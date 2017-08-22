@@ -101,14 +101,19 @@ namespace viscom {
             setAfterCallback(ecb);
 #endif // VISCOM_OGL_DEBUG_MSGS
         }
+        const std::string _vs = ".vert";
+        const std::string _fs = ".frag";
+        const std::string prog_bg = "backgroundGrid";
+        const std::string prog_ft = "foregroundTriangle";
+        const std::string prog_fm = "foregroundMesh";
 
-        backgroundProgram_ = GetGPUProgramManager().GetResource("backgroundGrid", std::initializer_list<std::string>{ "backgroundGrid.vert", "backgroundGrid.frag" });
+        backgroundProgram_ = GetGPUProgramManager().GetResource(prog_bg, std::initializer_list<std::string>{prog_bg + _vs, prog_bg + _fs });
         backgroundMVPLoc_ = backgroundProgram_->getUniformLocation("MVP");
 
-        triangleProgram_ = GetGPUProgramManager().GetResource("foregroundTriangle", std::initializer_list<std::string>{ "foregroundTriangle.vert", "foregroundTriangle.frag" });
+        triangleProgram_ = GetGPUProgramManager().GetResource(prog_ft, std::initializer_list<std::string>{prog_ft + _vs, prog_ft + _fs });
         triangleMVPLoc_ = triangleProgram_->getUniformLocation("MVP");
 
-        teapotProgram_ = GetGPUProgramManager().GetResource("foregroundMesh", std::initializer_list<std::string>{ "foregroundMesh.vert", "foregroundMesh.frag" });
+        teapotProgram_ = GetGPUProgramManager().GetResource(prog_fm, std::initializer_list<std::string>{ prog_fm+_vs, prog_fm+_fs });
         teapotModelMLoc_ = teapotProgram_->getUniformLocation("modelMatrix");
         teapotNormalMLoc_ = teapotProgram_->getUniformLocation("normalMatrix");
         teapotVPLoc_ = teapotProgram_->getUniformLocation("viewProjectionMatrix");
