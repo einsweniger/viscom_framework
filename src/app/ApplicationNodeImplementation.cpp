@@ -106,6 +106,7 @@ namespace viscom {
         const std::string prog_bg = "backgroundGrid";
         const std::string prog_ft = "foregroundTriangle";
         const std::string prog_fm = "foregroundMesh";
+		const std::string prog_quad = "test";
 
         backgroundProgram_ = GetGPUProgramManager().GetResource(prog_bg, std::initializer_list<std::string>{prog_bg + _vs, prog_bg + _fs });
         backgroundMVPLoc_ = backgroundProgram_->getUniformLocation("MVP");
@@ -117,6 +118,11 @@ namespace viscom {
         teapotModelMLoc_ = teapotProgram_->getUniformLocation("modelMatrix");
         teapotNormalMLoc_ = teapotProgram_->getUniformLocation("normalMatrix");
         teapotVPLoc_ = teapotProgram_->getUniformLocation("viewProjectionMatrix");
+
+
+		quad_ = CreateFullscreenQuad(prog_quad + _fs);
+		quad_time_ = quad_->GetGPUProgram()->getUniformLocation("iTime");
+		quad_mouse_ = quad_->GetGPUProgram()->getUniformLocation("iMousePos");
 
         std::vector<GridVertex> gridVertices;
 
@@ -162,6 +168,8 @@ namespace viscom {
 
         teapotMesh_ = GetMeshManager().GetResource("/models/teapot/teapot.obj");
         // teapotRenderable_ = MeshRenderable::create<SimpleMeshVertex>(teapotMesh_.get(), teapotProgram_.get());
+
+		mouseStatus_ = glm::vec4(.0f, .0f, .0f, .0f);
     }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double)
@@ -174,6 +182,9 @@ namespace viscom {
 
         triangleModelMatrix_ = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f)), static_cast<float>(currentTime), glm::vec3(0.0f, 1.0f, 0.0f));
         teapotModelMatrix_ = glm::scale(glm::rotate(glm::translate(glm::mat4(0.01f), glm::vec3(-3.0f, 0.0f, -5.0f)), static_cast<float>(currentTime), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.01f));
+		time_ = glfwGetTime();
+		//mouseStatus_.x = GetMousePositionNormalized().x;
+		//mouseStatus_.y = GetMousePositionNormalized().y;
     }
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
@@ -214,6 +225,13 @@ namespace viscom {
                 gl::glUniformMatrix4fv(teapotVPLoc_, 1, gl::GL_FALSE, glm::value_ptr(MVP));
                 // teapotRenderable_->Draw(teapotModelMatrix_);
             }
+
+			{
+				glUseProgram(quad_->GetGPUProgram()->getProgramId());
+				glUniform1f(quad_time_, time_);
+				glUniform4f(quad_mouse_, mouseStatus_.x, mouseStatus_.y, mouseStatus_.z, mouseStatus_.w);
+				quad_->Draw();
+			}
 
             gl::glBindBuffer(gl::GL_ARRAY_BUFFER, 0);
             gl::glBindVertexArray(0);
@@ -285,5 +303,27 @@ namespace viscom {
         }
         return false;
     }
+
+	bool ApplicationNodeImplementation::MouseButtonCallback(int button, int action)
+	{
+		//if (ApplicationNodeBase::MouseButtonCallback(button, action)) return true;
+
+		switch (button) {
+		case GLFW_MOUSE_BUTTON_1:
+			if (action == GLFW_REPEAT || action == GLFW_PRESS) mouseStatus_.z = 1;
+			else mouseStatus_.z = 0;
+			return true;
+		default:
+			return false;
+		}
+
+	}
+
+	bool ApplicationNodeImplementation::MousePosCallback(double x, double y)
+	{
+		mouseStatus_.x = x;
+		mouseStatus_.y = y;
+		return true;
+	}
 
 }

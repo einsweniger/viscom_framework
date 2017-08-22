@@ -32,6 +32,8 @@ namespace viscom {
         virtual void CleanUp() override;
 
         virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
+		virtual bool MouseButtonCallback(int button, int action);
+		virtual bool MousePosCallback(double x, double y);
 
     private:
         /** Holds the shader program for drawing the background. */
@@ -69,5 +71,12 @@ namespace viscom {
         glm::mat4 teapotModelMatrix_;
         glm::vec3 camPos_;
         glm::vec3 camRot_;
+		float time_ = 0.;
+		glm::vec4 mouseStatus_;
+
+		std::unique_ptr<FullscreenQuad> quad_;
+		const std::shared_ptr<GPUProgram> quad_prog_;
+		GLint quad_time_ = -1;
+		GLint quad_mouse_ = -1;
     };
 }
