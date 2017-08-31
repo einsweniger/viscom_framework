@@ -98,15 +98,30 @@ namespace viscom {
             Binding::initialize();
 #ifdef VISCOM_OGL_DEBUG_MSGS
             setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
-            setAfterCallback(ecb);
+                setAfterCallback(ecb);
 #endif // VISCOM_OGL_DEBUG_MSGS
         }
+        const std::string _vs = ".vert";
+        const std::string _fs = ".frag";
+        const std::string prog_quad = "test";
+
+        initExamples();
+        quad_ = CreateFullscreenQuad(prog_quad + _fs);
+        quad_time_ = quad_->GetGPUProgram()->getUniformLocation("iTime");
+        quad_mouse_ = quad_->GetGPUProgram()->getUniformLocation("iMousePos");
+
+        mouseStatus_ = glm::vec4(.0f, .0f, .0f, .0f);
+        camPos_ = glm::vec3{.0f, .1f, -5.f};
+        camRot_ = glm::vec3{0.6, 0.0, 0.0};
+    }
+
+    void ApplicationNodeImplementation::initExamples()
+    {
         const std::string _vs = ".vert";
         const std::string _fs = ".frag";
         const std::string prog_bg = "backgroundGrid";
         const std::string prog_ft = "foregroundTriangle";
         const std::string prog_fm = "foregroundMesh";
-		const std::string prog_quad = "test";
 
         backgroundProgram_ = GetGPUProgramManager().GetResource(prog_bg, std::initializer_list<std::string>{prog_bg + _vs, prog_bg + _fs });
         backgroundMVPLoc_ = backgroundProgram_->getUniformLocation("MVP");
@@ -171,7 +186,7 @@ namespace viscom {
 
         mouseStatus_ = glm::vec4(.0f, .0f, .0f, .0f);
         camPos_.z = 5.f;
-}
+    }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double)
     {
@@ -259,19 +274,19 @@ namespace viscom {
         switch (key)
         {
         case GLFW_KEY_W:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, -0.001);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, -movementFactor);
             return true;
 
         case GLFW_KEY_S:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, 0.001);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, movementFactor);
             return true;
 
         case GLFW_KEY_A:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(-0.001, 0.0, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(-movementFactor, 0.0, 0.0);
             return true;
 
         case GLFW_KEY_D:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.001, 0.0, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(movementFactor, 0.0, 0.0);
             return true;
 
         case GLFW_KEY_LEFT_CONTROL:

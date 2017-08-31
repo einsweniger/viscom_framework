@@ -78,5 +78,6 @@ namespace viscom {
 		const std::shared_ptr<GPUProgram> quad_prog_;
 		GLint quad_time_ = -1;
 		GLint quad_mvp_ = -1;
+        void initExamples();
     };
 }
