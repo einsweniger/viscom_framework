@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 SET(APP_NAME ViscomFramework)
+SET(CMAKE_CXX_STANDARD 17)
 
 PROJECT(${APP_NAME})
 
