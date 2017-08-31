@@ -77,6 +77,6 @@ namespace viscom {
 		std::unique_ptr<FullscreenQuad> quad_;
 		const std::shared_ptr<GPUProgram> quad_prog_;
 		GLint quad_time_ = -1;
-		GLint quad_mouse_ = -1;
+		GLint quad_mvp_ = -1;
     };
 }

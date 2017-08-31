@@ -169,8 +169,9 @@ namespace viscom {
         teapotMesh_ = GetMeshManager().GetResource("/models/teapot/teapot.obj");
         // teapotRenderable_ = MeshRenderable::create<SimpleMeshVertex>(teapotMesh_.get(), teapotProgram_.get());
 
-		mouseStatus_ = glm::vec4(.0f, .0f, .0f, .0f);
-    }
+        mouseStatus_ = glm::vec4(.0f, .0f, .0f, .0f);
+        camPos_.z = 5.f;
+}
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double)
     {
@@ -182,7 +183,7 @@ namespace viscom {
 
         triangleModelMatrix_ = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f)), static_cast<float>(currentTime), glm::vec3(0.0f, 1.0f, 0.0f));
         teapotModelMatrix_ = glm::scale(glm::rotate(glm::translate(glm::mat4(0.01f), glm::vec3(-3.0f, 0.0f, -5.0f)), static_cast<float>(currentTime), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.01f));
-		time_ = glfwGetTime();
+		time_ = static_cast<float>(currentTime);;
 		//mouseStatus_.x = GetMousePositionNormalized().x;
 		//mouseStatus_.y = GetMousePositionNormalized().y;
     }
@@ -227,9 +228,10 @@ namespace viscom {
             }
 
 			{
-				glUseProgram(quad_->GetGPUProgram()->getProgramId());
-				glUniform1f(quad_time_, time_);
-				glUniform4f(quad_mouse_, mouseStatus_.x, mouseStatus_.y, mouseStatus_.z, mouseStatus_.w);
+				gl::glUseProgram(quad_->GetGPUProgram()->getProgramId());
+                gl::glUniform1f(quad_time_, time_);
+                gl::glUniformMatrix4fv(quad_mvp_, 1, GL_FALSE, glm::value_ptr(MVP));
+
 				quad_->Draw();
 			}
 
@@ -251,6 +253,9 @@ namespace viscom {
     {
         if (ApplicationNodeBase::KeyboardCallback(key, scancode, action, mods)) return true;
 
+        const float movementFactor = 0.1; // 0.001;
+        const float rotationFactor = 0.2;//  0.002;
+
         switch (key)
         {
         case GLFW_KEY_W:
@@ -270,35 +275,35 @@ namespace viscom {
             return true;
 
         case GLFW_KEY_LEFT_CONTROL:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, -0.001, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, -movementFactor, 0.0);;
             return true;
 
         case GLFW_KEY_LEFT_SHIFT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.001, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, movementFactor, 0.0);
             return true;
 
         case GLFW_KEY_UP:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(-0.002, 0.0, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(-rotationFactor, 0.0, 0.0);
             return true;
 
         case GLFW_KEY_DOWN:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.002, 0.0, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(rotationFactor, 0.0, 0.0);
             return true;
 
         case GLFW_KEY_LEFT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, -0.002, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, -rotationFactor, 0.0);
             return true;
 
         case GLFW_KEY_RIGHT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.002, 0.0);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, rotationFactor, 0.0);;
             return true;
 
         case GLFW_KEY_Q:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, -0.002);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, -rotationFactor);
             return true;
 
         case GLFW_KEY_E:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, 0.002);
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, rotationFactor);
             return true;
         }
         return false;
@@ -321,8 +326,8 @@ namespace viscom {
 
 	bool ApplicationNodeImplementation::MousePosCallback(double x, double y)
 	{
-		mouseStatus_.x = x;
-		mouseStatus_.y = y;
+		mouseStatus_.x = static_cast<float>(x);
+		mouseStatus_.y = static_cast<float>(y);
 		return true;
 	}
 
