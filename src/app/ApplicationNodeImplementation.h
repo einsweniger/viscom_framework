@@ -10,6 +10,8 @@
 
 #include "core/ApplicationNodeInternal.h"
 #include "core/ApplicationNodeBase.h"
+#include "core/camera/ArcballCamera.h"
+#include "core/camera/FreeCamera.h"
 
 namespace viscom {
 
@@ -29,55 +31,24 @@ namespace viscom {
         virtual void UpdateFrame(double currentTime, double elapsedTime) override;
         virtual void ClearBuffer(FrameBuffer& fbo) override;
         virtual void DrawFrame(FrameBuffer& fbo) override;
+        virtual void Draw2D(FrameBuffer& fbo) override;
         virtual void CleanUp() override;
 
         virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
-		virtual bool MouseButtonCallback(int button, int action);
-		virtual bool MousePosCallback(double x, double y);
 
     private:
-        /** Holds the shader program for drawing the background. */
-        std::shared_ptr<GPUProgram> backgroundProgram_;
-        /** Holds the location of the MVP matrix. */
-        GLint backgroundMVPLoc_ = -1;
-
-        /** Holds the shader program for drawing the foreground triangle. */
-        std::shared_ptr<GPUProgram> triangleProgram_;
-        /** Holds the location of the MVP matrix. */
-        GLint triangleMVPLoc_ = -1;
-
-        /** Holds the shader program for drawing the foreground teapot. */
-        std::shared_ptr<GPUProgram> teapotProgram_;
-        /** Holds the location of the model matrix. */
-        GLint teapotModelMLoc_ = -1;
-        /** Holds the location of the normal matrix. */
-        GLint teapotNormalMLoc_ = -1;
-        /** Holds the location of the VP matrix. */
-        GLint teapotVPLoc_ = -1;
-
-        /** Holds the number of vertices of the background grid. */
-        unsigned int numBackgroundVertices_ = 0;
+        void toggleMouseGrab();
         /** Holds the vertex buffer for the background grid. */
         GLuint vboBackgroundGrid_ = 0;
         /** Holds the vertex array object for the background grid. */
         GLuint vaoBackgroundGrid_ = 0;
 
-        /** Holds the teapot mesh. */
-        std::shared_ptr<Mesh> teapotMesh_;
-        /** Holds the teapot mesh renderable. */
-        // std::unique_ptr<MeshRenderable> teapotRenderable_;
+        float time_ = 0.f;
 
-        glm::mat4 triangleModelMatrix_;
-        glm::mat4 teapotModelMatrix_;
-        glm::vec3 camPos_;
-        glm::vec3 camRot_;
-		float time_ = 0.;
-		glm::vec4 mouseStatus_;
-
-		std::unique_ptr<FullscreenQuad> quad_;
-		const std::shared_ptr<GPUProgram> quad_prog_;
-		GLint quad_time_ = -1;
-		GLint quad_mvp_ = -1;
-        void initExamples();
+        std::unique_ptr<FullscreenQuad> quad_;
+        std::vector<FrameBuffer> debugTextureBuffers_;
+        bool drawMenu_ = true;
+        bool grabMouse_ = false;
+        std::shared_ptr<FreeCamera> freeCam_;
     };
 }

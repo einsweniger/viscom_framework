@@ -1,44 +1,56 @@
 #version 430 core
-#include "hg_sdf.glsl"
 
+// shader inputs and uniforms
 in vec2 texCoord;
-uniform float time;             // shader playback time (in seconds)
-uniform mat4 mvp;
-uniform vec3 camPosition;
+uniform float u_time;             // shader playback time (in seconds)
+uniform mat4  u_camOrientation;
+uniform mat4  u_MVP;
+uniform vec3  u_camPosition;
 
-layout(location = 0) out vec4 color;
+// shader outputs
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragTexCoord;
+layout(location = 2) out vec4 worldPos;
+layout(location = 3) out vec4 normalTex;
 
-//------------------------------------------------------------------------
-// Here rather hacky and very basic sphere tracer, feel free to replace.
-//------------------------------------------------------------------------
+// universal constants
+const float PI        = 3.14159265;
+const float PI_2      = 1.57079632; // PI/2
+const float PI_4      = 0.78539816; // PI/4
+const float TAU       = 6.28318530; // PI*2
+const float PHI       = 1.61803398; // golden ratio. sqrt(5)*0.5 + 0.5 == 2 * sin(54deg) == 2 * cos(PI/5)
+const float SQRT3_2   = 0.86602540; //sqrt(3)/2
+const float ONE_SQRT3 = 0.57735026;
+
+// local constants
+const float NEAR =  0.0;
+const float FAR = 200.0;
+const float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
+const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
+const int MAX_ITERATIONS = 160;
+const float fog_density = .02;
+
+vec4 enhancedTrace(vec3 pos, vec3 dir);
+
+#include "hg_sdf.glsl"
+#include "iq_ref.glsl"
+
+
 
 // fField(p) is the final SDF definition, declared at the very bottom
 float fField(vec3 p);
 
-vec3 dNormal(vec3 p)
-{
-    const vec2 e = vec2(.005,0);
-    return normalize(vec3(
-        fField(p + e.xyy) - fField(p - e.xyy),
-        fField(p + e.yxy) - fField(p - e.yxy),
-        fField(p + e.yyx) - fField(p - e.yyx) ));
-}
-
-
 //simple sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 1)
 vec4 simpleTrace(vec3 origin, vec3 direction)
 {
-    const int MAX_ITERATIONS = 160;
     const float tau = .001; //threshold
-    const float t_max = 200.0;
-    const float t_min = 0.0;
 
-    float t = t_min;
+    float t = NEAR;
     int i = 0;
-    while(i < MAX_ITERATIONS && t < t_max) {
+    while(i < MAX_ITERATIONS && t < FAR) {
     	   float radius = fField(direction*t+origin);
          if (radius < tau) break;
-         if (t > t_max) return vec4(0.0); //return INFINITY;
+         if (t > NEAR) return vec4(INF); //return INFINITY;
          t += radius;
          i++;
     }
@@ -46,17 +58,11 @@ vec4 simpleTrace(vec3 origin, vec3 direction)
 }
 
 //over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
-vec4 enhancedTrace(vec3 pos, vec3 dir) {
-    const int MAX_ITERATIONS = 160;
-    const float t_max = 200.0;
-    const float t_min = 0.0;
-    const float pixelRadius = 0.0; //TODO
-    const bool forceHit = false;  //TODO
-
-    float omega = 1.2; //relaxation parameter omega ∈ [1;2)
-    float t = t_min;
-    float candidate_error = 0.0;// INFINITY;
-    float candidate_t = t_min;
+vec4 enhancedTrace(vec3 pos, vec3 dir, float pixelRadius, bool forceHit, float relaxation) {
+    float omega = relaxation; //relaxation parameter omega ∈ [1;2)
+    float t = NEAR;
+    float candidate_error = INF;
+    float candidate_t = NEAR;
     float previousRadius = 0.;
     float stepLength = 0.;
     float functionSign = fField(pos) < 0. ? -1. : +1.;
@@ -80,58 +86,20 @@ vec4 enhancedTrace(vec3 pos, vec3 dir) {
             candidate_error = error;
         }
 
-        if (!sorFail && error < pixelRadius || t > t_max)
+        if (!sorFail && error < pixelRadius || t > FAR)
             break;
         t += stepLength;
     }
 
-    if ((t > t_max || candidate_error > pixelRadius) && !forceHit) return vec4(0.0); //return INFINITY;
+    if ((t > FAR || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
     return vec4(dir*t+pos,1.0);
 }
 
-float etrace(vec3 pos, vec3 dir) {
-    const int MAX_ITERATIONS = 160;
-    const float t_max = 200.0;
-    const float t_min = 0.0;
-    const float pixelRadius = 0.0; //TODO
-    const bool forceHit = false;  //TODO
-
-    float omega = 1.2; //relaxation parameter omega ∈ [1;2)
-    float t = t_min;
-    float candidate_error = 0.0;// INFINITY;
-    float candidate_t = t_min;
-    float previousRadius = 0.;
-    float stepLength = 0.;
-    float functionSign = fField(pos) < 0. ? -1. : +1.;
-
-    for (int i = 0; i < MAX_ITERATIONS; ++i) {
-        float signedRadius = functionSign * fField(dir * t + pos);
-        float radius = abs(signedRadius);
-        bool sorFail = omega > 1. && (radius + previousRadius) < stepLength;
-        if (sorFail) {
-            stepLength -= omega * stepLength;
-            omega = 1;
-        } else {
-            stepLength = signedRadius * omega;
-        }
-
-        previousRadius = radius;
-        float error = radius / t;
-
-        if (!sorFail && error < candidate_error) {
-            candidate_t = t;
-            candidate_error = error;
-        }
-
-        if (!sorFail && error < pixelRadius || t > t_max)
-            break;
-        t += stepLength;
-    }
-
-    if ((t > t_max || candidate_error > pixelRadius) && !forceHit) return 0.0; //return INFINITY;
-    return t;
-
+// override for defaults
+vec4 enhancedTrace(vec3 pos, vec3 dir) {
+    return enhancedTrace(pos, dir, 0.0001, false, 1.9);
 }
+
 // abs(0+0-1)=1
 // abs(1+0-1)=0
 // abs(0+1-1)=0
@@ -182,62 +150,53 @@ vec4 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_
 
 vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 light_dir, vec4 hit)
 {
-    const float fog_density = .02;
     vec3 fog_color = sky_color(ray_dir, light_dir);
 
     float ray_len;
     vec3 color;
-    if (hit.w == 0.0) {
+    if (hit.w == INF) {
         ray_len = 1e16;
         color = fog_color;
     } else {
         vec3 dir = hit.xyz - ray_start;
-        vec3 norm = dNormal(hit.xyz);
+        vec3 norm = calcNormal(hit.xyz);
+        float aocc = calcAO(hit.xyz, norm);
         float diffuse = max(0.0, dot(norm, light_dir));
         float spec = max(0.0,dot(reflect(light_dir,norm),normalize(dir)));
+
         spec = pow(spec, 16.0)*.5;
 
         ray_len = length(dir);
 
         vec3 base_color = checker_texture(hit.xyz).xyz;
-        vec3 diffuse_color = mix(vec3(0.,.1,.3), vec3(1.,1.,.9), diffuse);
+        vec3 diffuse_color = mix(vec3(0.,.1,.3), vec3(1.,1.,.9), diffuse) * aocc;
         vec3 specular_color = spec * vec3(1.,1.,.9);
         color = base_color * diffuse_color + specular_color;
 
         float fog_dist = ray_len;
         float fog = 1.0 - 1.0/exp(fog_dist*fog_density);
         color = mix(color, fog_color, fog);
+
+        //debug texture output
+        normalTex = vec4(norm, 1.0);
     }
 
-    float cut_plane0 = sin(time)*.15 - .8;
+#if 0  //debug plane
+    float cut_plane0 = sin(u_time)*.15 - .8;
     for(int k=0; k<4; ++k) {
         vec4 dpcol = debug_plane(ray_start, ray_dir, cut_plane0+float(k)*.75, ray_len);
-        //if (dpcol.w == 0.) continue;
+        if (dpcol.w == INF) continue;
         float fog_dist = ray_len;
         dpcol.w *= 1.0/exp(fog_dist*.05);
         color = mix(color,dpcol.xyz,dpcol.w);
     }
+#endif
 
     return color;
 }
 
-vec4 mainImage(vec2 fragCoord)
-{
-    const vec2 uv = (texCoord-vec2(0.5))*2.0;
-    const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
-    const float cam_dist = 5.;
-
-    vec3 pos = vec3(mvp*vec4(0., 0., -cam_dist, 1.0));
-    vec3 dir = normalize(vec3(mvp*vec4(uv, 1., 0.)));
-
-    float t = etrace(pos, dir);
-    vec4 ray;
-    ray = vec4(dir*t+pos,1.0*t);
-    //ray = enhancedTrace(pos, dir);
-    vec3 color = shade(pos, dir, light_dir, ray);
-    color = pow(color,vec3(.44)); //"gamma" correction
-    vec4 fragColor = vec4(color, 1.);
-    return fragColor;
+float opUnion(float d1, float d2) {
+    return min(d1,d2);
 }
 
 //------------------------------------------------------------------------
@@ -246,37 +205,48 @@ vec4 mainImage(vec2 fragCoord)
 
 float fField(vec3 p)
 {
-#if 1 // Do some domain repetition
+#if 0 // Do some domain repetition
     p.xz = -p.xz;
     vec2 q = pModMirror2(p.xz,vec2(4.5));
 #endif
-    float dodec = fDodecahedron(p-vec3(-2.25,.5,-1.),.7);
-    float box1 = fBox(p-vec3(0,-.1,0),vec3(1));
-    float box2 = fBox(p-vec3(2.01,-.1,0),vec3(1));
-    float sphere = length(p-vec3(1.+sin(time*.5)*.2,.8,1))-1.;
+    const vec3 box_pos1 = vec3(-10,0,0);
+    const vec3 box_pos2 = vec3(-10.51,0,0);
+    const vec3 dodec_pos = vec3(-2.25,.5,-1.);
+    const vec3 box_size = vec3(.25);
+
     float d;
-    float r = 0.3;
-    float n = 4.;
-    d = fOpUnionStairs(box1,sphere,r,n);
-    return min(min(d,dodec),box2);
+    d = opUnion(fBox(p-box_pos2,box_size), fBox(p-box_pos1,box_size));
+    //d = opUnion(d, fDodecahedron(p-dodec_pos,.7));
+    d = opUnion(d, length(p-vec3(0,0,-10))-box_size.x);
+    d = opUnion(d, length(p-vec3(0,0,-12))-box_size.x);
+    d = opUnion(d, fPlane(p-vec3(0,1,0),vec3(0,1,0),1));
+    d = opUnion(d, map(p).x);
+    //float sphere = length(p-vec3(1.+sin(time*.5)*.2,.8,1))-0.5;
+
+    float stair_radius = 0.3;
+    float stair_count = 4.;
+
+    //d = fOpUnionStairs(box1,sphere1,stair_radius,stair_count);
+    //return prope;
+    return d;
 }
 
 void main()
 {
-    float time = (1 + sin(2*time))/2;
-    color = vec4(texCoord,fract(time),1);
+    //texCoords are between [0,1] shift from [0,1] to [-1, 1]
+    vec2 st = (texCoord-vec2(0.5))*2.0;
 
-    vec2 st = texCoord;
-    vec3 color3 = vec3(0.0);
+    //use inverse MVP to find ray direction
+    vec4 dir_projection = inverse(u_MVP)*vec4(st, 1.,1.);
+    vec3 ray_direction = normalize(vec3(dir_projection/dir_projection.w));
+    vec4 hit = enhancedTrace(u_camPosition, ray_direction);
+//    vec3 color = shade(u_camPosition, ray_direction, light_dir, hit);
+    vec3 color = render(u_camPosition, ray_direction);
+    fragColor = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
 
-    st *= 3.0;      // Scale up the space by 3
-    st = fract(st); // Wrap arround 1.0
-
-    // Now we have 3 spaces that goes from 0-1
-
-    color3 = vec3(st,0.0);
-    //color = vec3(circle(st,0.5));
-
-    color = vec4(color3,1.0);
-    color = mainImage(texCoord);
+    //debugging output
+    fragTexCoord = vec4(texCoord,0.f, 1.f);
+//    vec3 col = render(u_camPosition,ray_direction);
+//    fragTexCoord = vec4(pow(col,vec3(0.4545)), 1.0);
+    worldPos = hit; // does not accomodate for repetitions
 }
