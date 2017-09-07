@@ -50,10 +50,10 @@ float sdHexPrism( vec3 p, vec2 h )
 {
     vec3 q = abs(p);
 #if 0
-    return max(q.z-h.y,max((q.x*0.866025+q.y*0.5),q.y)-h.x);
+    return max(q.z-h.y,max((q.x*SQRT3_2+q.y*0.5),q.y)-h.x);
 #else
     float d1 = q.z-h.y;
-    float d2 = max((q.x*0.866025+q.y*0.5),q.y)-h.x;
+    float d2 = max((q.x*SQRT3_2+q.y*0.5),q.y)-h.x;
     return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
 #endif
 }
@@ -69,10 +69,10 @@ float sdTriPrism( vec3 p, vec2 h )
 {
     vec3 q = abs(p);
 #if 0
-    return max(q.z-h.y,max(q.x*0.866025+p.y*0.5,-p.y)-h.x*0.5);
+    return max(q.z-h.y,max(q.x*SQRT3_2+p.y*0.5,-p.y)-h.x*0.5);
 #else
     float d1 = q.z-h.y;
-    float d2 = max(q.x*0.866025+p.y*0.5,-p.y)-h.x*0.5;
+    float d2 = max(q.x*SQRT3_2+p.y*0.5,-p.y)-h.x*0.5;
     return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
 #endif
 }
@@ -180,11 +180,15 @@ vec2 map( in vec3 pos )
     vec2 res = opU( vec2( sdPlane(    pos), 1.0 ),
                     vec2( sdSphere(    pos-vec3( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
     res = opU( res, vec2( sdBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
+//    res = opU( res, vec2( fBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
     res = opU( res, vec2( udRoundBox(  pos-vec3( 1.0,0.25, 1.0), vec3(0.15), 0.1 ), 41.0 ) );
     res = opU( res, vec2( sdTorus(     pos-vec3( 0.0,0.25, 1.0), vec2(0.20,0.05) ), 25.0 ) );
+//    res = opU( res, vec2( fTorus(     pos-vec3( 0.0,0.25, 1.0), 0.05,0.20 ), 25.0 ) );
     res = opU( res, vec2( sdCapsule(   pos,vec3(-1.3,0.10,-0.1), vec3(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
+//    res = opU( res, vec2( fCapsule(   pos,vec3(-1.3,0.10,-0.1), vec3(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
     res = opU( res, vec2( sdTriPrism(  pos-vec3(-1.0,0.25,-1.0), vec2(0.25,0.05) ),43.5 ) );
     res = opU( res, vec2( sdCylinder(  pos-vec3( 1.0,0.30,-1.0), vec2(0.1,0.2) ), 8.0 ) );
+//    res = opU( res, vec2( fCylinder(  pos-vec3( 1.0,0.30,-1.0), 0.1,0.2 ), 8.0 ) );
     res = opU( res, vec2( sdCone(      pos-vec3( 0.0,0.50,-1.0), vec3(0.8,0.6,0.3) ), 55.0 ) );
     res = opU( res, vec2( sdTorus82(   pos-vec3( 0.0,0.25, 2.0), vec2(0.20,0.05) ),50.0 ) );
     res = opU( res, vec2( sdTorus88(   pos-vec3(-1.0,0.25, 2.0), vec2(0.20,0.05) ),43.0 ) );
@@ -194,7 +198,7 @@ vec2 map( in vec3 pos )
     res = opU( res, vec2( opS( udRoundBox(  pos-vec3(-2.0,0.2, 1.0), vec3(0.15),0.05),
                                sdSphere(    pos-vec3(-2.0,0.2, 1.0), 0.25)), 13.0 ) );
     res = opU( res, vec2( opS( sdTorus82(   pos-vec3(-2.0,0.2, 0.0), vec2(0.20,0.1)),
-                               sdCylinder(  opRep( vec3(atan(pos.x+2.0,pos.z)/6.2831, pos.y, 0.02+0.5*length(pos-vec3(-2.0,0.2, 0.0))), vec3(0.05,1.0,0.05)), vec2(0.02,0.6))), 51.0 ) );
+                               sdCylinder(  opRep( vec3(atan(pos.x+2.0,pos.z)/TAU, pos.y, 0.02+0.5*length(pos-vec3(-2.0,0.2, 0.0))), vec3(0.05,1.0,0.05)), vec2(0.02,0.6))), 51.0 ) );
     res = opU( res, vec2( 0.5*sdSphere(    pos-vec3(-2.0,0.25,-1.0), 0.2 ) + 0.03*sin(50.0*pos.x)*sin(50.0*pos.y)*sin(50.0*pos.z), 65.0 ) );
     res = opU( res, vec2( 0.5*sdTorus( opTwist(pos-vec3(-2.0,0.25, 2.0)),vec2(0.20,0.05)), 46.7 ) );
     res = opU( res, vec2( sdConeSection( pos-vec3( 0.0,0.35,-2.0), 0.15, 0.2, 0.1 ), 13.67 ) );
@@ -202,34 +206,6 @@ vec2 map( in vec3 pos )
 
     return res;
 }
-
-vec2 castRay( in vec3 ro, in vec3 rd )
-{
-    float tmin = 1.0;
-    float tmax = 20.0;
-
-#if 0
-    // bounding volume
-    float tp1 = (0.0-ro.y)/rd.y; if( tp1>0.0 ) tmax = min( tmax, tp1 );
-    float tp2 = (1.6-ro.y)/rd.y; if( tp2>0.0 ) { if( ro.y>1.6 ) tmin = max( tmin, tp2 );
-                                                 else           tmax = min( tmax, tp2 ); }
-#endif
-
-    float t = tmin;
-    float m = -1.0;
-    for( int i=0; i<64; i++ )
-    {
-        float precis = 0.0005*t;
-        vec2 res = map( ro+rd*t );
-        if( res.x<precis || t>tmax ) break;
-        t += res.x;
-        m = res.y;
-    }
-
-    if( t>tmax ) m=-1.0;
-    return vec2( t, m );
-}
-
 
 float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )
 {
@@ -247,7 +223,7 @@ float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )
 
 vec3 calcNormal( in vec3 pos )
 {
-    vec2 e = vec2(1.0,-1.0)*0.5773*0.0005;
+    vec2 e = vec2(1.0,-1.0)*ONE_SQRT3*0.0005;
     return normalize( e.xyy*map( pos + e.xyy ).x +
                       e.yyx*map( pos + e.yyx ).x +
                       e.yxy*map( pos + e.yxy ).x +
@@ -277,18 +253,57 @@ float calcAO( in vec3 pos, in vec3 nor )
     return clamp( 1.0 - 3.0*occ, 0.0, 1.0 );
 }
 
+vec2 castRay( in vec3 ro, in vec3 rd )
+{
+    float tmin = NEAR;
+    float tmax = FAR;
+
+#if 0
+    // bounding volume
+    float tp1 = (0.0-ro.y)/rd.y; if( tp1>0.0 ) tmax = min( tmax, tp1 );
+    float tp2 = (1.6-ro.y)/rd.y; if( tp2>0.0 ) { if( ro.y>1.6 ) tmin = max( tmin, tp2 );
+                                                 else           tmax = min( tmax, tp2 ); }
+#endif
+
+    float t = tmin;
+    float material = -1.0;
+    for( int i=0; i<MAX_ITERATIONS; i++ )
+    {
+        float precis = 0.0005*t;
+        vec2 res = map( ro+rd*t );
+        if( res.x<precis || t>tmax ) break;
+        t += res.x;
+        material = res.y;
+    }
+
+    if( t>tmax ) material=-1.0;
+    return vec2( t, material );
+}
+
 vec3 render( in vec3 ro, in vec3 rd )
 {
+#define ETRACE 1
+#if ETRACE
+    vec3 col = vec3(0.7, 0.9, 1.0) +rd.y*0.8;
+    float m = 4;
+    vec3 pos = enhancedTrace(ro, rd).xyz;
+    if( m>-0.5 )
+    {
+
+#else
     vec3 col = vec3(0.7, 0.9, 1.0) +rd.y*0.8;
     vec2 res = castRay(ro,rd);
     float t = res.x;
     float m = res.y;
+    m = 4;
     if( m>-0.5 )
     {
         vec3 pos = ro + t*rd;
+
+#endif
         vec3 nor = calcNormal( pos );
         vec3 ref = reflect( rd, nor );
-
+        normalTex = vec4(nor, 1.0);
         // material
         col = 0.45 + 0.35*sin( vec3(0.05,0.08,0.10)*(m-1.0) );
         if( m<1.5 )
@@ -320,7 +335,11 @@ vec3 render( in vec3 ro, in vec3 rd )
         lin += 0.25*fre*vec3(1.00,1.00,1.00)*occ;
         col = col*lin;
 
+#if ETRACE
+        col = mix( col, vec3(0.8,0.9,1.0), 1.0-exp( -0.0002 ) );
+#else
         col = mix( col, vec3(0.8,0.9,1.0), 1.0-exp( -0.0002*t*t*t ) );
+#endif
     }
 
     return vec3( clamp(col,0.0,1.0) );
@@ -335,44 +354,47 @@ mat3 setCamera( in vec3 ro, in vec3 ta, float cr )
     return mat3( cu, cv, cw );
 }
 
-//void mainImage( out vec4 fragColor, in vec2 fragCoord )
-//{
-//    vec2 mo = iMouse.xy/iResolution.xy;
-//    float time = 15.0 + iTime;
-//
-//
-//    vec3 tot = vec3(0.0);
-//#if AA>1
-//    for( int m=0; m<AA; m++ )
-//    for( int n=0; n<AA; n++ )
-//    {
-//        // pixel coordinates
-//        vec2 o = vec2(float(m),float(n)) / float(AA) - 0.5;
-//        vec2 p = (-iResolution.xy + 2.0*(fragCoord+o))/iResolution.y;
-//#else
-//        vec2 p = (-iResolution.xy + 2.0*fragCoord)/iResolution.y;
-//#endif
-//
-//        // camera
-//        vec3 ro = vec3( -0.5+3.5*cos(0.1*time + 6.0*mo.x), 1.0 + 2.0*mo.y, 0.5 + 4.0*sin(0.1*time + 6.0*mo.x) );
-//        vec3 ta = vec3( -0.5, -0.4, 0.5 );
-//        // camera-to-world transformation
-//        mat3 ca = setCamera( ro, ta, 0.0 );
-//        // ray direction
-//        vec3 rd = ca * normalize( vec3(p.xy,2.0) );
-//
-//        // render
-//        vec3 col = render( ro, rd );
-//
-//        // gamma
-//        col = pow( col, vec3(0.4545) );
-//
-//        tot += col;
-//#if AA>1
-//    }
-//    tot /= float(AA*AA);
-//#endif
-//
-//
-//    fragColor = vec4( tot, 1.0 );
-//}
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    vec2 iMouse = vec2(0,0);
+    vec2 iResolution = vec2(1980,720);
+    float iTime = 0.f;
+    vec2 mo = iMouse.xy/iResolution.xy;
+    float time = 15.0 + iTime;
+
+
+    vec3 tot = vec3(0.0);
+#if AA>1
+    for( int m=0; m<AA; m++ )
+    for( int n=0; n<AA; n++ )
+    {
+        // pixel coordinates
+        vec2 o = vec2(float(m),float(n)) / float(AA) - 0.5;
+        vec2 p = (-iResolution.xy + 2.0*(fragCoord+o))/iResolution.y;
+#else
+        vec2 p = (-iResolution.xy + 2.0*fragCoord)/iResolution.y;
+#endif
+
+        // camera
+        vec3 ro = vec3( -0.5+3.5*cos(0.1*time + 6.0*mo.x), 1.0 + 2.0*mo.y, 0.5 + 4.0*sin(0.1*time + 6.0*mo.x) );
+        vec3 ta = vec3( -0.5, -0.4, 0.5 );
+        // camera-to-world transformation
+        mat3 ca = setCamera( ro, ta, 0.0 );
+        // ray direction
+        vec3 rd = ca * normalize( vec3(p.xy,2.0) );
+
+        // render
+        vec3 col = render( ro, rd );
+
+        // gamma
+        col = pow( col, vec3(0.4545) );
+
+        tot += col;
+#if AA>1
+    }
+    tot /= float(AA*AA);
+#endif
+
+
+    fragColor = vec4( tot, 1.0 );
+}
