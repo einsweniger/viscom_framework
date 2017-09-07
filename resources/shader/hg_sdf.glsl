@@ -134,15 +134,15 @@
 //
 ////////////////////////////////////////////////////////////////
 
-#define PI 3.14159265
-#define TAU (2*PI)
-#define PHI (sqrt(5)*0.5 + 0.5)
-
 // Clamp to [0,1] - this operation is free under certain circumstances.
 // For further information see
 // http://www.humus.name/Articles/Persson_LowLevelThinking.pdf and
 // http://www.humus.name/Articles/Persson_LowlevelShaderOptimization.pdf
-#define saturate(x) clamp(x, 0, 1)
+// #define saturate(x) clamp(x, 0, 1)
+
+float saturate(float x) {
+  return clamp(x,0,1);
+}
 
 // Sign function that doesn't return 0
 float sgn(float x) {
@@ -151,6 +151,10 @@ float sgn(float x) {
 
 vec2 sgn(vec2 v) {
 	return vec2((v.x<0)?-1:1, (v.y<0)?-1:1);
+}
+
+float FastArcTan(float x) {
+  return PI_4*x - x*(abs(x) - 1) * (0.2447 + 0.0663*abs(x));
 }
 
 float square (float x) {
@@ -267,7 +271,6 @@ float fCylinder(vec3 p, float r, float height) {
 	d = max(d, abs(p.y) - height);
 	return d;
 }
-
 // Capsule: A Cylinder with round caps on both sides
 float fCapsule(vec3 p, float r, float c) {
 	return mix(length(p.xz) - r, length(vec3(p.x, abs(p.y) - c, p.z)) - r, step(c, abs(p.y)));
@@ -276,7 +279,7 @@ float fCapsule(vec3 p, float r, float c) {
 // Distance to line segment between <a> and <b>, used for fCapsule() version 2below
 float fLineSegment(vec3 p, vec3 a, vec3 b) {
 	vec3 ab = b - a;
-	float t = clamp(dot(p - a, ab) / dot(ab, ab), 0, 1);
+	float t = saturate(dot(p - a, ab) / dot(ab, ab));
 	return length((ab*t + a) - p);
 }
 
