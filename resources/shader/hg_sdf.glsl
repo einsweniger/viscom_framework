@@ -144,6 +144,10 @@ float saturate(float x) {
   return clamp(x,0,1);
 }
 
+vec3 saturate(vec3 x) {
+  return clamp(x,vec3(0),vec3(1));
+}
+
 // Sign function that doesn't return 0
 float sgn(float x) {
 	return (x<0)?-1:1;
