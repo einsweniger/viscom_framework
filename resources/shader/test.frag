@@ -31,7 +31,7 @@ const int MAX_ITERATIONS = 160;
 const float fog_density = .02;
 
 vec4 enhancedTrace(vec3 pos, vec3 dir);
-
+vec4 simpleTrace(vec3 origin, vec3 direction);
 #include "hg_sdf.glsl"
 #include "iq_ref.glsl"
 
@@ -54,7 +54,7 @@ vec4 simpleTrace(vec3 origin, vec3 direction)
          t += radius;
          i++;
     }
-    return vec4(direction*t+origin, 1.0);
+    return vec4(direction*t+origin, t);
 }
 
 //over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
@@ -92,7 +92,7 @@ vec4 enhancedTrace(vec3 pos, vec3 dir, float pixelRadius, bool forceHit, float r
     }
 
     if ((t > FAR || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
-    return vec4(dir*t+pos,1.0);
+    return vec4(dir*t+pos,t);
 }
 
 // override for defaults
@@ -228,7 +228,7 @@ float fField(vec3 p)
 
     //d = fOpUnionStairs(box1,sphere1,stair_radius,stair_count);
     //return prope;
-    return d;
+    return map(p).x;
 }
 
 void main()
