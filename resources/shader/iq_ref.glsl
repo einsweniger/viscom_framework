@@ -59,7 +59,7 @@ float sdHexPrism( vec3 p, vec2 h )
 float sdCapsule( vec3 p, vec3 a, vec3 b, float r )
 {
     vec3 pa = p-a, ba = b-a;
-    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    float h = saturate( dot(pa,ba)/dot(ba,ba));
     return length( pa - ba*h ) - r;
 }
 
@@ -175,9 +175,10 @@ vec3 opTwist( vec3 p )
 
 vec2 map(vec3 pos )
 {
-    vec2 res = opU( vec2( sdPlane(    pos), 1.0 ),
-                    vec2( sdSphere(    pos-vec3( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
-    res = opU( res, vec2( sdBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
+    vec2 res =      vec2( sdPlane(     pos-vec3( 0.0,-0.0,0.0)), 1.0 );
+//    vec2 res =      vec2(  fPlane(     pos-vec3( 0.0,-0.0,0.0), vec3(0,1,0), 0),1.0);
+    res = opU( res, vec2( sdSphere(    pos-vec3( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
+    res = opU( res, vec2( sdBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ));
 //    res = opU( res, vec2( fBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
     res = opU( res, vec2( udRoundBox(  pos-vec3( 1.0,0.25, 1.0), vec3(0.15), 0.1 ), 41.0 ) );
     res = opU( res, vec2( sdTorus(     pos-vec3( 0.0,0.25, 1.0), vec2(0.20,0.05) ), 25.0 ) );
@@ -216,39 +217,32 @@ float softshadow(vec3 ro,vec3 rd,float mint,float tmax )
         t += clamp( h, 0.02, 0.10 );
         if( h<0.001 || t>tmax ) break;
     }
-    return clamp( res, 0.0, 1.0 );
+    return saturate( res );
 }
 
 vec3 calcNormal(vec3 pos )
 {
-    vec2 e = vec2(1.0,-1.0)*ONE_SQRT3*0.0005;
+    vec2 e = vec2(1.0,-1.0)*ONE_SQRT3*0.0005; //0.00028867
     return normalize( e.xyy*map( pos + e.xyy ).x +
                       e.yyx*map( pos + e.yyx ).x +
                       e.yxy*map( pos + e.yxy ).x +
                       e.xxx*map( pos + e.xxx ).x );
-    /*
-    vec3 eps = vec3( 0.0005, 0.0, 0.0 );
-    vec3 nor = vec3(
-        map(pos+eps.xyy).x - map(pos-eps.xyy).x,
-        map(pos+eps.yxy).x - map(pos-eps.yxy).x,
-        map(pos+eps.yyx).x - map(pos-eps.yyx).x );
-    return normalize(nor);
-    */
 }
 
-float calcAO(vec3 pos,vec3 nor )
+float calcAO(vec3 pos,vec3 normal )
 {
-    float occ = 0.0;
-    float sca = 1.0;
-    for( int i=0; i<5; i++ )
+    float iterations = 5;
+    float occlusion = 0.0;
+    float scaling_factor = 1.0;
+    for( int i=0; i<iterations; i++ )
     {
         float hr = 0.01 + 0.12*float(i)/4.0;
-        vec3 aopos =  nor * hr + pos;
+        vec3 aopos =  normal * hr + pos;
         float dd = map( aopos ).x;
-        occ += -(dd-hr)*sca;
-        sca *= 0.95;
+        occlusion += -(dd-hr)*scaling_factor;
+        scaling_factor *= 0.95;
     }
-    return clamp( 1.0 - 3.0*occ, 0.0, 1.0 );
+    return saturate( 1.0 - 3.0*occlusion);
 }
 
 vec2 castRay(vec3 ro,vec3 rd )
@@ -278,69 +272,72 @@ vec2 castRay(vec3 ro,vec3 rd )
     return vec2( t, material );
 }
 
-vec3 render(vec3 ro,vec3 rd )
+
+vec3 render(vec3 ray_origin,vec3 ray_direction )
 {
 #define ETRACE 1
-#if ETRACE
-    vec3 col = vec3(0.7, 0.9, 1.0) +rd.y*0.8;
+    vec3 base_color = vec3(0.7, 0.9, 1.0) +ray_direction.y*0.8;
     float m = 4;
-    vec3 pos = enhancedTrace(ro, rd).xyz;
-    if( m>-0.5 )
-    {
-
+#if ETRACE
+    vec4 hit = enhancedTrace(ray_origin, ray_direction);
+    vec3 position = hit.xyz;
+    float t = hit.w;
+    position = ray_origin + t*ray_direction;
 #else
-    vec3 col = vec3(0.7, 0.9, 1.0) +rd.y*0.8;
-    vec2 res = castRay(ro,rd);
-    float t = res.x;
-    float m = res.y;
-    m = 4;
+    float t = castRay(ray_origin,ray_direction).x;
+    vec3 position = ray_origin + t*ray_direction;
+#endif
     if( m>-0.5 )
     {
-        vec3 pos = ro + t*rd;
 
-#endif
-        vec3 nor = calcNormal( pos );
-        vec3 ref = reflect( rd, nor );
-        normalTex = vec4(nor, 1.0);
+        vec3 surface_normal = calcNormal( position );
+        vec3 reflected = reflect( ray_direction, surface_normal );
+
         // material
-        col = 0.45 + 0.35*sin( vec3(0.05,0.08,0.10)*(m-1.0) );
+        base_color = 0.45 + 0.35*sin( vec3(0.05,0.08,0.10)*(m-1.0) );
         if( m<1.5 )
         {
 
-            float f = mod( floor(5.0*pos.z) + floor(5.0*pos.x), 2.0);
-            col = 0.3 + 0.1*f*vec3(1.0);
+            float f = mod( floor(5.0*position.z) + floor(5.0*position.x), 2.0);
+            base_color = 0.3 + 0.1*f*vec3(1.0);
         }
 
         // lighitng
-        float occ = calcAO( pos, nor );
-        vec3  lig = normalize( vec3(-0.4, 0.7, -0.6) );
-        float amb = clamp( 0.5+0.5*nor.y, 0.0, 1.0 );
-        float dif = clamp( dot( nor, lig ), 0.0, 1.0 );
-        float bac = clamp( dot( nor, normalize(vec3(-lig.x,0.0,-lig.z))), 0.0, 1.0 )*clamp( 1.0-pos.y,0.0,1.0);
-        float dom = smoothstep( -0.1, 0.1, ref.y );
-        float fre = pow( clamp(1.0+dot(nor,rd),0.0,1.0), 2.0 );
-        float spe = pow(clamp( dot( ref, lig ), 0.0, 1.0 ),16.0);
+        vec3  light_direction = normalize( vec3(-0.4, 0.7, -0.6) );
 
-        dif *= softshadow( pos, lig, 0.02, 2.5 );
-        dom *= softshadow( pos, ref, 0.02, 2.5 );
+        //simple lighting
+        float ambient = saturate( 0.5+0.5*surface_normal.y);  // sun light direction
+        float diffuse = saturate( dot( surface_normal, light_direction ));
+        float specular = pow(saturate( dot( reflected, light_direction )),16.0);
+
+        //advanced lighting
+        float occlusion_factor = calcAO( position, surface_normal );
+        float bac = saturate(1.0-position.y) * saturate(  dot( surface_normal, normalize(vec3(-light_direction.x,0.0,-light_direction.z)) )  );
+        float dom = smoothstep( -0.1, 0.1, reflected.y );  //causes hard shadows
+        float fresnel = pow( saturate(1.0+dot(surface_normal,ray_direction)), 2 );
+
+        float shadow_light = softshadow( position, light_direction, 0.02, 2.5 );  // shadows caused by light
+        float shadow_reflection = softshadow( position, reflected, 0.02, 2.5 );  // object reflections
+
+        normalTex = vec4(vec3(occlusion_factor),1); //debug output
+
+        diffuse *= shadow_light;
+        dom *= shadow_reflection;
+
 
         vec3 lin = vec3(0.0);
-        lin += 1.30*dif*vec3(1.00,0.80,0.55);
-        lin += 2.00*spe*vec3(1.00,0.90,0.70)*dif;
-        lin += 0.40*amb*vec3(0.40,0.60,1.00)*occ;
-        lin += 0.50*dom*vec3(0.40,0.60,1.00)*occ;
-        lin += 0.50*bac*vec3(0.25,0.25,0.25)*occ;
-        lin += 0.25*fre*vec3(1.00,1.00,1.00)*occ;
-        col = col*lin;
+        lin += 1.30*diffuse*vec3(1.00,0.80,0.55);
+        lin += 2.00*specular*vec3(1.00,0.90,0.70)*diffuse;
+        lin += 0.40*ambient*vec3(0.40,0.60,1.00)*occlusion_factor;
+        lin += 0.50*dom*vec3(0.40,0.60,1.00)*occlusion_factor;
+        lin += 0.50*bac*vec3(0.25,0.25,0.25)*occlusion_factor;
+        lin += 0.25*fresnel*vec3(1.00,1.00,1.00)*occlusion_factor;
+        base_color = base_color*lin;
 
-#if ETRACE
-        col = mix( col, vec3(0.8,0.9,1.0), 1.0-exp( -0.0002 ) );
-#else
-        col = mix( col, vec3(0.8,0.9,1.0), 1.0-exp( -0.0002*t*t*t ) );
-#endif
+        base_color = mix( base_color, vec3(0.8,0.9,1.0), 1.0-exp( -0.0002*t*t*t ) );
     }
 
-    return vec3( clamp(col,0.0,1.0) );
+    return vec3( saturate(base_color) );
 }
 
 mat3 setCamera(vec3 ro, vec3 ta, float cr )
@@ -352,7 +349,7 @@ mat3 setCamera(vec3 ro, vec3 ta, float cr )
     return mat3( cu, cv, cw );
 }
 
-void mainImage(vec2 fragCoord )
+vec4 mainImage(vec2 fragCoord )
 {
     vec2 iMouse = vec2(0,0);
     vec2 iResolution = vec2(1980,720);
