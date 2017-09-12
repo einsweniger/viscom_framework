@@ -11,8 +11,6 @@
 // More info here: http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
 
-#define AA 1   // make this 1 is your machine is too slow
-
 //------------------------------------------------------------------
 
 float sdPlane( vec3 p )
@@ -31,7 +29,7 @@ float sdBox( vec3 p, vec3 b )
     return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
 }
 
-float sdEllipsoid( in vec3 p, in vec3 r )
+float sdEllipsoid(vec3 p,vec3 r )
 {
     return (length( p/r ) - 1.0) * min(min(r.x,r.y),r.z);
 }
@@ -83,7 +81,7 @@ float sdCylinder( vec3 p, vec2 h )
   return min(max(d.x,d.y),0.0) + length(max(d,0.0));
 }
 
-float sdCone( in vec3 p, in vec3 c )
+float sdCone(vec3 p,vec3 c )
 {
     vec2 q = vec2( length(p.xz), p.y );
     float d1 = -q.y-c.z;
@@ -91,7 +89,7 @@ float sdCone( in vec3 p, in vec3 c )
     return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
 }
 
-float sdConeSection( in vec3 p, in float h, in float r1, in float r2 )
+float sdConeSection(vec3 p,float h,float r1,float r2 )
 {
     float d1 = -p.y - h;
     float q = p.y - h;
@@ -175,7 +173,7 @@ vec3 opTwist( vec3 p )
 
 //------------------------------------------------------------------
 
-vec2 map( in vec3 pos )
+vec2 map(vec3 pos )
 {
     vec2 res = opU( vec2( sdPlane(    pos), 1.0 ),
                     vec2( sdSphere(    pos-vec3( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
@@ -207,7 +205,7 @@ vec2 map( in vec3 pos )
     return res;
 }
 
-float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )
+float softshadow(vec3 ro,vec3 rd,float mint,float tmax )
 {
     float res = 1.0;
     float t = mint;
@@ -221,7 +219,7 @@ float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )
     return clamp( res, 0.0, 1.0 );
 }
 
-vec3 calcNormal( in vec3 pos )
+vec3 calcNormal(vec3 pos )
 {
     vec2 e = vec2(1.0,-1.0)*ONE_SQRT3*0.0005;
     return normalize( e.xyy*map( pos + e.xyy ).x +
@@ -238,7 +236,7 @@ vec3 calcNormal( in vec3 pos )
     */
 }
 
-float calcAO( in vec3 pos, in vec3 nor )
+float calcAO(vec3 pos,vec3 nor )
 {
     float occ = 0.0;
     float sca = 1.0;
@@ -253,7 +251,7 @@ float calcAO( in vec3 pos, in vec3 nor )
     return clamp( 1.0 - 3.0*occ, 0.0, 1.0 );
 }
 
-vec2 castRay( in vec3 ro, in vec3 rd )
+vec2 castRay(vec3 ro,vec3 rd )
 {
     float tmin = NEAR;
     float tmax = FAR;
@@ -280,7 +278,7 @@ vec2 castRay( in vec3 ro, in vec3 rd )
     return vec2( t, material );
 }
 
-vec3 render( in vec3 ro, in vec3 rd )
+vec3 render(vec3 ro,vec3 rd )
 {
 #define ETRACE 1
 #if ETRACE
@@ -345,7 +343,7 @@ vec3 render( in vec3 ro, in vec3 rd )
     return vec3( clamp(col,0.0,1.0) );
 }
 
-mat3 setCamera( in vec3 ro, in vec3 ta, float cr )
+mat3 setCamera(vec3 ro, vec3 ta, float cr )
 {
     vec3 cw = normalize(ta-ro);
     vec3 cp = vec3(sin(cr), cos(cr),0.0);
@@ -354,7 +352,7 @@ mat3 setCamera( in vec3 ro, in vec3 ta, float cr )
     return mat3( cu, cv, cw );
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void mainImage(vec2 fragCoord )
 {
     vec2 iMouse = vec2(0,0);
     vec2 iResolution = vec2(1980,720);
@@ -397,4 +395,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
 
     fragColor = vec4( tot, 1.0 );
+    return fragColor;
 }
