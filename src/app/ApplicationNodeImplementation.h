@@ -45,6 +45,7 @@ namespace viscom {
 
         float time_ = 0.f;
 
+        std::unique_ptr<FullscreenQuad> tex_;
         std::unique_ptr<FullscreenQuad> quad_;
         std::vector<FrameBuffer> debugTextureBuffers_;
         bool drawMenu_ = true;

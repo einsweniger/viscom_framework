@@ -100,14 +100,16 @@ namespace viscom {
             Binding::initialize();
 #ifdef VISCOM_OGL_DEBUG_MSGS
             setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
-                setAfterCallback(ecb);
+            setAfterCallback(ecb);
 #endif // VISCOM_OGL_DEBUG_MSGS
         }
         const std::string _vs = ".vert";
         const std::string _fs = ".frag";
         const std::string prog_quad = "test";
+        const std::string prog_tex = "renderTexture";
 
         quad_ = CreateFullscreenQuad(prog_quad + _fs);
+        tex_ = CreateFullscreenQuad(prog_tex + _fs);
         std::vector<FrameBufferTextureDescriptor> tex{};
         tex.emplace_back(gl::GL_RGBA32F);
         tex.emplace_back(gl::GL_RGBA32F);
@@ -115,6 +117,7 @@ namespace viscom {
         tex.emplace_back(gl::GL_RGBA32F);
 
         debugTextureBuffers_ = CreateOffscreenBuffers(FrameBufferDescriptor{tex, std::vector<RenderBufferDescriptor>{}});
+        freeCam_->SetCameraPosition(glm::vec3(0,1,8));
     }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
@@ -159,6 +162,15 @@ namespace viscom {
                 gl::glUniformMatrix4fv(prog->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, MVP);
                 gl::glUniform3f(prog->getUniformLocation("u_camPosition"), position.x, position.y, position.z);
                 quad_->Draw();
+            }
+        });
+        fbo.DrawToFBO([this]() {
+            auto tex = tex_->GetGPUProgram();
+            {
+                gl::glUseProgram(tex->getProgramId());
+                gl::glActiveTexture(GL_TEXTURE0);
+                gl::glBindTexture(GL_TEXTURE_2D, 1); //TODO don't hardwire texture
+                tex_->Draw();
             }
             gl::glUseProgram(0);
         });
