@@ -30,178 +30,51 @@ const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
 const int MAX_ITERATIONS = 160;
 const float fog_density = .02;
 
+// forward declarations
+float fField(vec3 p);  // fField(p) is the final SDF definition, declared at the very bottom
 vec4 enhancedTrace(vec3 pos, vec3 dir);
 vec4 simpleTrace(vec3 origin, vec3 direction);
-#include "hg_sdf.glsl"
-#include "iq_ref.glsl"
+vec2 map(vec3 pos);
 
-
-
-// fField(p) is the final SDF definition, declared at the very bottom
-float fField(vec3 p);
-
-//simple sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 1)
-vec4 simpleTrace(vec3 origin, vec3 direction)
-{
-    const float tau = .001; //threshold
-
-    float t = NEAR;
-    int i = 0;
-    while(i < MAX_ITERATIONS && t < FAR) {
-    	   float radius = fField(direction*t+origin);
-         if (radius < tau) break;
-         if (t > NEAR) return vec4(INF); //return INFINITY;
-         t += radius;
-         i++;
-    }
-    return vec4(direction*t+origin, t);
-}
-
-//over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
-vec4 enhancedTrace(vec3 pos, vec3 dir, float pixelRadius, bool forceHit, float relaxation) {
-    float omega = relaxation; //relaxation parameter omega ∈ [1;2)
-    float t = NEAR;
-    float candidate_error = INF;
-    float candidate_t = NEAR;
-    float previousRadius = 0.;
-    float stepLength = 0.;
-    float functionSign = fField(pos) < 0. ? -1. : +1.;
-
-    for (int i = 0; i < MAX_ITERATIONS; ++i) {
-        float signedRadius = functionSign * fField(dir * t + pos);
-        float radius = abs(signedRadius);
-        bool sorFail = omega > 1. && (radius + previousRadius) < stepLength;
-        if (sorFail) {
-            stepLength -= omega * stepLength;
-            omega = 1;
-        } else {
-            stepLength = signedRadius * omega;
-        }
-
-        previousRadius = radius;
-        float error = radius / t;
-
-        if (!sorFail && error < candidate_error) {
-            candidate_t = t;
-            candidate_error = error;
-        }
-
-        if (!sorFail && error < pixelRadius || t > FAR)
-            break;
-        t += stepLength;
-    }
-
-    if ((t > FAR || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
-    return vec4(dir*t+pos,t);
-}
-
-// override for defaults
-vec4 enhancedTrace(vec3 pos, vec3 dir) {
-    return enhancedTrace(pos, dir, 0.0001, false, 1.9);
-}
-
-// abs(0+0-1)=1
-// abs(1+0-1)=0
-// abs(0+1-1)=0
-// abs(1+1-1)=1
-float xnor(float x, in float y) { return abs(x+y-1.0); }
-
-vec4 checker_texture(vec3 pos)
-{
-    const float sample_size = 0.01;
-    pos = pos*8.0 + .5;
-    vec3 cell = step(1.0,mod(pos,2.0));
-    float checker = xnor(xnor(cell.x,cell.y),cell.z);
-    vec4 col = mix(vec4(.4),vec4(.5),checker);
-    float fade = 1.-min(1.,sample_size*24.); // very fake "AA"
-    col = mix(vec4(.5),col,fade);
-    pos = abs(fract(pos)-.5);
-    float d = max(max(pos.x,pos.y),pos.z);
-    d = smoothstep(.45,.5,d)*fade;
-    return mix(col,vec4(0.0),d);
-}
-
-vec3 sky_color(vec3 ray_dir, vec3 light_dir)
-{
-    float d = max(0.,dot(ray_dir,light_dir));
-    float d2 = light_dir.y*.7+.3;
-    vec3 base_col;
-    base_col = mix(vec3(.3),vec3((ray_dir.y<0.)?0.:1.),abs(ray_dir.y));
-    return base_col*d2;
-}
-
-vec4 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_len)
-{
-     // Fancy lighty debug plane
-     if (ray_start.y > cut_plane && ray_dir.y < 0.) {
-         float d = (ray_start.y - cut_plane) / -ray_dir.y;
-         if (d < ray_len) {
-             vec3 hit = ray_start + ray_dir*d;
-             float hit_dist = fField(hit);
-             float iso = fract(hit_dist*5.0);
-             vec3 dist_color = mix(vec3(.2,.4,.6),vec3(.2,.2,.4),iso);
-             dist_color *= 1.0/(max(0.0,hit_dist)+.001);
-             ray_len = d;
-             return vec4(dist_color,.1);
-         }
-     }
-    return vec4(0);
-}
-
-vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 light_dir, vec4 hit)
-{
-    vec3 fog_color = sky_color(ray_dir, light_dir);
-
-    float ray_len;
-    vec3 color;
-    if (hit.w == INF) {
-        ray_len = 1e16;
-        color = fog_color;
-    } else {
-        vec3 dir = hit.xyz - ray_start;
-        vec3 norm = calcNormal(hit.xyz);
-        float aocc = calcAO(hit.xyz, norm);
-        float diffuse = max(0.0, dot(norm, light_dir));
-        float spec = max(0.0,dot(reflect(light_dir,norm),normalize(dir)));
-
-        spec = pow(spec, 16.0)*.5;
-
-        ray_len = length(dir);
-
-        vec3 base_color = checker_texture(hit.xyz).xyz;
-        vec3 diffuse_color = mix(vec3(0.,.1,.3), vec3(1.,1.,.9), diffuse) * aocc;
-        vec3 specular_color = spec * vec3(1.,1.,.9);
-        color = base_color * diffuse_color + specular_color;
-
-        float fog_dist = ray_len;
-        float fog = 1.0 - 1.0/exp(fog_dist*fog_density);
-        color = mix(color, fog_color, fog);
-
-        //debug texture output
-        normalTex = vec4(norm, 1.0);
-    }
-
-#if 0  //debug plane
-    float cut_plane0 = sin(u_time)*.15 - .8;
-    for(int k=0; k<4; ++k) {
-        vec4 dpcol = debug_plane(ray_start, ray_dir, cut_plane0+float(k)*.75, ray_len);
-        if (dpcol.w == INF) continue;
-        float fog_dist = ray_len;
-        dpcol.w *= 1.0/exp(fog_dist*.05);
-        color = mix(color,dpcol.xyz,dpcol.w);
-    }
-#endif
-
-    return color;
-}
-
-float opUnion(float d1, float d2) {
-    return min(d1,d2);
-}
+#include "lib_util.glsl"
+#include "lib_sdf_op.glsl"
+#include "lib_sdf.glsl"
 
 //------------------------------------------------------------------------
 // Your custom SDF
 //------------------------------------------------------------------------
+vec2 map(vec3 pos )
+{
+    vec2 res =      vec2( sdPlane(     pos-vec3( 0.0,-0.0,0.0)), 1.0 );
+//    vec2 res =      vec2(  fPlane(     pos-vec3( 0.0,-0.0,0.0), vec3(0,1,0), 0),1.0);
+    res = opU( res, vec2( sdSphere(    pos-vec3( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
+    res = opU( res, vec2( sdBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ));
+//    res = opU( res, vec2( fBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
+    res = opU( res, vec2( udRoundBox(  pos-vec3( 1.0,0.25, 1.0), vec3(0.15), 0.1 ), 41.0 ) );
+    res = opU( res, vec2( sdTorus(     pos-vec3( 0.0,0.25, 1.0), vec2(0.20,0.05) ), 25.0 ) );
+//    res = opU( res, vec2( fTorus(     pos-vec3( 0.0,0.25, 1.0), 0.05,0.20 ), 25.0 ) );
+    res = opU( res, vec2( sdCapsule(   pos,vec3(-1.3,0.10,-0.1), vec3(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
+//    res = opU( res, vec2( fCapsule(   pos,vec3(-1.3,0.10,-0.1), vec3(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
+    res = opU( res, vec2( sdTriPrism(  pos-vec3(-1.0,0.25,-1.0), vec2(0.25,0.05) ),43.5 ) );
+    res = opU( res, vec2( sdCylinder(  pos-vec3( 1.0,0.30,-1.0), vec2(0.1,0.2) ), 8.0 ) );
+//    res = opU( res, vec2( fCylinder(  pos-vec3( 1.0,0.30,-1.0), 0.1,0.2 ), 8.0 ) );
+    res = opU( res, vec2( sdCone(      pos-vec3( 0.0,0.50,-1.0), vec3(0.8,0.6,0.3) ), 55.0 ) );
+    res = opU( res, vec2( sdTorus82(   pos-vec3( 0.0,0.25, 2.0), vec2(0.20,0.05) ),50.0 ) );
+    res = opU( res, vec2( sdTorus88(   pos-vec3(-1.0,0.25, 2.0), vec2(0.20,0.05) ),43.0 ) );
+    res = opU( res, vec2( sdCylinder6( pos-vec3( 1.0,0.30, 2.0), vec2(0.1,0.2) ), 12.0 ) );
+    res = opU( res, vec2( sdHexPrism(  pos-vec3(-1.0,0.20, 1.0), vec2(0.25,0.05) ),17.0 ) );
+    res = opU( res, vec2( sdPryamid4(  pos-vec3(-1.0,0.15,-2.0), vec3(0.8,0.6,0.25) ),37.0 ) );
+    res = opU( res, vec2( opS( udRoundBox(  pos-vec3(-2.0,0.2, 1.0), vec3(0.15),0.05),
+                               sdSphere(    pos-vec3(-2.0,0.2, 1.0), 0.25)), 13.0 ) );
+    res = opU( res, vec2( opS( sdTorus82(   pos-vec3(-2.0,0.2, 0.0), vec2(0.20,0.1)),
+                               sdCylinder(  opRep( vec3(atan(pos.x+2.0,pos.z)/TAU, pos.y, 0.02+0.5*length(pos-vec3(-2.0,0.2, 0.0))), vec3(0.05,1.0,0.05)), vec2(0.02,0.6))), 51.0 ) );
+    res = opU( res, vec2( 0.5*sdSphere(    pos-vec3(-2.0,0.25,-1.0), 0.2 ) + 0.03*sin(50.0*pos.x)*sin(50.0*pos.y)*sin(50.0*pos.z), 65.0 ) );
+    res = opU( res, vec2( 0.5*sdTorus( opTwist(pos-vec3(-2.0,0.25, 2.0)),vec2(0.20,0.05)), 46.7 ) );
+    res = opU( res, vec2( sdConeSection( pos-vec3( 0.0,0.35,-2.0), 0.15, 0.2, 0.1 ), 13.67 ) );
+    res = opU( res, vec2( sdEllipsoid( pos-vec3( 1.0,0.35,-2.0), vec3(0.15, 0.2, 0.05) ), 43.17 ) );
+
+    return res;
+}
 
 float fField(vec3 p)
 {
