@@ -18,7 +18,6 @@ void pR45(inout vec2 p) {
 
 
 //repeaters
-
 float pMod1(inout float p, float size) {
 	float halfsize = size*0.5;
 	float c = floor((p + halfsize)/size);
