@@ -19,7 +19,7 @@ namespace viscom {
     {
     public:
         explicit MasterNode(ApplicationNodeInternal* appNode);
-        virtual ~MasterNode() override;
+        ~MasterNode() override;
 
         void Draw2D(FrameBuffer& fbo) override;
 

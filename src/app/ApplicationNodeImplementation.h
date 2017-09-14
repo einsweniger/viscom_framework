@@ -25,24 +25,19 @@ namespace viscom {
         ApplicationNodeImplementation(ApplicationNodeImplementation&&) = delete;
         ApplicationNodeImplementation& operator=(const ApplicationNodeImplementation&) = delete;
         ApplicationNodeImplementation& operator=(ApplicationNodeImplementation&&) = delete;
-        virtual ~ApplicationNodeImplementation() override;
+        ~ApplicationNodeImplementation() override;
 
-        virtual void InitOpenGL() override;
-        virtual void UpdateFrame(double currentTime, double elapsedTime) override;
-        virtual void ClearBuffer(FrameBuffer& fbo) override;
-        virtual void DrawFrame(FrameBuffer& fbo) override;
-        virtual void Draw2D(FrameBuffer& fbo) override;
-        virtual void CleanUp() override;
+        void InitOpenGL() override;
+        void UpdateFrame(double currentTime, double elapsedTime) override;
+        void ClearBuffer(FrameBuffer& fbo) override;
+        void DrawFrame(FrameBuffer& fbo) override;
+        void Draw2D(FrameBuffer& fbo) override;
+        void CleanUp() override;
 
-        virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
+        bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
     private:
         void toggleMouseGrab();
-        /** Holds the vertex buffer for the background grid. */
-        GLuint vboBackgroundGrid_ = 0;
-        /** Holds the vertex array object for the background grid. */
-        GLuint vaoBackgroundGrid_ = 0;
-
         float time_ = 0.f;
 
         std::unique_ptr<FullscreenQuad> tex_;

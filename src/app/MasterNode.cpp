@@ -16,7 +16,7 @@ struct ExampleAppLog
     ImGuiTextBuffer Buf;
     ImGuiTextFilter Filter;
     ImVector<int> LineOffsets;        // Index to lines offset
-    bool ScrollToBottom;
+    bool ScrollToBottom = false;
 
     void Clear()
     {
@@ -39,7 +39,7 @@ struct ExampleAppLog
         ScrollToBottom = true;
     }
 
-    void Draw(const char* title, bool* p_open = NULL, std::function<void()> drawFn = NULL)
+    void Draw(const char* title, bool* p_open = nullptr, const std::function<void()>& drawFn = nullptr)
     {
         ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
         ImGui::Begin(title, p_open);
@@ -56,12 +56,12 @@ struct ExampleAppLog
         if (Filter.IsActive()) {
             const char* buf_begin = Buf.begin();
             const char* line = buf_begin;
-            for (int line_no = 0; line != NULL; line_no++) {
-                const char* line_end = (line_no < LineOffsets.Size) ? buf_begin + LineOffsets[line_no] : NULL;
+            for (int line_no = 0; line != nullptr; line_no++) {
+                const char* line_end = (line_no < LineOffsets.Size) ? buf_begin + LineOffsets[line_no] : nullptr;
                 if (Filter.PassFilter(line, line_end)) {
                     ImGui::TextUnformatted(line, line_end);
                 }
-                line = line_end && line_end[1] ? line_end + 1 : NULL;
+                line = line_end && line_end[1] ? line_end + 1 : nullptr;
             }
         } else {
             ImGui::TextUnformatted(Buf.begin());
