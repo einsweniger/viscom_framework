@@ -59,6 +59,13 @@ set(CMAKE_SHARED_LINKER_FLAGS_DEBUGOPENGLCALLS ${CMAKE_SHARED_LINKER_FLAGS_DEBUG
 include(${PROJECT_SOURCE_DIR}/extern/fwcore/CMake_core.txt)
 include(${PROJECT_SOURCE_DIR}/extern/fwenh/CMake_enh.txt)
 
+set(VISCOM_CLIENTGUI OFF CACHE BOOL "Use ImGui on clients.")
+set(VISCOM_SYNCINPUT OFF CACHE BOOL "Synchronize input from master to clients.")
+set(VISCOM_CLIENTMOUSECURSOR OFF CACHE BOOL "Show the mouse cursor on clients.")
+set(VISCOM_USE_SGCT OFF CACHE BOOL "Use SGCT for local builds.")
+set(TUIO_LIB OFF CACHE BOOL "Use TUIO input library")
+
+
 set(VISCOM_CONFIG_NAME "single" CACHE STRING "Name/directory of the configuration files to be used.")
 set(VISCOM_VIRTUAL_SCREEN_X 1920 CACHE INTEGER "Virtual screen size in x direction.")
 set(VISCOM_VIRTUAL_SCREEN_Y 1080 CACHE INTEGER "Virtual screen size in y direction.")
