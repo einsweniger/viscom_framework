@@ -43,6 +43,19 @@ float vmin(vec3 v) {
 float vmin(vec4 v) {
 	return min(min(v.x, v.y), min(v.z, v.w));
 }
+float bend(float x, float y, float z) { return max(0.5*(x*sqrt(3) + y),z);}
+float bend(float x, float y) { return bend(x, y, y);}
+float length2( vec2 p ){
+    return sqrt( p.x*p.x + p.y*p.y );
+}
+float length6( vec2 p ){
+    p = p*p*p; p = p*p;
+    return pow( p.x + p.y, 1.0/6.0 );
+}
+float length8( vec2 p ){
+    p = p*p; p = p*p; p = p*p;
+    return pow( p.x + p.y, 1.0/8.0 );
+}
 
 float softshadow(vec3 ro,vec3 rd,float mint,float tmax ) {
     float res = 1.0;
@@ -220,7 +233,7 @@ vec4 enhancedTrace(vec3 pos, vec3 dir, float pixelRadius, bool forceHit, float r
     return vec4(dir*t+pos,t);
 }  // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
 vec4 enhancedTrace(vec3 pos, vec3 dir) { return enhancedTrace(pos, dir, 0.0001, false, 1.9); }  // override for defaults
-float xnor(float x, in float y) { return abs(x+y-1.0); } // abs(0+0-1)=1, abs(1+0-1)=0, abs(0+1-1)=0, abs(1+1-1)=1
+float xnor(float x, float y) { return abs(x+y-1.0); } // abs(0+0-1)=1, abs(1+0-1)=0, abs(0+1-1)=0, abs(1+1-1)=1
 vec4 checker_texture(vec3 pos) {
     const float sample_size = 0.01;
     pos = pos*8.0 + .5;

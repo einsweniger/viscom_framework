@@ -45,36 +45,73 @@ vec2 map(vec3 pos);
 //------------------------------------------------------------------------
 vec2 map(vec3 pos )
 {
-//compared, same.
-    vec2 res =      vec2( sdfXZPlane(     pos-vec3( 0.0,-0.0,0.0)), 1.0 );
-    res = opU( res, vec2( sdfSphere(    pos-vec3( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
-//    res = opU( res, vec2( sdBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
-    res = opU( res, vec2( fBox(       pos-vec3( 1.0,0.25, 0.0), vec3(0.25) ), 3.0 ) );
 
-    res = opU( res, vec2( udRoundBox(  pos-vec3( 1.0,0.25, 1.0), vec3(0.25), 0.0 ), 41.0 ) );
-//    res = opU( res, vec2( fBoxCheap(   pos-vec3( 1.0,0.25, 1.0), vec3(0.25)), 41.0 ) );
+    vec3 offset = pos-vec3(-2,.25,2);
+    vec2 res =      vec2( sdfPlaneXZ(   pos-vec3( 0.0,-0.0,0.0)), 1.0 );
+    res = opU( res, vec2 ( fBox2(pos.zy-vec2( 2.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( fBox2(pos.zy-vec2( 1.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( fBox2(pos.zy-vec2( 0.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( fBox2(pos.zy-vec2(-0.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( fBox2(pos.zy-vec2(-1.5,0.07), vec2(0.01,0.05)),          45.0));
 
-    res = opU( res, vec2( sdTorus(     pos-vec3( 0.0,0.25, 1.0), vec2(0.20,0.05) ), 25.0 ) );
-//    res = opU( res, vec2( fTorus(     pos-vec3( 0.0,0.25, 1.0), 0.05,0.20 ), 25.0 ) );
-    res = opU( res, vec2( sdCapsule(   pos,vec3(-1.3,0.10,-0.1), vec3(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
-//    res = opU( res, vec2( fCapsule(   pos,vec3(-1.3,0.10,-0.1), vec3(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
-    res = opU( res, vec2( sdTriPrism(  pos-vec3(-1.0,0.25,-1.0), vec2(0.25,0.05) ),43.5 ) );
-    res = opU( res, vec2( sdCylinder(  pos-vec3( 1.0,0.30,-1.0), vec2(0.1,0.2) ), 8.0 ) );
-//    res = opU( res, vec2( fCylinder(  pos-vec3( 1.0,0.30,-1.0), 0.1,0.2 ), 8.0 ) );
-    res = opU( res, vec2( sdCone(      pos-vec3( 0.0,0.50,-1.0), vec3(0.8,0.6,0.3) ), 55.0 ) );
-    res = opU( res, vec2( sdTorus82(   pos-vec3( 0.0,0.25, 2.0), vec2(0.20,0.05) ),50.0 ) );
-    res = opU( res, vec2( sdTorus88(   pos-vec3(-1.0,0.25, 2.0), vec2(0.20,0.05) ),43.0 ) );
-    res = opU( res, vec2( sdCylinder6( pos-vec3( 1.0,0.30, 2.0), vec2(0.1,0.2) ), 12.0 ) );
-    res = opU( res, vec2( sdHexPrism(  pos-vec3(-1.0,0.20, 1.0), vec2(0.25,0.05) ),17.0 ) );
-    res = opU( res, vec2( sdPryamid4(  pos-vec3(-1.0,0.15,-2.0), vec3(0.8,0.6,0.25) ),37.0 ) );
-    res = opU( res, vec2( opS( udRoundBox(  pos-vec3(-2.0,0.2, 1.0), vec3(0.15),0.05),
-                               sdfSphere(    pos-vec3(-2.0,0.2, 1.0), 0.25)), 13.0 ) );
-    res = opU( res, vec2( opS( sdTorus82(   pos-vec3(-2.0,0.2, 0.0), vec2(0.20,0.1)),
-                               sdCylinder(  opRep( vec3(atan(pos.x+2.0,pos.z)/TAU, pos.y, 0.02+0.5*length(pos-vec3(-2.0,0.2, 0.0))), vec3(0.05,1.0,0.05)), vec2(0.02,0.6))), 51.0 ) );
-    res = opU( res, vec2( 0.5*sdfSphere(    pos-vec3(-2.0,0.25,-1.0), 0.2 ) + 0.03*sin(50.0*pos.x)*sin(50.0*pos.y)*sin(50.0*pos.z), 65.0 ) );
-    res = opU( res, vec2( 0.5*sdTorus( opTwist(pos-vec3(-2.0,0.25, 2.0)),vec2(0.20,0.05)), 46.7 ) );
-    res = opU( res, vec2( sdConeSection( pos-vec3( 0.0,0.35,-2.0), 0.15, 0.2, 0.1 ), 13.67 ) );
-    res = opU( res, vec2( sdEllipsoid( pos-vec3( 1.0,0.35,-2.0), vec3(0.15, 0.2, 0.05) ), 43.17 ) );
+//row1
+    res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
+    res = opU( res, vec2( sdfCylinder(  offset-vec3(1,0,0), vec2(0.2,0.2)),          8.0));
+    res = opU( res, vec2( sdfCylinder6( offset-vec3(2,0,0), vec2(0.1,0.2) ),        12.0));
+    res = opU( res, vec2( sdConeSection(offset-vec3(3,0,0), 0.15, 0.2, 0.1 ),       13.6));
+    res = opU( res, vec2( sdfEllipsoid( offset-vec3(4,0,0), vec3(0.15, 0.2, 0.05)), 43.1));
+
+//row2
+    offset.z += 1;
+    res = opU( res, vec2( sdfRoundBox(  offset-vec3(0,0,0), vec3(0.15), 0.1),       41.0));
+    res = opU( res, vec2( sdfTorus88(   offset-vec3(1,0,0), 0.05, 0.20 ),           43.0));
+    res = opU( res, vec2( sdfTorus82(   offset-vec3(2,0,0), 0.05, 0.20 ),           50.0));
+    res = opU( res, vec2( sdfTorus(     offset-vec3(3,0,0), 0.05,0.20 ),            25.0));
+    res = opU( res, vec2( sdfDisc(      offset-vec3(4,0,0), 0.2 )-0.05,              8.0));
+
+//row3
+    offset.z += 1;
+    res = opU( res, vec2( sdfSphere(    offset-vec3(0,0,0), 0.25 ),                      46.9));
+    res = opU( res, vec2( sdfCapsule(   offset-vec3(1,0,0), vec3(0.2), vec3(-0.2), 0.1), 31.9));
+    res = opU( res, vec2( sdfTriPrism(  offset-vec3(2,0,0), vec2(0.25,0.05) ),           43.5));
+    res = opU( res, vec2( sdfHexPrismYZ(offset-vec3(3,0,0), vec2(0.25,0.05) ),           17.0));
+    res = opU( res, vec2( sdCone(       offset-vec3(4,0,0), vec3(0.8,0.6,0.25) ),        55.0));
+
+//row4
+    offset.z += 1;
+
+    // box - sphere
+    vec3 diff = offset-vec3(0,0,0);
+    res = opU( res, vec2( opS( sdfRoundBox( diff, vec3(0.15), 0.05),
+                               sdfSphere(   diff, 0.25)),
+                          13.0 ));
+    // sphere + displacement
+    diff = offset-vec3(1,0,0);
+    float displacement = 0.03 *sin(50.0*diff.x)
+                              *sin(50.0*diff.y)
+                              *sin(50.0*diff.z);
+    res = opU( res, vec2( 0.5* sdfSphere(diff, 0.2 ) + displacement,
+                          65.0 ));
+
+    // looks lika a gear?
+    diff = offset-vec3(2,0,0);
+    vec3 repetitionPos = vec3(atan(diff.x,diff.z)/TAU, diff.y, 0.02+0.5*length(diff));
+    vec3 repetitionMod = vec3(0.05,1,0.05);
+    vec3 repetition = opRep( repetitionPos, repetitionMod);
+    res = opU( res, vec2( opS( sdfTorus82( diff, 0.1, 0.2),
+                               sdfCylinder( repetition, vec2(0.02,0.6))),
+                          51.0 ));
+    // twisty thing
+    diff = offset-vec3(3,0,0);
+    res = opU( res, vec2(0.5*sdfTorus(opTwist(diff),0.05,0.25),        46.7));
+    res = opU( res, vec2( sdfPyramid(   offset-vec3(4,0,0), 0.25 ),    37.0));  // res = opU( res, vec2( sdPyramid4(   offset-vec3(0,0,0), vec3(0.8,0.6,0.25) ),37.0 ) );
+
+//row5
+    offset.z += 1;
+
+//row6
+    offset.z += 1;
+    res = opU( res, vec2( fBlob( offset-vec3(0,0.1,0)), 43.17 ) );
 
     return res;
 }
@@ -91,7 +128,7 @@ float fField(vec3 p)
     const vec3 box_size = vec3(.25);
 
     float d;
-    d = opUnion(fBox(p-box_pos2,box_size), fBox(p-box_pos1,box_size));
+    d = opUnion(sdfBox(p-box_pos2,box_size), sdfBox(p-box_pos1,box_size));
     //d = opUnion(d, fDodecahedron(p-dodec_pos,.7));
     d = opUnion(d, length(p-vec3(0,0,-10))-box_size.x);
     d = opUnion(d, length(p-vec3(0,0,-12))-box_size.x);
