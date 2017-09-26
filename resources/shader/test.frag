@@ -13,33 +13,13 @@ layout(location = 1) out vec4 fragTexCoord;
 layout(location = 2) out vec4 worldPos;
 layout(location = 3) out vec4 normalTex;
 
-// universal constants
-const float PI        = 3.14159265;
-const float PI_2      = 1.57079632; // PI/2
-const float PI_4      = 0.78539816; // PI/4
-const float TAU       = 6.28318530; // PI*2
-const float PHI       = 1.61803398; // golden ratio. sqrt(5)*0.5 + 0.5 == 2 * sin(54deg) == 2 * cos(PI/5)
-const float SQRT3_2   = 0.86602540; //sqrt(3)/2
-const float ONE_SQRT3 = 0.57735026;
-
 // local constants
-const float NEAR =  0.0;
-const float FAR = 200.0;
-const float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
 const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
-const int MAX_ITERATIONS = 160;
-const float fog_density = .02;
-
-// forward declarations
-float fField(vec3 p);  // fField(p) is the final SDF definition, declared at the very bottom
-vec4 enhancedTrace(vec3 pos, vec3 dir);
-vec4 simpleTrace(vec3 origin, vec3 direction);
-vec2 map(vec3 pos);
 
 #include "lib_util.glsl"
 #include "lib_sdf_op.glsl"
 #include "lib_sdf.glsl"
-
+#include "lib_trace.glsl"
 //------------------------------------------------------------------------
 // Your custom SDF
 //------------------------------------------------------------------------
@@ -47,19 +27,23 @@ vec2 map(vec3 pos )
 {
 
     vec3 offset = pos-vec3(-2,.25,2);
-    vec2 res =      vec2( sdfPlaneXZ(   pos-vec3( 0.0,-0.0,0.0)), 1.0 );
-    res = opU( res, vec2 ( fBox2(pos.zy-vec2( 2.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( fBox2(pos.zy-vec2( 1.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( fBox2(pos.zy-vec2( 0.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( fBox2(pos.zy-vec2(-0.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( fBox2(pos.zy-vec2(-1.5,0.07), vec2(0.01,0.05)),          45.0));
+    pReflect(offset, vec3(0,1,0),1);
+    vec2 res =      vec2( sdfPlaneXZ(   pos-vec3(0,-2,0)), 2.0 );
+    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2( 2.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2( 1.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2( 0.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2(-0.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2(-1.5,0.07), vec2(0.01,0.05)),          45.0));
+    //res = opU( res, vec2 ( -sdfBox(pos, vec3(10)),          45.0));
 
+//    res = opU( res, vec2 ( sdfCorner(pos.xz-vec2(-5,-5)),          45.0));
+//    res = opU( res, vec2 ( sdfCorner(-pos.xz-vec2(-5, -5)),          45.0));
 //row1
     res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
     res = opU( res, vec2( sdfCylinder(  offset-vec3(1,0,0), vec2(0.2,0.2)),          8.0));
     res = opU( res, vec2( sdfCylinder6( offset-vec3(2,0,0), vec2(0.1,0.2) ),        12.0));
-    res = opU( res, vec2( sdConeSection(offset-vec3(3,0,0), 0.15, 0.2, 0.1 ),       13.6));
-    res = opU( res, vec2( sdfEllipsoid( offset-vec3(4,0,0), vec3(0.15, 0.2, 0.05)), 43.1));
+    res = opU( res, vec2( sdCone(       offset-vec3(3,0.35,0), 0.2, 0.8, 0.4 ),        55.0));
+    res = opU( res, vec2( sdConeSection(offset-vec3(3,0,0),   0.15, 0.2, 0.1 ),       13.6));
 
 //row2
     offset.z += 1;
@@ -75,7 +59,7 @@ vec2 map(vec3 pos )
     res = opU( res, vec2( sdfCapsule(   offset-vec3(1,0,0), vec3(0.2), vec3(-0.2), 0.1), 31.9));
     res = opU( res, vec2( sdfTriPrism(  offset-vec3(2,0,0), vec2(0.25,0.05) ),           43.5));
     res = opU( res, vec2( sdfHexPrismYZ(offset-vec3(3,0,0), vec2(0.25,0.05) ),           17.0));
-    res = opU( res, vec2( sdCone(       offset-vec3(4,0,0), vec3(0.8,0.6,0.25) ),        55.0));
+    res = opU( res, vec2( sdfEllipsoid( offset-vec3(4,0,0), vec3(0.15, 0.2, 0.05)), 43.1));
 
 //row4
     offset.z += 1;
@@ -101,6 +85,7 @@ vec2 map(vec3 pos )
     res = opU( res, vec2( opS( sdfTorus82( diff, 0.1, 0.2),
                                sdfCylinder( repetition, vec2(0.02,0.6))),
                           51.0 ));
+
     // twisty thing
     diff = offset-vec3(3,0,0);
     res = opU( res, vec2(0.5*sdfTorus(opTwist(diff),0.05,0.25),        46.7));
@@ -114,34 +99,6 @@ vec2 map(vec3 pos )
     res = opU( res, vec2( fBlob( offset-vec3(0,0.1,0)), 43.17 ) );
 
     return res;
-}
-
-float fField(vec3 p)
-{
-#if 0 // Do some domain repetition
-    p.xz = -p.xz;
-    vec2 q = pModMirror2(p.xz,vec2(4.5));
-#endif
-    const vec3 box_pos1 = vec3(-10,0,0);
-    const vec3 box_pos2 = vec3(-10.51,0,0);
-    const vec3 dodec_pos = vec3(-2.25,.5,-1.);
-    const vec3 box_size = vec3(.25);
-
-    float d;
-    d = opUnion(sdfBox(p-box_pos2,box_size), sdfBox(p-box_pos1,box_size));
-    //d = opUnion(d, fDodecahedron(p-dodec_pos,.7));
-    d = opUnion(d, length(p-vec3(0,0,-10))-box_size.x);
-    d = opUnion(d, length(p-vec3(0,0,-12))-box_size.x);
-    d = opUnion(d, sdfPlane(p-vec3(0,1,0),vec3(0,1,0),1));
-    d = opUnion(d, map(p).x);
-    //float sphere = length(p-vec3(1.+sin(time*.5)*.2,.8,1))-0.5;
-
-    float stair_radius = 0.3;
-    float stair_count = 4.;
-
-    //d = fOpUnionStairs(box1,sphere1,stair_radius,stair_count);
-    //return prope;
-    return map(p).x;
 }
 
 void main()

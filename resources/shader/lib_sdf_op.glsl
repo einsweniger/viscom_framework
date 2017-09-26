@@ -142,6 +142,7 @@ float fOpIntersectionChamfer(float a, float b, float r) {
 float fOpDifferenceChamfer (float a, float b, float r) {
 	return fOpIntersectionChamfer(a, -b, r);
 }  // Difference can be built from Intersection or Union:
+
 float fOpUnionRound(float a, float b, float r) {
 	vec2 u = max(vec2(r - a,r - b), vec2(0));
 	return max(r, min (a, b)) - length(u);
@@ -153,6 +154,7 @@ float fOpIntersectionRound(float a, float b, float r) {
 float fOpDifferenceRound (float a, float b, float r) {
 	return fOpIntersectionRound(a, -b, r);
 }
+
 float fOpUnionColumns(float a, float b, float r, float n) {
 	if ((a < r) && (b < r)) {
 		vec2 p = vec2(a, b);
@@ -205,6 +207,7 @@ float fOpDifferenceColumns(float a, float b, float r, float n) {
 float fOpIntersectionColumns(float a, float b, float r, float n) {
 	return fOpDifferenceColumns(a,-b,r, n);
 }
+
 float fOpUnionStairs(float a, float b, float r, float n) {
 	float s = r/n;
 	float u = b-r;
@@ -216,6 +219,7 @@ float fOpIntersectionStairs(float a, float b, float r, float n) {
 float fOpDifferenceStairs(float a, float b, float r, float n) {
 	return -fOpUnionStairs(-a, b, r, n);
 }
+
 float fOpUnionSoft(float a, float b, float r) {
 	float e = max(r - abs(a - b), 0);
 	return min(a, b) - e*e*0.25/r;

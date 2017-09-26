@@ -111,6 +111,26 @@ float sdfTriPrism( vec3 p, vec2 h ){
     return precise_sdf(vec2(d1,d2));  // precise
 }
 
+//endless/uncapped sdfs
+float sdCone( vec3 p, float x, float y ) { // older version from website, not capped
+    // c must be normalized
+    float q = length(p.xy);
+    return dot(normalize(vec2(x,y)),vec2(q,p.z));
+}
+float sdfEndlessBoxCheap(vec2 p, vec2 b) {
+  return vmax(abs(p)-b);
+}  // Same as above, but in two dimensions (an endless box)
+float sdfEndlessBox(vec2 p, vec2 b) {
+  vec2 d = abs(p) - b;
+  return precise_sdf(d);
+}
+float sdfCorner (vec2 p) {
+  return length(max(p, vec2(0))) + vmax(min(p, vec2(0)));
+}  // Endless "corner"
+float sdCylinder( vec3 p, vec3 c )
+{
+  return length(p.xz-c.xy)-c.z;
+}
 /*
 What i've learnt:
 
@@ -126,11 +146,27 @@ q.x*sqrt(3)*0.5 + q.z*0.5 == dot(vec2(cos(PI/3), sin(PI/3)), q.zx)
 */
 
 //TODO how is zis workink?
-float sdCone(vec3 p,vec3 c ){
+float sdCappedCone( in vec3 p, in vec3 c ) { // older version from website
     vec2 q = vec2( length(p.xz), p.y );
-    float d1 = -q.y-c.z;
-    float d2 = max( dot(q,c.xy), q.y);
-    return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
+    vec2 v = vec2( c.z*c.y/c.x, -c.z );
+    vec2 w = v - q;
+    vec2 vv = vec2( dot(v,v), v.x*v.x );
+    vec2 qv = vec2( dot(v,w), v.x*w.x );
+    vec2 d = max(qv,0.0)*qv/vv;
+    return sqrt( dot(w,w) - max(d.x,d.y) ) * sign(max(q.y*v.x-q.x*v.y,w.y));
+}
+float sdCone(vec3 p, float h, float x, float y){
+    float d1 = -p.y - h;
+    vec2 q = vec2( length(p.xz), p.y );
+    float d2 = max( dot(q,vec2(x,y)), p.y);
+    return precise_sdf(vec2(d1,d2));
+}
+float sdConeSection(vec3 p,float h,float r1,float r2 ){
+    float d1 = -p.y - h;
+    float q = p.y - h;
+    float si = 0.5*(r1-r2)/h;
+    float d2 = max( sqrt( dot(p.xz,p.xz)*(1.0-si*si)) + q*si - r2, q );
+    return precise_sdf(vec2(d1,d2));
 }
 float fCone(vec3 p, float radius, float height) {
   vec2 q = vec2(length(p.xz), p.y);
@@ -153,15 +189,6 @@ float fCone(vec3 p, float radius, float height) {
 }  // Cone with correct distances to tip and base circle. Y is up, 0 is in the middle of the base.
 
 
-// SFDs only in iq_ref
-float sdConeSection(vec3 p,float h,float r1,float r2 ){
-    float d1 = -p.y - h;
-    float q = p.y - h;
-    float si = 0.5*(r1-r2)/h;
-    float d2 = max( sqrt( dot(p.xz,p.xz)*(1.0-si*si)) + q*si - r2, q );
-    return precise_sdf(vec2(d1,d2));
-}
-
 // SDFs only in hg_sdf
 float fBlob(vec3 p) {  //TODO needs to be scaleable
   p = abs(p);
@@ -179,16 +206,6 @@ float fCapsule(vec3 p, float r, float c) {
   return mix(length(p.xz) - r, length(vec3(p.x, abs(p.y) - c, p.z)) - r, step(c, abs(p.y)));
 }  // Capsule: A Cylinder with round caps on both sides
 // endless boxes/corridors
-float fBox2Cheap(vec2 p, vec2 b) {
-  return vmax(abs(p)-b);
-}  // Same as above, but in two dimensions (an endless box)
-float fBox2(vec2 p, vec2 b) {
-  vec2 d = abs(p) - b;
-  return length(max(d, vec2(0))) + vmax(min(d, vec2(0)));
-}
-float fCorner (vec2 p) {
-  return length(max(p, vec2(0))) + vmax(min(p, vec2(0)));
-}  // Endless "corner"
 
 
 // generalized DF
