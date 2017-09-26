@@ -11,7 +11,7 @@
 #include "core/ApplicationNodeInternal.h"
 #include "core/ApplicationNodeBase.h"
 #include "core/camera/ArcballCamera.h"
-#include "core/camera/FreeCamera.h"
+#include "camera/MyFreeCamera.h"
 
 namespace viscom {
 
@@ -45,6 +45,6 @@ namespace viscom {
         std::vector<FrameBuffer> debugTextureBuffers_;
         bool drawMenu_ = true;
         bool grabMouse_ = false;
-        std::shared_ptr<FreeCamera> freeCam_;
+        std::shared_ptr<MyFreeCamera> freeCam_;
     };
 }

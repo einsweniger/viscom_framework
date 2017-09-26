@@ -74,7 +74,9 @@ file(GLOB_RECURSE DATA_FILES ${PROJECT_SOURCE_DIR}/data/*.*)
 file(GLOB_RECURSE SHADER_FILES ${PROJECT_SOURCE_DIR}/resources/shader/*.*)
 file(GLOB_RECURSE SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/app/*.h
-    ${PROJECT_SOURCE_DIR}/src/app/*.cpp)
+    ${PROJECT_SOURCE_DIR}/src/app/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/camera/*.h
+    ${PROJECT_SOURCE_DIR}/src/camera/*.cpp)
 file(GLOB SRC_FILES_ROOT
     ${PROJECT_SOURCE_DIR}/src/*.h
     ${PROJECT_SOURCE_DIR}/src/*.cpp)

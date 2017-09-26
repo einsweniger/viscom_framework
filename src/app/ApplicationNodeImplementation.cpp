@@ -18,7 +18,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <core/camera/FreeCamera.h>
+
 
 #include "Vertices.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
@@ -88,7 +88,7 @@ namespace viscom {
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
         ApplicationNodeBase{appNode}
     {
-        freeCam_ = std::make_shared<FreeCamera>(appNode->GetCamera()->GetPosition(), *(appNode->GetCamera()));
+        freeCam_ = std::make_shared<MyFreeCamera>(appNode->GetCamera()->GetPosition(), *(appNode->GetCamera()), 15.0);
     }
 
     ApplicationNodeImplementation::~ApplicationNodeImplementation() = default;
