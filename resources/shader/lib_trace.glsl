@@ -204,7 +204,7 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
         float shadow_light = softshadow( position, light_direction, 0.02, 2.5 );  // shadows caused by light
         float shadow_reflection = softshadow( position, reflected, 0.02, 2.5 );  // object reflections
 
-        normalTex = vec4(vec3(surface_normal),1); //debug output
+        out_normals = vec4(vec3(surface_normal),1); //debug output
 
         diffuse *= shadow_light;
         dom *= shadow_reflection;
@@ -254,7 +254,7 @@ vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 light_dir, vec4 hit) {
         color = mix(color, fog_color, fog);
 
         //debug texture output
-        normalTex = vec4(norm, 1.0);
+        out_normals = vec4(norm, 1.0);
     }
 
     if (DRAW_DEBUG == 1) {

@@ -20,7 +20,7 @@ namespace viscom {
     class MyFreeCamera final : public CameraBase
     {
     public:
-        MyFreeCamera(const glm::vec3& camPos, viscom::CameraHelper& cameraHelper, double moveSpeed) noexcept;
+        MyFreeCamera(const glm::vec3& camPos, viscom::CameraHelper& cameraHelper, double moveSpeed = 30.0) noexcept;
 
         bool HandleMouse(int button, int action, float mouseWheelDelta, const ApplicationNodeBase* sender) override;
         void UpdateCamera(double elapsedTime, const ApplicationNodeBase* sender) override;

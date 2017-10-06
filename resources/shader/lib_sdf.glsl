@@ -22,7 +22,6 @@ const vec3 GDFVectors[19] = vec3[](
   normalize(vec3( PHI,    1,   0)),
   normalize(vec3(-PHI,    1,   0))
 );
-
 float precise_sdf(vec3 d) {
     return length(max(d,0.0)) + min(vmax(d),0.0);
     return vmax(d);
@@ -32,23 +31,42 @@ float precise_sdf(vec2 d) {
     return vmax(d);
 }
 
+struct Box {
+    vec3 position;
+    vec3 bounds;
+};
 float sdfBox( vec3 p, vec3 b ){
     vec3 d = abs(p) - b;
     return precise_sdf(d);
 }
+float sdf(vec3 position, Box b) {
+    return sdfBox(position-b.position, b.bounds);
+}
+
 float sdfLineSegment(vec3 p, vec3 a, vec3 b) {
-  vec3 pa = p-a, ba = b - a;
-  float h = saturate(dot(pa, ba) / dot(ba, ba));
-  return length(pa - ba*h);
+    vec3 pa = p-a, ba = b - a;
+    float h = saturate(dot(pa, ba) / dot(ba, ba));
+    return length(pa - ba*h);
 }  // Distance to line segment between <a> and <b>, used for fCapsule() version 2below
 
+struct Capsule {
+    vec3 positon;
+    vec3 start;
+    vec3 end;
+    float radius;
+};
 float sdfCapsule(vec3 p, vec3 a, vec3 b, float r) {
-  return sdfLineSegment(p, a, b) - r;
+    return sdfLineSegment(p, a, b) - r;
 }  // Capsule version 2: between two end points <a> and <b> with radius r
+float sdf(vec3 position, Capsule c) {
+  return sdfCapsule(position-c.positon, c.start, c.end, c.radius);
+}
+
 float sdfCircle(vec3 p, float r) {
-  float l = length(p.xz) - r;
-  return length(vec2(p.y, l));
+    float l = length(p.xz) - r;
+    return length(vec2(p.y, l));
 }  // A circle line. Can also be used to make a torus by subtracting the smaller radius of the torus.
+
 float sdfCylinder( vec3 p, vec2 h ){
   vec2 d = abs(vec2(length(p.xz),p.y)) - h;
   return precise_sdf(d);  //for cheaper, but bad edges: return vmax(d);

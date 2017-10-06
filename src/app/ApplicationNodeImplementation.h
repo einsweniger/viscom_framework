@@ -31,13 +31,19 @@ namespace viscom {
         void UpdateFrame(double currentTime, double elapsedTime) override;
         void ClearBuffer(FrameBuffer& fbo) override;
         void DrawFrame(FrameBuffer& fbo) override;
-        void Draw2D(FrameBuffer& fbo) override;
         void CleanUp() override;
 
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
-    private:
+        std::vector<FrameBuffer>& GetDebugTextureBuffer() { return debugTextureBuffers_; }
+        const double& GetTimeDelta() const {return timeDelta_;}
+
+    protected:
         void toggleMouseGrab();
+        const GPUProgram* GetActiveGPUProgram() const {return quad_->GetGPUProgram();}
+
+    private:
+
         float time_ = 0.f;
 
         std::unique_ptr<FullscreenQuad> tex_;
@@ -46,5 +52,6 @@ namespace viscom {
         bool drawMenu_ = true;
         bool grabMouse_ = false;
         std::shared_ptr<MyFreeCamera> freeCam_;
+        double timeDelta_;
     };
 }

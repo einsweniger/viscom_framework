@@ -6,12 +6,11 @@ uniform float u_time;             // shader playback time (in seconds)
 uniform mat4  u_camOrientation;
 uniform mat4  u_MVP;
 uniform vec3  u_camPosition;
-
 // shader outputs
-layout(location = 0) out vec4 fragColor;
-layout(location = 1) out vec4 fragTexCoord;
-layout(location = 2) out vec4 worldPos;
-layout(location = 3) out vec4 normalTex;
+layout(location = 0) out vec4 out_color;
+layout(location = 1) out vec4 out_texCoord;
+layout(location = 2) out vec4 out_worldPos;
+layout(location = 3) out vec4 out_normals;
 
 // local constants
 const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
@@ -20,26 +19,34 @@ const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
 #include "lib_sdf_op.glsl"
 #include "lib_sdf.glsl"
 #include "lib_trace.glsl"
+uniform Box boxes[1];
+
 //------------------------------------------------------------------------
 // Your custom SDF
 //------------------------------------------------------------------------
-vec2 map(vec3 pos )
+vec2 map(vec3 pos)
 {
+Box box;
+box.position = vec3(0,0,0);
+box.bounds = vec3(.25);
 
     vec3 offset = pos-vec3(-2,.25,2);
     pReflect(offset, vec3(0,1,0),1);
+    Capsule capsule;
+
     vec2 res =      vec2( sdfPlaneXZ(   pos-vec3(0,-2,0)), 2.0 );
-    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2( 2.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2( 1.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2( 0.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2(-0.5,0.07), vec2(0.01,0.05)),          45.0));
-    res = opU( res, vec2 ( sdfEndlessBox(pos.zy-vec2(-1.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2( 2.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2( 1.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2( 0.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2(-0.5,0.07), vec2(0.01,0.05)),          45.0));
+    res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2(-1.5,0.07), vec2(0.01,0.05)),          45.0));
     //res = opU( res, vec2 ( -sdfBox(pos, vec3(10)),          45.0));
 
 //    res = opU( res, vec2 ( sdfCorner(pos.xz-vec2(-5,-5)),          45.0));
 //    res = opU( res, vec2 ( sdfCorner(-pos.xz-vec2(-5, -5)),          45.0));
 //row1
-    res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
+    res = opU( res, vec2( sdf(offset, boxes[0]),  3.0));
+//    res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
     res = opU( res, vec2( sdfCylinder(  offset-vec3(1,0,0), vec2(0.2,0.2)),          8.0));
     res = opU( res, vec2( sdfCylinder6( offset-vec3(2,0,0), vec2(0.1,0.2) ),        12.0));
     res = opU( res, vec2( sdCone(       offset-vec3(3,0.35,0), 0.2, 0.8, 0.4 ),        55.0));
@@ -97,7 +104,7 @@ vec2 map(vec3 pos )
 //row6
     offset.z += 1;
     res = opU( res, vec2( fBlob( offset-vec3(0,0.1,0)), 43.17 ) );
-
+    //res.x = pMod1(res.x, 20.0);
     return res;
 }
 
@@ -109,14 +116,10 @@ void main()
     //use inverse MVP to find ray direction
     vec4 dir_projection = inverse(u_MVP)*vec4(st, 1.,1.);
     vec3 ray_direction = normalize(vec3(dir_projection/dir_projection.w));
+    //trace
     vec4 hit = enhancedTrace(u_camPosition, ray_direction);
-//    vec3 color = shade(u_camPosition, ray_direction, light_dir, hit);
     vec3 color = render(u_camPosition, ray_direction);
-    fragColor = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
-
-    //debugging output
-    fragTexCoord = vec4(texCoord,0.f, 1.f);
-//    vec3 col = render(u_camPosition,ray_direction);
-//    fragTexCoord = vec4(pow(col,vec3(0.4545)), 1.0);
-    worldPos = hit; // does not accomodate for repetitions
+    out_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
+    out_texCoord = vec4(texCoord,0.f, 1.f);
+    out_worldPos = hit; // does not accomodate for repetitions
 }

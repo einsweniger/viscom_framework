@@ -20,9 +20,18 @@ namespace viscom {
     public:
         explicit MasterNode(ApplicationNodeInternal* appNode);
         ~MasterNode() override;
+        bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
         void Draw2D(FrameBuffer& fbo) override;
+    private:
 
+        bool imMainMenu_ = true;
+        bool imOverlay_ = false;
+        bool imShaderWindow_ = false;
+        bool imDemoWindow_ = false;
+        bool imBuffersWindow_ = false;
+        void drawMainMenu(const bool* p_open);
+        bool imProgramRecourceWindow_ = false;
     };
 
 

@@ -59,8 +59,9 @@ set(CMAKE_SHARED_LINKER_FLAGS_DEBUGOPENGLCALLS ${CMAKE_SHARED_LINKER_FLAGS_DEBUG
 set(VISCOM_CLIENTGUI OFF CACHE BOOL "Use ImGui on clients." FORCE)
 set(VISCOM_SYNCINPUT OFF CACHE BOOL "Synchronize input from master to clients." FORCE)
 set(VISCOM_CLIENTMOUSECURSOR OFF CACHE BOOL "Show the mouse cursor on clients." FORCE)
-set(VISCOM_USE_SGCT OFF CACHE BOOL "Use SGCT for local builds." FORCE)
+set(VISCOM_USE_SGCT ON CACHE BOOL "Use SGCT for local builds." FORCE)
 set(TUIO_LIB OFF CACHE BOOL "Use TUIO input library" FORCE)
+set(ENV{SGCT_ROOT_DIR} "${PROJECT_SOURCE_DIR}/extern/SGCT-2.7.3-bin/mscv14_x64")
 
 include(${PROJECT_SOURCE_DIR}/extern/fwcore/CMake_core.txt)
 include(${PROJECT_SOURCE_DIR}/extern/fwenh/CMake_enh.txt)
@@ -73,10 +74,8 @@ file(GLOB_RECURSE CFG_FILES ${PROJECT_SOURCE_DIR}/config/*.*)
 file(GLOB_RECURSE DATA_FILES ${PROJECT_SOURCE_DIR}/data/*.*)
 file(GLOB_RECURSE SHADER_FILES ${PROJECT_SOURCE_DIR}/resources/shader/*.*)
 file(GLOB_RECURSE SRC_FILES
-    ${PROJECT_SOURCE_DIR}/src/app/*.h
-    ${PROJECT_SOURCE_DIR}/src/app/*.cpp
-    ${PROJECT_SOURCE_DIR}/src/camera/*.h
-    ${PROJECT_SOURCE_DIR}/src/camera/*.cpp)
+    ${PROJECT_SOURCE_DIR}/src/*/*.h
+    ${PROJECT_SOURCE_DIR}/src/*/*.cpp)
 file(GLOB SRC_FILES_ROOT
     ${PROJECT_SOURCE_DIR}/src/*.h
     ${PROJECT_SOURCE_DIR}/src/*.cpp)
@@ -116,3 +115,4 @@ copy_core_lib_dlls(${APP_NAME})
 install(TARGETS ${APP_NAME} RUNTIME DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME})
 install(DIRECTORY resources/ DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME}/resources)
 install(FILES ${CMAKE_BINARY_DIR}/framework_install.cfg DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME} RENAME framework.cfg)
+

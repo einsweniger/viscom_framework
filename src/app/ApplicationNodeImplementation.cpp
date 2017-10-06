@@ -18,7 +18,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+#include <gfx/Primitives.h>
 
 #include "Vertices.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
@@ -88,7 +88,7 @@ namespace viscom {
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
         ApplicationNodeBase{appNode}
     {
-        freeCam_ = std::make_shared<MyFreeCamera>(appNode->GetCamera()->GetPosition(), *(appNode->GetCamera()), 15.0);
+        freeCam_ = std::make_shared<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
     }
 
     ApplicationNodeImplementation::~ApplicationNodeImplementation() = default;
@@ -122,6 +122,7 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
+        timeDelta_ = elapsedTime;
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
 
         time_ = static_cast<float>(currentTime);
@@ -139,28 +140,21 @@ namespace viscom {
     {
         //debugging textures for imgui.
         SelectOffscreenBuffer(debugTextureBuffers_)->DrawToFBO([this](){
+            gfx::Box b;
+            b.position = glm::vec3(0);
+            b.bounds = glm::vec3(.25f);
+
             auto position = GetCamera()->GetPosition();
-            auto camOrientation = glm::value_ptr(glm::mat3_cast(GetCamera()->GetOrientation()));
+            auto camOrientation = (glm::mat3_cast(GetCamera()->GetOrientation()));
+            auto MVP = (GetCamera()->GetViewPerspectiveMatrix());
             auto prog = quad_->GetGPUProgram();
             {
                 gl::glUseProgram(prog->getProgramId());
                 gl::glUniform1f(prog->getUniformLocation("u_time"), time_);
-                gl::glUniformMatrix3fv(prog->getUniformLocation("u_camOrientation"), 1, gl::GL_FALSE, camOrientation);
+                gl::glUniformMatrix4fv(prog->getUniformLocation("u_camOrientation"), 1, gl::GL_FALSE, glm::value_ptr(camOrientation));
+                gl::glUniformMatrix4fv(prog->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
                 gl::glUniform3f(prog->getUniformLocation("u_camPosition"), position.x, position.y, position.z);
-                quad_->Draw();
-            }
-        });
-        fbo.DrawToFBO([this]() {
-            auto position = GetCamera()->GetPosition();
-            auto camOrientation = glm::value_ptr(glm::mat4_cast(GetCamera()->GetOrientation()));
-            auto MVP = glm::value_ptr(GetCamera()->GetViewPerspectiveMatrix());
-            auto prog = quad_->GetGPUProgram();
-            {
-                gl::glUseProgram(prog->getProgramId());
-                gl::glUniform1f(prog->getUniformLocation("u_time"), time_);
-                gl::glUniformMatrix4fv(prog->getUniformLocation("u_camOrientation"), 1, gl::GL_FALSE, camOrientation);
-                gl::glUniformMatrix4fv(prog->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, MVP);
-                gl::glUniform3f(prog->getUniformLocation("u_camPosition"), position.x, position.y, position.z);
+                b.send(prog, 0);
                 quad_->Draw();
             }
         });
@@ -168,8 +162,8 @@ namespace viscom {
             auto tex = tex_->GetGPUProgram();
             {
                 gl::glUseProgram(tex->getProgramId());
-                gl::glActiveTexture(GL_TEXTURE0);
-                gl::glBindTexture(GL_TEXTURE_2D, 1); //TODO don't hardwire texture
+                gl::glActiveTexture(gl::GL_TEXTURE0);
+                glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures().front()); //TODO don't hardwire texture
                 tex_->Draw();
             }
             gl::glUseProgram(0);
@@ -183,50 +177,22 @@ namespace viscom {
     bool ApplicationNodeImplementation::KeyboardCallback(int key, int scancode, int action, int mods)
     {
         if (ApplicationNodeBase::KeyboardCallback(key, scancode, action, mods)) { return true; }
-
         switch (key) {
-        case GLFW_KEY_TAB: if (action == GLFW_REPEAT || action == GLFW_PRESS) { toggleMouseGrab(); }
-                           return true;
-        default: return false;
+            default: return false;
         }
+
+        return false;
     }
 
     void ApplicationNodeImplementation::toggleMouseGrab()
     {
         if (!grabMouse_) {
-            GetApplication()->SetCursorInputMode(GLFW_CURSOR_DISABLED);
+            SetCursorInputMode(GLFW_CURSOR_DISABLED);
             grabMouse_ = true;
         } else {
-            GetApplication()->SetCursorInputMode(GLFW_CURSOR_NORMAL);
+            SetCursorInputMode(GLFW_CURSOR_NORMAL);
             grabMouse_ = false;
         }
-    }
-
-    void ApplicationNodeImplementation::Draw2D(FrameBuffer& fbo)
-    {
-        fbo.DrawToFBO([this]() {
-            ImVec2 uv0(0, 1);
-            ImVec2 uv1(1, 0);
-            auto camQuat = GetCamera()->GetOrientation();
-
-            if(ImGui::Begin("Camera Params")) {
-
-                ImGui::InputFloat4("cam quat", glm::value_ptr(camQuat));
-            }
-            ImGui::End();
-            if (ImGui::Begin("Buffers:")) {
-                std::string name{"tex "};
-                for (auto tex : SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures()) {
-                    std::string headerName = name + std::to_string(tex);
-                    if (ImGui::CollapsingHeader(headerName.c_str())) {
-                        ImVec2 region(ImGui::GetWindowContentRegionWidth(), ImGui::GetWindowContentRegionWidth() / 1.7f);
-                        ImGui::Image(reinterpret_cast<ImTextureID>(tex), region, uv0, uv1);
-                    };
-                }
-                ImGui::End();
-            } else { ImGui::End(); }
-
-        });
     }
 
 }
