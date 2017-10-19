@@ -1,14 +1,14 @@
 const float NEAR =  0.0;
-const float FAR = 200.0;
+const float FAR = 20.0;
 const float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
 const int MAX_ITERATIONS = 160;
-const float fog_density = .02;
+const float fog_density = .2;
 const int USE_BV = 0;
 const int DRAW_DEBUG = 0;
 const int ENHANCED_TRACER = 1;
 
 // forward declaration
-vec2 map(vec3 pos);
+//vec2 map(vec3 pos);
 
 // tracers
 vec4 simpleTrace(vec3 origin, vec3 direction) {
@@ -17,11 +17,12 @@ vec4 simpleTrace(vec3 origin, vec3 direction) {
     float t = NEAR;
     int i = 0;
     while(i < MAX_ITERATIONS && t < FAR) {
-    	   float result = map(direction*t+origin).x;
-         if (result < tau) break;
-         if (t > NEAR) return vec4(INF); //return INFINITY;
-         t += result;
-         i++;
+        vec3 position = direction*t+origin;
+        vec2 result = map(position);
+        if (result.x < tau) break;
+        if (t > NEAR) return vec4(INF); //return INFINITY;
+        t += result.x;
+        i++;
     }
     return vec4(direction*t+origin, t);
 }  // simple sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 1)
@@ -171,8 +172,12 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
         position = hit.xyz ;
         material = hit.w;
     }
+    if (material == INF) {
+      vec3 fog_color = sky_color(ray_direction, light_dir);
+      base_color = fog_color;
+    } else
 
-    if( material>-0.5 )
+    if(material>-0.5 )
     {
 
         vec3 surface_normal = calcNormal( position );
@@ -222,6 +227,10 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
         base_color = mix( base_color, vec3(0.8,0.9,1.0), 1.0-exp( -0.0002*t*t*t ) );
     }
 
+    vec3 col = vec3(0.8, 0.9, 1.0);
+    col = saturate(1.0-vec3(t)*.2);
+    col = col*abs(calcNormal( position )*.5+.5);
+    return 1-col;
     return vec3( saturate(base_color) );
 }
 

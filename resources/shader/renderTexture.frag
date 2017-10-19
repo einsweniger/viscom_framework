@@ -18,5 +18,6 @@ void main()
 //    vec4 color2 = postChromaticAberration(tex, texCoord);
 //    color = (color1 + color2) / 2;
 //    color = postPixelate(tex, texCoord);
+    color = postFerris(tex, texCoord);
 
 }

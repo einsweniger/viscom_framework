@@ -10,17 +10,12 @@ vec2 barrelDistortion(vec2 coord, float amt) {
 	return coord + cc * dist * amt;
 }
 
-float sat( float t )
-{
-	return clamp( t, 0.0, 1.0 );
-}
-
 float linterp( float t ) {
-	return sat( 1.0 - abs( 2.0*t - 1.0 ) );
+	return saturate( 1.0 - abs( 2.0*t - 1.0 ) );
 }
 
 float remap( float t, float a, float b ) {
-	return sat( (t - a) / (b - a) );
+	return saturate( (t - a) / (b - a) );
 }
 
 vec4 spectrum_offset( float t ) {
@@ -33,11 +28,11 @@ vec4 spectrum_offset( float t ) {
 	return pow( ret, vec4(1.0/2.2) );
 }
 
-float level( in float value, in float min, in float max ) {
+float level(float value, float min, float max ) {
 	return min / 255.0 + ( max - min ) * value / 255.0;
 }
 
-float gamma( in float value, in float g ) {
+float gamma( float value, float g ) {
 	return pow( value, 1.0 / g );
 }
 
@@ -163,3 +158,74 @@ vec4 postPixelate(sampler2D tex, vec2 uv) {  //TODO, should be able to do thins 
     float v = floor(uv.y/d)*d;
     return texture2D(tex, vec2(u,v));
 }
+
+
+vec3 unitSquareToNGon(vec2 p, float n, float amount)
+{
+    float a = p.x * 2.0 - 1.0;
+    float b = p.y * 2.0 - 1.0;
+
+    float pi = 3.141592;
+
+    float r, theta;
+    if (a > -b) {
+        if (a > b) {
+            r = a;
+            theta = (pi / 4.0) * (b / a);
+        } else {
+            r = b;
+            theta = (pi / 4.0) * (2.0 - (a / b));
+        }
+    } else {
+        if (a < b) {
+            r = -a;
+            theta = (pi / 4.0) * (4.0 + (b / a));
+        } else {
+            r = -b;
+            if (b != 0.0) {
+                theta = (pi / 4.0) * (6.0 - (a / b));
+            } else {
+                theta = 0.0;
+            }
+        }
+    }
+
+    float circleRadius = r;
+
+    r *= mix(1.0, cos(pi / n) / cos(theta - (2.0 * pi / n) * floor((n * theta + pi) / (2.0 * pi))), amount);
+    // This is just so that the shape isn't aligned to an axis, which looks a bit nicer
+    theta += .6;
+
+    float u = r * cos(theta);
+    float v = r * sin(theta);
+    return vec3(u, v, circleRadius);
+}
+
+
+vec4 postFerris(sampler2D tex, vec2 uv) {
+    vec3 clean = texture(tex, uv).xyz;
+
+    vec3 acc = vec3(0.0);
+    int kernelSize = 8;
+    for (int y = 0; y < kernelSize; y++)
+    {
+        for (int x = 0; x < kernelSize; x++)
+        {
+            vec2 unitSquare = vec2(ivec2(x, y)) / vec2(ivec2(kernelSize - 1));
+
+            vec2 nGon = unitSquareToNGon(unitSquare, 7.0, 1.0).xy * 20.0;
+            vec2 offset = nGon / vec2(1920,1080); //TODO remove hardcoded
+            acc += texture(tex, uv + offset).xyz * (1.0 / float(kernelSize * kernelSize));
+        }
+    }
+
+    acc = pow(acc + 0.01, vec3(3.3));
+
+    vec3 outputColor = clean + acc;
+    vec3 tonemappedColor = outputColor / (outputColor + 1.0);
+    vec3 gammaCorrectedOutputColor = pow(tonemappedColor, vec3(1.0 / 2.2));
+
+    return vec4(outputColor,1.0);
+
+}
+

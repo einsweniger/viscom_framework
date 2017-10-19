@@ -11,7 +11,48 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
+void checkGlError() {
+    GLenum err;
+    while (true) {
+        err = glGetError();
+        switch (err) {
+            case GL_INVALID_ENUM:
+                printf("GLerror: invalid enum\n");
+                break;
+            case GL_INVALID_VALUE:
+                printf("GLerror: invalid value\n");
+                break;
+            case GL_INVALID_OPERATION:
+                printf("GLerror: invalid operation\n");
+                break;
+            case GL_STACK_OVERFLOW:
+                printf("GLerror: stack overflow\n");
+                break;
+            case GL_STACK_UNDERFLOW:
+                printf("GLerror: stack underflow\n");
+                break;
+            case GL_OUT_OF_MEMORY:
+                printf("GLerror: out of memory\n");
+                break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                printf("GLerror: invalid framebuffer operation\n");
+                break;
+            case GL_CONTEXT_LOST:
+                printf("GLerror: context lost\n");
+                break;
+            case GL_TABLE_TOO_LARGE:
+                printf("GLerror: table too large\n");
+                break;
+            case GL_NO_ERROR:
+                printf("GLerror: no error\n");
+                return;
+            default:
+                printf("GLerror: wtf\n");
+                break;
+        }
+    }
 
+}
 struct ExampleAppLog
 {
     ImGuiTextBuffer Buf;
@@ -134,7 +175,9 @@ namespace viscom {
             {GL_BUFFER_VARIABLE, {GL_NAME_LENGTH, GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE
         };
         if(ImGui::Begin("GPUProgram", p_open)) {
-            ImGui::BulletText("ProgramId: %d",id);
+            GLint activeProg;
+            glGetIntegerv(GL_CURRENT_PROGRAM, &activeProg);
+            ImGui::BulletText("Active Program: %d (%d)", activeProg, id);
             for(auto interface : interfaces) {
                 if(ImGui::TreeNode(interface.second.c_str())){
                     for (auto property : interfaceProperties) {
@@ -145,6 +188,19 @@ namespace viscom {
                     }
                     ImGui::TreePop();
                 }
+            }
+            GLint maxSubRoutines,maxSubroutineUniformLocations,activeSubUniforms;
+            glGetIntegerv(GL_MAX_SUBROUTINES, &maxSubRoutines);
+            glGetIntegerv(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, &maxSubroutineUniformLocations);
+            ImGui::BulletText("GL_MAX_SUBROUTINES: %d", maxSubRoutines);
+            ImGui::BulletText("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
+            if(ImGui::TreeNode("Subroutine details")) {
+                checkGlError();
+                glGetProgramStageiv(id, GL_VERTEX_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &activeSubUniforms);
+                checkGlError();
+                ImGui::Text("Active Subroutines: %d", activeSubUniforms);
+
+                ImGui::TreePop();
             }
 
 
@@ -166,7 +222,7 @@ namespace viscom {
                 ImGui::MenuItem("Menu", "M", &imMainMenu_);
                 ImGui::MenuItem("Overlay", "O", &imOverlay_);
                 ImGui::MenuItem("Shader", "Ctrl+S", &imShaderWindow_);
-                ImGui::MenuItem("GPUProgram","", &imProgramRecourceWindow_);
+                ImGui::MenuItem("GPUProgram","G", &imProgramRecourceWindow_);
                 ImGui::Separator();
                 ImGui::MenuItem("ImGui Demo", "", &imDemoWindow_);
                 ImGui::EndMenu();
@@ -234,6 +290,7 @@ namespace viscom {
             case GLFW_KEY_O: imOverlay_ = !imOverlay_; return true;
             case GLFW_KEY_M: imMainMenu_ = !imMainMenu_; return true;
             case GLFW_KEY_B: imBuffersWindow_= !imBuffersWindow_; return true;
+            case GLFW_KEY_G: imProgramRecourceWindow_= !imProgramRecourceWindow_; return true;
             case GLFW_KEY_S: {
                 if(mods == GLFW_MOD_CONTROL) {
                     imShaderWindow_ = !imShaderWindow_;

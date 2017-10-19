@@ -6,6 +6,7 @@ uniform float u_time;             // shader playback time (in seconds)
 uniform mat4  u_camOrientation;
 uniform mat4  u_MVP;
 uniform vec3  u_camPosition;
+
 // shader outputs
 layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec4 out_texCoord;
@@ -15,16 +16,35 @@ layout(location = 3) out vec4 out_normals;
 // local constants
 const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
 
+subroutine vec2 SceneMap(vec3 position);  // function signature type declaration
+subroutine uniform SceneMap map;  // uniform instance, can be called like a function
+
 #include "lib_util.glsl"
 #include "lib_sdf_op.glsl"
 #include "lib_sdf.glsl"
-#include "lib_trace.glsl"
+#include "lib_trace.glsl"  // needs vec2 map(vec3) to be declared.
 uniform Box boxes[1];
 
 //------------------------------------------------------------------------
 // Your custom SDF
 //------------------------------------------------------------------------
-vec2 map(vec3 pos)
+
+subroutine(SceneMap) vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/view/ltd3W2
+{
+
+    vec2 res =  vec2(100.,0.);
+	  vec3 p = pos;
+    pos.xyz = mod(pos.xyz-.5,1.)-.5;
+
+   	//pos.xyz = opTwist(pos.xzy,3.,0.);
+   	float s =    sdfSphere(pos+vec3(0.,0.,0.), .4);
+    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.5,0.1+sin((p.z-u_time)*5.)*.05,1.0)));
+    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.1+cos((p.z-u_time)*5.)*.05,0.5,1.0)) );
+    s = opS(s, sdfCylinder(pos.xzy,            vec2(.25,1.01)));
+    res = opU( res, vec2( s, 50. ) );
+    return res;
+}
+subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
 {
 Box box;
 box.position = vec3(0,0,0);
@@ -118,7 +138,10 @@ void main()
     vec3 ray_direction = normalize(vec3(dir_projection/dir_projection.w));
     //trace
     vec4 hit = enhancedTrace(u_camPosition, ray_direction);
+    vec3 position = u_camPosition;
+    position.z -= u_time*.5;
     vec3 color = render(u_camPosition, ray_direction);
+    //color = shade(u_camPosition, ray_direction, light_dir, hit);
     out_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     out_texCoord = vec4(texCoord,0.f, 1.f);
     out_worldPos = hit; // does not accomodate for repetitions
