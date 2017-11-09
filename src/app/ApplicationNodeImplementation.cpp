@@ -108,8 +108,9 @@ namespace viscom {
         const std::string prog_quad = "test";
         const std::string prog_tex = "renderTexture";
 
-        quad_ = CreateFullscreenQuad(prog_quad + _fs);
-        tex_ = CreateFullscreenQuad(prog_tex + _fs);
+
+        quad_ = std::make_unique<MyFullscreenQuad>(prog_quad + _fs, this);
+        tex_ = std::make_unique<MyFullscreenQuad>(prog_tex + _fs, this);
         std::vector<FrameBufferTextureDescriptor> tex{};
         tex.emplace_back(gl::GL_RGBA32F);
         tex.emplace_back(gl::GL_RGBA32F);

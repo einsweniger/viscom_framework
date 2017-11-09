@@ -150,9 +150,19 @@ namespace viscom {
 
 
     }
-    void drawProgramWindow(GLuint id, bool* p_open)
+    void MasterNode::drawProgramWindow(bool* p_open)
     {
-        const std::unordered_map<GLint, std::string> interfaces {
+        using enum2enums = std::pair<GLenum, std::vector<GLenum>>;
+        using enum2str = std::pair<GLenum, std::vector<GLenum>>;
+        const std::unordered_map<GLenum, std::vector<GLenum>> resourceProperties {
+            {GL_UNIFORM,         {GL_NAME_LENGTH, GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE, ATOMIC_COUNTER_BUFFER_INDEX
+            {GL_UNIFORM_BLOCK,   {GL_NAME_LENGTH, GL_ACTIVE_VARIABLES, GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES}},  // BUFFER_DATA_SIZE
+            {GL_PROGRAM_INPUT,   {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT}},
+            {GL_PROGRAM_OUTPUT,  {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT, GL_LOCATION_INDEX}},
+            {GL_BUFFER_VARIABLE, {GL_NAME_LENGTH, GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE
+        };
+
+        const std::unordered_map<GLenum, std::string> interfaces {
             {GL_UNIFORM, "GL_UNIFORM"},
             {GL_UNIFORM_BLOCK, "GL_UNIFORM_BLOCK"},
             {GL_PROGRAM_INPUT, "GL_PROGRAM_INPUT"},
@@ -161,23 +171,24 @@ namespace viscom {
 //            {GL_ATOMIC_COUNTER_BUFFER, "GL_ATOMIC_COUNTER_BUFFER"},
 //            {GL_SHADER_STORAGE_BLOCK, "GL_SHADER_STORAGE_BLOCK"}
         };
-        const std::unordered_map<GLint, std::string> interfaceProperties {
+        const std::unordered_map<GLenum, std::string> interfaceProperties {
             {GL_ACTIVE_RESOURCES, "GL_ACTIVE_RESOURCES"},
             {GL_MAX_NAME_LENGTH, "GL_MAX_NAME_LENGTH"},  // not for ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER
 //            {GL_MAX_NUM_ACTIVE_VARIABLES, "GL_MAX_NUM_ACTIVE_VARIABLES"},  // only for ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK
 //            {GL_MAX_NUM_COMPATIBLE_SUBROUTINES, "GL_MAX_NUM_COMPATIBLE_SUBROUTINES"}  // only for {VERTEX,GEOMETRY,FRAGMENT,COMPUTE}_SUBROUTINE_UNIFORM , TESS_{CONTROL,EVALUATION}_SUBROUTINE_UNIFORM
         };
-        const std::unordered_map<GLint, std::vector<GLint>> resourceProperties{
-            {GL_UNIFORM,         {GL_NAME_LENGTH, GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE, ATOMIC_COUNTER_BUFFER_INDEX
-            {GL_UNIFORM_BLOCK,   {GL_NAME_LENGTH, GL_ACTIVE_VARIABLES, GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES}},  // BUFFER_DATA_SIZE
-            {GL_PROGRAM_INPUT,   {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT}},
-            {GL_PROGRAM_OUTPUT,  {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT, GL_LOCATION_INDEX}},
-            {GL_BUFFER_VARIABLE, {GL_NAME_LENGTH, GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE
+        const std::unordered_map<GLenum, std::string> programStageProperties {
+            {GL_ACTIVE_SUBROUTINE_UNIFORMS,           "GL_ACTIVE_SUBROUTINE_UNIFORMS"},
+            {GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,  "GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS"},
+            {GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH, "GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH"},
+            {GL_ACTIVE_SUBROUTINES,                   "GL_ACTIVE_SUBROUTINES"},
+            {GL_ACTIVE_SUBROUTINE_MAX_LENGTH,         "GL_ACTIVE_SUBROUTINE_MAX_LENGTH"},
         };
+
+        auto prog = quad_->GetGPUProgram();
+        GLuint id = prog->getProgramId();
         if(ImGui::Begin("GPUProgram", p_open)) {
-            GLint activeProg;
-            glGetIntegerv(GL_CURRENT_PROGRAM, &activeProg);
-            ImGui::BulletText("Active Program: %d (%d)", activeProg, id);
+            ImGui::BulletText("Program: %d", id);
             for(auto interface : interfaces) {
                 if(ImGui::TreeNode(interface.second.c_str())){
                     for (auto property : interfaceProperties) {
@@ -189,14 +200,28 @@ namespace viscom {
                     ImGui::TreePop();
                 }
             }
-            GLint maxSubRoutines,maxSubroutineUniformLocations,activeSubUniforms;
-            glGetIntegerv(GL_MAX_SUBROUTINES, &maxSubRoutines);
-            glGetIntegerv(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, &maxSubroutineUniformLocations);
-            ImGui::BulletText("GL_MAX_SUBROUTINES: %d", maxSubRoutines);
-            ImGui::BulletText("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
             if(ImGui::TreeNode("Subroutine details")) {
-                glGetProgramStageiv(id, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &activeSubUniforms);
-                ImGui::Text("Active Subroutines: %d", activeSubUniforms);
+                GLint maxSubRoutines,maxSubroutineUniformLocations;
+                glGetIntegerv(GL_MAX_SUBROUTINES, &maxSubRoutines);
+                glGetIntegerv(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, &maxSubroutineUniformLocations);
+                ImGui::Text("GL_MAX_SUBROUTINES: %d", maxSubRoutines);
+                ImGui::Text("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
+                for(auto progStageProp : programStageProperties) {
+                    GLint value;
+                    glGetProgramStageiv(id, GL_FRAGMENT_SHADER, progStageProp.first, &value);
+                    ImGui::Text("%s: %d", progStageProp.second.c_str(), value);
+                }
+                GLint subUniformCount, subUniformNameLen;
+                glGetProgramStageiv(id, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &subUniformCount);
+                glGetProgramStageiv(id, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH, &subUniformNameLen);
+
+                for(const auto& uniform : quad_->GetSubroutineUniforms()) {
+                    GLint activeSubroutine = glGetSubroutineUniformLocation(id,GL_FRAGMENT_SHADER, "map");
+                    ImGui::Text("uniform %d: %s (active sub: %d)", uniform.second, uniform.first.c_str(), activeSubroutine);
+                    for(const auto& subroutine : quad_->GetSubroutineCompatibleUniforms(uniform.second)) {
+                        ImGui::BulletText("subroutine %d: %s", subroutine.second, subroutine.first.c_str());
+                    }
+                }
                 ImGui::TreePop();
             }
 
@@ -270,7 +295,7 @@ namespace viscom {
                 }
                 ImGui::End();
             }
-            if(imProgramRecourceWindow_) drawProgramWindow(GetActiveGPUProgram()->getProgramId(), &imProgramRecourceWindow_);
+            if(imProgramRecourceWindow_) drawProgramWindow(&imProgramRecourceWindow_);
         });
     }
     bool MasterNode::KeyboardCallback(int key, int scancode, int action, int mods)

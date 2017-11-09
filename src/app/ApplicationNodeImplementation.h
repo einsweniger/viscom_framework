@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "gfx/MyFullscreenQuad.h"
 #include "core/ApplicationNodeInternal.h"
 #include "core/ApplicationNodeBase.h"
 #include "core/camera/ArcballCamera.h"
@@ -40,14 +41,12 @@ namespace viscom {
 
     protected:
         void toggleMouseGrab();
-        const GPUProgram* GetActiveGPUProgram() const {return quad_->GetGPUProgram();}
 
-    private:
 
         float time_ = 0.f;
 
-        std::unique_ptr<FullscreenQuad> tex_;
-        std::unique_ptr<FullscreenQuad> quad_;
+        std::unique_ptr<MyFullscreenQuad> tex_;
+        std::unique_ptr<MyFullscreenQuad> quad_;
         std::vector<FrameBuffer> debugTextureBuffers_;
         bool drawMenu_ = true;
         bool grabMouse_ = false;

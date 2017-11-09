@@ -31,6 +31,7 @@ namespace viscom {
         bool imDemoWindow_ = false;
         bool imBuffersWindow_ = false;
         void drawMainMenu(const bool* p_open);
+        void drawProgramWindow(bool* p_open);
         bool imProgramRecourceWindow_ = false;
     };
 
