@@ -195,11 +195,8 @@ namespace viscom {
             ImGui::BulletText("GL_MAX_SUBROUTINES: %d", maxSubRoutines);
             ImGui::BulletText("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
             if(ImGui::TreeNode("Subroutine details")) {
-                checkGlError();
-                glGetProgramStageiv(id, GL_VERTEX_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &activeSubUniforms);
-                checkGlError();
+                glGetProgramStageiv(id, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &activeSubUniforms);
                 ImGui::Text("Active Subroutines: %d", activeSubUniforms);
-
                 ImGui::TreePop();
             }
 

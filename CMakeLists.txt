@@ -69,6 +69,7 @@ include(${PROJECT_SOURCE_DIR}/extern/fwenh/CMake_enh.txt)
 set(VISCOM_CONFIG_NAME "single" CACHE STRING "Name/directory of the configuration files to be used.")
 set(VISCOM_VIRTUAL_SCREEN_X 1920 CACHE INTEGER "Virtual screen size in x direction.")
 set(VISCOM_VIRTUAL_SCREEN_Y 1080 CACHE INTEGER "Virtual screen size in y direction.")
+set(VISCOM_OPENGL_PROFILE "4.5" CACHE STRING "OpenGL profile version to use." FORCE)
 
 file(GLOB_RECURSE CFG_FILES ${PROJECT_SOURCE_DIR}/config/*.*)
 file(GLOB_RECURSE DATA_FILES ${PROJECT_SOURCE_DIR}/data/*.*)

@@ -155,8 +155,6 @@ namespace viscom {
                 gl::glUniformMatrix4fv(prog->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
                 gl::glUniform3f(prog->getUniformLocation("u_camPosition"), position.x, position.y, position.z);
                 b.send(prog, 0);
-                GLint countActiveSU[1024];
-                glGetProgramStageiv(prog->getProgramId(), GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, countActiveSU);
                 quad_->Draw();
             }
         });
