@@ -17,12 +17,12 @@ namespace viscom {
     const UniformList MyFullscreenQuad::GetSubroutineUniforms()
     {
         auto id = GetGPUProgram()->getProgramId();
-        auto count = mglGetSubroutineUniformCount(id, GL_FRAGMENT_SHADER);
+        auto count = mglGetProgramInterfaceQuery(id, GL_FRAGMENT_SUBROUTINE_UNIFORM, GL_ACTIVE_RESOURCES);
         if(0 == count) {
             return UniformList();
         }
 
-        auto maxNameLen = mglGetSubroutineUniformMaxLen(id, GL_FRAGMENT_SHADER);
+        auto maxNameLen = mglGetProgramInterfaceQuery(id, GL_FRAGMENT_SUBROUTINE_UNIFORM, GL_MAX_NAME_LENGTH);
         UniformList result;
         result.reserve(count);
         std::string name;
@@ -40,7 +40,7 @@ namespace viscom {
         auto count = mglGetCompatibleSubroutineCount(id, GL_FRAGMENT_SHADER, uniform);
         UniformList result;
         result.reserve(count);
-        const auto subNameLen = mglGetSubroutineMaxLen(id, GL_FRAGMENT_SHADER);
+        const auto subNameLen = mglGetProgramInterfaceQuery(id, GL_FRAGMENT_SUBROUTINE, GL_MAX_NAME_LENGTH);
 
         std::string name;
         name.reserve(subNameLen);
@@ -54,29 +54,23 @@ namespace viscom {
     const UniformList MyFullscreenQuad::GetUniforms()
     {
         auto id = GetGPUProgram()->getProgramId();
-        auto numUniforms = mglGetUniformCount(id);
+        auto numUniforms = mglGetProgramInterfaceQuery(id, GL_UNIFORM, GL_ACTIVE_RESOURCES);
         if (0 == numUniforms) {
             return UniformList();
         }
         UniformList result;
         result.reserve(numUniforms);
-        const std::vector<GLenum> properties{GL_NAME_LENGTH, GL_BLOCK_INDEX, GL_LOCATION}; //GL_TYPE might be interesting, too
-        std::vector<GLint> values(properties.size());
         for(GLuint counter = 0; counter < numUniforms; ++counter) {
-            glGetProgramResourceiv(id, GL_UNIFORM, counter,
-                                   properties.size(), &properties[0],
-                                   values.size(), nullptr, &values[0]);
-            if(-1 != values[1]) {
-                // if BLOCK_INDEX is set, we skip it. blocks are handled separately
+            auto props = mglGetProgramResource(id, GL_UNIFORM, counter, {GL_NAME_LENGTH, GL_BLOCK_INDEX, GL_LOCATION});
+            if(-1 != props[GL_BLOCK_INDEX]) {  // if BLOCK_INDEX is set, we skip it. blocks are handled separately
                 continue;
             }
-
             std::string name;
-            name.reserve(positive(values[0]));
+            name.reserve(positive(props[GL_NAME_LENGTH]));
 
-            glGetProgramResourceName(id, GL_UNIFORM, counter, values[0], nullptr, &name[0]);
+            glGetProgramResourceName(id, GL_UNIFORM, counter, props[GL_NAME_LENGTH], nullptr, &name[0]);
 
-            result.emplace_back(name, values[2]);
+            result.emplace_back(name, props[GL_LOCATION]);
         }
         return result;
     }
