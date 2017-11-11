@@ -17,14 +17,26 @@ namespace viscom {
         }
     }
 
-    static GLuint mglGetProgramInterfaceQuery(const GLuint program, const GLenum interface, const GLenum property) {
+    static GLuint mglGetProgramInterface(const GLuint program, const GLenum interface, const GLenum property) {
         GLint result = 0;
         glGetProgramInterfaceiv(program, interface, property, &result);
         return positive(result);
     }
 
-    static GLuint mglGetProgramResourceIndex(const GLuint program, const GLenum interface, const std::string name) {
+    static GLuint mglGetProgramResourceIndex(const GLuint program, const GLenum interface, const std::string& name) {
         return glGetProgramResourceIndex(program, interface, &name[0]);
+    }
+
+    static std::string mglGetProgramResourceName(GLuint program, GLenum interface, GLuint index, GLint length) {
+        std::string name;
+        name.reserve(positive(length));
+        glGetProgramResourceName(program, interface, index, length, nullptr, &name[0]);
+        return name;
+    }
+
+    static std::string mglGetProgramResourceName(GLuint program, GLenum interface, GLuint index) {
+        auto length = mglGetProgramInterface(program, interface, GL_MAX_NAME_LENGTH);
+        return mglGetProgramResourceName(program, interface, index, length);
     }
 
     static ResourceProperties mglGetProgramResource(const GLuint program, const GLenum interface, const GLuint index, const std::vector<GLenum>& properties) {
@@ -37,8 +49,16 @@ namespace viscom {
         return result;
     }
 
+    static std::vector<GLint> mglGetProgramResource(const GLuint program, const GLenum interface, const GLuint index, const GLenum property, const GLuint size) {
+        std::vector<GLint> params(size);
+        GLsizei propCount = 1;
+        auto bufSize = static_cast<GLsizei>(params.size());
+        glGetProgramResourceiv(program, interface, index, propCount, &property, bufSize, nullptr, &params[0]);
+        return params;
+    }
+
     static PropertyList mglGetProgramResourceAll(GLuint const program, GLenum const interface, const std::vector<GLenum>& properties) {
-        auto activeResources = mglGetProgramInterfaceQuery(program, interface, GL_ACTIVE_RESOURCES);
+        auto activeResources = mglGetProgramInterface(program, interface, GL_ACTIVE_RESOURCES);
         if(0 == activeResources) {
             return PropertyList();
         }
@@ -50,22 +70,16 @@ namespace viscom {
         return result;
     }
 
-    static GLuint mglGetCompatibleSubroutineCount(const GLuint program, const GLenum shader, const GLuint uniform) {
-        GLint compatibleSubroutineCount;
-        glGetActiveSubroutineUniformiv(program, shader, uniform, GL_NUM_COMPATIBLE_SUBROUTINES, &compatibleSubroutineCount);
-        return positive(compatibleSubroutineCount);
-    }
-
-    static std::vector<GLuint> mglGetCompatibleSubroutines(GLuint program, GLenum shader, GLuint uniform) {
-        auto count = mglGetCompatibleSubroutineCount(program,shader,uniform);
+    static std::vector<GLuint> mglGetCompatibleSubroutines(GLuint program, GLenum interface, GLuint uniform) {
+        auto props = mglGetProgramResource(program, interface, uniform, {GL_NUM_COMPATIBLE_SUBROUTINES});
+        auto count = positive(props[GL_NUM_COMPATIBLE_SUBROUTINES]);
         if(0 == count) {
             return std::vector<GLuint>();
         }
         std::vector<GLuint> result;
         result.reserve(count);
-        std::vector<GLint> subroutines(count);
-        glGetActiveSubroutineUniformiv(program, shader, uniform, GL_COMPATIBLE_SUBROUTINES, &subroutines[0]);
-        for (auto subroutine : subroutines) {
+
+        for (auto subroutine : mglGetProgramResource(program, interface, uniform, GL_COMPATIBLE_SUBROUTINES, count)) {
             result.push_back(positive(subroutine));
         }
         return result;

@@ -200,7 +200,7 @@ namespace viscom {
                     ImGui::TreePop();
                 }
             }
-            if(ImGui::TreeNode("unifrorm locations")) {
+            if(ImGui::TreeNode("uniform locations")) {
                 for(const auto& uniform : quad_->GetUniforms()) {
                     ImGui::Text("%s: %d", uniform.first.c_str(), uniform.second);
                 }
@@ -217,9 +217,6 @@ namespace viscom {
                     glGetProgramStageiv(id, GL_FRAGMENT_SHADER, progStageProp.first, &value);
                     ImGui::Text("%s: %d", progStageProp.second.c_str(), value);
                 }
-                GLint subUniformCount, subUniformNameLen;
-                glGetProgramStageiv(id, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &subUniformCount);
-                glGetProgramStageiv(id, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH, &subUniformNameLen);
 
                 for(const auto& uniform : quad_->GetSubroutineUniforms()) {
                     GLint activeSubroutine = glGetSubroutineUniformLocation(id,GL_FRAGMENT_SHADER, "map");
