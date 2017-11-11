@@ -34,16 +34,25 @@ namespace viscom {
         glGetProgramStageiv(progname, shader, GL_ACTIVE_SUBROUTINE_MAX_LENGTH, &subNameLen);
         return positive(subNameLen);
     }
-    static std::vector<GLuint> mglGetCompatibleSubroutines(GLuint progname, GLenum shader, GLuint uniform, GLuint count) {
+    static std::vector<GLuint> mglGetCompatibleSubroutines(GLuint progname, GLenum shader, GLuint uniform) {
+        auto count = mglGetCompatibleSubroutineCount(progname,shader,uniform);
+        if(0 == count) {
+            return std::vector<GLuint>();
+        }
         std::vector<GLuint> result;
         result.reserve(count);
-        auto subroutines = new GLint[count];
-        glGetActiveSubroutineUniformiv(progname, GL_FRAGMENT_SHADER, uniform, GL_COMPATIBLE_SUBROUTINES, subroutines);
-        for(GLuint index=0; index < count; ++index) {
-            result.push_back(positive(subroutines[index]));
+        std::vector<GLint> subroutines(count);
+        glGetActiveSubroutineUniformiv(progname, shader, uniform, GL_COMPATIBLE_SUBROUTINES, &subroutines[0]);
+        for (auto subroutine : subroutines) {
+            result.push_back(positive(subroutine));
         }
-        delete[] subroutines;
         return result;
+    }
+    static GLuint mglGetUniformCount(GLuint progname) {
+        GLint count = 0;
+        //glGetProgramiv(progname, GL_ACTIVE_UNIFORMS, &count) is old, pre 4.3 style.
+        glGetProgramInterfaceiv(progname, GL_UNIFORM, GL_ACTIVE_RESOURCES, &count);
+        return positive(count);
     }
 
 }

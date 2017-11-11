@@ -20,6 +20,7 @@ namespace viscom {
         const GPUProgram* GetGPUProgram() const { return fsq_->GetGPUProgram(); }
         const UniformList GetSubroutineUniforms();
         const UniformList GetSubroutineCompatibleUniforms(GLuint uniform);
+        const UniformList GetUniforms();
 
     private:
         std::unique_ptr<FullscreenQuad> fsq_;

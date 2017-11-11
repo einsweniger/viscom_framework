@@ -155,7 +155,7 @@ namespace viscom {
         using enum2enums = std::pair<GLenum, std::vector<GLenum>>;
         using enum2str = std::pair<GLenum, std::vector<GLenum>>;
         const std::unordered_map<GLenum, std::vector<GLenum>> resourceProperties {
-            {GL_UNIFORM,         {GL_NAME_LENGTH, GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE, ATOMIC_COUNTER_BUFFER_INDEX
+            {GL_UNIFORM,         {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_BLOCK_INDEX, GL_LOCATION}},  // ARRAY_STRIDE , IS_ROW_MAJOR , MATRIX_STRIDE, ATOMIC_COUNTER_BUFFER_INDEX
             {GL_UNIFORM_BLOCK,   {GL_NAME_LENGTH, GL_ACTIVE_VARIABLES, GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES}},  // BUFFER_DATA_SIZE
             {GL_PROGRAM_INPUT,   {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT}},
             {GL_PROGRAM_OUTPUT,  {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT, GL_LOCATION_INDEX}},
@@ -199,6 +199,12 @@ namespace viscom {
                     }
                     ImGui::TreePop();
                 }
+            }
+            if(ImGui::TreeNode("unifrorm locations")) {
+                for(const auto& uniform : quad_->GetUniforms()) {
+                    ImGui::Text("%s: %d", uniform.first.c_str(), uniform.second);
+                }
+                ImGui::TreePop();
             }
             if(ImGui::TreeNode("Subroutine details")) {
                 GLint maxSubRoutines,maxSubroutineUniformLocations;
