@@ -6,12 +6,25 @@ const float fog_density = .2;
 const int USE_BV = 0;
 const int DRAW_DEBUG = 0;
 const int ENHANCED_TRACER = 1;
+/*
+If enhancedTrace had 5 params and would be called like:
+subroutine(RayMarch) vec4 enhancedTrace(vec3 pos, vec3 dir) { return enhancedTrace(pos, dir, 0.0001, false, 1.9); }
+GLSL would treat that as static recursion and since that is forbidden it will not compile with:
+'error C9004: symbol not function "map"'
 
-// forward declaration
-//vec2 map(vec3 pos);
+  Recursion is not allowed, not even statically. Static recursion is present if the static function-call graph of
+  a program contains cycles. This includes all potential function calls through variables declared as
+  subroutine uniform (described below). It is a compile-time or link-time error if a single compilation unit
+  (shader) contains either static recursion or the potential for recursion through subroutine variables.
+
+  ($6.1.1 Function Calling Conventions, GL 4.6 core p117)
+*/
+
+subroutine vec4 RayMarch(vec3 origin, vec3 direction);  // function signature type declaration
+subroutine uniform RayMarch raymarch;  // uniform instance, can be called like a function
 
 // tracers
-vec4 simpleTrace(vec3 origin, vec3 direction) {
+subroutine(RayMarch) vec4 simpleTrace(vec3 origin, vec3 direction) {
     const float tau = .001; //threshold
 
     float t = NEAR;
@@ -27,7 +40,7 @@ vec4 simpleTrace(vec3 origin, vec3 direction) {
     return vec4(direction*t+origin, t);
 }  // simple sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 1)
 
-vec4 castRay(vec3 origin,vec3 direction ) {
+subroutine(RayMarch) vec4 castRay(vec3 origin,vec3 direction ) {
     float tmin = NEAR;
     float tmax = FAR;
 
@@ -62,7 +75,10 @@ vec4 castRay(vec3 origin,vec3 direction ) {
     return vec4( direction*t+origin, material );
 }
 
-vec4 enhancedTrace(vec3 pos, vec3 dir, float pixelRadius, bool forceHit, float relaxation) {
+subroutine(RayMarch) vec4 enhancedTrace(vec3 pos, vec3 dir) {
+    float relaxation = 1.9;
+    float pixelRadius = 0.0001;
+    bool forceHit = false;
     float omega = relaxation; //relaxation parameter omega ∈ [1;2)
     float t = NEAR;
     float material = -1.0;
@@ -71,6 +87,7 @@ vec4 enhancedTrace(vec3 pos, vec3 dir, float pixelRadius, bool forceHit, float r
     float previousRadius = 0.;
     float stepLength = 0.;
     float functionSign = map(pos).x < 0. ? -1. : +1.;
+
 
     for (int i = 0; i < MAX_ITERATIONS; ++i) {
         vec2 result = map(dir * t + pos);
@@ -101,8 +118,6 @@ vec4 enhancedTrace(vec3 pos, vec3 dir, float pixelRadius, bool forceHit, float r
     if ((t > FAR || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
     return vec4(dir*t+pos,material);
 }  // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
-
-vec4 enhancedTrace(vec3 pos, vec3 dir) { return enhancedTrace(pos, dir, 0.0001, false, 1.9); }  // override for defaults
 
 vec4 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_len) {
      // Fancy lighty debug plane
@@ -163,6 +178,9 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
     vec3 position;
     float t;
 
+//    vec4 hit = raymarch(ray_origin, ray_direction);
+//    position = hit.xyz;
+//    material = hit.w;
     if(ENHANCED_TRACER == 1) {
         vec4 hit = enhancedTrace(ray_origin, ray_direction);
         position = hit.xyz;

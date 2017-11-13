@@ -145,4 +145,5 @@ void main()
     out_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     out_texCoord = vec4(texCoord,0.f, 1.f);
     out_worldPos = hit; // does not accomodate for repetitions
+    out_worldPos = raymarch(vec3(0), vec3(0));
 }
