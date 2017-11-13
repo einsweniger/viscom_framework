@@ -20,9 +20,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <gfx/Primitives.h>
 
-#include "Vertices.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
-// #include "core/gfx/mesh/MeshRenderable.h"
 
 void ecb(const glbinding::FunctionCall & call) {
     std::stringstream callOut;
@@ -30,6 +28,7 @@ void ecb(const glbinding::FunctionCall & call) {
     for (unsigned i = 0; i < call.parameters.size(); ++i)
     {
         callOut << call.parameters[i]->asString();
+
         if (i < call.parameters.size() - 1)
             callOut << ", ";
     }
@@ -112,10 +111,10 @@ namespace viscom {
         quad_ = std::make_unique<MyFullscreenQuad>(prog_quad + _fs, this);
         tex_ = std::make_unique<MyFullscreenQuad>(prog_tex + _fs, this);
         std::vector<FrameBufferTextureDescriptor> tex{};
-        tex.emplace_back(gl::GL_RGBA32F);
-        tex.emplace_back(gl::GL_RGBA32F);
-        tex.emplace_back(gl::GL_RGBA32F);
-        tex.emplace_back(gl::GL_RGBA32F);
+        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
+        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
+        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
+        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
 
         debugTextureBuffers_ = CreateOffscreenBuffers(FrameBufferDescriptor{tex, std::vector<RenderBufferDescriptor>{}});
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
@@ -164,7 +163,7 @@ namespace viscom {
             {
                 gl::glUseProgram(tex->getProgramId());
                 gl::glActiveTexture(gl::GL_TEXTURE0);
-                glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures().front());
+                gl::glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures().front());
                 tex_->Draw();
             }
             gl::glUseProgram(0);
@@ -178,9 +177,6 @@ namespace viscom {
     bool ApplicationNodeImplementation::KeyboardCallback(int key, int scancode, int action, int mods)
     {
         if (ApplicationNodeBase::KeyboardCallback(key, scancode, action, mods)) { return true; }
-        switch (key) {
-            default: return false;
-        }
 
         return false;
     }

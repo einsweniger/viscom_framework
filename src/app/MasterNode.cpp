@@ -7,43 +7,47 @@
  */
 
 #include "MasterNode.h"
+#include "core/glfw.h"
 #include <imgui.h>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
+#include <glbinding/gl/gl.h>
+#include "../../extern/fwcore/src/core/gfx/Shader.h"
+
 
 void checkGlError() {
-    GLenum err;
+    
     while (true) {
-        err = glGetError();
+        const auto err = gl::glGetError();
         switch (err) {
-            case GL_INVALID_ENUM:
+        case gl::GL_INVALID_ENUM:
                 printf("GLerror: invalid enum\n");
                 break;
-            case GL_INVALID_VALUE:
+            case gl::GL_INVALID_VALUE:
                 printf("GLerror: invalid value\n");
                 break;
-            case GL_INVALID_OPERATION:
+            case gl::GL_INVALID_OPERATION:
                 printf("GLerror: invalid operation\n");
                 break;
-            case GL_STACK_OVERFLOW:
+            case gl::GL_STACK_OVERFLOW:
                 printf("GLerror: stack overflow\n");
                 break;
-            case GL_STACK_UNDERFLOW:
+            case gl::GL_STACK_UNDERFLOW:
                 printf("GLerror: stack underflow\n");
                 break;
-            case GL_OUT_OF_MEMORY:
+            case gl::GL_OUT_OF_MEMORY:
                 printf("GLerror: out of memory\n");
                 break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
+            case gl::GL_INVALID_FRAMEBUFFER_OPERATION:
                 printf("GLerror: invalid framebuffer operation\n");
                 break;
-            case GL_CONTEXT_LOST:
+            case gl::GL_CONTEXT_LOST:
                 printf("GLerror: context lost\n");
                 break;
-            case GL_TABLE_TOO_LARGE:
+            case gl::GL_TABLE_TOO_LARGE:
                 printf("GLerror: table too large\n");
                 break;
-            case GL_NO_ERROR:
+            case gl::GL_NO_ERROR:
                 printf("GLerror: no error\n");
                 return;
             default:
@@ -51,7 +55,6 @@ void checkGlError() {
                 break;
         }
     }
-
 }
 struct ExampleAppLog
 {
@@ -152,37 +155,37 @@ namespace viscom {
     }
     void MasterNode::drawProgramWindow(bool* p_open)
     {
-        using enum2enums = std::pair<GLenum, std::vector<GLenum>>;
-        using enum2str = std::pair<GLenum, std::vector<GLenum>>;
-        const std::unordered_map<GLenum, std::vector<GLenum>> resourceProperties {
-            {GL_UNIFORM,         {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_BLOCK_INDEX, GL_LOCATION}},  // ARRAY_STRIDE , IS_ROW_MAJOR , MATRIX_STRIDE, ATOMIC_COUNTER_BUFFER_INDEX
-            {GL_UNIFORM_BLOCK,   {GL_NAME_LENGTH, GL_ACTIVE_VARIABLES, GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES}},  // BUFFER_DATA_SIZE
-            {GL_PROGRAM_INPUT,   {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT}},
-            {GL_PROGRAM_OUTPUT,  {GL_NAME_LENGTH, GL_ARRAY_SIZE, GL_IS_PER_PATCH, GL_LOCATION, GL_LOCATION_COMPONENT, GL_LOCATION_INDEX}},
-            {GL_BUFFER_VARIABLE, {GL_NAME_LENGTH, GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE
+        using enum2enums = std::pair<gl::GLenum, std::vector<gl::GLenum>>;
+        using enum2str = std::pair<gl::GLenum, std::vector<gl::GLenum>>;
+        const std::unordered_map<gl::GLenum, std::vector<gl::GLenum>> resourceProperties {
+            {gl::GL_UNIFORM,         {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE, gl::GL_BLOCK_INDEX, gl::GL_LOCATION}},  // ARRAY_STRIDE , IS_ROW_MAJOR , MATRIX_STRIDE, ATOMIC_COUNTER_BUFFER_INDEX
+            {gl::GL_UNIFORM_BLOCK,   {gl::GL_NAME_LENGTH, gl::GL_ACTIVE_VARIABLES, gl::GL_BUFFER_BINDING, gl::GL_NUM_ACTIVE_VARIABLES}},  // BUFFER_DATA_SIZE
+            {gl::GL_PROGRAM_INPUT,   {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE, gl::GL_IS_PER_PATCH, gl::GL_LOCATION, gl::GL_LOCATION_COMPONENT}},
+            {gl::GL_PROGRAM_OUTPUT,  {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE, gl::GL_IS_PER_PATCH, gl::GL_LOCATION, gl::GL_LOCATION_COMPONENT, gl::GL_LOCATION_INDEX}},
+            {gl::GL_BUFFER_VARIABLE, {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE
         };
 
-        const std::unordered_map<GLenum, std::string> interfaces {
-            {GL_UNIFORM, "GL_UNIFORM"},
-            {GL_UNIFORM_BLOCK, "GL_UNIFORM_BLOCK"},
-            {GL_PROGRAM_INPUT, "GL_PROGRAM_INPUT"},
-            {GL_PROGRAM_OUTPUT, "GL_PROGRAM_OUTPUT"},
-            {GL_BUFFER_VARIABLE, "GL_BUFFER_VARIABLE"},
-//            {GL_ATOMIC_COUNTER_BUFFER, "GL_ATOMIC_COUNTER_BUFFER"},
-//            {GL_SHADER_STORAGE_BLOCK, "GL_SHADER_STORAGE_BLOCK"}
+        const std::unordered_map<gl::GLenum, std::string> interfaces {
+            {gl::GL_UNIFORM, "GL_UNIFORM"},
+            {gl::GL_UNIFORM_BLOCK, "GL_UNIFORM_BLOCK"},
+            {gl::GL_PROGRAM_INPUT, "GL_PROGRAM_INPUT"},
+            {gl::GL_PROGRAM_OUTPUT, "GL_PROGRAM_OUTPUT"},
+            {gl::GL_BUFFER_VARIABLE, "GL_BUFFER_VARIABLE"},
+//            {gl::GL_ATOMIC_COUNTER_BUFFER, "GL_ATOMIC_COUNTER_BUFFER"},
+//            {gl::GL_SHADER_STORAGE_BLOCK, "GL_SHADER_STORAGE_BLOCK"}
         };
-        const std::unordered_map<GLenum, std::string> interfaceProperties {
-            {GL_ACTIVE_RESOURCES, "GL_ACTIVE_RESOURCES"},
-            {GL_MAX_NAME_LENGTH, "GL_MAX_NAME_LENGTH"},  // not for ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER
-//            {GL_MAX_NUM_ACTIVE_VARIABLES, "GL_MAX_NUM_ACTIVE_VARIABLES"},  // only for ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK
-//            {GL_MAX_NUM_COMPATIBLE_SUBROUTINES, "GL_MAX_NUM_COMPATIBLE_SUBROUTINES"}  // only for {VERTEX,GEOMETRY,FRAGMENT,COMPUTE}_SUBROUTINE_UNIFORM , TESS_{CONTROL,EVALUATION}_SUBROUTINE_UNIFORM
+        const std::unordered_map<gl::GLenum, std::string> interfaceProperties {
+            {gl::GL_ACTIVE_RESOURCES, "GL_ACTIVE_RESOURCES"},
+            {gl::GL_MAX_NAME_LENGTH, "GL_MAX_NAME_LENGTH"},  // not for ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER
+//            {gl::GL_MAX_NUM_ACTIVE_VARIABLES, "GL_MAX_NUM_ACTIVE_VARIABLES"},  // only for ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK
+//            {gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES, "GL_MAX_NUM_COMPATIBLE_SUBROUTINES"}  // only for {VERTEX,GEOMETRY,FRAGMENT,COMPUTE}_SUBROUTINE_UNIFORM , TESS_{CONTROL,EVALUATION}_SUBROUTINE_UNIFORM
         };
-        const std::unordered_map<GLenum, std::string> programStageProperties {
-            {GL_ACTIVE_SUBROUTINE_UNIFORMS,           "GL_ACTIVE_SUBROUTINE_UNIFORMS"},
-            {GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,  "GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS"},
-            {GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH, "GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH"},
-            {GL_ACTIVE_SUBROUTINES,                   "GL_ACTIVE_SUBROUTINES"},
-            {GL_ACTIVE_SUBROUTINE_MAX_LENGTH,         "GL_ACTIVE_SUBROUTINE_MAX_LENGTH"},
+        const std::unordered_map<gl::GLenum, std::string> programStageProperties {
+            {gl::GL_ACTIVE_SUBROUTINE_UNIFORMS,           "GL_ACTIVE_SUBROUTINE_UNIFORMS"},
+            {gl::GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,  "GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS"},
+            {gl::GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH, "GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH"},
+            {gl::GL_ACTIVE_SUBROUTINES,                   "GL_ACTIVE_SUBROUTINES"},
+            {gl::GL_ACTIVE_SUBROUTINE_MAX_LENGTH,         "GL_ACTIVE_SUBROUTINE_MAX_LENGTH"},
         };
 
         auto prog = quad_->GetGPUProgram();
@@ -193,7 +196,7 @@ namespace viscom {
                 if(ImGui::TreeNode(interface.second.c_str())){
                     for (auto property : interfaceProperties) {
                         GLint value;
-                        glGetProgramInterfaceiv(id, interface.first, property.first, &value);
+                        gl::glGetProgramInterfaceiv(id, interface.first, property.first, &value);
                         ImGui::Text("%s: %d", property.second.c_str(), value);
                         value = 0;  // you have to reset the value by yourself, because GLFW won't.
                     }
@@ -208,18 +211,18 @@ namespace viscom {
             }
             if(ImGui::TreeNode("Subroutine details")) {
                 GLint maxSubRoutines,maxSubroutineUniformLocations;
-                glGetIntegerv(GL_MAX_SUBROUTINES, &maxSubRoutines);
-                glGetIntegerv(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, &maxSubroutineUniformLocations);
+                gl::glGetIntegerv(gl::GL_MAX_SUBROUTINES, &maxSubRoutines);
+                gl::glGetIntegerv(gl::GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, &maxSubroutineUniformLocations);
                 ImGui::Text("GL_MAX_SUBROUTINES: %d", maxSubRoutines);
                 ImGui::Text("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
                 for(auto progStageProp : programStageProperties) {
                     GLint value;
-                    glGetProgramStageiv(id, GL_FRAGMENT_SHADER, progStageProp.first, &value);
+                    gl::glGetProgramStageiv(id, gl::GL_FRAGMENT_SHADER, progStageProp.first, &value);
                     ImGui::Text("%s: %d", progStageProp.second.c_str(), value);
                 }
 
                 for(const auto& uniform : quad_->GetSubroutineUniforms()) {
-                    GLint activeSubroutine = glGetSubroutineUniformLocation(id, GL_FRAGMENT_SHADER, &uniform.first[0]);
+                    GLint activeSubroutine = gl::glGetSubroutineUniformLocation(id, gl::GL_FRAGMENT_SHADER, &uniform.first[0]);
                     ImGui::Text("uniform %d: %s (active sub: %d)", uniform.second, uniform.first.c_str(), activeSubroutine);
                     for(const auto& subroutine : quad_->GetSubroutineCompatibleUniforms(uniform.second)) {
                         ImGui::BulletText("subroutine %d: %s", subroutine.second, subroutine.first.c_str());
