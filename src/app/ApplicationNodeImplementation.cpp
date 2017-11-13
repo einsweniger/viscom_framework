@@ -164,7 +164,7 @@ namespace viscom {
             {
                 gl::glUseProgram(tex->getProgramId());
                 gl::glActiveTexture(gl::GL_TEXTURE0);
-                glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures().front()); //TODO don't hardwire texture
+                glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures().front());
                 tex_->Draw();
             }
             gl::glUseProgram(0);

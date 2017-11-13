@@ -219,7 +219,7 @@ namespace viscom {
                 }
 
                 for(const auto& uniform : quad_->GetSubroutineUniforms()) {
-                    GLint activeSubroutine = glGetSubroutineUniformLocation(id,GL_FRAGMENT_SHADER, "map");
+                    GLint activeSubroutine = glGetSubroutineUniformLocation(id, GL_FRAGMENT_SHADER, &uniform.first[0]);
                     ImGui::Text("uniform %d: %s (active sub: %d)", uniform.second, uniform.first.c_str(), activeSubroutine);
                     for(const auto& subroutine : quad_->GetSubroutineCompatibleUniforms(uniform.second)) {
                         ImGui::BulletText("subroutine %d: %s", subroutine.second, subroutine.first.c_str());

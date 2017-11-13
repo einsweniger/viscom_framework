@@ -29,8 +29,9 @@ namespace viscom {
 
     static std::string mglGetProgramResourceName(GLuint program, GLenum interface, GLuint index, GLint length) {
         std::string name;
-        name.reserve(positive(length));
+        name.resize(positive(length));
         glGetProgramResourceName(program, interface, index, length, nullptr, &name[0]);
+        name.shrink_to_fit();
         return name;
     }
 
@@ -85,4 +86,13 @@ namespace viscom {
         return result;
     }
 
+    static void mglUniformSubroutines(const GLenum shadertype, const std::vector<GLuint>& indices) {
+        auto count = static_cast<GLsizei>(indices.size());
+        glUniformSubroutinesuiv(shadertype, count, &indices[0]);
+    }
+
+//    static std::vector<GLint> mglGetUniformuiv(GLuint program​, GLint location​) {
+//
+//        glGetUniformuiv(program​, location​, *params​);
+//    }
 }
