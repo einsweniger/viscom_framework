@@ -76,13 +76,16 @@ namespace viscom {
         quad_ = std::make_unique<MyFullscreenQuad>(prog_quad + _fs, this);
         tex_ = std::make_unique<MyFullscreenQuad>(prog_tex + _fs, this);
         std::vector<FrameBufferTextureDescriptor> tex{};
-        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
-        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
-        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
-        tex.emplace_back(static_cast<GLenum>(gl::GL_RGBA32F));
+        for(const auto& output : quad_->GetProgramOutpput()) {
+            LOG(INFO) << "adding texture descriptor for " << output.first;
+            tex.emplace_back(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
+        }
 
         debugTextureBuffers_ = CreateOffscreenBuffers(FrameBufferDescriptor{tex, std::vector<RenderBufferDescriptor>{}});
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
+        for(const auto& uniform : quad_->GetUniforms()) {
+            LOG(INFO) << uniform.first << ": " << glbinding::Meta::getString(uniform.second.type);
+        }
     }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
