@@ -12,7 +12,9 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glbinding/gl/gl.h>
+#include <glbinding/Meta.h>
 #include "../../extern/fwcore/src/core/gfx/Shader.h"
+#include "gfx/glutil.h"
 
 
 void checkGlError() {
@@ -130,7 +132,7 @@ namespace viscom {
             return;
         }
         ImGui::Text("Draw Time (ms): %.2f", timeDelta*1000);
-        ImGui::PlotHistogram("", histData, 90, 0, NULL, 0.0f, 60.0f, ImVec2(0,90));
+        ImGui::PlotHistogram("", histData, 90, 0, nullptr, 0.0f, 60.0f, ImVec2(0,90));
         ImGui::Separator();
         ImGui::Text("Mouse Position: (%.1f,%.1f)", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
         ImGui::End();
@@ -155,37 +157,22 @@ namespace viscom {
     }
     void MasterNode::drawProgramWindow(bool* p_open)
     {
-        using enum2enums = std::pair<gl::GLenum, std::vector<gl::GLenum>>;
-        using enum2str = std::pair<gl::GLenum, std::vector<gl::GLenum>>;
-        const std::unordered_map<gl::GLenum, std::vector<gl::GLenum>> resourceProperties {
-            {gl::GL_UNIFORM,         {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE, gl::GL_BLOCK_INDEX, gl::GL_LOCATION}},  // ARRAY_STRIDE , IS_ROW_MAJOR , MATRIX_STRIDE, ATOMIC_COUNTER_BUFFER_INDEX
-            {gl::GL_UNIFORM_BLOCK,   {gl::GL_NAME_LENGTH, gl::GL_ACTIVE_VARIABLES, gl::GL_BUFFER_BINDING, gl::GL_NUM_ACTIVE_VARIABLES}},  // BUFFER_DATA_SIZE
-            {gl::GL_PROGRAM_INPUT,   {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE, gl::GL_IS_PER_PATCH, gl::GL_LOCATION, gl::GL_LOCATION_COMPONENT}},
-            {gl::GL_PROGRAM_OUTPUT,  {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE, gl::GL_IS_PER_PATCH, gl::GL_LOCATION, gl::GL_LOCATION_COMPONENT, gl::GL_LOCATION_INDEX}},
-            {gl::GL_BUFFER_VARIABLE, {gl::GL_NAME_LENGTH, gl::GL_ARRAY_SIZE}},  // ARRAY_STRIDE , BLOCK_INDEX , IS_ROW_MAJOR , MATRIX_STRIDE
-        };
+        using glbinding::Meta;
+        const std::vector<GLenum> interfaces {
+            gl::GL_UNIFORM, gl::GL_UNIFORM_BLOCK, gl::GL_PROGRAM_INPUT, gl::GL_PROGRAM_OUTPUT, gl::GL_BUFFER_VARIABLE};
 
-        const std::unordered_map<gl::GLenum, std::string> interfaces {
-            {gl::GL_UNIFORM, "GL_UNIFORM"},
-            {gl::GL_UNIFORM_BLOCK, "GL_UNIFORM_BLOCK"},
-            {gl::GL_PROGRAM_INPUT, "GL_PROGRAM_INPUT"},
-            {gl::GL_PROGRAM_OUTPUT, "GL_PROGRAM_OUTPUT"},
-            {gl::GL_BUFFER_VARIABLE, "GL_BUFFER_VARIABLE"},
-//            {gl::GL_ATOMIC_COUNTER_BUFFER, "GL_ATOMIC_COUNTER_BUFFER"},
-//            {gl::GL_SHADER_STORAGE_BLOCK, "GL_SHADER_STORAGE_BLOCK"}
-        };
-        const std::unordered_map<gl::GLenum, std::string> interfaceProperties {
-            {gl::GL_ACTIVE_RESOURCES, "GL_ACTIVE_RESOURCES"},
-            {gl::GL_MAX_NAME_LENGTH, "GL_MAX_NAME_LENGTH"},  // not for ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER
+        const std::vector<GLenum> interfaceProperties {
+            gl::GL_ACTIVE_RESOURCES,
+            gl::GL_MAX_NAME_LENGTH, // not for ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER
 //            {gl::GL_MAX_NUM_ACTIVE_VARIABLES, "GL_MAX_NUM_ACTIVE_VARIABLES"},  // only for ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK
 //            {gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES, "GL_MAX_NUM_COMPATIBLE_SUBROUTINES"}  // only for {VERTEX,GEOMETRY,FRAGMENT,COMPUTE}_SUBROUTINE_UNIFORM , TESS_{CONTROL,EVALUATION}_SUBROUTINE_UNIFORM
         };
-        const std::unordered_map<gl::GLenum, std::string> programStageProperties {
-            {gl::GL_ACTIVE_SUBROUTINE_UNIFORMS,           "GL_ACTIVE_SUBROUTINE_UNIFORMS"},
-            {gl::GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,  "GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS"},
-            {gl::GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH, "GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH"},
-            {gl::GL_ACTIVE_SUBROUTINES,                   "GL_ACTIVE_SUBROUTINES"},
-            {gl::GL_ACTIVE_SUBROUTINE_MAX_LENGTH,         "GL_ACTIVE_SUBROUTINE_MAX_LENGTH"},
+        const std::vector<GLenum> programStageProperties {
+            GL_ACTIVE_SUBROUTINE_UNIFORMS,
+            GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,
+            GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH,
+            GL_ACTIVE_SUBROUTINES,
+            GL_ACTIVE_SUBROUTINE_MAX_LENGTH,
         };
 
         auto prog = quad_->GetGPUProgram();
@@ -193,11 +180,11 @@ namespace viscom {
         if(ImGui::Begin("GPUProgram", p_open)) {
             ImGui::BulletText("Program: %d", id);
             for(auto interface : interfaces) {
-                if(ImGui::TreeNode(interface.second.c_str())){
+                if(ImGui::TreeNode(Meta::getString(interface).c_str())){
                     for (auto property : interfaceProperties) {
                         GLint value;
-                        gl::glGetProgramInterfaceiv(id, interface.first, property.first, &value);
-                        ImGui::Text("%s: %d", property.second.c_str(), value);
+                        gl::glGetProgramInterfaceiv(id, interface, property, &value);
+                        ImGui::Text("%s: %d", Meta::getString(property).c_str(), value);
                         value = 0;  // you have to reset the value by yourself, because GLFW won't.
                     }
                     ImGui::TreePop();
@@ -205,8 +192,13 @@ namespace viscom {
             }
             if(ImGui::TreeNode("uniform locations")) {
                 for(const auto& uniform : quad_->GetUniforms()) {
-                    ImGui::Text("%s: %d", uniform.first.c_str(), uniform.second);
+                    ImGui::Text("%s: %d, %s", uniform.first.c_str(), uniform.second.location, Meta::getString(uniform.second.type).c_str());
                 }
+                ImGui::TreePop();
+            }
+            if(ImGui::TreeNode("program output")) {
+                for(const auto& output : quad_->GetProgramOutpput())
+                    ImGui::Text("%s: %d, %s", output.first.c_str(), output.second.location, Meta::getString(output.second.type).c_str());
                 ImGui::TreePop();
             }
             if(ImGui::TreeNode("Subroutine details")) {
@@ -217,17 +209,33 @@ namespace viscom {
                 ImGui::Text("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
                 for(auto progStageProp : programStageProperties) {
                     GLint value;
-                    gl::glGetProgramStageiv(id, gl::GL_FRAGMENT_SHADER, progStageProp.first, &value);
-                    ImGui::Text("%s: %d", progStageProp.second.c_str(), value);
+                    gl::glGetProgramStageiv(id, gl::GL_FRAGMENT_SHADER, progStageProp, &value);
+                    ImGui::Text("%s: %d", Meta::getString(progStageProp).c_str(), value);
                 }
 
+                static bool firstRun = true;
+                static std::vector<GLuint> selected(1024);
+                GLsizei counter = 0;
                 for(const auto& uniform : quad_->GetSubroutineUniforms()) {
+                    glUseProgram(id);
                     GLint activeSubroutine = gl::glGetSubroutineUniformLocation(id, gl::GL_FRAGMENT_SHADER, &uniform.first[0]);
+                    activeSubroutine = mglGetUniformSubroutine(GL_FRAGMENT_SHADER,uniform.second);
+                    glUseProgram(0);
                     ImGui::Text("uniform %d: %s (active sub: %d)", uniform.second, uniform.first.c_str(), activeSubroutine);
-                    for(const auto& subroutine : quad_->GetSubroutineCompatibleUniforms(uniform.second)) {
-                        ImGui::BulletText("subroutine %d: %s", subroutine.second, subroutine.first.c_str());
+                    if(firstRun) {
+                        selected[uniform.second] = positive(activeSubroutine);
+                        firstRun = false;
                     }
+                    for(const auto& subroutine : quad_->GetSubroutineCompatibleUniforms(uniform.second)) {
+                        ImGui::BulletText("subroutine %d:", subroutine.second); ImGui::SameLine();
+                        ImGui::RadioButton(subroutine.first.c_str(), reinterpret_cast<int *>(&selected[uniform.second]), subroutine.second);
+                    }
+                    ++counter;
                 }
+                glUseProgram(id);
+                glUniformSubroutinesuiv(GL_FRAGMENT_SHADER,counter,&selected[0]);
+                glUseProgram(0);
+                quad_->SetSubroutines(selected, static_cast<size_t>(counter));
                 ImGui::TreePop();
             }
 
@@ -288,9 +296,12 @@ namespace viscom {
             }
             if (imBuffersWindow_) {
                 if(ImGui::Begin("Buffers:", &imBuffersWindow_)) {
-                    std::string name{ "tex " };
-                    for (auto tex : SelectOffscreenBuffer(GetDebugTextureBuffer())->GetTextures()) {
-                        std::string headerName = name + std::to_string(tex);
+
+                    const auto& selectedBuffer = SelectOffscreenBuffer(GetDebugTextureBuffer());
+//                    for (auto tex : SelectOffscreenBuffer(GetDebugTextureBuffer())->GetTextures()) {
+                    for (auto tex : selectedBuffer->GetTextures()) {
+                        std::string name = mglGetProgramResourceName(quad_->GetGPUProgram()->getProgramId(), gl::GL_PROGRAM_OUTPUT, tex);
+                        std::string headerName = std::to_string(tex);//name + ": "+ std::to_string(tex);
                         if (ImGui::CollapsingHeader(headerName.c_str())) {
                             ImVec2 uv0(0, 1);
                             ImVec2 uv1(1, 0);
