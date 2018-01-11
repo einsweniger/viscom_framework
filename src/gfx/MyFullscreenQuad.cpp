@@ -9,7 +9,7 @@
 namespace viscom {
 
     MyFullscreenQuad::MyFullscreenQuad(const std::string& fragmentShader,  ApplicationNodeBase* appNode) :
-    fsq_{appNode->CreateFullscreenQuad(fragmentShader)}
+    fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, subroutines{1024}
     //appNode_{appNode}
     {
 
@@ -44,23 +44,57 @@ namespace viscom {
         }
         return result;
     }
-    const UniformList MyFullscreenQuad::GetUniforms()
+    const UniformMap MyFullscreenQuad::GetUniforms()
     {
         auto id = GetGPUProgram()->getProgramId();
         auto numUniforms = mglGetProgramInterface(id, GL_UNIFORM, GL_ACTIVE_RESOURCES);
         if (0 == numUniforms) {
-            return UniformList();
+            return UniformMap();
         }
-        UniformList result;
-        result.reserve(numUniforms);
+        UniformMap uniforms;
+        uniforms.reserve(numUniforms);
         for(GLuint index = 0; index < numUniforms; ++index) {
-            auto props = mglGetProgramResource(id, GL_UNIFORM, index, {GL_NAME_LENGTH, GL_BLOCK_INDEX, GL_LOCATION});
+            auto props = mglGetProgramResource(id, GL_UNIFORM, index, {GL_NAME_LENGTH, GL_BLOCK_INDEX, GL_LOCATION, GL_TYPE});
             if(-1 != props[GL_BLOCK_INDEX]) {  // if BLOCK_INDEX is set, we skip it. blocks are handled separately
                 continue;
             }
+            uniform_info_t info = {};
+            info.location = props[GL_LOCATION];
+            info.type = getType(props[GL_TYPE]);
             std::string name = mglGetProgramResourceName(id, GL_UNIFORM, index, props[GL_NAME_LENGTH]);
-            result.emplace_back(name, props[GL_LOCATION]);
+            uniforms.emplace(name, info);
+        }
+        return uniforms;
+    }
+    const UniformMap MyFullscreenQuad::GetProgramOutpput()
+    {
+        auto id = GetGPUProgram()->getProgramId();
+        auto numOutput = mglGetProgramInterface(id, GL_PROGRAM_OUTPUT, GL_ACTIVE_RESOURCES);
+        if (0 == numOutput) {
+            return UniformMap();
+        }
+
+        UniformMap result;
+        result.reserve(numOutput);
+        for(GLuint index = 0; index < numOutput; ++index) {
+            uniform_info_t info = {};
+            auto props = mglGetProgramResource(id, GL_PROGRAM_OUTPUT, index, {GL_LOCATION, GL_TYPE});
+            info.location = props[GL_LOCATION];
+            info.type = getType(props[GL_TYPE]);
+            std::string name = mglGetProgramResourceName(id, GL_PROGRAM_OUTPUT, index);
+            result.emplace(name, info);
         }
         return result;
     }
+    void
+    MyFullscreenQuad::SetSubroutines(const std::vector<gl::GLuint> &in, const size_t length)
+    {
+        subroutines.assign(in.begin(), in.begin()+length);
+    }
+    void
+    MyFullscreenQuad::SendSubroutines() const
+    {
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, static_cast<GLsizei>(subroutines.size()), &subroutines[0]);
+    }
+
 }
