@@ -24,6 +24,56 @@ subroutine vec4 RayMarch(vec3 origin, vec3 direction);  // function signature ty
 subroutine uniform RayMarch raymarch;  // uniform instance, can be called like a function
 
 // tracers
+vec4 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool forceHit) {
+    float omega = relaxation; //relaxation parameter omega ∈ [1;2)
+    float t = NEAR;
+    float material = -1.0;
+    float candidate_error = INF;
+    float candidate_t = NEAR;
+    float previousRadius = 0.;
+    float stepLength = 0.;
+    float functionSign = map(pos).x < 0. ? -1. : +1.;
+
+
+    for (int i = 0; i < MAX_ITERATIONS; ++i) {
+        vec2 result = map(dir * t + pos);
+        material = result.y;
+        float signedRadius = functionSign * result.x;
+        float radius = abs(signedRadius);
+        bool sorFail = omega > 1. && (radius + previousRadius) < stepLength;
+        if (sorFail) {
+            stepLength -= omega * stepLength;
+            omega = 1;
+        } else {
+            stepLength = signedRadius * omega;
+        }
+
+        previousRadius = radius;
+        float error = radius / t;
+
+        if (!sorFail && error < candidate_error) {
+            candidate_t = t;
+            candidate_error = error;
+        }
+
+        if (!sorFail && error < pixelRadius || t > FAR)
+            break;
+        t += stepLength;
+    }
+
+    if ((t > FAR || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
+    return vec4(dir*t+pos,material);
+}  // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
+
+// subroutine(RayMarch) vec4 enhancedTrace(vec3 origin,vec3 direction) {  <-- error, counts as static recursion
+subroutine(RayMarch) vec4 defaultEnhancedTrace(vec3 origin,vec3 direction) {
+    const float relaxation = 1.9;
+    const float pixelRadius = 0.0001;
+    const bool forceHit = false;
+
+    return enhancedTrace(origin, direction, relaxation, pixelRadius, forceHit);
+}
+
 subroutine(RayMarch) vec4 simpleTrace(vec3 origin, vec3 direction) {
     const float tau = .001; //threshold
 
@@ -75,49 +125,6 @@ subroutine(RayMarch) vec4 castRay(vec3 origin,vec3 direction ) {
     return vec4( direction*t+origin, material );
 }
 
-subroutine(RayMarch) vec4 enhancedTrace(vec3 pos, vec3 dir) {
-    float relaxation = 1.9;
-    float pixelRadius = 0.0001;
-    bool forceHit = false;
-    float omega = relaxation; //relaxation parameter omega ∈ [1;2)
-    float t = NEAR;
-    float material = -1.0;
-    float candidate_error = INF;
-    float candidate_t = NEAR;
-    float previousRadius = 0.;
-    float stepLength = 0.;
-    float functionSign = map(pos).x < 0. ? -1. : +1.;
-
-
-    for (int i = 0; i < MAX_ITERATIONS; ++i) {
-        vec2 result = map(dir * t + pos);
-        material = result.y;
-        float signedRadius = functionSign * result.x;
-        float radius = abs(signedRadius);
-        bool sorFail = omega > 1. && (radius + previousRadius) < stepLength;
-        if (sorFail) {
-            stepLength -= omega * stepLength;
-            omega = 1;
-        } else {
-            stepLength = signedRadius * omega;
-        }
-
-        previousRadius = radius;
-        float error = radius / t;
-
-        if (!sorFail && error < candidate_error) {
-            candidate_t = t;
-            candidate_error = error;
-        }
-
-        if (!sorFail && error < pixelRadius || t > FAR)
-            break;
-        t += stepLength;
-    }
-
-    if ((t > FAR || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
-    return vec4(dir*t+pos,material);
-}  // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
 
 vec4 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_len) {
      // Fancy lighty debug plane
@@ -178,18 +185,9 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
     vec3 position;
     float t;
 
-//    vec4 hit = raymarch(ray_origin, ray_direction);
-//    position = hit.xyz;
-//    material = hit.w;
-    if(ENHANCED_TRACER == 1) {
-        vec4 hit = enhancedTrace(ray_origin, ray_direction);
-        position = hit.xyz;
-        material = hit.w;
-    } else {
-        vec4 hit = castRay(ray_origin, ray_direction);
-        position = hit.xyz ;
-        material = hit.w;
-    }
+    vec4 hit = raymarch(ray_origin, ray_direction);
+    position = hit.xyz;
+    material = hit.w;
     if (material == INF) {
       vec3 fog_color = sky_color(ray_direction, light_dir);
       base_color = fog_color;

@@ -137,7 +137,7 @@ void main()
     vec4 dir_projection = inverse(u_MVP)*vec4(st, 1.,1.);
     vec3 ray_direction = normalize(vec3(dir_projection/dir_projection.w));
     //trace
-    vec4 hit = enhancedTrace(u_camPosition, ray_direction);
+    vec4 hit = raymarch(u_camPosition, ray_direction);
     vec3 position = u_camPosition;
     position.z -= u_time*.5;
     vec3 color = render(u_camPosition, ray_direction);
@@ -145,5 +145,4 @@ void main()
     out_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     out_texCoord = vec4(texCoord,0.f, 1.f);
     out_worldPos = hit; // does not accomodate for repetitions
-    out_worldPos = raymarch(vec3(0), vec3(0));
 }
