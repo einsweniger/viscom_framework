@@ -37,6 +37,12 @@ namespace viscom {
     {
         enh::ApplicationNodeBase::InitOpenGL();
 
+        initExamples();
+
+    }
+
+    void ApplicationNodeImplementation::initExamples()
+    {
         backgroundProgram_ = GetGPUProgramManager().GetResource("backgroundGrid", std::vector<std::string>{ "backgroundGrid.vert", "backgroundGrid.frag" });
         backgroundMVPLoc_ = backgroundProgram_->getUniformLocation("MVP");
 

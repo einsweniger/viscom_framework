@@ -78,5 +78,6 @@ namespace viscom {
 
         std::vector<FrameBuffer> sceneFBOs_;
         std::unique_ptr<enh::DepthOfField> dof_;
+        void initExamples();
     };
 }
