@@ -2,7 +2,7 @@ const float max_distort = 0.5;
 const int num_iter = 24;
 const float reci_num_iter_f = 1.0 / float(num_iter);
 
-#include "lib_util.glsl"
+#include "util.glsl"
 vec2 barrelDistortion(vec2 coord, float amt) {
 	vec2 cc = coord - 0.5;
 	float dist = dot(cc, cc);
