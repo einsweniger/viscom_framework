@@ -12,12 +12,14 @@
 #include <glbinding/gl/gl.h>
 #include <glbinding/Binding.h>
 #include <glbinding/callbacks.h>
+#include <glbinding/Meta.h>
 #include <imgui.h>
 #include <iostream>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <app/gfx/Primitives.h>
 
 #include "Vertices.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
@@ -38,8 +40,21 @@ namespace viscom {
     {
         enh::ApplicationNodeBase::InitOpenGL();
 
-        initExamples();
+        quad_ = std::make_unique<MyFullscreenQuad>("test.frag", this);
+        tex_ = std::make_unique<MyFullscreenQuad>("renderTexture.frag", this);
+        std::vector<FrameBufferTextureDescriptor> tex{};
+        for(const auto& output : quad_->GetProgramOutpput()) {
+            LOG(INFO) << "adding texture descriptor for " << output.first;
+            tex.emplace_back(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
+        }
 
+        debugTextureBuffers_ = CreateOffscreenBuffers(FrameBufferDescriptor{tex, std::vector<RenderBufferDescriptor>{}});
+        freeCam_->SetCameraPosition(glm::vec3(0,1,8));
+        for(const auto& uniform : quad_->GetUniforms()) {
+            LOG(INFO) << uniform.first << ": " << glbinding::Meta::getString(uniform.second.type);
+        }
+
+        initExamples();
     }
 
     void ApplicationNodeImplementation::initExamples()
@@ -109,7 +124,11 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
-        updateExamples(currentTime);
+        timeDelta_ = elapsedTime;
+        if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
+
+        time_ = static_cast<float>(currentTime);
+        //updateExamples(currentTime);
     }
 
     void ApplicationNodeImplementation::updateExamples(double currentTime)
@@ -139,7 +158,38 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
-        drawExamples(fbo);
+        SelectOffscreenBuffer(debugTextureBuffers_)->DrawToFBO([this](){
+            gfx::Box b;
+            b.position = glm::vec3(0);
+            b.bounds = glm::vec3(.25f);
+
+            auto position = GetCamera()->GetPosition();
+            auto camOrientation = (glm::mat3_cast(GetCamera()->GetOrientation()));
+            auto MVP = (GetCamera()->GetViewPerspectiveMatrix());
+            auto prog = quad_->GetGPUProgram();
+            {
+                gl::glUseProgram(prog->getProgramId());
+                gl::glUniform1f(prog->getUniformLocation("u_time"), time_);
+                gl::glUniformMatrix4fv(prog->getUniformLocation("u_camOrientation"), 1, gl::GL_FALSE, glm::value_ptr(camOrientation));
+                gl::glUniformMatrix4fv(prog->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
+                gl::glUniform3f(prog->getUniformLocation("u_camPosition"), position.x, position.y, position.z);
+                quad_->SendSubroutines();
+                b.send(prog, 0);
+                quad_->Draw();
+            }
+        });
+        fbo.DrawToFBO([this]() {
+            auto tex = tex_->GetGPUProgram();
+            {
+                gl::glUseProgram(tex->getProgramId());
+                gl::glActiveTexture(gl::GL_TEXTURE0);
+                gl::glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures().front());
+                tex_->Draw();
+            }
+            gl::glUseProgram(0);
+        });
+
+        //drawExamples(fbo);
     }
 
     void ApplicationNodeImplementation::drawExamples(FrameBuffer& fbo)
