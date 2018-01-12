@@ -186,6 +186,7 @@ namespace viscom {
     void ApplicationNodeImplementation::CleanUp()
     {
         cleanupExamples();
+        ApplicationNodeBase::CleanUp();
     }
 
     void ApplicationNodeImplementation::cleanupExamples()
@@ -202,8 +203,6 @@ namespace viscom {
         teapotProgram_ = nullptr;
         triangleProgram_ = nullptr;
         backgroundProgram_ = nullptr;
-
-        ApplicationNodeBase::CleanUp();
     }
 
     bool ApplicationNodeImplementation::KeyboardCallback(int key, int scancode, int action, int mods)
