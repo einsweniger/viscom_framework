@@ -92,5 +92,8 @@ namespace viscom {
         std::vector<FrameBuffer> sceneFBOs_;
         std::unique_ptr<enh::DepthOfField> dof_;
         void initExamples();
+        void updateExamples(double currentTime);
+        void drawExamples(FrameBuffer &fbo);
+        void cleanupExamples();
     };
 }

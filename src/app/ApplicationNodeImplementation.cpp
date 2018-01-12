@@ -109,11 +109,11 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
-        timeDelta_ = elapsedTime;
-        if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
+        updateExamples(currentTime);
+    }
 
-        time_ = static_cast<float>(currentTime);
-
+    void ApplicationNodeImplementation::updateExamples(double currentTime)
+    {
         GetCamera()->SetPosition(camPos_);
         glm::quat pitchQuat = glm::angleAxis(camRot_.x, glm::vec3(1.0f, 0.0f, 0.0f));
         glm::quat yawQuat = glm::angleAxis(camRot_.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -138,6 +138,11 @@ namespace viscom {
     }
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
+    {
+        drawExamples(fbo);
+    }
+
+    void ApplicationNodeImplementation::drawExamples(FrameBuffer& fbo)
     {
         auto sceneFBO = SelectOffscreenBuffer(sceneFBOs_);
         sceneFBO->DrawToFBO([this]() {
@@ -179,6 +184,11 @@ namespace viscom {
     }
 
     void ApplicationNodeImplementation::CleanUp()
+    {
+        cleanupExamples();
+    }
+
+    void ApplicationNodeImplementation::cleanupExamples()
     {
         if (vaoBackgroundGrid_ != 0) gl::glDeleteVertexArrays(1, &vaoBackgroundGrid_);
         vaoBackgroundGrid_ = 0;
