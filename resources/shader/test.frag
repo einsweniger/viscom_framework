@@ -19,10 +19,10 @@ const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
 subroutine vec2 SceneMap(vec3 position);  // function signature type declaration
 subroutine uniform SceneMap map;  // uniform instance, can be called like a function
 
-#include "lib_util.glsl"
-#include "lib_sdf_op.glsl"
-#include "lib_sdf.glsl"
-#include "lib_trace.glsl"  // needs vec2 map(vec3) to be declared.
+#include "lib/util.glsl"
+#include "lib/sdf_op.glsl"
+#include "lib/sdf.glsl"
+#include "lib/trace.glsl"  // needs vec2 map(vec3) to be declared.
 uniform Box boxes[1];
 
 //------------------------------------------------------------------------

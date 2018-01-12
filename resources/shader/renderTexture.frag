@@ -5,7 +5,7 @@ out vec4 color;
 
 uniform sampler2D tex;
 
-#include "lib_postproc.glsl"
+#include "lib/postproc.glsl"
 
 void main()
 {
