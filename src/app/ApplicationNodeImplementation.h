@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <app/gfx/MyFullscreenQuad.h>
+#include <app/camera/MyFreeCamera.h>
 #include "enh/ApplicationNodeBase.h"
 
 namespace viscom::enh {
@@ -38,6 +40,17 @@ namespace viscom {
 
     protected:
         enh::DepthOfField* GetDOF() { return dof_.get(); }
+        void toggleMouseGrab();
+
+        float time_ = 0.f;
+
+        std::unique_ptr<MyFullscreenQuad> tex_;
+        std::unique_ptr<MyFullscreenQuad> quad_;
+        std::vector<FrameBuffer> debugTextureBuffers_;
+        bool drawMenu_ = true;
+        bool grabMouse_ = false;
+        std::shared_ptr<MyFreeCamera> freeCam_;
+        double timeDelta_;
 
     private:
         /** Holds the shader program for drawing the background. */

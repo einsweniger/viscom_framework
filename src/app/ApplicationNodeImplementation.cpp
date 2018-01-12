@@ -29,6 +29,7 @@ namespace viscom {
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
         ApplicationNodeBase{ appNode }
     {
+        freeCam_ = std::make_shared<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
     }
 
     ApplicationNodeImplementation::~ApplicationNodeImplementation() = default;
@@ -106,8 +107,13 @@ namespace viscom {
         dof_ = std::make_unique<enh::DepthOfField>(this);
     }
 
-    void ApplicationNodeImplementation::UpdateFrame(double currentTime, double)
+    void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
+        timeDelta_ = elapsedTime;
+        if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
+
+        time_ = static_cast<float>(currentTime);
+
         GetCamera()->SetPosition(camPos_);
         glm::quat pitchQuat = glm::angleAxis(camRot_.x, glm::vec3(1.0f, 0.0f, 0.0f));
         glm::quat yawQuat = glm::angleAxis(camRot_.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -246,5 +252,17 @@ namespace viscom {
         }
         return false;
     }
+
+    void ApplicationNodeImplementation::toggleMouseGrab()
+    {
+        if (!grabMouse_) {
+            SetCursorInputMode(GLFW_CURSOR_DISABLED);
+            grabMouse_ = true;
+        } else {
+            SetCursorInputMode(GLFW_CURSOR_NORMAL);
+            grabMouse_ = false;
+        }
+    }
+
 
 }
