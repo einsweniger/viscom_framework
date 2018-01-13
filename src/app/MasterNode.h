@@ -21,7 +21,19 @@ namespace viscom {
         explicit MasterNode(ApplicationNodeInternal* appNode);
         virtual ~MasterNode() override;
 
+        virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
+        virtual void UpdateFrame(double currentTime, double elapsedTime) override;
         void Draw2D(FrameBuffer& fbo) override;
 
+    private:
+        void drawMainMenu(const bool *p_open);
+        bool imMainMenu_ = true;
+        bool imOverlay_ = false;
+        bool imShaderWindow_ = true;
+        bool imDemoWindow_ = false;
+        bool imBuffersWindow_ = false;
+        bool imProgramRecourceWindow_ = true;
+        double absoluteTime_;
+        double elapsedTime_;
     };
 }

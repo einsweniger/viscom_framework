@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <app/gfx/MyFullscreenQuad.h>
+#include <app/gfx/IntrospectableFsq.h>
 #include <app/camera/MyFreeCamera.h>
 #include "enh/ApplicationNodeBase.h"
 
@@ -44,8 +44,8 @@ namespace viscom {
 
         float time_ = 0.f;
 
-        std::unique_ptr<MyFullscreenQuad> tex_;
-        std::unique_ptr<MyFullscreenQuad> quad_;
+        std::unique_ptr<IntrospectableFsq> tex_;
+        std::unique_ptr<IntrospectableFsq> quad_;
         std::vector<FrameBuffer> debugTextureBuffers_;
         bool drawMenu_ = true;
         bool grabMouse_ = false;

@@ -40,8 +40,8 @@ namespace viscom {
     {
         enh::ApplicationNodeBase::InitOpenGL();
 
-        quad_ = std::make_unique<MyFullscreenQuad>("test.frag", this);
-        tex_ = std::make_unique<MyFullscreenQuad>("renderTexture.frag", this);
+        quad_ = std::make_unique<IntrospectableFsq>("test.frag", this);
+        tex_ = std::make_unique<IntrospectableFsq>("renderTexture.frag", this);
         std::vector<FrameBufferTextureDescriptor> tex{};
         for(const auto& output : quad_->GetProgramOutpput()) {
             LOG(INFO) << "adding texture descriptor for " << output.first;
