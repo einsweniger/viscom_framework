@@ -12,8 +12,8 @@ namespace viscom {
     fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, subroutines{1024}
     //appNode_{appNode}
     {
-
     }
+
     const UniformList MyFullscreenQuad::GetSubroutineUniforms()
     {
         auto id = GetGPUProgram()->getProgramId();
@@ -32,6 +32,7 @@ namespace viscom {
 
         return result;
     }
+
     const UniformList MyFullscreenQuad::GetSubroutineCompatibleUniforms(GLuint uniform)
     {
         auto id = GetGPUProgram()->getProgramId();
@@ -44,6 +45,7 @@ namespace viscom {
         }
         return result;
     }
+
     const UniformMap MyFullscreenQuad::GetUniforms()
     {
         auto id = GetGPUProgram()->getProgramId();
@@ -66,6 +68,7 @@ namespace viscom {
         }
         return uniforms;
     }
+
     const UniformMap MyFullscreenQuad::GetProgramOutpput()
     {
         auto id = GetGPUProgram()->getProgramId();
@@ -86,15 +89,14 @@ namespace viscom {
         }
         return result;
     }
-    void
-    MyFullscreenQuad::SetSubroutines(const std::vector<gl::GLuint> &in, const size_t length)
+
+    void MyFullscreenQuad::SetSubroutines(const std::vector<gl::GLuint> &in, const size_t length)
     {
         subroutines.assign(in.begin(), in.begin()+length);
     }
-    void
-    MyFullscreenQuad::SendSubroutines() const
+
+    void MyFullscreenQuad::SendSubroutines() const
     {
         glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, static_cast<GLsizei>(subroutines.size()), &subroutines[0]);
     }
-
 }
