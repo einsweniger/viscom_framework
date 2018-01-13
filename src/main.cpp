@@ -37,7 +37,11 @@ int main(int argc, char** argv)
     if (argc > 1) config = viscom::LoadConfiguration(argv[1]);
     else config = viscom::LoadConfiguration("framework.cfg");
     config.resourceSearchPaths_.emplace_back(config.baseDirectory_ + "extern/fwenh/resources/");
-
+    if(config.openglProfile_.at(0) != '4') {
+        LOG(WARNING) << "at least opengl v4 necessary";
+        std::cout << "at least opengl v4 necessary";
+        return 0;
+    }
     auto appNode = Application_Init(config);
 
     // Main loop
