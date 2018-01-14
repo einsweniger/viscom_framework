@@ -63,18 +63,35 @@ struct ShaderLog
     }
 };
 
-    struct uniform_info_t {
+    struct interface_info_t {
         gl::GLint location;
         gl::GLenum type;
     };
 
-    struct subroutine_uniform_info_t {
-        gl::GLint location;
+    struct program_interface_info_t {
+        gl::GLuint activeResourceCount;
+        gl::GLenum interface;
+    };
+
+    struct subroutine_info_t {
+        std::string name;
         gl::GLuint value;
     };
 
-    using UniformList = std::vector<std::pair<std::string, GLuint>>;
-    using UniformMap = std::unordered_map<std::string, uniform_info_t>;
+    struct subroutine_uniform_info_t {
+        std::string name;
+        gl::GLuint location;
+        gl::GLuint activeSubroutine;
+        std::vector<subroutine_info_t> compatibleSubroutines;
+    };
+
+
+    using InterfaceInfoList = std::vector<std::pair<std::string, GLuint>>;
+    using InterfaceInfoMap = std::unordered_map<std::string, interface_info_t>;
+    /**
+     * Encapsulates a FullscreenQuad and enables editing uniforms for the fragment shader.
+     * We don't care for any other shader types here, since we only draw on a FSQ.
+     */
     class IntrospectableFsq
     {
     public:
@@ -83,11 +100,11 @@ struct ShaderLog
 
         void Draw() const;
         void Draw2D(FrameBuffer& fbo);
-        const GPUProgram* GetGPUProgram() const { return fsq_->GetGPUProgram(); }
-        const UniformList GetSubroutineUniforms();
-        const UniformList GetSubroutineCompatibleUniforms(GLuint uniform);
-        const UniformMap GetUniforms();
-        const UniformMap GetProgramOutpput();
+        const GPUProgram* GetGPUProgram() const { return gpuProgram_.get(); }
+        const InterfaceInfoList GetSubroutineUniforms();
+        const std::vector<subroutine_info_t> GetSubroutineCompatibleUniforms(GLuint uniform);
+        const InterfaceInfoMap GetUniforms();
+        const InterfaceInfoMap GetProgramOutpput();
         void SetSubroutines(const std::vector<GLuint> &in, const size_t length);
         void SendSubroutines() const;
 
@@ -97,7 +114,11 @@ struct ShaderLog
     private:
         /** The GPU program used for drawing. */
         std::shared_ptr<GPUProgram> gpuProgram_;
-        void
-    DrawProgramWindow(bool *p_open);
+        void DrawProgramWindow(bool *p_open);
+        void loadProgramInterfaceInformation();
+        std::vector<program_interface_info_t> programInterfaceInfo_;
+        InterfaceInfoMap uniformInfo_;
+        InterfaceInfoMap programOutputInfo_;
+        std::vector<subroutine_uniform_info_t> subroutineUniformInfo_;
     };
 }

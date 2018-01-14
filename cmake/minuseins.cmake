@@ -1,0 +1,1 @@
+set(VISCOM_OPENGL_PROFILE "4.5" CACHE STRING "OpenGL profile version to use." FORCE)
