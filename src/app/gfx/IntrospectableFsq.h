@@ -85,6 +85,13 @@ struct ShaderLog
         std::vector<subroutine_info_t> compatibleSubroutines;
     };
 
+    struct float_uniform_info_t {
+        std::string name;
+        gl::GLenum type;
+        gl::GLuint location;
+        std::vector<gl::GLfloat> value;
+    };
+
 
     using InterfaceInfoList = std::vector<std::pair<std::string, GLuint>>;
     using InterfaceInfoMap = std::unordered_map<std::string, interface_info_t>;
@@ -101,11 +108,9 @@ struct ShaderLog
         void Draw() const;
         void Draw2D(FrameBuffer& fbo);
         const GPUProgram* GetGPUProgram() const { return gpuProgram_.get(); }
-        const InterfaceInfoList GetSubroutineUniforms();
         const std::vector<subroutine_info_t> GetSubroutineCompatibleUniforms(GLuint uniform);
         const InterfaceInfoMap GetUniforms();
         const InterfaceInfoMap GetProgramOutpput();
-        void SetSubroutines(const std::vector<GLuint> &in, const size_t length);
         void SendSubroutines() const;
 
     private:
@@ -120,5 +125,7 @@ struct ShaderLog
         InterfaceInfoMap uniformInfo_;
         InterfaceInfoMap programOutputInfo_;
         std::vector<subroutine_uniform_info_t> subroutineUniformInfo_;
+        std::vector<float_uniform_info_t> uFloat_;
+        void SendFloats() const;
     };
 }

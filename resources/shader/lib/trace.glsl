@@ -1,11 +1,11 @@
-const float NEAR =  0.0;
-const float FAR = 20.0;
-const float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
-const int MAX_ITERATIONS = 160;
-const float fog_density = .2;
-const int USE_BV = 0;
-const int DRAW_DEBUG = 0;
-const int ENHANCED_TRACER = 1;
+uniform float NEAR =  0.0;
+uniform float FAR = 20.0;
+uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
+uniform int MAX_ITERATIONS = 160;
+uniform float fog_density = .2;
+uniform int USE_BV = 0;
+uniform int DRAW_DEBUG = 0;
+uniform int ENHANCED_TRACER = 1;
 /*
 If enhancedTrace had 5 params and would be called like:
 subroutine(RayMarch) vec4 enhancedTrace(vec3 pos, vec3 dir) { return enhancedTrace(pos, dir, 0.0001, false, 1.9); }

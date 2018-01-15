@@ -9,6 +9,15 @@
 #include "glprogram.h"
 
 namespace viscom {
+    constexpr std::array<gl::GLenum,5> progStageProps() {
+        return {
+            gl::GL_ACTIVE_SUBROUTINE_UNIFORMS,
+            gl::GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,
+            gl::GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH,
+            gl::GL_ACTIVE_SUBROUTINES,
+            gl::GL_ACTIVE_SUBROUTINE_MAX_LENGTH,
+        };
+    }
     IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  ApplicationNodeBase* appNode) :
     fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, subroutines{1024},
     gpuProgram_{appNode->GetGPUProgramManager().GetResource("fullScreenQuad_" + fragmentShader, std::vector<std::string>{ "fullScreenQuad.vert", fragmentShader })}
@@ -16,20 +25,15 @@ namespace viscom {
         loadProgramInterfaceInformation();
     }
 
-    const InterfaceInfoList IntrospectableFsq::GetSubroutineUniforms()
-    {
-        return glwrap::getSubroutineUniforms(gpuProgram_->getProgramId(), gl::GL_FRAGMENT_SUBROUTINE_UNIFORM);
-    }
-
-    const std::vector<subroutine_info_t> IntrospectableFsq::GetSubroutineCompatibleUniforms(GLuint uniform)
+    const std::vector<subroutine_info_t> IntrospectableFsq::GetSubroutineCompatibleUniforms(gl::GLuint uniform)
     {
         auto id = gpuProgram_->getProgramId();
-        auto compatibleSubroutines = mglGetCompatibleSubroutines(id, GL_FRAGMENT_SUBROUTINE_UNIFORM, uniform);
+        auto compatibleSubroutines = mglGetCompatibleSubroutines(id, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, uniform);
         std::vector<subroutine_info_t> result;
         result.reserve(compatibleSubroutines.size());
         for(auto subroutine : compatibleSubroutines){
             subroutine_info_t data;
-            data.name = mglGetProgramResourceName(id, GL_FRAGMENT_SUBROUTINE, subroutine);
+            data.name = mglGetProgramResourceName(id, gl::GL_FRAGMENT_SUBROUTINE, subroutine);
             data.value = subroutine;
             result.push_back(data);
         }
@@ -47,14 +51,11 @@ namespace viscom {
         return glwrap::GetProgramOutpput(gpuProgram_->getProgramId());
     }
 
-    void IntrospectableFsq::SetSubroutines(const std::vector<gl::GLuint> &in, const size_t length)
-    {
-        subroutines.assign(in.begin(), in.begin()+length);
-    }
-
     void IntrospectableFsq::SendSubroutines() const
     {
-        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, static_cast<GLsizei>(subroutines.size()), &subroutines[0]);
+        if(subroutines.empty()) return;
+
+        glUniformSubroutinesuiv(gl::GL_FRAGMENT_SHADER, static_cast<GLsizei>(subroutines.size()), &subroutines[0]);
     }
 
     void IntrospectableFsq::Draw2D(FrameBuffer &fbo)
@@ -79,18 +80,11 @@ namespace viscom {
             DrawProgramWindow(&program_window);
         });
     }
-    const std::vector<GLenum> programStageProperties {
-        gl::GL_ACTIVE_SUBROUTINE_UNIFORMS,
-        gl::GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,
-        gl::GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH,
-        gl::GL_ACTIVE_SUBROUTINES,
-        gl::GL_ACTIVE_SUBROUTINE_MAX_LENGTH,
-    };
 
     void IntrospectableFsq::DrawProgramWindow(bool* p_open) {
         using glbinding::Meta;
         if(ImGui::Begin("GPUProgram", p_open)) {
-            GLuint program = gpuProgram_->getProgramId();
+            gl::GLuint program = gpuProgram_->getProgramId();
             ImGui::Text("Program: %d", program);
             if(ImGui::TreeNode("(active): Program Interface")) {
                 for(auto info : programInterfaceInfo_)
@@ -103,6 +97,9 @@ namespace viscom {
                 for(const auto& uniform : uniformInfo_) {
                     ImGui::Text("%s: %d, %s", uniform.first.c_str(), uniform.second.location, Meta::getString(uniform.second.type).c_str());
                 }
+                for(auto& ufloat : uFloat_) {
+                    ImGui::DragFloat(ufloat.name.c_str(), &ufloat.value[0]);
+                }
                 ImGui::TreePop();
             }
             if(ImGui::TreeNode("program output")) {
@@ -111,46 +108,36 @@ namespace viscom {
                 ImGui::TreePop();
             }
             if(ImGui::TreeNode("Subroutine details")) {
-                GLint maxSubRoutines,maxSubroutineUniformLocations;
-                gl::glGetIntegerv(gl::GL_MAX_SUBROUTINES, &maxSubRoutines); //TODO put this into mgl
-                gl::glGetIntegerv(gl::GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, &maxSubroutineUniformLocations);
+                auto maxSubRoutines = mglGetIntegerv(gl::GL_MAX_SUBROUTINES);
+                auto maxSubroutineUniformLocations = mglGetIntegerv(gl::GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS);
                 ImGui::Text("GL_MAX_SUBROUTINES: %d", maxSubRoutines);
                 ImGui::Text("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
-                for(auto progStageProp : programStageProperties) {
-                    GLint value;
-                    gl::glGetProgramStageiv(program, gl::GL_FRAGMENT_SHADER, progStageProp, &value); //TODO put this into mgl
+                for(auto progStageProp : progStageProps()) {
+                    auto value = mglGetProgramStageiv(program, gl::GL_FRAGMENT_SHADER, progStageProp);
                     ImGui::Text("%s: %d", Meta::getString(progStageProp).c_str(), value);
                 }
 
-                static bool firstRun = true;
-                static std::vector<GLuint> selected(1024);
-                GLsizei counter = 0;
                 for(const auto& uniform : subroutineUniformInfo_) {
                     ImGui::Text("location %d: %s (active sub: %d)", uniform.location, uniform.name.c_str(), uniform.activeSubroutine);
-                    if(firstRun) {
-                        selected[uniform.location] = positive(uniform.activeSubroutine);
-                        firstRun = false;
-                    }
-                    for(const auto& subroutine : uniform.compatibleSubroutines) { //TODO start fixing here.
+                    for(const auto& subroutine : uniform.compatibleSubroutines) {
                         ImGui::BulletText("subroutine %d:", subroutine.value); ImGui::SameLine();
-                        ImGui::RadioButton(subroutine.name.c_str(), reinterpret_cast<int *>(&selected[uniform.location]), subroutine.value);
+                        ImGui::RadioButton(subroutine.name.c_str(), reinterpret_cast<int *>(&subroutines[uniform.location]), subroutine.value);
                     }
-                    ++counter;
                 }
 
-                //SetSubroutines(selected, static_cast<size_t>(counter)); //TODO this next
                 ImGui::TreePop();
             }
-
-
         }
         ImGui::End();
     }
 
     void IntrospectableFsq::Draw() const
     {
-        //SendSubroutines(); //TODO then this.
+        gl::glUseProgram(gpuProgram_->getProgramId());
+        SendSubroutines();
+        SendFloats();
         fsq_->Draw();
+        gl::glUseProgram(0);
     }
 
 
@@ -212,7 +199,7 @@ namespace viscom {
     void IntrospectableFsq::loadProgramInterfaceInformation()
     {
         auto program = gpuProgram_->getProgramId();
-        glUseProgram(program);
+        gl::glUseProgram(program);
 
         programInterfaceInfo_.clear();
         for(auto interface : glwrap::programInterfaces) {
@@ -227,13 +214,48 @@ namespace viscom {
             subroutine_uniform_info_t uniform;
             uniform.name = info.first;
             uniform.location = info.second;
-            uniform.activeSubroutine = mglGetUniformSubroutine(GL_FRAGMENT_SHADER,uniform.location);
+            uniform.activeSubroutine = mglGetUniformSubroutine(gl::GL_FRAGMENT_SHADER,uniform.location);
             uniform.compatibleSubroutines = GetSubroutineCompatibleUniforms(uniform.location);
             subroutineUniformInfo_.push_back(uniform);
             subroutines.push_back(uniform.activeSubroutine);
         }
 
-        glUseProgram(0);
+        uFloat_.clear();
+        for(const auto& uniform : uniformInfo_) {
+
+            if(uniform.second.type == gl::GL_FLOAT) {
+                float_uniform_info_t info;
+                info.name = uniform.first;
+                info.location = uniform.second.location;
+                info.type = gl::GL_FLOAT;
+                info.value.push_back(mglGetUniformfv(program, info.location));
+                uFloat_.push_back(info);
+            }
+        }
+
+        gl::glUseProgram(0);
+    }
+    void IntrospectableFsq::SendFloats() const
+    {
+        if(uFloat_.empty()) return;
+
+        for(const auto &info : uFloat_) {
+            switch(info.type) {
+                case gl::GL_FLOAT:
+                    gl::glUniform1fv(info.location, 1, &info.value[0]);
+                    break;
+                case gl::GL_FLOAT_VEC2:
+                    gl::glUniform2fv(info.location, 1, &info.value[0]);
+                    break;
+                case gl::GL_FLOAT_VEC3:
+                    gl::glUniform3fv(info.location, 1, &info.value[0]);
+                    break;
+                case gl::GL_FLOAT_VEC4:
+                    gl::glUniform4fv(info.location, 1, &info.value[0]);
+                    break;
+            }
+
+        }
     }
 
 }

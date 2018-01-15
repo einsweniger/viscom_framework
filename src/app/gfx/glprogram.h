@@ -24,6 +24,7 @@ using UniformList = std::vector<std::pair<std::string, gl::GLuint>>;
 using UniformMap = std::unordered_map<std::string, uniform_info_t>;
 
 namespace viscom::glwrap {
+
     static const std::vector<gl::GLenum> programInterfaces {
         gl::GL_UNIFORM,
         gl::GL_UNIFORM_BLOCK,
@@ -46,6 +47,10 @@ namespace viscom::glwrap {
         gl::GL_TRANSFORM_FEEDBACK_BUFFER,
         gl::GL_BUFFER_VARIABLE,
         gl::GL_SHADER_STORAGE_BLOCK
+    };
+
+    struct prog {
+        gl::GLuint program;
     };
 
     static const std::vector<gl::GLenum> programInterfaceProperties {
@@ -200,18 +205,18 @@ namespace viscom::glwrap {
         return result;
 
     }
-    static InterfaceInfoMap getUniformInfo(const GLuint program)
+    static InterfaceInfoMap getUniformInfo(const gl::GLuint program)
     {
         return getNameLocationType(program, gl::GL_UNIFORM);
     }
 
-    const InterfaceInfoList getSubroutineUniforms(GLuint program, GLenum interface)
+    const InterfaceInfoList getSubroutineUniforms(gl::GLuint program, gl::GLenum interface)
     {
         return getNameLocation(program, interface);
 
     }
 
-    const InterfaceInfoMap GetProgramOutpput(GLuint program)
+    const InterfaceInfoMap GetProgramOutpput(gl::GLuint program)
     {
         return getNameLocationType(program, gl::GL_PROGRAM_OUTPUT);
     }
