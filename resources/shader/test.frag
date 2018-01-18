@@ -1,5 +1,5 @@
 #version 330 core
-#extension ARB_shader_subroutine : require
+#extension GL_ARB_shader_subroutine : require
 
 // __VERSION__
 // shader inputs and uniforms
