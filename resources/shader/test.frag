@@ -1,5 +1,7 @@
-#version 430 core
+#version 330 core
+#extension ARB_shader_subroutine : require
 
+// __VERSION__
 // shader inputs and uniforms
 in vec2 texCoord;
 uniform float u_time;             // shader playback time (in seconds)
