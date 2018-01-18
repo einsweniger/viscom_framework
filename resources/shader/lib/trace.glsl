@@ -1,5 +1,3 @@
-#extension ARB_shader_subroutine : require
-
 uniform float NEAR =  0.0;
 uniform float FAR = 20.0;
 uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
