@@ -17,7 +17,7 @@ vec2 sgn(vec2 v) {
 	return vec2((v.x<0)?-1:1, (v.y<0)?-1:1);
 }
 float sgn(float x) {
-	return (x<0)?-1:1;
+	return (x<0.0)?-1.0:1.0;
 }  // Sign function that doesn't return 0
 float FastArcTan(float x) {
   return PI_4*x - x*(abs(x) - 1) * (0.2447 + 0.0663*abs(x));
