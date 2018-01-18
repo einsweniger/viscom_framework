@@ -8,3 +8,7 @@ set(VISCOM_CLIENTMOUSECURSOR OFF CACHE BOOL "Show the mouse cursor on clients." 
 set(VISCOM_USE_SGCT OFF CACHE BOOL "Use SGCT for local builds.")
 set(TUIO_LIB OFF CACHE BOOL "Use TUIO input library" FORCE)
 set(ENV{SGCT_ROOT_DIR} "${PROJECT_SOURCE_DIR}/extern/SGCT-2.7.3-bin/mscv14_x64")
+if(${VISCOM_USE_SGCT})
+    add_subdirectory(extern/fwcore/extern/sgct)
+    include_directories(BEFORE ${PROJECT_BINARY_DIR}/extern/sgct)
+endif()
