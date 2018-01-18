@@ -1,7 +1,8 @@
 [submodule "extern/fwcore"]
 	path = extern/fwcore
-	url=https://github.com/viscom-ulm/viscom_framework_core.git
-	branch = v_0.7
+	url=https://github.com/einsweniger/viscom_framework_core.git
+	branch = feature/enh
 [submodule "extern/fwenh"]
 	path = extern/fwenh
-	url = https://github.com/dasmysh/viscom_framework_enh.git
+	url = https://github.com/einsweniger/viscom_framework_enh.git
+	branch = develop
