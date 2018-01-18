@@ -72,7 +72,7 @@ namespace viscom {
                             loadProgramInterfaceInformation();
                             log.AddLog("reload succesful\n");
                         } catch (shader_compiler_error& compilerError) {
-                            log.AddLog(compilerError.what());
+                            log.AddLog("%s",compilerError.what());
                         }
                     }
                 });
@@ -252,6 +252,9 @@ namespace viscom {
                     break;
                 case gl::GL_FLOAT_VEC4:
                     gl::glUniform4fv(info.location, 1, &info.value[0]);
+                    break;
+                default:
+                    // not implemented
                     break;
             }
 
