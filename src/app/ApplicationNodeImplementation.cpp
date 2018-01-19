@@ -166,7 +166,6 @@ namespace viscom {
             {
                 gl::glUseProgram(prog->getProgramId());
                 gl::glUniform1f(prog->getUniformLocation("u_time"), time_);
-                gl::glUniformMatrix4fv(prog->getUniformLocation("u_camOrientation"), 1, gl::GL_FALSE, glm::value_ptr(camOrientation));
                 gl::glUniformMatrix4fv(prog->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
                 gl::glUniform3f(prog->getUniformLocation("u_camPosition"), position.x, position.y, position.z);
                 quad_->SendSubroutines();
