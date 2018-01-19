@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "glutil.h"
+#include "util.h"
 
 /**
  * These are all the possible interfaces of a Program in OpenGL 4.6

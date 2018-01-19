@@ -6,8 +6,8 @@
 #include <glbinding/Meta.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "IntrospectableFsq.h"
-#include "glutil.h"
-#include "glprogram.h"
+#include "app/gfx/gl/util.h"
+#include "app/gfx/gl/program.h"
 
 namespace viscom {
     constexpr std::array<gl::GLenum,5> progStageProps() {
@@ -20,7 +20,7 @@ namespace viscom {
         };
     }
     IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  ApplicationNodeBase* appNode) :
-    fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, subroutines{1024},
+    fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, subroutines{1024}, app_{appNode},
     gpuProgram_{appNode->GetGPUProgramManager().GetResource("fullScreenQuad_" + fragmentShader, std::vector<std::string>{ "fullScreenQuad.vert", fragmentShader })}
     {
         loadProgramInterfaceInformation();
@@ -120,6 +120,8 @@ namespace viscom {
                 ImGui::TreePop();
             }
             if(ImGui::TreeNode("program output")) {
+                //TODO connect shader output to imgui for visual representation.
+                //TODO connect shader output to next stage
                 for(const auto& output : programOutputInfo_)
                     ImGui::Text("%s: %d, %s", output.first.c_str(), output.second.location, Meta::getString(output.second.type).c_str());
                 ImGui::TreePop();
@@ -153,6 +155,19 @@ namespace viscom {
         gl::glUseProgram(gpuProgram_->getProgramId());
         SendSubroutines();
         SendUniforms();
+        //TODO merge outer context to local variables, then SendSubroutines()
+        //TODO add checkbox to variables updated through context so updates can be ignored
+        auto position = app_->GetCamera()->GetPosition();
+        auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
+        gl::glUniform1f(gpuProgram_->getUniformLocation("u_time"), currentTime_);
+        gl::glUniform1f(gpuProgram_->getUniformLocation("u_delta"), elapsedTime_);
+        gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
+        gl::glUniform3f(gpuProgram_->getUniformLocation("u_eye"), position.x, position.y, position.z);
+        /*TODO
+         * uniform vec4 u_date;  // year, month, day and seconds
+         * uniform vec2 u_resolution;  // viewport resolution (in pixels)
+         * uniform vec2 u_mouse;  // mouse pixel coords
+         */
         fsq_->Draw();
         gl::glUseProgram(0);
     }
@@ -262,7 +277,8 @@ namespace viscom {
 
     void IntrospectableFsq::UpdateFrame(double currentTime, double elapsedTime)
     {
-        time_ = static_cast<gl::GLfloat>(currentTime);
+        currentTime_ = static_cast<gl::GLfloat>(currentTime);
+        elapsedTime_ = static_cast<gl::GLfloat>(elapsedTime);
     }
 
 }

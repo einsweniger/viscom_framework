@@ -6,8 +6,10 @@
 #include <core/gfx/FullscreenQuad.h>
 #include <core/ApplicationNodeBase.h>
 #include <memory>
+#include <variant>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
+
 
 namespace viscom {
 
@@ -135,7 +137,10 @@ struct ShaderLog
         std::vector<subroutine_uniform_info_t> subroutineUniformInfo_;
         std::vector<float_uniform_info_t> uFloat_;
         std::vector<int_uniform_info_t> uInt_;
+        std::vector<std::variant<int_uniform_info_t, float_uniform_info_t>> uniforms_;
         void SendUniforms() const;
-        gl::GLfloat time_;
+        gl::GLfloat currentTime_;
+        gl::GLfloat elapsedTime_;
+        ApplicationNodeBase* app_;
     };
 }
