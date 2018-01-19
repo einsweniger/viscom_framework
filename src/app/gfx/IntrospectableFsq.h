@@ -92,6 +92,13 @@ struct ShaderLog
         std::vector<gl::GLfloat> value;
     };
 
+    struct int_uniform_info_t {
+        std::string name;
+        gl::GLenum type;
+        gl::GLuint location;
+        std::vector<gl::GLint> value;
+    };
+
 
     using InterfaceInfoList = std::vector<std::pair<std::string, GLuint>>;
     using InterfaceInfoMap = std::unordered_map<std::string, interface_info_t>;
@@ -113,6 +120,7 @@ struct ShaderLog
         const InterfaceInfoMap GetProgramOutpput();
         void SendSubroutines() const;
 
+        void UpdateFrame(double currentTime, double elapsedTime);
     private:
         std::unique_ptr<FullscreenQuad> fsq_;
         std::vector<gl::GLuint> subroutines;
@@ -126,6 +134,8 @@ struct ShaderLog
         InterfaceInfoMap programOutputInfo_;
         std::vector<subroutine_uniform_info_t> subroutineUniformInfo_;
         std::vector<float_uniform_info_t> uFloat_;
-        void SendFloats() const;
+        std::vector<int_uniform_info_t> uInt_;
+        void SendUniforms() const;
+        gl::GLfloat time_;
     };
 }

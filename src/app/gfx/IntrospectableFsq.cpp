@@ -4,6 +4,7 @@
 
 #include <core/gfx/Shader.h>
 #include <glbinding/Meta.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "IntrospectableFsq.h"
 #include "glutil.h"
 #include "glprogram.h"
@@ -83,6 +84,7 @@ namespace viscom {
 
     void IntrospectableFsq::DrawProgramWindow(bool* p_open) {
         using glbinding::Meta;
+
         if(ImGui::Begin("GPUProgram", p_open)) {
             gl::GLuint program = gpuProgram_->getProgramId();
             ImGui::Text("Program: %d", program);
@@ -94,11 +96,26 @@ namespace viscom {
                 ImGui::TreePop();
             };
             if(ImGui::TreeNode("uniform locations")) {
-                for(const auto& uniform : uniformInfo_) {
-                    ImGui::Text("%s: %d, %s", uniform.first.c_str(), uniform.second.location, Meta::getString(uniform.second.type).c_str());
+                for(const auto& u : uniformInfo_) {
+                    ImGui::Text("%s: %d, %s", u.first.c_str(), u.second.location, Meta::getString(u.second.type).c_str());
                 }
-                for(auto& ufloat : uFloat_) {
-                    ImGui::DragFloat(ufloat.name.c_str(), &ufloat.value[0]);
+                for(auto& uniform : uFloat_) {
+                    const float v_speed = 0.0001f;
+                    const float v_min = 0.0f;
+                    const float v_max = 0.0f;
+                    const char* display_format = "%.5f";
+                    const float power = 1.0f;
+                    //DragFloat(const char* label, float* v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* display_format = "%.3f", float power = 1.0f);
+                    if(gl::GL_FLOAT      == uniform.type) ImGui::DragFloat (uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+                    if(gl::GL_FLOAT_VEC2 == uniform.type) ImGui::DragFloat2(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+                    if(gl::GL_FLOAT_VEC3 == uniform.type) ImGui::DragFloat3(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+                    if(gl::GL_FLOAT_VEC4 == uniform.type) ImGui::DragFloat4(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+                }
+                for(auto& uniform : uInt_) {
+                    if(gl::GL_INT      == uniform.type) ImGui::DragInt (uniform.name.c_str(), &uniform.value[0]);
+                    if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(uniform.name.c_str(), &uniform.value[0]);
+                    if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(uniform.name.c_str(), &uniform.value[0]);
+                    if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(uniform.name.c_str(), &uniform.value[0]);
                 }
                 ImGui::TreePop();
             }
@@ -135,67 +152,10 @@ namespace viscom {
     {
         gl::glUseProgram(gpuProgram_->getProgramId());
         SendSubroutines();
-        SendFloats();
+        SendUniforms();
         fsq_->Draw();
         gl::glUseProgram(0);
     }
-
-
-    //TODO review differenve between ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS and ACTIVE_SUBROUTINE_UNIFORMS
-
-    /**
-     * void GetProgramStageiv( uint program, enum shadertype, enum pname, int *values );
-     * returns properties of the program object program specific to the programmable
-     * stage corresponding to shadertype in values. The parameter value to return is
-     * specified by pname.
-     * If pname is ACTIVE_SUBROUTINE_UNIFORMS , the number of active subroutine variables in the stage is returned.
-     * If pname is ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS , the number of active subroutine variable locations in the stage is returned.
-     * If pname is ACTIVE_SUBROUTINES , the number of active subroutines in the stage is returned.
-     * If pname is ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH or ACTIVE_SUBROUTINE_MAX_LENGTH , the length of the longest subroutine uniform or subroutine name, respectively, for the stage is returned.
-     * The returned name length includes space for a null terminator.
-     * If there is no shader of type shadertype in program, the values returned will be consistent
-     * with a shader with no subroutines or subroutine uniforms.
-     */
-/**
- A subroutine uniform may have an explicit location specified in the shader.
-
- At link time, all active subroutine uniforms without an explicit location will be assigned a unique location.
-
- The value of ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS for a program object is the largest specified or assigned location plus one.
-
- An assigned location will never take the location of an explicitly specified location, even if that subroutine uniform is inactive.
-
- Between the location zero and the value of ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS minus one there may
- be unused locations, either because they were not assigned a subroutine uniform or
- because the subroutine uniform was determined to be inactive by the linker.
-
- These locations will be ignored when assigning the subroutine index as described below.
-
- There is an implementation-dependent limit on the number of active subroutine uniform locations in each shader stage;
- a program will fail to link if the number of subroutine uniform locations required is greater than the value of
- MAX_SUBROUTINE_UNIFORM_LOCATIONS or if an explicit subroutine uniform location is outside this limit.
-
- For active subroutine uniforms declared as arrays, the declared array elements are assigned consecutive locations.
-
- Each function in a shader associated with a subroutine type is considered an active subroutine, unless the compiler conclusively determines that the function
- could never be assigned to an active subroutine uniform.
-
- The subroutine functions can be assigned an explicit index in the shader between zero and the value of MAX_SUBROUTINES minus one.
-
- At link time, all active subroutines without an explicit index will be assigned an index between zero and the value of ACTIVE_SUBROUTINES minus one.
-
- An assigned index will never take the same index of an explicitly specified index in the shader, even if that subroutine is inactive.
-
- Between index zero and the vaue of ACTIVE_SUBROUTINES minus one there may be unused indices either because they weren’t assigned an index by the linker or
- because the subroutine was determined to be inactive by the linker.
-
- If there are no explicitly defined subroutine indices in the shader the implementation must assign
- indices between zero and the value of ACTIVE_SUBROUTINES minus one with no index unused.
-
- It is recommended, but not required, that the application assigns a range of tightly packed indices starting from zero to avoid indices between zero
- and the value of ACTIVE_SUBROUTINES minus one being unused.
- */
-
     void IntrospectableFsq::loadProgramInterfaceInformation()
     {
         auto program = gpuProgram_->getProgramId();
@@ -221,21 +181,42 @@ namespace viscom {
         }
 
         uFloat_.clear();
-        for(const auto& uniform : uniformInfo_) {
-
-            if(uniform.second.type == gl::GL_FLOAT) {
-                float_uniform_info_t info;
-                info.name = uniform.first;
-                info.location = uniform.second.location;
-                info.type = gl::GL_FLOAT;
-                info.value.push_back(mglGetUniformfv(program, info.location));
-                uFloat_.push_back(info);
+        for(const auto& uniform : uniformInfo_)
+        {
+            switch (uniform.second.type)
+            {
+                case gl::GL_FLOAT:
+                case gl::GL_FLOAT_VEC2:
+                case gl::GL_FLOAT_VEC3:
+                case gl::GL_FLOAT_VEC4:
+                    float_uniform_info_t info;
+                    info.name = uniform.first;
+                    info.location = uniform.second.location;
+                    info.type = uniform.second.type;
+                    info.value = std::vector<float>(glwrap::getSize(uniform.second.type));
+                    gl::glGetUniformfv(program, info.location, &info.value[0]);
+                    uFloat_.push_back(info);
+                    break;
+            }
+            switch (uniform.second.type)
+            {
+                case gl::GL_INT:
+                case gl::GL_INT_VEC2:
+                case gl::GL_INT_VEC3:
+                case gl::GL_INT_VEC4:
+                    int_uniform_info_t intfo;
+                    intfo.name = uniform.first;
+                    intfo.location = uniform.second.location;
+                    intfo.type = uniform.second.type;
+                    intfo.value = std::vector<int>(glwrap::getSize(uniform.second.type));
+                    gl::glGetUniformiv(program, intfo.location, &intfo.value[0]);
+                    uInt_.push_back(intfo);
+                    break;
             }
         }
-
         gl::glUseProgram(0);
     }
-    void IntrospectableFsq::SendFloats() const
+    void IntrospectableFsq::SendUniforms() const
     {
         if(uFloat_.empty()) return;
 
@@ -257,8 +238,31 @@ namespace viscom {
                     // not implemented
                     break;
             }
-
         }
+        for(const auto &info : uInt_) {
+            switch(info.type) {
+                case gl::GL_INT:
+                    gl::glUniform1iv(info.location, 1, &info.value[0]);
+                    break;
+                case gl::GL_INT_VEC2:
+                    gl::glUniform2iv(info.location, 1, &info.value[0]);
+                    break;
+                case gl::GL_INT_VEC3:
+                    gl::glUniform3iv(info.location, 1, &info.value[0]);
+                    break;
+                case gl::GL_INT_VEC4:
+                    gl::glUniform4iv(info.location, 1, &info.value[0]);
+                    break;
+                default:
+                    // not implemented
+                    break;
+            }
+        }
+    }
+
+    void IntrospectableFsq::UpdateFrame(double currentTime, double elapsedTime)
+    {
+        time_ = static_cast<gl::GLfloat>(currentTime);
     }
 
 }
