@@ -128,6 +128,7 @@ namespace viscom {
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
 
         time_ = static_cast<float>(currentTime);
+        quad_->UpdateFrame(currentTime, elapsedTime);
         //updateExamples(currentTime);
     }
 
