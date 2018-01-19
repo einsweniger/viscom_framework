@@ -95,5 +95,6 @@ namespace viscom {
         void updateExamples(double currentTime);
         void drawExamples(FrameBuffer &fbo);
         void cleanupExamples();
+        void clearExamples();
     };
 }

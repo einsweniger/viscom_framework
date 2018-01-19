@@ -54,7 +54,7 @@ namespace viscom {
             LOG(INFO) << uniform.first << ": " << glbinding::Meta::getString(uniform.second.type);
         }
 
-        initExamples();
+        //initExamples();
     }
 
     void ApplicationNodeImplementation::initExamples()
@@ -145,11 +145,7 @@ namespace viscom {
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
     {
-        SelectOffscreenBuffer(sceneFBOs_)->DrawToFBO([]() {
-            gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
-        });
-
+        //clearExamples();
         fbo.DrawToFBO([]() {
             gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
@@ -235,7 +231,7 @@ namespace viscom {
 
     void ApplicationNodeImplementation::CleanUp()
     {
-        cleanupExamples();
+        //cleanupExamples();
         ApplicationNodeBase::CleanUp();
     }
 
@@ -322,6 +318,12 @@ namespace viscom {
             grabMouse_ = false;
         }
     }
-
+    void ApplicationNodeImplementation::clearExamples()
+    {
+        SelectOffscreenBuffer(sceneFBOs_)->DrawToFBO([]() {
+            gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+        });
+    }
 
 }
