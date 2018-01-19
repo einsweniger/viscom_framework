@@ -5,7 +5,9 @@ uniform int MAX_ITERATIONS = 160;
 uniform float fog_density = .2;
 uniform int USE_BV = 0;
 uniform int DRAW_DEBUG = 0;
-uniform int ENHANCED_TRACER = 1;
+uniform float relaxation = 1.9;
+uniform float pixelRadius = 0.0001;
+
 /*
 If enhancedTrace had 5 params and would be called like:
 subroutine(RayMarch) vec4 enhancedTrace(vec3 pos, vec3 dir) { return enhancedTrace(pos, dir, 0.0001, false, 1.9); }
@@ -67,8 +69,6 @@ vec4 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool
 
 // subroutine(RayMarch) vec4 enhancedTrace(vec3 origin,vec3 direction) {  <-- error, counts as static recursion
 subroutine(RayMarch) vec4 defaultEnhancedTrace(vec3 origin,vec3 direction) {
-    const float relaxation = 1.9;
-    const float pixelRadius = 0.0001;
     const bool forceHit = false;
 
     return enhancedTrace(origin, direction, relaxation, pixelRadius, forceHit);

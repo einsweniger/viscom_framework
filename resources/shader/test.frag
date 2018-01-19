@@ -1,15 +1,16 @@
 #version 330 core
 #extension GL_ARB_shader_subroutine : require
 
-// __VERSION__
 // shader inputs and uniforms
 in vec2 texCoord;
 uniform float u_time;             // shader playback time (in seconds)
-uniform mat4  u_camOrientation;
+uniform float u_delta;  // delta time between frames (in seconds)
+uniform vec4 u_date;  // year, month, day and seconds
+uniform vec2 u_resolution;  // viewport resolution (in pixels)
+uniform vec2 u_mouse;  // mouse pixel coords
+uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform mat4  u_MVP;
-uniform vec3  u_camPosition;
-uniform vec3 unused;
-uniform float u_timescale = 1.0;
+uniform float timescale = 1.0;
 
 // shader outputs
 layout(location = 0) out vec4 out_color;
@@ -42,8 +43,8 @@ subroutine(SceneMap) vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/vie
 
    	//pos.xyz = opTwist(pos.xzy,3.,0.);
    	float s =    sdfSphere(pos+vec3(0.,0.,0.), .4);
-    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.5,0.1+sin((p.z-u_time*u_timescale)*5.)*.05,1.0)));
-    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.1+cos((p.z-u_time*u_timescale)*5.)*.05,0.5,1.0)) );
+    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.5,0.1+sin((p.z-u_time*timescale)*5.)*.05,1.0)));
+    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.1+cos((p.z-u_time*timescale)*5.)*.05,0.5,1.0)) );
     s = opS(s, sdfCylinder(pos.xzy,            vec2(.25,1.01)));
     res = opU( res, vec2( s, 50. ) );
     return res;
@@ -69,8 +70,8 @@ box.bounds = vec3(.25);
 //    res = opU( res, vec2 ( sdfCorner(pos.xz-vec2(-5,-5)),          45.0));
 //    res = opU( res, vec2 ( sdfCorner(-pos.xz-vec2(-5, -5)),          45.0));
 //row1
-    res = opU( res, vec2( sdf(offset, boxes[0]),  3.0));
-//    res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
+//    res = opU( res, vec2( sdf(offset, boxes[0]),  3.0));
+    res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
     res = opU( res, vec2( sdfCylinder(  offset-vec3(1,0,0), vec2(0.2,0.2)),          8.0));
     res = opU( res, vec2( sdfCylinder6( offset-vec3(2,0,0), vec2(0.1,0.2) ),        12.0));
     res = opU( res, vec2( sdCone(       offset-vec3(3,0.35,0), 0.2, 0.8, 0.4 ),        55.0));
@@ -141,10 +142,10 @@ void main()
     vec4 dir_projection = inverse(u_MVP)*vec4(st, 1.,1.);
     vec3 ray_direction = normalize(vec3(dir_projection/dir_projection.w));
     //trace
-    vec4 hit = raymarch(u_camPosition, ray_direction);
-    vec3 position = u_camPosition;
+    vec4 hit = raymarch(u_eye, ray_direction);
+    vec3 position = u_eye;
     position.z -= u_time*.5;
-    vec3 color = render(u_camPosition, ray_direction);
+    vec3 color = render(u_eye, ray_direction);
     //color = shade(u_camPosition, ray_direction, light_dir, hit);
     out_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     out_texCoord = vec4(texCoord,0.f, 1.f);
