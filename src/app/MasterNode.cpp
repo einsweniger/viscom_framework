@@ -8,6 +8,7 @@
 
 #include "MasterNode.h"
 #include <imgui.h>
+#include <app/gfx/gl/util.h>
 #include "enh/gfx/postprocessing/DepthOfField.h"
 #include "core/glfw.h"
 
@@ -45,6 +46,25 @@ namespace viscom {
             if(imDemoWindow_) ImGui::ShowTestWindow();
             if(imMainMenu_) drawMainMenu(&imMainMenu_);
             if(imOverlay_) drawOverlay(&imOverlay_, elapsedTime_);
+            if (imBuffersWindow_) {
+                if(ImGui::Begin("Buffers:", &imBuffersWindow_)) {
+
+                    const auto& selectedBuffer = SelectOffscreenBuffer(debugTextureBuffers_);
+//                    for (auto tex : SelectOffscreenBuffer(GetDebugTextureBuffer())->GetTextures()) {
+                    for (auto tex : selectedBuffer->GetTextures()) {
+                        std::string name = mglGetProgramResourceName(quad_->GetGPUProgram()->getProgramId(), gl::GL_PROGRAM_OUTPUT, tex);
+                        std::string headerName = std::to_string(tex);//name + ": "+ std::to_string(tex);
+                        if (ImGui::CollapsingHeader(headerName.c_str())) {
+                            ImVec2 uv0(0, 1);
+                            ImVec2 uv1(1, 0);
+                            ImVec2 region(ImGui::GetWindowContentRegionWidth(), ImGui::GetWindowContentRegionWidth() / 1.7f);
+                            ImGui::Image(reinterpret_cast<ImTextureID>(tex), region, uv0, uv1);
+                        };
+                    }
+                }
+                ImGui::End();
+            }
+
 //            ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
 //            if (ImGui::Begin("", nullptr, ImGuiWindowFlags_ShowBorders)) {
 //                GetDOF()->RenderParameterSliders();
