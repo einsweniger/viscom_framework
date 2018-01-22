@@ -295,6 +295,8 @@ namespace viscom {
     void IntrospectableFsq::DrawToBuffer(const FrameBuffer& fbo)
     {
         fbo.DrawToFBO([this]{
+            gl::glActiveTexture(gl::GL_TEXTURE0);
+            gl::glBindTexture(gl::GL_TEXTURE_2D, 2); //TODO remove hardcoded texture ID, think of a good way to forward it from previous backbuffer.
             gl::glUseProgram(gpuProgram_->getProgramId());
             SendSubroutines();
             SendUniforms();

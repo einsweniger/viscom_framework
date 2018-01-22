@@ -146,13 +146,7 @@ namespace viscom {
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
         quad_->DrawToBackBuffer();
-        quad_->DrawToBuffer(fbo);
-//        gl::glUseProgram(tex_->GetGPUProgram()->getProgramId());
-//        gl::glActiveTexture(gl::GL_TEXTURE0);
-//        gl::glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(quad_->GetBackBuffer())->GetTextures().front());
-//        gl::glBindTexture(gl::GL_TEXTURE_2D, 2);
-//        tex_->DrawToBackBuffer();
-//        tex_->DrawToBuffer(fbo);
+        tex_->DrawToBuffer(fbo);
 
         //drawExamples(fbo);
     }
