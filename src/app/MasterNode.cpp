@@ -49,9 +49,8 @@ namespace viscom {
             if (imBuffersWindow_) {
                 if(ImGui::Begin("Buffers:", &imBuffersWindow_)) {
 
-                    const auto& selectedBuffer = SelectOffscreenBuffer(debugTextureBuffers_);
-//                    for (auto tex : SelectOffscreenBuffer(GetDebugTextureBuffer())->GetTextures()) {
-                    for (auto tex : selectedBuffer->GetTextures()) {
+                    const auto& textures = SelectOffscreenBuffer(quad_->GetBackBuffer())->GetTextures();
+                    for (auto& tex : textures) { //TODO, this seems to be empty?
                         std::string name = mglGetProgramResourceName(quad_->GetGPUProgram()->getProgramId(), gl::GL_PROGRAM_OUTPUT, tex);
                         std::string headerName = std::to_string(tex);//name + ": "+ std::to_string(tex);
                         if (ImGui::CollapsingHeader(headerName.c_str())) {
@@ -71,7 +70,10 @@ namespace viscom {
 //            }
 //            ImGui::End();
         });
-        if(imProgramRecourceWindow_) quad_->Draw2D(fbo);
+        if(imProgramRecourceWindow_) {
+            quad_->Draw2D(fbo);
+            tex_->Draw2D(fbo);
+        }
 
         ApplicationNodeImplementation::Draw2D(fbo);
     }

@@ -46,7 +46,6 @@ namespace viscom {
 
         std::unique_ptr<IntrospectableFsq> tex_;
         std::unique_ptr<IntrospectableFsq> quad_;
-        std::vector<FrameBuffer> debugTextureBuffers_;
         bool drawMenu_ = true;
         bool grabMouse_ = false;
         std::shared_ptr<MyFreeCamera> freeCam_;

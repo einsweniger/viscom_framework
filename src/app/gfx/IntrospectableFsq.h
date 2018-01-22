@@ -114,19 +114,19 @@ struct ShaderLog
         IntrospectableFsq(const std::string& fragmentProgram, ApplicationNodeBase* appNode);
 
 
-        void Draw() const;
+        void DrawToBackBuffer();
+        void DrawToBuffer(const FrameBuffer& fbo);
         void Draw2D(FrameBuffer& fbo);
         const GPUProgram* GetGPUProgram() const { return gpuProgram_.get(); }
         const std::vector<subroutine_info_t> GetSubroutineCompatibleUniforms(GLuint uniform);
         const InterfaceInfoMap GetUniforms();
         const InterfaceInfoMap GetProgramOutpput();
         void SendSubroutines() const;
-
+        const std::vector<FrameBuffer> GetBackBuffer() {return backBuffers_;};
         void UpdateFrame(double currentTime, double elapsedTime);
     private:
         std::unique_ptr<FullscreenQuad> fsq_;
         std::vector<gl::GLuint> subroutines;
-    private:
         /** The GPU program used for drawing. */
         std::shared_ptr<GPUProgram> gpuProgram_;
         void DrawProgramWindow(bool *p_open);
@@ -137,6 +137,7 @@ struct ShaderLog
         std::vector<subroutine_uniform_info_t> subroutineUniformInfo_;
         std::vector<float_uniform_info_t> uFloat_;
         std::vector<int_uniform_info_t> uInt_;
+        std::vector<FrameBuffer> backBuffers_;
         std::vector<std::variant<int_uniform_info_t, float_uniform_info_t>> uniforms_;
         void SendUniforms() const;
         gl::GLfloat currentTime_;

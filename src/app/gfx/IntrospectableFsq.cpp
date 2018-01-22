@@ -122,8 +122,21 @@ namespace viscom {
             if(ImGui::TreeNode("program output")) {
                 //TODO connect shader output to imgui for visual representation.
                 //TODO connect shader output to next stage
+                const auto& texIds = app_->SelectOffscreenBuffer(backBuffers_)->GetTextures();
                 for(const auto& output : programOutputInfo_)
+                {
                     ImGui::Text("%s: %d, %s", output.first.c_str(), output.second.location, Meta::getString(output.second.type).c_str());
+                    const auto textureID = texIds.at(output.second.location);
+                    ImGui::Text("texture id: %d", textureID);
+                    std::string name = mglGetProgramResourceName(program, gl::GL_PROGRAM_OUTPUT, textureID);
+                    std::string headerName = std::to_string(textureID);//name + ": "+ std::to_string(tex);
+                    if (ImGui::CollapsingHeader(headerName.c_str())) {
+                        ImVec2 uv0(0, 1);
+                        ImVec2 uv1(1, 0);
+                        ImVec2 region(ImGui::GetWindowContentRegionWidth(), ImGui::GetWindowContentRegionWidth() / 1.7f);
+                        ImGui::Image(reinterpret_cast<ImTextureID>(textureID), region, uv0, uv1);
+                    };
+                }
                 ImGui::TreePop();
             }
             if(ImGui::TreeNode("Subroutine details")) {
@@ -150,27 +163,6 @@ namespace viscom {
         ImGui::End();
     }
 
-    void IntrospectableFsq::Draw() const
-    {
-        gl::glUseProgram(gpuProgram_->getProgramId());
-        SendSubroutines();
-        SendUniforms();
-        //TODO merge outer context to local variables, then SendSubroutines()
-        //TODO add checkbox to variables updated through context so updates can be ignored
-        auto position = app_->GetCamera()->GetPosition();
-        auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
-        gl::glUniform1f(gpuProgram_->getUniformLocation("u_time"), currentTime_);
-        gl::glUniform1f(gpuProgram_->getUniformLocation("u_delta"), elapsedTime_);
-        gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
-        gl::glUniform3f(gpuProgram_->getUniformLocation("u_eye"), position.x, position.y, position.z);
-        /*TODO
-         * uniform vec4 u_date;  // year, month, day and seconds
-         * uniform vec2 u_resolution;  // viewport resolution (in pixels)
-         * uniform vec2 u_mouse;  // mouse pixel coords
-         */
-        fsq_->Draw();
-        gl::glUseProgram(0);
-    }
     void IntrospectableFsq::loadProgramInterfaceInformation()
     {
         auto program = gpuProgram_->getProgramId();
@@ -196,6 +188,7 @@ namespace viscom {
         }
 
         uFloat_.clear();
+        uInt_.clear();
         for(const auto& uniform : uniformInfo_)
         {
             switch (uniform.second.type)
@@ -230,6 +223,18 @@ namespace viscom {
             }
         }
         gl::glUseProgram(0);
+        std::vector<FrameBufferTextureDescriptor> backBufTextures{};
+        for(const auto& output : GetProgramOutpput()) {
+            if(gl::GL_FLOAT_VEC4 == output.second.type) {
+                LOG(INFO) << "adding texture descriptor for " << output.first;
+                backBufTextures.emplace_back(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
+            }
+        }
+        backBuffers_ = app_->CreateOffscreenBuffers(FrameBufferDescriptor{backBufTextures,{}});
+        auto buffer = app_->SelectOffscreenBuffer(backBuffers_);
+        for(const auto& tex : buffer->GetTextures()) {
+            LOG(INFO) << "available texture: " << tex;
+        }
     }
     void IntrospectableFsq::SendUniforms() const
     {
@@ -279,6 +284,37 @@ namespace viscom {
     {
         currentTime_ = static_cast<gl::GLfloat>(currentTime);
         elapsedTime_ = static_cast<gl::GLfloat>(elapsedTime);
+    }
+
+    void IntrospectableFsq::DrawToBackBuffer()
+    {
+        auto backbuffer = app_->SelectOffscreenBuffer(backBuffers_);
+        DrawToBuffer(*backbuffer);
+    }
+
+    void IntrospectableFsq::DrawToBuffer(const FrameBuffer& fbo)
+    {
+        fbo.DrawToFBO([this]{
+            gl::glUseProgram(gpuProgram_->getProgramId());
+            SendSubroutines();
+            SendUniforms();
+            //TODO merge outer context to local variables, then SendSubroutines()
+            //TODO add checkbox to variables updated through context so updates can be ignored
+            auto position = app_->GetCamera()->GetPosition();
+            auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
+            gl::glUniform1f(gpuProgram_->getUniformLocation("u_time"), currentTime_);
+            gl::glUniform1f(gpuProgram_->getUniformLocation("u_delta"), elapsedTime_);
+            gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
+            gl::glUniform3f(gpuProgram_->getUniformLocation("u_eye"), position.x, position.y, position.z);
+            /*TODO
+             * uniform vec4 u_date;  // year, month, day and seconds
+             * uniform vec2 u_resolution;  // viewport resolution (in pixels)
+             * uniform vec2 u_mouse;  // mouse pixel coords
+             */
+            fsq_->Draw();
+            gl::glUseProgram(0);
+        });
+
     }
 
 }

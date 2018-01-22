@@ -40,19 +40,9 @@ namespace viscom {
     {
         enh::ApplicationNodeBase::InitOpenGL();
 
+        freeCam_->SetCameraPosition(glm::vec3(0,1,8));
         quad_ = std::make_unique<IntrospectableFsq>("test.frag", this);
         tex_ = std::make_unique<IntrospectableFsq>("renderTexture.frag", this);
-        std::vector<FrameBufferTextureDescriptor> tex{};
-        for(const auto& output : quad_->GetProgramOutpput()) {
-            LOG(INFO) << "adding texture descriptor for " << output.first;
-            tex.emplace_back(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
-        }
-
-        debugTextureBuffers_ = CreateOffscreenBuffers(FrameBufferDescriptor{tex,{}});
-        freeCam_->SetCameraPosition(glm::vec3(0,1,8));
-        for(const auto& uniform : quad_->GetUniforms()) {
-            LOG(INFO) << uniform.first << ": " << glbinding::Meta::getString(uniform.second.type);
-        }
 
         //initExamples();
     }
@@ -155,22 +145,14 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
-        SelectOffscreenBuffer(debugTextureBuffers_)->DrawToFBO([this](){
-
-            {
-                quad_->Draw();
-            }
-        });
-        fbo.DrawToFBO([this]() {
-            auto tex = tex_->GetGPUProgram();
-            {
-                gl::glUseProgram(tex->getProgramId());
-                gl::glActiveTexture(gl::GL_TEXTURE0);
-                gl::glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(debugTextureBuffers_)->GetTextures().front());
-                tex_->Draw();
-            }
-            gl::glUseProgram(0);
-        });
+        quad_->DrawToBackBuffer();
+        quad_->DrawToBuffer(fbo);
+//        gl::glUseProgram(tex_->GetGPUProgram()->getProgramId());
+//        gl::glActiveTexture(gl::GL_TEXTURE0);
+//        gl::glBindTexture(gl::GL_TEXTURE_2D, this->SelectOffscreenBuffer(quad_->GetBackBuffer())->GetTextures().front());
+//        gl::glBindTexture(gl::GL_TEXTURE_2D, 2);
+//        tex_->DrawToBackBuffer();
+//        tex_->DrawToBuffer(fbo);
 
         //drawExamples(fbo);
     }
