@@ -1,4 +1,5 @@
 #version 330
+#extension GL_ARB_shader_subroutine : require
 
 in vec2 texCoord;
 out vec4 color;
@@ -18,6 +19,7 @@ void main()
 //    vec4 color2 = postChromaticAberration(tex, texCoord);
 //    color = (color1 + color2) / 2;
 //    color = postPixelate(tex, texCoord);
-    color = postFerris(tex, texCoord);
+//    color = postFerris(tex, texCoord);
+    color = postprocess(tex, texCoord);
 
 }

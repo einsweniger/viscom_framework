@@ -1,6 +1,5 @@
-const float max_distort = 0.5;
-const int num_iter = 24;
-const float reci_num_iter_f = 1.0 / float(num_iter);
+subroutine vec4 PostProcess(sampler2D origin, vec2 uv);  // function signature type declaration
+subroutine uniform PostProcess postprocess;  // uniform instance, can be called like a function
 
 #include "util.glsl"
 vec2 barrelDistortion(vec2 coord, float amt) {
@@ -36,22 +35,29 @@ float gamma( float value, float g ) {
 	return pow( value, 1.0 / g );
 }
 
-vec4 postChromaticAberration(sampler2D tex, vec2 uv) {
+subroutine(PostProcess) vec4 none(sampler2D tex, vec2 uv) {
+  return texture2D(tex, uv);
+}
+
+uniform float ca_max_distort = 0.5;
+uniform int ca_num_iter = 24;
+uniform float ca_reci_num_iter_f = 1.0 / 24.0;
+subroutine(PostProcess) vec4 chromaticAberration(sampler2D tex, vec2 uv) {
 
 	vec4 sumcol = vec4(0.0);
 	vec4 sumw = vec4(0.0);
-	for ( int i=0; i<num_iter;++i )
+	for ( int i=0; i<ca_num_iter;++i )
 	{
-		float t = float(i) * reci_num_iter_f;
+		float t = float(i) * ca_reci_num_iter_f;
 		vec4 w = spectrum_offset( t );
 		sumw += w;
-		sumcol += w * texture2D( tex, barrelDistortion(uv, .6 * max_distort*t ) );
+		sumcol += w * texture2D( tex, barrelDistortion(uv, .6 * ca_max_distort*t ) );
 	}
 
 	return sumcol / sumw;
 }
 
-vec4 postArtFs(sampler2D tex, vec2 uv) {
+subroutine(PostProcess) vec4 artFs(sampler2D tex, vec2 uv) {
 
 	vec4 color = texture2D( tex, uv );
 	float r = color.r;
@@ -74,7 +80,7 @@ vec4 postArtFs(sampler2D tex, vec2 uv) {
 	return vec4( r, g, b, color.a );
 }
 
-vec4 postBarrelBlur(sampler2D tex, vec2 uv) {
+subroutine(PostProcess) vec4 barrelBlur(sampler2D tex, vec2 uv) {
 
 	vec4 a1=texture2D(tex, barrelDistortion(uv,0.0));
 	vec4 a2=texture2D(tex, barrelDistortion(uv,0.2));
@@ -96,7 +102,7 @@ vec4 postBarrelBlur(sampler2D tex, vec2 uv) {
 
 }
 
-vec4 postBloom(sampler2D tex, vec2 uv) {
+subroutine(PostProcess) vec4 bloom(sampler2D tex, vec2 uv) {
    vec4 sum = vec4(0);
     for( int i= -4 ;i < 4; i++){
         for ( int j = -3; j < 3; j++){
@@ -113,7 +119,7 @@ vec4 postBloom(sampler2D tex, vec2 uv) {
 
 }
 
-vec4 postSobel(sampler2D tex, vec2 uv){
+subroutine(PostProcess) vec4 sobel(sampler2D tex, vec2 uv){
     const vec3 offset = vec3(-1.0/1500.0, 0.0, 1.0/1500.0);
     vec4 top         = texture(tex, uv + offset.yz);
     vec4 bottom      = texture(tex, uv + offset.yx);
@@ -128,7 +134,7 @@ vec4 postSobel(sampler2D tex, vec2 uv){
     return sqrt(sx * sx + sy * sy);
 }
 
-vec4 postSimpleBlur(sampler2D tex, vec2 uv) {
+subroutine(PostProcess) vec4 simpleBlur(sampler2D tex, vec2 uv) {
     const ivec3 offset = ivec3(2,0,-2);
     vec4 blurred = vec4(0.0);
     blurred += textureOffset(tex, uv, offset.xx);
@@ -149,10 +155,11 @@ vec4 greyscale(vec4 color){
     return vec4(vec3((color.x+color.y+color.z)/3.0),1.0);
 }
 
-vec4 postPixelate(sampler2D tex, vec2 uv) {  //TODO, should be able to do thins in tracer.
+subroutine(PostProcess) vec4 pixelate(sampler2D tex, vec2 uv) {  //TODO, should be able to do thins in tracer.
     const float intensity = 200.0;
     float d = 1.0/intensity;
-    float aspect = 16.0/9.0;  //TODO hardcoded aspect ratio
+    vec2 texSize = textureSize(tex,0);
+    float aspect = texSize.x/texSize.y;
     float u = floor(uv.x/d)*d; //this is essentially modulo?
     d = aspect/intensity;
     float v = floor(uv.y/d)*d;
@@ -202,7 +209,7 @@ vec3 unitSquareToNGon(vec2 p, float n, float amount)
 }
 
 
-vec4 postFerris(sampler2D tex, vec2 uv) {
+subroutine(PostProcess) vec4 ferris(sampler2D tex, vec2 uv) {
     vec3 clean = texture(tex, uv).xyz;
 
     vec3 acc = vec3(0.0);
@@ -214,7 +221,7 @@ vec4 postFerris(sampler2D tex, vec2 uv) {
             vec2 unitSquare = vec2(ivec2(x, y)) / vec2(ivec2(kernelSize - 1));
 
             vec2 nGon = unitSquareToNGon(unitSquare, 7.0, 1.0).xy * 20.0;
-            vec2 offset = nGon / vec2(1920,1080); //TODO remove hardcoded
+            vec2 offset = nGon / vec2(textureSize(tex, 0));
             acc += texture(tex, uv + offset).xyz * (1.0 / float(kernelSize * kernelSize));
         }
     }

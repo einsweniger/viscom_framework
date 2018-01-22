@@ -126,6 +126,7 @@ struct ShaderLog
         void UpdateFrame(double currentTime, double elapsedTime);
     private:
         std::unique_ptr<FullscreenQuad> fsq_;
+        std::string shaderName_;
         std::vector<gl::GLuint> subroutines;
         /** The GPU program used for drawing. */
         std::shared_ptr<GPUProgram> gpuProgram_;
