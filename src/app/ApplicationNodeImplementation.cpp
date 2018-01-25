@@ -146,7 +146,7 @@ namespace viscom {
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
         quad_->DrawToBackBuffer();
-        tex_->DrawToBuffer(fbo);
+        tex_->DrawToBuffer(fbo, *quad_);
 
         //drawExamples(fbo);
     }

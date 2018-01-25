@@ -116,6 +116,7 @@ struct ShaderLog
 
         void DrawToBackBuffer();
         void DrawToBuffer(const FrameBuffer& fbo);
+        void DrawToBuffer(const FrameBuffer& fbo, const IntrospectableFsq& prev);
         void Draw2D(FrameBuffer& fbo);
         const GPUProgram* GetGPUProgram() const { return gpuProgram_.get(); }
         const std::vector<subroutine_info_t> GetSubroutineCompatibleUniforms(GLuint uniform);

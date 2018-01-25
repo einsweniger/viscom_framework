@@ -307,9 +307,34 @@ namespace viscom {
     void IntrospectableFsq::DrawToBuffer(const FrameBuffer& fbo)
     {
         fbo.DrawToFBO([this]{
-            gl::glActiveTexture(gl::GL_TEXTURE0);
-            gl::glBindTexture(gl::GL_TEXTURE_2D, 2); //TODO remove hardcoded texture ID, think of a good way to forward it from previous backbuffer.
             gl::glUseProgram(gpuProgram_->getProgramId());
+            SendSubroutines();
+            SendUniforms();
+            //TODO merge outer context to local variables, then SendSubroutines()
+            //TODO add checkbox to variables updated through context so updates can be ignored
+            auto position = app_->GetCamera()->GetPosition();
+            auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
+            gl::glUniform1f(gpuProgram_->getUniformLocation("u_time"), currentTime_);
+            gl::glUniform1f(gpuProgram_->getUniformLocation("u_delta"), elapsedTime_);
+            gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
+            gl::glUniform3f(gpuProgram_->getUniformLocation("u_eye"), position.x, position.y, position.z);
+            /*TODO
+             * uniform vec4 u_date;  // year, month, day and seconds
+             * uniform vec2 u_resolution;  // viewport resolution (in pixels)
+             * uniform vec2 u_mouse;  // mouse pixel coords
+             */
+            fsq_->Draw();
+            gl::glUseProgram(0);
+        });
+
+    }
+    void IntrospectableFsq::DrawToBuffer(const FrameBuffer &fbo, const IntrospectableFsq &prev)
+    {
+        auto backbuffer = app_->SelectOffscreenBuffer(prev.backBuffers_);
+        fbo.DrawToFBO([this,&backbuffer]{
+            gl::glUseProgram(gpuProgram_->getProgramId());
+            gl::glActiveTexture(gl::GL_TEXTURE0);
+            gl::glBindTexture(gl::GL_TEXTURE_2D, backbuffer->GetTextures().front()); //TODO remove hardcoded texture ID, think of a good way to forward it from previous backbuffer.
             SendSubroutines();
             SendUniforms();
             //TODO merge outer context to local variables, then SendSubroutines()
