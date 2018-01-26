@@ -10,6 +10,38 @@
 #include "app/gfx/gl/program.h"
 
 namespace viscom {
+    struct uniform_draw_menu {
+        void operator()(glwrap::unhandled_t& u) {ImGui::Text("%s: %d, %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());};
+        void operator()(glwrap::float_t& uniform) {
+            const float v_speed = 0.0001f;
+            const float v_min = 0.0f;
+            const float v_max = 0.0f;
+            const char* display_format = "%.5f";
+            const float power = 1.0f;
+            //DragFloat(const char* label, float* v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* display_format = "%.3f", float power = 1.0f);
+            if(gl::GL_FLOAT      == uniform.type) ImGui::DragFloat (uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if(gl::GL_FLOAT_VEC2 == uniform.type) ImGui::DragFloat2(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if(gl::GL_FLOAT_VEC3 == uniform.type) ImGui::DragFloat3(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if(gl::GL_FLOAT_VEC4 == uniform.type) ImGui::DragFloat4(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+        }
+        void operator()(glwrap::integer_t& uniform) {
+            if(gl::GL_INT      == uniform.type) ImGui::DragInt (uniform.name.c_str(), &uniform.value[0]);
+            if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(uniform.name.c_str(), &uniform.value[0]);
+            if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(uniform.name.c_str(), &uniform.value[0]);
+            if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(uniform.name.c_str(), &uniform.value[0]);
+        }
+        void operator()(glwrap::uinteger_t& u) {
+            //DragInt(const char* label, int* v, float v_speed = 1.0f, int v_min = 0, int v_max = 0, const char* display_format = "%.0f");
+//            const float v_speed = 1.0f;
+//            const int v_min = 0;
+//            const int v_max = 10000000; //TODO replace with max uint?
+//            if(gl::GL_UNSIGNED_INT      == uniform.type) ImGui::DragInt (uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max);
+//            if(gl::GL_UNSIGNED_INT_VEC2 == uniform.type) ImGui::DragInt2(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max);
+//            if(gl::GL_UNSIGNED_INT_VEC3 == uniform.type) ImGui::DragInt3(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max);
+//            if(gl::GL_UNSIGNED_INT_VEC4 == uniform.type) ImGui::DragInt4(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max);
+            ImGui::Text("%s: %d, %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());
+        }
+    };
     constexpr std::array<gl::GLenum,5> progStageProps() {
         return {
             gl::GL_ACTIVE_SUBROUTINE_UNIFORMS,
@@ -90,15 +122,6 @@ namespace viscom {
         if(ImGui::Begin("GPUProgram", p_open)) {
             gl::GLuint program = gpuProgram_->getProgramId();
             ImGui::Text("Program: %d", program); ImGui::SameLine();
-            if (ImGui::Button(std::string("recompile ").append(shaderName_).c_str())) {
-                try {
-                    gpuProgram_->recompileProgram();
-                    loadProgramInterfaceInformation();
-                    log.AddLog("reload succesful\n");
-                } catch (shader_compiler_error& compilerError) {
-                    log.AddLog("%s",compilerError.what());
-                }
-            }
             if(ImGui::TreeNode(std::string("(active): Program Interface##").append(shaderName_).c_str())) {
                 for(auto info : programInterfaceInfo_)
                 {
@@ -127,6 +150,13 @@ namespace viscom {
                     if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(uniform.name.c_str(), &uniform.value[0]);
                     if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(uniform.name.c_str(), &uniform.value[0]);
                     if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(uniform.name.c_str(), &uniform.value[0]);
+                }
+                ImGui::TreePop();
+            }
+            if(ImGui::TreeNode(std::string("better uniform locations##").append(shaderName_).c_str())) {
+                auto visitor = uniform_draw_menu{};
+                for(auto& uniform : uniforms_) {
+                    std::visit(visitor, uniform);
                 }
                 ImGui::TreePop();
             }
@@ -198,6 +228,7 @@ namespace viscom {
             subroutineUniformInfo_.push_back(uniform);
             subroutines.push_back(uniform.activeSubroutine);
         }
+        uniforms_ = glwrap::read_uniforms(program);
 
         uFloat_.clear();
         uInt_.clear();
@@ -236,7 +267,7 @@ namespace viscom {
         }
         gl::glUseProgram(0);
         std::vector<FrameBufferTextureDescriptor> backBufTextures{};
-        for(const auto& output : GetProgramOutpput()) {
+        for(const auto& output : glwrap::GetProgramOutpput(gpuProgram_->getProgramId())) {
             if(gl::GL_FLOAT_VEC4 == output.second.type) {
                 LOG(INFO) << "adding texture descriptor for " << output.first;
                 backBufTextures.emplace_back(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
@@ -306,7 +337,7 @@ namespace viscom {
 
     void IntrospectableFsq::DrawToBuffer(const FrameBuffer& fbo)
     {
-        fbo.DrawToFBO([this]{
+        fbo.DrawToFBO([this,&fbo]{
             gl::glUseProgram(gpuProgram_->getProgramId());
             SendSubroutines();
             SendUniforms();
@@ -318,6 +349,7 @@ namespace viscom {
             gl::glUniform1f(gpuProgram_->getUniformLocation("u_delta"), elapsedTime_);
             gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
             gl::glUniform3f(gpuProgram_->getUniformLocation("u_eye"), position.x, position.y, position.z);
+            gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
             /*TODO
              * uniform vec4 u_date;  // year, month, day and seconds
              * uniform vec2 u_resolution;  // viewport resolution (in pixels)
@@ -331,7 +363,7 @@ namespace viscom {
     void IntrospectableFsq::DrawToBuffer(const FrameBuffer &fbo, const IntrospectableFsq &prev)
     {
         auto backbuffer = app_->SelectOffscreenBuffer(prev.backBuffers_);
-        fbo.DrawToFBO([this,&backbuffer]{
+        fbo.DrawToFBO([this,&backbuffer,&fbo]{
             gl::glUseProgram(gpuProgram_->getProgramId());
             gl::glActiveTexture(gl::GL_TEXTURE0);
             gl::glBindTexture(gl::GL_TEXTURE_2D, backbuffer->GetTextures().front()); //TODO remove hardcoded texture ID, think of a good way to forward it from previous backbuffer.
@@ -345,6 +377,7 @@ namespace viscom {
             gl::glUniform1f(gpuProgram_->getUniformLocation("u_delta"), elapsedTime_);
             gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
             gl::glUniform3f(gpuProgram_->getUniformLocation("u_eye"), position.x, position.y, position.z);
+            gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
             /*TODO
              * uniform vec4 u_date;  // year, month, day and seconds
              * uniform vec2 u_resolution;  // viewport resolution (in pixels)

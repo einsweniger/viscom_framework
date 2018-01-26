@@ -39,10 +39,76 @@ subroutine(PostProcess) vec4 none(sampler2D tex, vec2 uv) {
   return texture2D(tex, uv);
 }
 
+float randf(){
+    float time = u_time*0.1;
+    return mod(4.0,sin(time*time)+1.0)*0.75;
+}
+/*
+
+subroutine(PostProcess) vec4 glitch(sampler2D iChannel0, vec2 uv) {
+
+    //vec2 uv = fragCoord.xy / iResolution.xy;
+
+    vec2 iResolution = u_resolution;
+    float iTime = u_time;
+    vec2 fragCoord;
+    fragCoord.x= uv.x*iResolution.x;
+    fragCoord.y= uv.y*iResolution.y;
+    float amount = randf()*0.005;
+    float angle = (PI*randf())/(2.0*PI)-PI;
+    float seed = randf();
+    float seed_x = 0.5*randf()-0.5;
+    float seed_y = (0.3*randf()/0.6)-0.3;
+    float distortion_x = randf()*iResolution.x;
+    float distortion_y = randf()*iResolution.y;
+    float col_s = 0.3;
+        vec2 p = uv;
+        float xs = floor(fragCoord.x / 0.5);
+        float ys = floor(fragCoord.y / 0.5);
+        //based on staffantans glitch shader for unity https://github.com/staffantan/unityglitch
+        vec4 normal = texture(iChannel0, p*seed*seed);
+        if(p.y<distortion_x+col_s && p.y>distortion_x-col_s*seed) {
+            if(seed_x >0.0){
+                p.y = 1. - (p.y + distortion_y);
+            }
+            else {
+                p.y = distortion_y;
+            }
+        }
+        if(p.x<distortion_y+col_s && p.x>distortion_y-col_s*seed) {
+            if(seed_y>0.){
+                p.x=distortion_x;
+            }
+            else {
+                p.x = 1. - (p.x + distortion_x);
+            }
+        }
+        p.x+=normal.x*seed_x*(seed/5.);
+        p.y+=normal.y*seed_y*(seed/5.);
+        //base from RGB shift shader
+        vec2 offset = amount * vec2( cos(angle), sin(angle));
+        vec4 cr = texture(iChannel0, p + offset);
+        vec4 cga = texture(iChannel0, p);
+        vec4 cb = texture(iChannel0, p - offset);
+        vec4 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
+        //add noise
+
+       vec4 snow = 200.*amount*vec4(hash12(vec2(xs * seed,ys * seed*50.))*0.2);
+        fragColor = fragColor+ snow;
+
+      //   	fragColor.rgb *= smoothstep(0.8, vigentOffset * 0.799, dist *( darkness + vigentOffset ));
+
+      //        fragColor.rgb = pow(fragColor.rgb, 1.0/vec3(2.2));
+
+          return fragColor;
+}
+
+*/
+
 uniform float ca_max_distort = 0.5;
 uniform int ca_num_iter = 24;
 uniform float ca_reci_num_iter_f = 1.0 / 24.0;
-subroutine(PostProcess) vec4 chromaticAberration(sampler2D tex, vec2 uv) {
+subroutine(PostProcess) vec4 chromaticAberrationV1(sampler2D tex, vec2 uv) {
 
 	vec4 sumcol = vec4(0.0);
 	vec4 sumw = vec4(0.0);
@@ -55,6 +121,24 @@ subroutine(PostProcess) vec4 chromaticAberration(sampler2D tex, vec2 uv) {
 	}
 
 	return sumcol / sumw;
+}
+subroutine(PostProcess) vec4 chromaticAberrationV2(sampler2D t, vec2 UV){
+	vec2 uv = 1.0 - 2.0 * UV;
+	vec3 color = vec3(0);
+	float rf = 1.0;
+	float gf = 1.0;
+  float bf = 1.0;
+	float f = 1.0/float(ca_num_iter);
+	for(int i = 0; i < ca_num_iter; ++i){
+		color.r += f*texture(t, 0.5-0.5*(uv*rf) ).r;
+		color.g += f*texture(t, 0.5-0.5*(uv*gf) ).g;
+		color.b += f*texture(t, 0.5-0.5*(uv*bf) ).b;
+		rf *= 0.9972;
+		gf *= 0.998;
+    bf /= 0.9988;
+		color = saturate(color);
+	}
+	return vec4(color,1.0);
 }
 
 subroutine(PostProcess) vec4 artFs(sampler2D tex, vec2 uv) {
@@ -155,7 +239,7 @@ vec4 greyscale(vec4 color){
     return vec4(vec3((color.x+color.y+color.z)/3.0),1.0);
 }
 
-subroutine(PostProcess) vec4 pixelate(sampler2D tex, vec2 uv) {  //TODO, should be able to do thins in tracer.
+subroutine(PostProcess) vec4 pixelate(sampler2D tex, vec2 uv) {  //TODO, should be able to do this in tracer.
     const float intensity = 200.0;
     float d = 1.0/intensity;
     vec2 texSize = textureSize(tex,0);
@@ -236,3 +320,9 @@ subroutine(PostProcess) vec4 ferris(sampler2D tex, vec2 uv) {
 
 }
 
+subroutine(PostProcess) vec4 redBar(sampler2D tex, vec2 uv) {
+  vec3 col = vec3(0);
+    col = mix(vec3(1, 0.0, 0.0), col, smoothstep(.5, .495, uv.x) + smoothstep(.5, .505, uv.x));
+	return vec4(col, 1.0);
+
+}

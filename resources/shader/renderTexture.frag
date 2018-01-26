@@ -5,6 +5,8 @@ in vec2 texCoord;
 out vec4 color;
 
 uniform sampler2D tex;
+uniform uvec2 u_resolution;  // viewport resolution (in pixels)
+uniform float u_time;
 
 #include "lib/postproc.glsl"
 

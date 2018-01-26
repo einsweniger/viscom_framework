@@ -6,7 +6,7 @@ in vec2 texCoord;
 uniform float u_time;             // shader playback time (in seconds)
 uniform float u_delta;  // delta time between frames (in seconds)
 uniform vec4 u_date;  // year, month, day and seconds
-uniform vec2 u_resolution;  // viewport resolution (in pixels)
+uniform uvec2 u_resolution;  // viewport resolution (in pixels)
 uniform vec2 u_mouse;  // mouse pixel coords
 uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform mat4  u_MVP;
@@ -28,7 +28,7 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 #include "lib/sdf_op.glsl"
 #include "lib/sdf.glsl"
 #include "lib/trace.glsl"  // needs vec2 map(vec3) to be declared.
-uniform Box boxes[1];
+
 
 //------------------------------------------------------------------------
 // Your custom SDF
@@ -49,11 +49,9 @@ subroutine(SceneMap) vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/vie
     res = opU( res, vec2( s, 50. ) );
     return res;
 }
+
 subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
 {
-Box box;
-box.position = vec3(0,0,0);
-box.bounds = vec3(.25);
 
     vec3 offset = pos-vec3(-2,.25,2);
     pReflect(offset, vec3(0,1,0),1);

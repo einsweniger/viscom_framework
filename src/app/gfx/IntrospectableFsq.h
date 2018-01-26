@@ -9,6 +9,7 @@
 #include <variant>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
+#include "app/gfx/gl/uniform.h"
 
 
 namespace viscom {
@@ -140,7 +141,7 @@ struct ShaderLog
         std::vector<float_uniform_info_t> uFloat_;
         std::vector<int_uniform_info_t> uInt_;
         std::vector<FrameBuffer> backBuffers_;
-        std::vector<std::variant<int_uniform_info_t, float_uniform_info_t>> uniforms_;
+        std::vector<glwrap::uniform_container> uniforms_;
         void SendUniforms() const;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
