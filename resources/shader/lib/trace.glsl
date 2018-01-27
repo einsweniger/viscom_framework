@@ -7,7 +7,7 @@ uniform int USE_BV = 0;
 uniform int DRAW_DEBUG = 0;
 uniform float relaxation = 1.9;
 uniform float pixelRadius = 0.0001;
-
+out vec4 out_normals;
 /*
 If enhancedTrace had 5 params and would be called like:
 subroutine(RayMarch) vec4 enhancedTrace(vec3 pos, vec3 dir) { return enhancedTrace(pos, dir, 0.0001, false, 1.9); }

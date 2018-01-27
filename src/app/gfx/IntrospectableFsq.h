@@ -65,46 +65,6 @@ struct ShaderLog
         ImGui::End();
     }
 };
-
-    struct interface_info_t {
-        gl::GLint location;
-        gl::GLenum type;
-    };
-
-    struct program_interface_info_t {
-        gl::GLuint activeResourceCount;
-        gl::GLenum interface;
-    };
-
-    struct subroutine_info_t {
-        std::string name;
-        gl::GLuint value;
-    };
-
-    struct subroutine_uniform_info_t {
-        std::string name;
-        gl::GLuint location;
-        gl::GLuint activeSubroutine;
-        std::vector<subroutine_info_t> compatibleSubroutines;
-    };
-
-    struct float_uniform_info_t {
-        std::string name;
-        gl::GLenum type;
-        gl::GLuint location;
-        std::vector<gl::GLfloat> value;
-    };
-
-    struct int_uniform_info_t {
-        std::string name;
-        gl::GLenum type;
-        gl::GLuint location;
-        std::vector<gl::GLint> value;
-    };
-
-
-    using InterfaceInfoList = std::vector<std::pair<std::string, GLuint>>;
-    using InterfaceInfoMap = std::unordered_map<std::string, interface_info_t>;
     /**
      * Encapsulates a FullscreenQuad and enables editing uniforms for the fragment shader.
      * We don't care for any other shader types here, since we only draw on a FSQ.
@@ -120,29 +80,19 @@ struct ShaderLog
         void DrawToBuffer(const FrameBuffer& fbo, const IntrospectableFsq& prev);
         void Draw2D(FrameBuffer& fbo);
         const GPUProgram* GetGPUProgram() const { return gpuProgram_.get(); }
-        const std::vector<subroutine_info_t> GetSubroutineCompatibleUniforms(GLuint uniform);
-        const InterfaceInfoMap GetUniforms();
-        const InterfaceInfoMap GetProgramOutpput();
-        void SendSubroutines() const;
+//        const std::vector<subroutine_info_t> GetSubroutineCompatibleUniforms(GLuint uniform);
+//        void SendSubroutines() const;
         const std::vector<FrameBuffer> GetBackBuffer() {return backBuffers_;};
         void UpdateFrame(double currentTime, double elapsedTime);
     private:
-        std::unique_ptr<FullscreenQuad> fsq_;
-        std::string shaderName_;
-        std::vector<gl::GLuint> subroutines;
-        /** The GPU program used for drawing. */
-        std::shared_ptr<GPUProgram> gpuProgram_;
         void DrawProgramWindow(bool *p_open);
         void loadProgramInterfaceInformation();
-        std::vector<program_interface_info_t> programInterfaceInfo_;
-        InterfaceInfoMap uniformInfo_;
-        InterfaceInfoMap programOutputInfo_;
-        std::vector<subroutine_uniform_info_t> subroutineUniformInfo_;
-        std::vector<float_uniform_info_t> uFloat_;
-        std::vector<int_uniform_info_t> uInt_;
+        void SendUniforms() const;
+        std::unique_ptr<FullscreenQuad> fsq_;
+        std::shared_ptr<GPUProgram> gpuProgram_;
+        std::string shaderName_;
         std::vector<FrameBuffer> backBuffers_;
         std::vector<glwrap::uniform_container> uniforms_;
-        void SendUniforms() const;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
         ApplicationNodeBase* app_;

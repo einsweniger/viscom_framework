@@ -6,25 +6,8 @@
 
 #include "util.h"
 
-/**
- * These are all the possible interfaces of a Program in OpenGL 4.6
- * See OpenGL 4.6 Core Profile, p 101-105 for explanation
- */
-struct uniform_info_t {
-    gl::GLint location;
-    gl::GLenum type;
-};
 
-struct subroutine_uniform_info_t {
-    gl::GLint location;
-    gl::GLuint value;
-};
-
-using UniformList = std::vector<std::pair<std::string, gl::GLuint>>;
-using UniformMap = std::unordered_map<std::string, uniform_info_t>;
-
-namespace viscom::glwrap {
-
+namespace viscom::glwrap::constants{
     static const std::vector<gl::GLenum> programInterfaces {
         gl::GL_UNIFORM,
         gl::GL_UNIFORM_BLOCK,
@@ -47,10 +30,6 @@ namespace viscom::glwrap {
         gl::GL_TRANSFORM_FEEDBACK_BUFFER,
         gl::GL_BUFFER_VARIABLE,
         gl::GL_SHADER_STORAGE_BLOCK
-    };
-
-    struct prog {
-        gl::GLuint program;
     };
 
     static const std::vector<gl::GLenum> programInterfaceProperties {
@@ -139,88 +118,48 @@ namespace viscom::glwrap {
         gl::GL_TYPE, //"GL_UNIFORM, GL_PROGRAM_INPUT, GL_PROGRAM_OUTPUT, GL_TRANSFORM_FEEDBACK_VARYING, GL_BUFFER_VARIABLE"
 
     };
+}
 
-
+namespace viscom::glwrap {
+//    using InterfaceInfoList = std::vector<std::pair<std::string, gl::GLuint>>;
+//    using InterfaceInfoMap = std::unordered_map<std::string, interface_info_t>;
 
     static gl::GLuint getActiveResourceCount(const gl::GLuint program, const gl::GLenum interface) {
         return mglGetProgramInterface(program, interface, gl::GL_ACTIVE_RESOURCES);
     }
 
-    static ResourceProperties getUniformResourceProperties(const gl::GLuint program, const gl::GLuint index, const std::vector<gl::GLenum>& requestedProperties = allValidUniformProperties)
-    {
-        return mglGetProgramResource(program, gl::GL_UNIFORM, index, requestedProperties);
-    }
-
-    static ResourceProperties getProgramOutputResourceProperties(const gl::GLuint program, const gl::GLuint index, const std::vector<gl::GLenum>& requestedProperties = allValidProgramOutputProperties)
-    {
-        return mglGetProgramResource(program, gl::GL_PROGRAM_OUTPUT, index, requestedProperties);
-    }
-
-    static InterfaceInfoMap getNameLocationType(const gl::GLuint program, const gl::GLenum interface) {
-        auto activeResCount = getActiveResourceCount(program, interface);
-        if (0 == activeResCount) {
-            return InterfaceInfoMap();
-        }
-        InterfaceInfoMap result;
-        result.reserve(activeResCount);
-/*
-        if(gl::GL_UNIFORM == interface) { //unsure if this additional check for uniform blocks is necessary, tho.
-            for(gl::GLuint index = 0; index < activeResCount; ++index) {
-                auto props = mglGetProgramResource(program, interface, index, {gl::GL_NAME_LENGTH, gl::GL_BLOCK_INDEX, gl::GL_LOCATION, gl::GL_TYPE});
-                if(-1 != props[gl::GL_BLOCK_INDEX]) {
-                    // if BLOCK_INDEX is set, we skip it. blocks are ignored for now, maybe handled separately.
-                    continue;
-                }
-                interface_info_t info{props[gl::GL_LOCATION],getType(props[gl::GL_TYPE])};
-                std::string name = mglGetProgramResourceName(program, interface, index, props[gl::GL_NAME_LENGTH]);
-                result.emplace(name, info);
-            }
-            return result;
-        }
-*/
-        for(gl::GLuint index = 0; index < activeResCount; ++index) {
-            auto props = mglGetProgramResource(program, interface, index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
-            interface_info_t info{props[gl::GL_LOCATION],getType(props[gl::GL_TYPE])};
-            std::string name = mglGetProgramResourceName(program, interface, index, props[gl::GL_NAME_LENGTH]);
-            result.emplace(name, info);
-        }
-
-        return result;
-    }
-
-    static InterfaceInfoList getNameLocation(const gl::GLuint program, const gl::GLenum interface) {
-        auto activeResCount = getActiveResourceCount(program, interface);
-        if(0 == activeResCount) {
-            return InterfaceInfoList();
-        }
-
-        auto maxNameLen = mglGetProgramInterface(program, interface, gl::GL_MAX_NAME_LENGTH);
-        InterfaceInfoList result;
-        result.reserve(activeResCount);
-        for(GLuint index = 0; index < activeResCount; ++index) {
-            auto name = mglGetProgramResourceName(program, interface, index, maxNameLen);
-            result.emplace_back(name, index);
-        }
-
-        return result;
-
-    }
-    static InterfaceInfoMap getUniformInfo(const gl::GLuint program)
-    {
-        return getNameLocationType(program, gl::GL_UNIFORM);
-    }
-
-    const InterfaceInfoList getSubroutineUniforms(gl::GLuint program, gl::GLenum interface)
-    {
-        return getNameLocation(program, interface);
-
-    }
-
-    const InterfaceInfoMap GetProgramOutpput(gl::GLuint program)
-    {
-        return getNameLocationType(program, gl::GL_PROGRAM_OUTPUT);
-    }
-
+//    static InterfaceInfoMap getNameLocationType(const gl::GLuint program, const gl::GLenum interface) {
+//        auto activeResCount = getActiveResourceCount(program, interface);
+//        if (0 == activeResCount) {
+//            return InterfaceInfoMap();
+//        }
+//        InterfaceInfoMap result;
+//        result.reserve(activeResCount);
+///*
+//        if(gl::GL_UNIFORM == interface) { //unsure if this additional check for uniform blocks is necessary, tho.
+//            for(gl::GLuint index = 0; index < activeResCount; ++index) {
+//                auto props = mglGetProgramResource(program, interface, index, {gl::GL_NAME_LENGTH, gl::GL_BLOCK_INDEX, gl::GL_LOCATION, gl::GL_TYPE});
+//                if(-1 != props[gl::GL_BLOCK_INDEX]) {
+//                    // if BLOCK_INDEX is set, we skip it. blocks are ignored for now, maybe handled separately.
+//                    continue;
+//                }
+//                interface_info_t info{props[gl::GL_LOCATION],getType(props[gl::GL_TYPE])};
+//                std::string name = mglGetProgramResourceName(program, interface, index, props[gl::GL_NAME_LENGTH]);
+//                result.emplace(name, info);
+//            }
+//            return result;
+//        }
+//*/
+//        for(gl::GLuint index = 0; index < activeResCount; ++index) {
+//            auto props = mglGetProgramResource(program, interface, index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
+//            interface_info_t info{props[gl::GL_LOCATION],getType(props[gl::GL_TYPE])};
+//            std::string name = mglGetProgramResourceName(program, interface, index, props[gl::GL_NAME_LENGTH]);
+//            result.emplace(name, info);
+//        }
+//
+//        return result;
+//    }
+//
 
 }
 

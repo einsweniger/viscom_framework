@@ -13,10 +13,11 @@ uniform mat4  u_MVP;
 uniform float timescale = 1.0;
 
 // shader outputs
-layout(location = 0) out vec4 out_color;
-layout(location = 1) out vec4 out_texCoord;
-layout(location = 2) out vec4 out_worldPos;
-layout(location = 3) out vec4 out_normals;
+out vec4 out_color;
+out vec4 out_shaded;
+out vec4 out_texCoord;
+out vec4 out_worldPos;
+
 
 // local constants
 const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
@@ -144,7 +145,7 @@ void main()
     vec3 position = u_eye;
     position.z -= u_time*.5;
     vec3 color = render(u_eye, ray_direction);
-    //color = shade(u_camPosition, ray_direction, light_dir, hit);
+    out_shaded = pow(vec4(shade(u_eye, ray_direction, light_dir, hit),1.0),vec4(.44));
     out_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     out_texCoord = vec4(texCoord,0.f, 1.f);
     out_worldPos = hit; // does not accomodate for repetitions
