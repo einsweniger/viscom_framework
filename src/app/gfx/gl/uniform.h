@@ -109,8 +109,20 @@ namespace viscom::glwrap
         return get_name_location(program, interface);
     }
 
-    static std::vector<info_t> get_program_output(const gl::GLuint program) {
-        return get_name_location_type(program, gl::GL_PROGRAM_OUTPUT);
+    struct program_output_t
+    {
+        std::string name;
+        gl::GLenum type;
+        gl::GLint location;
+        gl::GLuint textureLocation;
+    };
+
+    static std::vector<program_output_t> get_program_output(const gl::GLuint program) {
+        std::vector<program_output_t> result{};
+        for(const auto& info : get_name_location_type(program, gl::GL_PROGRAM_OUTPUT)){
+            result.push_back(program_output_t{info.name, info.type, info.location, 0});
+        }
+        return result;
     }
     template<gl::GLenum>
     struct U {};
@@ -161,13 +173,14 @@ namespace viscom::glwrap
         std::vector<gl::GLuint> activeSubroutines;
         std::vector<subroutine_uniform_t> subroutineUniforms;
     };
-
+    
     using uniform_container = std::variant<
-        integer_t,
-        unhandled_t,
-        float_t,
-        uinteger_t,
-        stage_subroutines_t
+        integer_t
+        ,unhandled_t
+        ,float_t
+        ,uinteger_t
+        ,stage_subroutines_t
+        ,program_output_t
     >;
 
     static std::vector<subroutine_t> get_subroutine_compatible_uniforms(gl::GLuint program, gl::GLenum stage, gl::GLuint uniform)
@@ -292,6 +305,7 @@ namespace viscom::glwrap
         void operator()(stage_subroutines_t& arg) {
             gl::glUniformSubroutinesuiv(arg.programStage, static_cast<GLsizei>(arg.activeSubroutines.size()), &arg.activeSubroutines[0]);
         }
+        void operator()(program_output_t& arg) { } //do nothing
         void operator()(unhandled_t& arg) { } //fallthrough
     };
 

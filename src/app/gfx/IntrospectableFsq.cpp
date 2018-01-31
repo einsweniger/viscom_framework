@@ -51,6 +51,19 @@ namespace viscom {
                 }
             }
         }
+        void operator()(glwrap::program_output_t output) {
+            ImGui::Text("%s: %d, %s", output.name.c_str(), output.location, glbinding::Meta::getString(output.type).c_str());
+            const auto textureID = output.textureLocation;
+            ImGui::Text("texture id: %d", textureID);
+            std::string headerName = std::to_string(textureID);//name + ": "+ std::to_string(tex);
+            if (ImGui::TreeNode(headerName.c_str())) {
+                ImVec2 uv0(0, 1);
+                ImVec2 uv1(1, 0);
+                ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
+                ImGui::Image(reinterpret_cast<ImTextureID>(textureID), region, uv0, uv1);
+                ImGui::TreePop();
+            };
+        }
     };
     constexpr std::array<gl::GLenum,5> progStageProps() {
         return {
@@ -68,21 +81,6 @@ namespace viscom {
     {
         loadProgramInterfaceInformation();
     }
-
-//    const std::vector<subroutine_info_t> IntrospectableFsq::GetSubroutineCompatibleUniforms(gl::GLuint uniform)
-//    {
-//        auto id = gpuProgram_->getProgramId();
-//        auto compatibleSubroutines = mglGetCompatibleSubroutines(id, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, uniform);
-//        std::vector<subroutine_info_t> result;
-//        result.reserve(compatibleSubroutines.size());
-//        for(auto subroutine : compatibleSubroutines){
-//            subroutine_info_t data;
-//            data.name = mglGetProgramResourceName(id, gl::GL_FRAGMENT_SUBROUTINE, subroutine);
-//            data.value = subroutine;
-//            result.push_back(data);
-//        }
-//        return result;
-//    }
 
     void IntrospectableFsq::Draw2D(FrameBuffer &fbo)
     {
@@ -114,13 +112,6 @@ namespace viscom {
         if(ImGui::Begin("GPUProgram", p_open)) {
             gl::GLuint program = gpuProgram_->getProgramId();
             ImGui::Text("Program: %d", program); ImGui::SameLine();
-//            if(ImGui::TreeNode(std::string("(active): Program Interface##").append(shaderName_).c_str())) {
-//                for(auto info : programInterfaceInfo_)
-//                {
-//                    ImGui::Text("(%d): %s", info.activeResourceCount, Meta::getString(info.interface).c_str());
-//                }
-//                ImGui::TreePop();
-//            };
             if(ImGui::TreeNode(std::string("better uniform locations##").append(shaderName_).c_str())) {
                 auto visitor = uniform_draw_menu{};
                 for(auto& uniform : uniforms_) {
@@ -128,47 +119,6 @@ namespace viscom {
                 }
                 ImGui::TreePop();
             }
-//            if(ImGui::TreeNode(std::string("program output##").append(shaderName_).c_str())) {
-//                //TODO connect shader output to next stage
-//                const auto& texIds = app_->SelectOffscreenBuffer(backBuffers_)->GetTextures();
-//                for(const auto& output : programOutputInfo_)
-//                {
-//                    ImGui::Text("%s: %d, %s", output.first.c_str(), output.second.location, Meta::getString(output.second.type).c_str());
-//                    const auto textureID = texIds.at(output.second.location);
-//                    ImGui::Text("texture id: %d", textureID);
-//                    std::string name = mglGetProgramResourceName(program, gl::GL_PROGRAM_OUTPUT, textureID);
-//                    std::string headerName = std::to_string(textureID);//name + ": "+ std::to_string(tex);
-//                    if (ImGui::TreeNode(headerName.c_str())) {
-//                        ImVec2 uv0(0, 1);
-//                        ImVec2 uv1(1, 0);
-//                        ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
-//                        ImGui::Image(reinterpret_cast<ImTextureID>(textureID), region, uv0, uv1);
-//                        ImGui::TreePop();
-//                    };
-//                }
-//                ImGui::TreePop();
-//            }
-//            if(ImGui::TreeNode(std::string("Subroutine details##").append(shaderName_).c_str())) {
-//                auto maxSubRoutines = mglGetIntegerv(gl::GL_MAX_SUBROUTINES);
-//                auto maxSubroutineUniformLocations = mglGetIntegerv(gl::GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS);
-//                ImGui::Text("GL_MAX_SUBROUTINES: %d", maxSubRoutines);
-//                ImGui::Text("GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS: %d", maxSubroutineUniformLocations);
-//
-//                for(auto progStageProp : progStageProps()) {
-//                    auto value = mglGetProgramStageiv(program, gl::GL_FRAGMENT_SHADER, progStageProp);
-//                    ImGui::Text("%s: %d", Meta::getString(progStageProp).c_str(), value);
-//                }
-//
-//                for(const auto& uniform : subroutineUniformInfo_) {
-//                    ImGui::Text("location %d: %s (active sub: %d)", uniform.location, uniform.name.c_str(), uniform.activeSubroutine);
-//                    for(const auto& subroutine : uniform.compatibleSubroutines) {
-//                        ImGui::BulletText("subroutine %d:", subroutine.value); ImGui::SameLine();
-//                        ImGui::RadioButton(subroutine.name.c_str(), reinterpret_cast<int *>(&subroutines[uniform.location]), subroutine.value);
-//                    }
-//                }
-//
-//                ImGui::TreePop();
-//            }
         }
         ImGui::End();
     }
@@ -178,28 +128,11 @@ namespace viscom {
         auto program = gpuProgram_->getProgramId();
         gl::glUseProgram(program);
 
-//        programInterfaceInfo_.clear();
-//        for(auto interface : glwrap::constants::programInterfaces) {
-//            program_interface_info_t info{glwrap::getActiveResourceCount(program, interface), interface};
-//            programInterfaceInfo_.push_back(info);
-//        }
-//        programOutputInfo_ = glwrap::GetProgramOutpput(program);
-//        subroutineUniformInfo_.clear();
-//        subroutines.clear();
-//        for(const auto &info : glwrap::getSubroutineUniforms(program, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM)) {
-//            subroutine_uniform_info_t uniform;
-//            uniform.name = info.first;
-//            uniform.location = info.second;
-//            uniform.activeSubroutine = mglGetUniformSubroutine(gl::GL_FRAGMENT_SHADER,uniform.location);
-//            uniform.compatibleSubroutines = GetSubroutineCompatibleUniforms(uniform.location);
-//            subroutineUniformInfo_.push_back(uniform);
-//            subroutines.push_back(uniform.activeSubroutine);
-//        }
         uniforms_ = glwrap::read_uniforms_from_program(program);
 
-        gl::glUseProgram(0);
         std::vector<FrameBufferTextureDescriptor> backBufTextures{};
-        for(const auto& output : glwrap::get_program_output(gpuProgram_->getProgramId())) {
+        auto programOutput = glwrap::get_program_output(program);
+        for(auto& output : programOutput) {
             if(gl::GL_FLOAT_VEC4 == output.type) {
                 LOG(INFO) << "adding texture descriptor for " << output.name;
                 backBufTextures.emplace_back(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
@@ -207,9 +140,16 @@ namespace viscom {
         }
         backBuffers_ = app_->CreateOffscreenBuffers(FrameBufferDescriptor{backBufTextures,{}});
         auto buffer = app_->SelectOffscreenBuffer(backBuffers_);
+        gl::GLuint counter = 0;
         for(const auto& tex : buffer->GetTextures()) {
             LOG(INFO) << "available texture: " << tex;
+            programOutput.at(counter).textureLocation = tex;
+            ++counter;
         }
+        for(const auto& output : programOutput) {
+            uniforms_.push_back(output);
+        }
+        gl::glUseProgram(0);
     }
     void IntrospectableFsq::SendUniforms() const
     {
@@ -218,13 +158,6 @@ namespace viscom {
             std::visit(visitor,u);
         }
     }
-
-//    void IntrospectableFsq::SendSubroutines() const
-//    {
-//        if(subroutines.empty()) return;
-//
-//        glUniformSubroutinesuiv(gl::GL_FRAGMENT_SHADER, static_cast<GLsizei>(subroutines.size()), &subroutines[0]);
-//    }
 
     void IntrospectableFsq::UpdateFrame(double currentTime, double elapsedTime)
     {
