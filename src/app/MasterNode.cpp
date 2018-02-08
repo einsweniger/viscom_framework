@@ -57,7 +57,7 @@ namespace viscom {
                             ImVec2 uv0(0, 1);
                             ImVec2 uv1(1, 0);
                             ImVec2 region(ImGui::GetWindowContentRegionWidth(), ImGui::GetWindowContentRegionWidth() / 1.7f);
-                            ImGui::Image(reinterpret_cast<ImTextureID>(tex), region, uv0, uv1);
+                            ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) tex), region, uv0, uv1);
                         };
                     }
                 }
