@@ -114,7 +114,15 @@ namespace viscom::glwrap
         std::string name;
         gl::GLenum type;
         gl::GLint location;
-        gl::GLuint textureLocation;
+        gl::GLsizei textureLocation;
+    };
+
+    struct program_input_t
+    {
+        std::string name;
+        gl::GLenum type;
+        gl::GLint location;
+        gl::GLsizei textureLocation;
     };
 
     static std::vector<program_output_t> get_program_output(const gl::GLuint program) {
@@ -132,7 +140,7 @@ namespace viscom::glwrap
         std::string name;
         gl::GLenum type;
         gl::GLint location;
-        std::vector<int> value;
+        std::vector<gl::GLint> value;
     };
 
     struct float_t
@@ -140,7 +148,7 @@ namespace viscom::glwrap
         std::string name;
         gl::GLenum type;
         gl::GLint location;
-        std::vector<float> value;
+        std::vector<gl::GLfloat> value;
     };
 
     struct uinteger_t
@@ -148,7 +156,7 @@ namespace viscom::glwrap
         std::string name;
         gl::GLenum type;
         gl::GLint location;
-        std::vector<unsigned int> value;
+        std::vector<gl::GLuint> value;
     };
     struct unhandled_t
     {
@@ -173,7 +181,25 @@ namespace viscom::glwrap
         std::vector<gl::GLuint> activeSubroutines;
         std::vector<subroutine_uniform_t> subroutineUniforms;
     };
-    
+
+    struct sampler_t {
+        std::string name;
+        gl::GLenum type;
+        gl::GLint location;
+        gl::GLint boundTexture;
+    };
+
+    struct program_samplers_t {
+        std::vector<sampler_t> samplers;
+    };
+
+    struct bool_t {
+        std::string name;
+        gl::GLenum type;
+        gl::GLint location;
+        std::vector<gl::GLint> value; //imgui does not like GLboolean, so we're doing int's instead.
+    };
+
     using uniform_container = std::variant<
         integer_t
         ,unhandled_t
@@ -181,6 +207,8 @@ namespace viscom::glwrap
         ,uinteger_t
         ,stage_subroutines_t
         ,program_output_t
+        ,program_samplers_t
+        ,bool_t
     >;
 
     static std::vector<subroutine_t> get_subroutine_compatible_uniforms(gl::GLuint program, gl::GLenum stage, gl::GLuint uniform)
@@ -225,6 +253,12 @@ namespace viscom::glwrap
             default:return false;
         }
     }
+    constexpr bool is_bool(gl::GLenum type) {
+        switch (type) {
+            case gl::GL_BOOL:case gl::GL_BOOL_VEC2:case gl::GL_BOOL_VEC3:case gl::GL_BOOL_VEC4: return true;
+            default: return false;
+        }
+    }
 
 
     static uniform_container make_uniform(gl::GLuint program, std::string name, gl::GLint location, gl::GLenum type)
@@ -244,6 +278,12 @@ namespace viscom::glwrap
             gl::glGetUniformuiv(program,  positive(location), &value[0]);
             return uinteger_t{name, type, location, value};
         }
+        if (is_bool(type)) {
+            auto intValues = std::vector<gl::GLint>(glwrap::getSize(type));
+            gl::glGetUniformiv(program, positive(location), &intValues[0]);
+            return bool_t{name, type, location, intValues};
+        };
+
         //fallthrough
         return unhandled_t{name, type, location};
     }
@@ -264,10 +304,26 @@ namespace viscom::glwrap
     static std::vector<uniform_container> read_uniforms_from_program(gl::GLuint program)
     {
         std::vector<uniform_container> result;
+        program_samplers_t collected_samplers{};
         // "normal" uniforms
         for (const auto &uniform : get_uniforms(program)) {
-            result.push_back(make_uniform(program, uniform.name, uniform.location, uniform.type));
+            auto created_uniform = make_uniform(program, uniform.name, uniform.location, uniform.type);
+            if(std::holds_alternative<unhandled_t>(created_uniform)) {
+                auto test = std::get<unhandled_t>(created_uniform);
+                if(is_sampler(test.type)) {
+                    collected_samplers.samplers.push_back(sampler_t{test.name, test.type, test.location, 0});
+                } else {
+                    result.push_back(test);
+                }
+                //is sampler, collect;
+
+            } else {
+                result.push_back(created_uniform);
+            }
         }
+        // add collected samplers to result
+        result.push_back(collected_samplers);
+
         for (const auto stage : constants::programStagesWithSubroutines()) {
             auto activeUniforms = get_active_res_cout(program, constants::getSubroutineUniformEnumForProgramStage(stage));
             if (0 == activeUniforms) continue;
@@ -302,8 +358,24 @@ namespace viscom::glwrap
             if (gl::GL_FLOAT_VEC3 == arg.type) gl::glUniform3fv(arg.location, 1, &arg.value[0]);
             if (gl::GL_FLOAT_VEC4 == arg.type) gl::glUniform4fv(arg.location, 1, &arg.value[0]);
         }
+        void operator()(bool_t& arg) {
+            if (gl::GL_BOOL == arg.type)      gl::glUniform1iv(arg.location, 1, &arg.value[0]);
+            if (gl::GL_BOOL_VEC2 == arg.type) gl::glUniform2iv(arg.location, 1, &arg.value[0]);
+            if (gl::GL_BOOL_VEC3 == arg.type) gl::glUniform3iv(arg.location, 1, &arg.value[0]);
+            if (gl::GL_BOOL_VEC4 == arg.type) gl::glUniform4iv(arg.location, 1, &arg.value[0]);
+        }
         void operator()(stage_subroutines_t& arg) {
             gl::glUniformSubroutinesuiv(arg.programStage, static_cast<GLsizei>(arg.activeSubroutines.size()), &arg.activeSubroutines[0]);
+        }
+        void operator()(program_samplers_t& arg) {
+            gl::GLint counter = 0;
+            for(auto sampler : arg.samplers) {
+                gl::glActiveTexture(gl::GL_TEXTURE0 + counter);
+                gl::glBindTexture(gl::GL_TEXTURE_2D, sampler.boundTexture);
+                gl::glUniform1i(sampler.location, counter);
+                counter++;
+            }
+
         }
         void operator()(program_output_t& arg) { } //do nothing
         void operator()(unhandled_t& arg) { } //fallthrough

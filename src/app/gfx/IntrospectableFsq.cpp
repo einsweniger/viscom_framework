@@ -30,6 +30,21 @@ namespace viscom {
             if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(uniform.name.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(uniform.name.c_str(), &uniform.value[0]);
         }
+        void operator()(glwrap::bool_t& uniform) {
+            int counter = 0;
+            for(auto& value : uniform.value) {
+                std::string label = uniform.name + "[" + std::to_string(counter)+ "]";
+                ImGui::Checkbox(label.c_str(), reinterpret_cast<bool*>(&value));
+                counter++;
+            }
+        }
+        void operator()(glwrap::program_samplers_t& arg) {
+            ImGui::Text("samplers:");
+            for(auto& sampler : arg.samplers) {
+                ImGui::InputInt(sampler.name.c_str(), static_cast<int*>(&sampler.boundTexture));
+            }
+
+        }
         void operator()(glwrap::uinteger_t& u) {
             //DragInt(const char* label, int* v, float v_speed = 1.0f, int v_min = 0, int v_max = 0, const char* display_format = "%.0f");
 //            const float v_speed = 1.0f;
@@ -52,15 +67,14 @@ namespace viscom {
             }
         }
         void operator()(glwrap::program_output_t output) {
-            ImGui::Text("%s: %d, %s", output.name.c_str(), output.location, glbinding::Meta::getString(output.type).c_str());
             const auto textureID = output.textureLocation;
-            ImGui::Text("texture id: %d", textureID);
-            std::string headerName = std::to_string(textureID);//name + ": "+ std::to_string(tex);
+            //ImGui::Text("%s: %d, %s", output.name.c_str(), output.location, glbinding::Meta::getString(output.type).c_str());
+            std::string headerName = std::to_string(textureID) +  ":" + output.name.append("(" +std::to_string(output.location) + ") "+glbinding::Meta::getString(output.type)) ;
             if (ImGui::TreeNode(headerName.c_str())) {
                 ImVec2 uv0(0, 1);
                 ImVec2 uv1(1, 0);
                 ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
-                ImGui::Image(reinterpret_cast<ImTextureID>(textureID), region, uv0, uv1);
+                ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t)textureID), region, uv0, uv1);
                 ImGui::TreePop();
             };
         }
@@ -75,7 +89,7 @@ namespace viscom {
         };
     }
     IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  ApplicationNodeBase* appNode) :
-    fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, /*subroutines{1024},*/ app_{appNode},
+    fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, app_{appNode},
     shaderName_{fragmentShader},
     gpuProgram_{appNode->GetGPUProgramManager().GetResource("fullScreenQuad_" + fragmentShader, std::vector<std::string>{ "fullScreenQuad.vert", fragmentShader })}
     {
@@ -130,8 +144,8 @@ namespace viscom {
 
         uniforms_ = glwrap::read_uniforms_from_program(program);
 
-        std::vector<FrameBufferTextureDescriptor> backBufTextures{};
         auto programOutput = glwrap::get_program_output(program);
+        std::vector<FrameBufferTextureDescriptor> backBufTextures{};
         for(auto& output : programOutput) {
             if(gl::GL_FLOAT_VEC4 == output.type) {
                 LOG(INFO) << "adding texture descriptor for " << output.name;
