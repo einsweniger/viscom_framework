@@ -1,8 +1,9 @@
-#version 330 core
+#version 410 core
 #extension GL_ARB_shader_subroutine : require
 
 // shader inputs and uniforms
 in vec2 texCoord;
+uniform float timescale =1.0;
 uniform float u_time;             // shader playback time (in seconds)
 uniform float u_delta;  // delta time between frames (in seconds)
 uniform vec4 u_date;  // year, month, day and seconds
@@ -10,19 +11,15 @@ uniform uvec2 u_resolution;  // viewport resolution (in pixels)
 uniform vec2 u_mouse;  // mouse pixel coords
 uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform mat4  u_MVP;
-uniform float timescale = 1.0;
 
 // shader outputs
-out vec4 out_color;
-out vec4 out_shaded;
-out vec4 out_texCoord;
-out vec4 out_worldPos;
+out vec4 test_color;
+out vec4 test_shaded;
+out vec4 test_texCoord;
+out vec4 test_worldPos;
 
 
-// local constants
-const vec3 light_dir = normalize(vec3(.5, 1.0, -.25));
-
-subroutine vec2 SceneMap(vec3 position);  // function signature type declaration
+subroutine vec2 SceneMap(vec3 position);  // function signature type declaration, returns distance and material id
 subroutine uniform SceneMap map;  // uniform instance, can be called like a function
 
 #include "lib/util.glsl"
@@ -144,9 +141,9 @@ void main()
     vec4 hit = raymarch(u_eye, ray_direction);
     vec3 position = u_eye;
     position.z -= u_time*.5;
-    vec3 color = render(u_eye, ray_direction);
-    out_shaded = pow(vec4(shade(u_eye, ray_direction, light_dir, hit),1.0),vec4(.44));
-    out_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
-    out_texCoord = vec4(texCoord,0.f, 1.f);
-    out_worldPos = hit; // does not accomodate for repetitions
+    vec3 color = render(u_eye, ray_direction, hit.xyz, hit.w);
+    test_shaded = pow(vec4(shade(u_eye, ray_direction, hit.xyz, hit.w),1.0),vec4(.44));
+    test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
+    test_texCoord = vec4(texCoord,0.f, 1.f);
+    test_worldPos = hit; // does not accomodate for repetitions
 }
