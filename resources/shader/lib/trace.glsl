@@ -1,46 +1,33 @@
-uniform float NEAR =  0.0;
-uniform float FAR = 20.0;
-uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
-uniform int MAX_ITERATIONS = 160;
-uniform float fog_density = .2;
-uniform int USE_BV = 0;
-uniform int DRAW_DEBUG = 0;
-uniform float relaxation = 1.9;
-uniform float pixelRadius = 0.0001;
-out vec4 out_normals;
-/*
-If enhancedTrace had 5 params and would be called like:
-subroutine(RayMarch) vec4 enhancedTrace(vec3 pos, vec3 dir) { return enhancedTrace(pos, dir, 0.0001, false, 1.9); }
-GLSL would treat that as static recursion and since that is forbidden it will not compile with:
-'error C9004: symbol not function "map"'
-
-  Recursion is not allowed, not even statically. Static recursion is present if the static function-call graph of
-  a program contains cycles. This includes all potential function calls through variables declared as
-  subroutine uniform (described below). It is a compile-time or link-time error if a single compilation unit
-  (shader) contains either static recursion or the potential for recursion through subroutine variables.
-
-  ($6.1.1 Function Calling Conventions, GL 4.6 core p117)
-*/
+out vec4 trace_normals;
+out vec4 trace_inverted_normals;
 
 subroutine vec4 RayMarch(vec3 origin, vec3 direction);  // function signature type declaration
 subroutine uniform RayMarch raymarch;  // uniform instance, can be called like a function
 
 // tracers
+uniform float t_min =  0.0;
+uniform float t_max = 20.0;
+uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
+uniform int MAX_ITERATIONS = 160;
+uniform float fog_density = .2;
+uniform int USE_BV = 0;
+uniform float relaxation = 1.9;
+uniform float pixelRadius = 0.0001;
 vec4 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool forceHit) {
     float omega = relaxation; //relaxation parameter omega ∈ [1;2)
-    float t = NEAR;
+    float t = t_min;
     float material = -1.0;
     float candidate_error = INF;
-    float candidate_t = NEAR;
+    float candidate_t = t_min;
     float previousRadius = 0.;
     float stepLength = 0.;
-    float functionSign = map(pos).x < 0. ? -1. : +1.;
-
-
+    //float functionSign = map(pos).x < 0. ? -1. : +1.;
     for (int i = 0; i < MAX_ITERATIONS; ++i) {
+
         vec2 result = map(dir * t + pos);
         material = result.y;
-        float signedRadius = functionSign * result.x;
+        //float signedRadius = functionSign * result.x;
+        float signedRadius = result.x;
         float radius = abs(signedRadius);
         bool sorFail = omega > 1. && (radius + previousRadius) < stepLength;
         if (sorFail) {
@@ -58,12 +45,12 @@ vec4 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool
             candidate_error = error;
         }
 
-        if (!sorFail && error < pixelRadius || t > FAR)
+        if (!sorFail && error < pixelRadius || t > t_max)
             break;
         t += stepLength;
     }
 
-    if ((t > FAR || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
+    if ((t > t_max || candidate_error > pixelRadius) && !forceHit) return vec4(INF);
     return vec4(dir*t+pos,material);
 }  // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
 
@@ -77,13 +64,13 @@ subroutine(RayMarch) vec4 defaultEnhancedTrace(vec3 origin,vec3 direction) {
 subroutine(RayMarch) vec4 simpleTrace(vec3 origin, vec3 direction) {
     const float tau = .001; //threshold
 
-    float t = NEAR;
+    float t = t_min;
     int i = 0;
-    while(i < MAX_ITERATIONS && t < FAR) {
+    while(i < MAX_ITERATIONS && t < t_max) {
         vec3 position = direction*t+origin;
         vec2 result = map(position);
         if (result.x < tau) break;
-        if (t > NEAR) return vec4(INF); //return INFINITY;
+        if (t > t_min) return vec4(INF); //return INFINITY;
         t += result.x;
         i++;
     }
@@ -91,8 +78,8 @@ subroutine(RayMarch) vec4 simpleTrace(vec3 origin, vec3 direction) {
 }  // simple sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 1)
 
 subroutine(RayMarch) vec4 castRay(vec3 origin,vec3 direction ) {
-    float tmin = NEAR;
-    float tmax = FAR;
+    float tmin = t_min;
+    float tmax = t_max;
 
     if(USE_BV == 1) {
         // bounding volume
@@ -164,11 +151,18 @@ vec3 calcNormal(vec3 pos ) {
                       e.xxx*map( pos + e.xxx ).x );
 }
 
+vec3 calNormalFerris(vec3 pos) {
+    float normalEpsilon = 0.001;
+    return normalize(vec3(map(pos + vec3(normalEpsilon, 0, 0)).x - map(pos - vec3(normalEpsilon, 0, 0)).x ,
+                          map(pos + vec3(0, normalEpsilon, 0)).x - map(pos - vec3(0, normalEpsilon, 0)).x,
+                          map(pos + vec3(0, 0, normalEpsilon)).x - map(pos - vec3(0, 0, normalEpsilon)).x));
+}
+
+uniform int aoIterations = 5;
 float calcAO(vec3 pos,vec3 normal ) {
-    float iterations = 5;
     float occlusion = 0.0;
     float scaling_factor = 1.0;
-    for( int i=0; i<iterations; i++ )
+    for( int i=0; i<aoIterations; i++ )
     {
         float hr = 0.01 + 0.12*float(i)/4.0;
         vec3 aopos =  normal * hr + pos;
@@ -179,22 +173,18 @@ float calcAO(vec3 pos,vec3 normal ) {
     return saturate( 1.0 - 3.0*occlusion);
 }
 
-vec3 render(vec3 ray_origin,vec3 ray_direction ){
+uniform vec3 render_light_direction = normalize( vec3(-0.4, 0.7, -0.6) );
+vec3 render(vec3 ray_origin, vec3 ray_direction, vec3 hit, float material ){
+    vec3  light_direction = normalize( render_light_direction );
     vec3 base_color = vec3(0.7, 0.9, 1.0) +ray_direction.y*0.8;
-    float material = -1;
-    vec3 position;
+    //float material = -1;
+    vec3 position = hit;
     float t;
 
-    vec4 hit = raymarch(ray_origin, ray_direction);
-    position = hit.xyz;
-    material = hit.w;
     if (material == INF) {
-      vec3 fog_color = sky_color(ray_direction, light_dir);
+      vec3 fog_color = sky_color(ray_direction, light_direction);
       base_color = fog_color;
-    } else
-
-    if(material>-0.5 )
-    {
+    } else if(material>-0.5 ) {
 
         vec3 surface_normal = calcNormal( position );
         vec3 reflected = reflect( ray_direction, surface_normal );
@@ -209,7 +199,7 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
         }
 
         // lighitng
-        vec3  light_direction = normalize( vec3(-0.4, 0.7, -0.6) );
+
 
         //simple lighting
         float ambient = saturate( 0.5+0.5*surface_normal.y);  // sun light direction
@@ -225,7 +215,7 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
         float shadow_light = softshadow( position, light_direction, 0.02, 2.5 );  // shadows caused by light
         float shadow_reflection = softshadow( position, reflected, 0.02, 2.5 );  // object reflections
 
-        out_normals = vec4(vec3(surface_normal),1); //debug output
+        trace_normals = vec4(vec3(surface_normal),1); //debug output
 
         diffuse *= shadow_light;
         dom *= shadow_reflection;
@@ -246,16 +236,20 @@ vec3 render(vec3 ray_origin,vec3 ray_direction ){
     vec3 col = vec3(0.8, 0.9, 1.0);
     col = saturate(1.0-vec3(t)*.2);
     col = col*abs(calcNormal( position )*.5+.5);
-    return 1-col;
-    return vec3( saturate(base_color) );
+    trace_inverted_normals = pow(vec4(1-col,1.0),vec4(.44));  //set colors to inverted normal.
+    return vec3( saturate(base_color) );  //actually shade by material
 }
 
-vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 light_dir, vec4 hit) {
+
+uniform vec3 shade_light_dir = normalize(vec3(.5, 1.0, -.25));
+uniform bool shade_DRAW_DEBUG = false;
+vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 hit, float material) {
+    vec3 light_dir = normalize(shade_light_dir);
     vec3 fog_color = sky_color(ray_dir, light_dir);
 
     float ray_len;
     vec3 color;
-    if (hit.w == INF) {
+    if (material == INF) {
         ray_len = INF;
         color = fog_color;
     } else {
@@ -279,10 +273,10 @@ vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 light_dir, vec4 hit) {
         color = mix(color, fog_color, fog);
 
         //debug texture output
-        out_normals = vec4(norm, 1.0);
+        trace_normals = vec4(norm, 1.0);
     }
 
-    if (DRAW_DEBUG == 1) {
+    if (shade_DRAW_DEBUG) {
         float cut_plane0 = sin(u_time)*.15 - .8;
         for(int k=0; k<4; ++k) {
             vec4 dpcol = debug_plane(ray_start, ray_dir, cut_plane0+float(k)*.75, ray_len);
