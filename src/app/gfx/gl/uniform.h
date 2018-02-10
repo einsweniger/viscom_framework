@@ -95,7 +95,7 @@ namespace viscom::glwrap
             auto props = mglGetProgramResource(program, interface, index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
             std::string name = mglGetProgramResourceName(program, interface, index, props[gl::GL_NAME_LENGTH]);
             result.push_back({name, getType(props[gl::GL_TYPE]), props[gl::GL_LOCATION]});
-            }
+        }
 
         return result;
     }
@@ -130,6 +130,9 @@ namespace viscom::glwrap
         for(const auto& info : get_name_location_type(program, gl::GL_PROGRAM_OUTPUT)){
             result.push_back(program_output_t{info.name, info.type, info.location, 0});
         }
+        std::sort(result.begin(), result.end(), [](glwrap::program_output_t a, glwrap::program_output_t b) {
+            return a.location < b.location;
+        }); // have to sort output, otherwise mapping name to texture is wrong.
         return result;
     }
     template<gl::GLenum>
@@ -220,7 +223,7 @@ namespace viscom::glwrap
                   << ",enum:" << constants::getSubroutineEnumForProgramStage(stage);
         std::vector<subroutine_t> result;
         result.reserve(compatibleSubroutines.size());
-        for(auto subroutine : compatibleSubroutines) {
+        for(auto subroutine : compatibleSubroutines) {  //TODO somehow the names are padded with \0?
             subroutine_t data;
             data.name = mglGetProgramResourceName(program, gl::GL_FRAGMENT_SUBROUTINE, subroutine);
             data.value = subroutine;
@@ -260,7 +263,7 @@ namespace viscom::glwrap
         }
     }
 
-
+    //TODO add a struct that creates the uniforms and collects subroutines and program output to their respective structs.
     static uniform_container make_uniform(gl::GLuint program, std::string name, gl::GLint location, gl::GLenum type)
     {
         if (is_int(type)) {
@@ -308,22 +311,26 @@ namespace viscom::glwrap
         // "normal" uniforms
         for (const auto &uniform : get_uniforms(program)) {
             auto created_uniform = make_uniform(program, uniform.name, uniform.location, uniform.type);
+            //check if uniform is a sampler of any kind.
             if(std::holds_alternative<unhandled_t>(created_uniform)) {
                 auto test = std::get<unhandled_t>(created_uniform);
                 if(is_sampler(test.type)) {
+                    //if type is sampler, collect;
                     collected_samplers.samplers.push_back(sampler_t{test.name, test.type, test.location, 0});
                 } else {
+                    //otherwise push as unhandled;
                     result.push_back(test);
                 }
-                //is sampler, collect;
-
             } else {
                 result.push_back(created_uniform);
             }
         }
         // add collected samplers to result
-        result.push_back(collected_samplers);
+        if(0 != collected_samplers.samplers.size()){
+            result.push_back(collected_samplers);
+        }
 
+        // add subroutine uniforms
         for (const auto stage : constants::programStagesWithSubroutines()) {
             auto activeUniforms = get_active_res_cout(program, constants::getSubroutineUniformEnumForProgramStage(stage));
             if (0 == activeUniforms) continue;
