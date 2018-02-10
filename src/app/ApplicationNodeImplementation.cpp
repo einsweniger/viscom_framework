@@ -288,5 +288,17 @@ namespace viscom {
             gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
         });
     }
+    void ApplicationNodeImplementation::EncodeData()
+    {
+        ApplicationNodeBase::EncodeData();
+    }
+    void ApplicationNodeImplementation::DecodeData()
+    {
+        ApplicationNodeBase::DecodeData();
+    }
+    bool ApplicationNodeImplementation::AddTuioCursor(TUIO::TuioCursor *tcur)
+    {
+        return ApplicationNodeBase::AddTuioCursor(tcur);
+    }
 
 }

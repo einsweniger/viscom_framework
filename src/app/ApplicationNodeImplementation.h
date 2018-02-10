@@ -35,7 +35,9 @@ namespace viscom {
         virtual void ClearBuffer(FrameBuffer& fbo) override;
         virtual void DrawFrame(FrameBuffer& fbo) override;
         virtual void CleanUp() override;
-
+        void EncodeData() override;
+        void DecodeData() override;
+        bool AddTuioCursor(TUIO::TuioCursor *tcur) override;
         virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
     protected:
