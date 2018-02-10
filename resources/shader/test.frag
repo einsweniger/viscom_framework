@@ -12,12 +12,8 @@ uniform vec2 u_mouse;  // mouse pixel coords
 uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform mat4  u_MVP;
 
-// shader outputs
-out vec4 test_color;
-out vec4 test_shaded;
-out vec4 test_texCoord;
-out vec4 test_worldPos;
-
+// shadertoystuffs
+float iTime = u_time;
 
 subroutine vec2 SceneMap(vec3 position);  // function signature type declaration, returns distance and material id
 subroutine uniform SceneMap map;  // uniform instance, can be called like a function
@@ -25,7 +21,8 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 #include "lib/util.glsl"
 #include "lib/sdf_op.glsl"
 #include "lib/sdf.glsl"
-#include "lib/trace.glsl"  // needs vec2 map(vec3) to be declared.
+#include "lib/trace.glsl"  //
+#include "lib/coloring.glsl"  // shade_scene
 
 
 //------------------------------------------------------------------------
@@ -48,25 +45,56 @@ subroutine(SceneMap) vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/vie
     return res;
 }
 
+subroutine(SceneMap) vec2 positionOffsetting( vec3 pos ) {  // https://www.shadertoy.com/view/XdlcWf
+    vec3 offset = pos-vec3(-2,.25,2); //same position as in sdfDemo
+
+//row1
+//row2
+    offset.z += 1;
+//row3
+    offset.z += 1;
+
+    vec3 octahedronPos = offset-vec3(5,0,0);
+    float roomWidth = .5*.6;
+    float rep = 4.;
+
+    vec2 idx = floor((abs(octahedronPos.xz)) / 0.2)*0.5;
+
+    float clock = iTime*4.;
+    float phase = (idx.y+idx.x);
+
+    float anim = sin(phase + clock);
+
+    vec3 polar_repeat = octahedronPos;
+    float i = pModPolar(polar_repeat.xz, rep);
+    polar_repeat.x -= 0.31 + anim*0.1;
+
+    vec2 res =      vec2(fOctahedron(octahedronPos, roomWidth),     43.1);
+    res = opU( res, vec2(fOctahedron(polar_repeat,  roomWidth*0.6), 55.0));
+    return res;
+}
+uniform Box box;
+uniform Capsule capsule;
 subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
 {
 
     vec3 offset = pos-vec3(-2,.25,2);
     pReflect(offset, vec3(0,1,0),1);
-    Capsule capsule;
 
+
+
+//"grid" setup
     vec2 res =      vec2( sdfPlaneXZ(   pos-vec3(0,-2,0)), 2.0 );
     res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2( 2.5,0.07), vec2(0.01,0.05)),          45.0));
     res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2( 1.5,0.07), vec2(0.01,0.05)),          45.0));
     res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2( 0.5,0.07), vec2(0.01,0.05)),          45.0));
     res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2(-0.5,0.07), vec2(0.01,0.05)),          45.0));
     res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2(-1.5,0.07), vec2(0.01,0.05)),          45.0));
-    //res = opU( res, vec2 ( -sdfBox(pos, vec3(10)),          45.0));
 
-//    res = opU( res, vec2 ( sdfCorner(pos.xz-vec2(-5,-5)),          45.0));
-//    res = opU( res, vec2 ( sdfCorner(-pos.xz-vec2(-5, -5)),          45.0));
+    res = opU(res, vec2(sdf(offset, box), 45.0));
+    res = opU(res, vec2(sdf(offset, capsule), 45.0));
+
 //row1
-//    res = opU( res, vec2( sdf(offset, boxes[0]),  3.0));
     res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
     res = opU( res, vec2( sdfCylinder(  offset-vec3(1,0,0), vec2(0.2,0.2)),          8.0));
     res = opU( res, vec2( sdfCylinder6( offset-vec3(2,0,0), vec2(0.1,0.2) ),        12.0));
@@ -87,7 +115,9 @@ subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/X
     res = opU( res, vec2( sdfCapsule(   offset-vec3(1,0,0), vec3(0.2), vec3(-0.2), 0.1), 31.9));
     res = opU( res, vec2( sdfTriPrism(  offset-vec3(2,0,0), vec2(0.25,0.05) ),           43.5));
     res = opU( res, vec2( sdfHexPrismYZ(offset-vec3(3,0,0), vec2(0.25,0.05) ),           17.0));
-    res = opU( res, vec2( sdfEllipsoid( offset-vec3(4,0,0), vec3(0.15, 0.2, 0.05)), 43.1));
+    res = opU( res, vec2( sdfEllipsoid( offset-vec3(4,0,0), vec3(0.15, 0.2, 0.05)),      43.1));
+    res = opU( res, vec2( fOctahedron(  offset-vec3(5,0,0), 0.5*0.6),                    43.1));
+
 
 //row4
     offset.z += 1;
@@ -129,6 +159,12 @@ subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/X
     return res;
 }
 
+// shader outputs
+out vec4 test_color;
+out vec4 test_shaded;
+out vec4 test_texCoord;
+out vec4 test_worldPos;
+
 void main()
 {
     //texCoords are between [0,1] shift from [0,1] to [-1, 1]
@@ -137,12 +173,12 @@ void main()
     //use inverse MVP to find ray direction
     vec4 dir_projection = inverse(u_MVP)*vec4(st, 1.,1.);
     vec3 ray_direction = normalize(vec3(dir_projection/dir_projection.w));
+
     //trace
     vec4 hit = raymarch(u_eye, ray_direction);
     vec3 position = u_eye;
-    position.z -= u_time*.5;
-    vec3 color = render(u_eye, ray_direction, hit.xyz, hit.w);
-    test_shaded = pow(vec4(shade(u_eye, ray_direction, hit.xyz, hit.w),1.0),vec4(.44));
+    //position.z -= u_time*.5;
+    vec3 color = shade_scene(u_eye, ray_direction, hit.xyz, hit.w);
     test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     test_texCoord = vec4(texCoord,0.f, 1.f);
     test_worldPos = hit; // does not accomodate for repetitions

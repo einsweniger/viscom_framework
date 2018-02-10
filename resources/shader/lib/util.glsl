@@ -90,6 +90,11 @@ vec3 sky_color(vec3 ray_dir, vec3 light_dir) {
 
 // Noise by iq
 float hash( float n ) { return fract(sin(n)*753.5453123); }
+vec2 hash2( vec2 p ) {return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);}
+vec3 hash3( vec2 p ) {
+    vec3 q = vec3( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)), dot(p,vec2(419.2,371.9)) );
+	  return fract(sin(q)*43758.5453);
+}
 float noise( in vec3 x )
 {
     vec3 p = floor(x);

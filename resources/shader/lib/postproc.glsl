@@ -43,7 +43,7 @@ float randf(){
     float time = u_time*0.1;
     return mod(4.0,sin(time*time)+1.0)*0.75;
 }
-/*
+
 
 subroutine(PostProcess) vec4 glitch(sampler2D iChannel0, vec2 uv) {
 
@@ -93,17 +93,15 @@ subroutine(PostProcess) vec4 glitch(sampler2D iChannel0, vec2 uv) {
         vec4 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
         //add noise
 
-       vec4 snow = 200.*amount*vec4(hash12(vec2(xs * seed,ys * seed*50.))*0.2);
+       vec4 snow = 200.*amount*vec4(hash2(vec2(xs * seed,ys * seed*50.)).x*0.2);
         fragColor = fragColor+ snow;
 
-      //   	fragColor.rgb *= smoothstep(0.8, vigentOffset * 0.799, dist *( darkness + vigentOffset ));
+         	//fragColor.rgb *= smoothstep(0.8, vigentOffset * 0.799, dist *( darkness + vigentOffset ));
 
-      //        fragColor.rgb = pow(fragColor.rgb, 1.0/vec3(2.2));
+            //  fragColor.rgb = pow(fragColor.rgb, 1.0/vec3(2.2));
 
           return fragColor;
 }
-
-*/
 
 uniform float ca_max_distort = 0.5;
 uniform int ca_num_iter = 24;
@@ -320,6 +318,16 @@ subroutine(PostProcess) vec4 ferris(sampler2D tex, vec2 uv) {
 
 }
 
+subroutine(PostProcess) vec4 noise(sampler2D tex, vec2 uv) {
+  float noise_value = noise(texture(tex, uv).xyz * sin(u_time));
+  float fbm_value = fbm(vec3(sin(u_time), cos(u_time), sin(u_time)));
+  vec4 color = texture(tex, uv);
+  vec2 noise = hash2(uv);
+  return vec4(hash3(uv),1);
+  return vec4(0,fbm_value,0,1);
+  return texture(tex, uv) + noise_value;
+
+}
 subroutine(PostProcess) vec4 redBar(sampler2D tex, vec2 uv) {
   vec3 col = vec3(0);
     col = mix(vec3(1, 0.0, 0.0), col, smoothstep(.5, .495, uv.x) + smoothstep(.5, .505, uv.x));
