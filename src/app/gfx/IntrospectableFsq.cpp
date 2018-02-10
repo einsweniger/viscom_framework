@@ -11,24 +11,26 @@
 
 namespace viscom {
     struct uniform_draw_menu {
-        void operator()(glwrap::unhandled_t& u) {ImGui::Text("%s: %d, %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());}
+        void operator()(glwrap::unhandled_t& u) {ImGui::Text("%s(%d) %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());}
         void operator()(glwrap::float_t& uniform) {
+            std::string header = uniform.name + "(" + std::to_string(uniform.location) + ")";
             const float v_speed = 0.0001f;
             const float v_min = 0.0f;
             const float v_max = 0.0f;
             const char* display_format = "%.5f";
             const float power = 1.0f;
             //DragFloat(const char* label, float* v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* display_format = "%.3f", float power = 1.0f);
-            if(gl::GL_FLOAT      == uniform.type) ImGui::DragFloat (uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-            if(gl::GL_FLOAT_VEC2 == uniform.type) ImGui::DragFloat2(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-            if(gl::GL_FLOAT_VEC3 == uniform.type) ImGui::DragFloat3(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-            if(gl::GL_FLOAT_VEC4 == uniform.type) ImGui::DragFloat4(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if(gl::GL_FLOAT      == uniform.type) ImGui::DragFloat (header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if(gl::GL_FLOAT_VEC2 == uniform.type) ImGui::DragFloat2(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if(gl::GL_FLOAT_VEC3 == uniform.type) ImGui::DragFloat3(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if(gl::GL_FLOAT_VEC4 == uniform.type) ImGui::DragFloat4(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
         }
         void operator()(glwrap::integer_t& uniform) {
-            if(gl::GL_INT      == uniform.type) ImGui::DragInt (uniform.name.c_str(), &uniform.value[0]);
-            if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(uniform.name.c_str(), &uniform.value[0]);
-            if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(uniform.name.c_str(), &uniform.value[0]);
-            if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(uniform.name.c_str(), &uniform.value[0]);
+            std::string header = uniform.name + "(" + std::to_string(uniform.location) + ")";
+            if(gl::GL_INT      == uniform.type) ImGui::DragInt (header.c_str(), &uniform.value[0]);
+            if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(header.c_str(), &uniform.value[0]);
+            if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(header.c_str(), &uniform.value[0]);
+            if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(header.c_str(), &uniform.value[0]);
         }
         void operator()(glwrap::bool_t& uniform) {
             int counter = 0;
@@ -59,35 +61,27 @@ namespace viscom {
         void operator()(glwrap::stage_subroutines_t& stage){
             ImGui::Text("stage: %s",glbinding::Meta::getString(stage.programStage).c_str());
             for (auto& uniform: stage.subroutineUniforms) {
-                ImGui::Text("location %d: %s (active sub: %d)", uniform.location, uniform.name.c_str(), stage.activeSubroutines[uniform.location]);
+
+                ImGui::Text("%s (%d): active subroutine: %d", uniform.name.c_str(), uniform.location, stage.activeSubroutines[uniform.location]);
                 for(const auto& subroutine : uniform.compatibleSubroutines) {
-                    ImGui::BulletText("subroutine %d:", subroutine.value); ImGui::SameLine();
-                    ImGui::RadioButton(subroutine.name.c_str(), reinterpret_cast<int *>(&stage.activeSubroutines[uniform.location]), subroutine.value);
+                    std::string header = subroutine.name + "(" + std::to_string(subroutine.value) + ")";
+                    //ImGui::BulletText("subroutine %d:", subroutine.value); ImGui::SameLine();
+                    ImGui::RadioButton(header.c_str(), reinterpret_cast<int *>(&stage.activeSubroutines[uniform.location]), subroutine.value);
                 }
             }
         }
         void operator()(glwrap::program_output_t output) {
-            const auto textureID = output.textureLocation;
-            //ImGui::Text("%s: %d, %s", output.name.c_str(), output.location, glbinding::Meta::getString(output.type).c_str());
-            std::string headerName = std::to_string(textureID) +  ":" + output.name.append("(" +std::to_string(output.location) + ") "+glbinding::Meta::getString(output.type)) ;
+            //TODO name_str to TexId mapping is off. Also, name seems to be null terminated. so everything after is not output?
+            std::string headerName = std::to_string(output.textureLocation) +  ":" + output.name.append("(" +std::to_string(output.location) + ") "+glbinding::Meta::getString(output.type)) ;
             if (ImGui::TreeNode(headerName.c_str())) {
                 ImVec2 uv0(0, 1);
                 ImVec2 uv1(1, 0);
                 ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
-                ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t)textureID), region, uv0, uv1);
+                ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) output.textureLocation), region, uv0, uv1);
                 ImGui::TreePop();
             };
         }
     };
-    constexpr std::array<gl::GLenum,5> progStageProps() {
-        return {
-            gl::GL_ACTIVE_SUBROUTINE_UNIFORMS,
-            gl::GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,
-            gl::GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH,
-            gl::GL_ACTIVE_SUBROUTINES,
-            gl::GL_ACTIVE_SUBROUTINE_MAX_LENGTH,
-        };
-    }
     IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  ApplicationNodeBase* appNode) :
     fsq_{appNode->CreateFullscreenQuad(fragmentShader)}, app_{appNode},
     shaderName_{fragmentShader},
