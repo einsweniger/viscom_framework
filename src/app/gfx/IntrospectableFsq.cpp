@@ -92,6 +92,7 @@ namespace viscom {
 
     void IntrospectableFsq::Draw2D(FrameBuffer &fbo)
     {
+        //TODO remove static log, move to class, so log output is inserted into the correct log.
         static ShaderLog log;
         static bool shader_log_window = true;
         static bool program_window;
@@ -149,6 +150,7 @@ namespace viscom {
         backBuffers_ = app_->CreateOffscreenBuffers(FrameBufferDescriptor{backBufTextures,{}});
         auto buffer = app_->SelectOffscreenBuffer(backBuffers_);
         gl::GLuint counter = 0;
+
         for(const auto& tex : buffer->GetTextures()) {
             LOG(INFO) << "available texture: " << tex;
             programOutput.at(counter).textureLocation = tex;
@@ -179,11 +181,17 @@ namespace viscom {
         DrawToBuffer(*backbuffer);
     }
 
+    //TODO instead of these functions, add the method AddPass(IntrospectalbleFsq).
+    //TODO then pass the textures from this render to the next pass.
+    //TODO use a map to update uniforms in. this will serve several purposes:
+    //TODO 1. serialization of the state/uniforms to a file for later reloading of the parameters.
+    //TODO 2. actually introspecting the values of uniforms updated from the outside
+    //TODO 3. having a checkbox for u_time, to select if time will run or if we update it ourselves.
+    //TODO 4. when recompiling the program, we can merge the values/state into the new program, so no reset.
     void IntrospectableFsq::DrawToBuffer(const FrameBuffer& fbo)
     {
         fbo.DrawToFBO([this,&fbo]{
             gl::glUseProgram(gpuProgram_->getProgramId());
-//            SendSubroutines();
             SendUniforms();
             //TODO merge outer context to local variables, then SendSubroutines()
             //TODO add checkbox to variables updated through context so updates can be ignored
@@ -209,9 +217,6 @@ namespace viscom {
         auto backbuffer = app_->SelectOffscreenBuffer(prev.backBuffers_);
         fbo.DrawToFBO([this,&backbuffer,&fbo]{
             gl::glUseProgram(gpuProgram_->getProgramId());
-            gl::glActiveTexture(gl::GL_TEXTURE0);
-            gl::glBindTexture(gl::GL_TEXTURE_2D, backbuffer->GetTextures().front()); //TODO remove hardcoded texture ID, think of a good way to forward it from previous backbuffer.
-//            SendSubroutines();
             SendUniforms();
             //TODO merge outer context to local variables, then SendSubroutines()
             //TODO add checkbox to variables updated through context so updates can be ignored
