@@ -52,6 +52,8 @@ namespace viscom {
         name.resize(positive(length));
         gl::glGetProgramResourceName(program, interface, index, length, nullptr, &name[0]);
         name.shrink_to_fit();
+        name.resize(name.size()-1);
+        //name.erase(name.end()-1); // char* from opengl are terminated with \0, have to remove those; otherwise imgui will not draw any strings after that one.
         return name;
     }
 
@@ -281,21 +283,27 @@ namespace viscom {
             {
                 case gl::GL_FLOAT:
                 case gl::GL_INT:
+                case gl::GL_UNSIGNED_INT:
                 case gl::GL_BOOL:
                     return 1;
                 case gl::GL_FLOAT_VEC2:
                 case gl::GL_INT_VEC2:
+                case gl::GL_UNSIGNED_INT_VEC2:
                 case gl::GL_BOOL_VEC2:
                     return 2;
                 case gl::GL_FLOAT_VEC3:
                 case gl::GL_INT_VEC3:
+                case gl::GL_UNSIGNED_INT_VEC3:
                 case gl::GL_BOOL_VEC3:
                     return 3;
                 case gl::GL_FLOAT_VEC4:
                 case gl::GL_INT_VEC4:
+                case gl::GL_UNSIGNED_INT_VEC4:
                 case gl::GL_BOOL_VEC4:
                     return 4;
-                default:return 0;
+                default:
+                    LOG(WARNING) << "asking for size of unimplemented type. expect failure!";
+                    return 0;
 
             }
         }
