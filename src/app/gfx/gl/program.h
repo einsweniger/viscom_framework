@@ -8,29 +8,7 @@
 
 
 namespace viscom::glwrap::constants{
-    static const std::vector<gl::GLenum> programInterfaces {
-        gl::GL_UNIFORM,
-        gl::GL_UNIFORM_BLOCK,
-        gl::GL_ATOMIC_COUNTER_BUFFER,
-        gl::GL_PROGRAM_INPUT,
-        gl::GL_PROGRAM_OUTPUT,
-        gl::GL_VERTEX_SUBROUTINE,
-        gl::GL_TESS_CONTROL_SUBROUTINE,
-        gl::GL_TESS_EVALUATION_SUBROUTINE,
-        gl::GL_GEOMETRY_SUBROUTINE,
-        gl::GL_FRAGMENT_SUBROUTINE,
-        gl::GL_COMPUTE_SUBROUTINE,
-        gl::GL_VERTEX_SUBROUTINE_UNIFORM,
-        gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
-        gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
-        gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
-        gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
-        gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
-        gl::GL_TRANSFORM_FEEDBACK_VARYING,
-        gl::GL_TRANSFORM_FEEDBACK_BUFFER,
-        gl::GL_BUFFER_VARIABLE,
-        gl::GL_SHADER_STORAGE_BLOCK
-    };
+
 
     static const std::vector<gl::GLenum> programInterfaceProperties {
         //"GL_UNIFORM_BLOCK, GL_ATOMIC_COUNTER_BUFFER, GL_SHADER_STORAGE_BLOCK, GL_TRANSFORM_FEEDBACK_BUFFER"

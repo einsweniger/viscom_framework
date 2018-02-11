@@ -47,6 +47,29 @@ namespace viscom::glwrap::constants
         if(gl::GL_COMPUTE_SHADER == stage) return gl::GL_COMPUTE_SUBROUTINE;
         return gl::GL_DEBUG_TYPE_ERROR;
     }
+    static const std::vector<gl::GLenum> programInterfaces {
+        gl::GL_UNIFORM,
+        gl::GL_UNIFORM_BLOCK,
+        gl::GL_ATOMIC_COUNTER_BUFFER,
+        gl::GL_PROGRAM_INPUT,
+        gl::GL_PROGRAM_OUTPUT,
+        gl::GL_VERTEX_SUBROUTINE,
+        gl::GL_TESS_CONTROL_SUBROUTINE,
+        gl::GL_TESS_EVALUATION_SUBROUTINE,
+        gl::GL_GEOMETRY_SUBROUTINE,
+        gl::GL_FRAGMENT_SUBROUTINE,
+        gl::GL_COMPUTE_SUBROUTINE,
+        gl::GL_VERTEX_SUBROUTINE_UNIFORM,
+        gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
+        gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
+        gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
+        gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
+        gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
+        gl::GL_TRANSFORM_FEEDBACK_VARYING,
+        gl::GL_TRANSFORM_FEEDBACK_BUFFER,
+        gl::GL_BUFFER_VARIABLE,
+        gl::GL_SHADER_STORAGE_BLOCK
+    };
 }
 
 namespace viscom::glwrap
@@ -71,7 +94,7 @@ namespace viscom::glwrap
         if(0 == activeResCount) {
             return std::vector<name_location_t>();
         }
-
+        //TODO since subroutine names come from here, and this is using max name len, this is probably why there's NUL char padding
         auto maxNameLen = mglGetProgramInterface(program, interface, gl::GL_MAX_NAME_LENGTH);
         std::vector<name_location_t> result;
         result.reserve(activeResCount);
