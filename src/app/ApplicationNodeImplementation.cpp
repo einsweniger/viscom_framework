@@ -24,6 +24,7 @@
 #include "Vertices.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
 #include "app/gfx/IntrospectableFsq.h"
+#include "app/camera/MyFreeCamera.h"
 
 namespace viscom {
 

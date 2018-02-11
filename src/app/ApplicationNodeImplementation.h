@@ -8,18 +8,13 @@
 
 #pragma once
 
-//#include <app/gfx/IntrospectableFsq.h>
-#include <app/camera/MyFreeCamera.h>
 #include "enh/ApplicationNodeBase.h"
-
-namespace viscom::enh {
-    class DepthOfField;
-}
 
 namespace viscom {
 
     class MeshRenderable;
     class IntrospectableFsq;
+    class MyFreeCamera;
 
     class ApplicationNodeImplementation : public enh::ApplicationNodeBase
     {
@@ -29,17 +24,17 @@ namespace viscom {
         ApplicationNodeImplementation(ApplicationNodeImplementation&&) = delete;
         ApplicationNodeImplementation& operator=(const ApplicationNodeImplementation&) = delete;
         ApplicationNodeImplementation& operator=(ApplicationNodeImplementation&&) = delete;
-        virtual ~ApplicationNodeImplementation() override;
+        ~ApplicationNodeImplementation() override;
 
-        virtual void InitOpenGL() override;
-        virtual void UpdateFrame(double currentTime, double elapsedTime) override;
-        virtual void ClearBuffer(FrameBuffer& fbo) override;
-        virtual void DrawFrame(FrameBuffer& fbo) override;
-        virtual void CleanUp() override;
+        void InitOpenGL() override;
+        void UpdateFrame(double currentTime, double elapsedTime) override;
+        void ClearBuffer(FrameBuffer& fbo) override;
+        void DrawFrame(FrameBuffer& fbo) override;
+        void CleanUp() override;
         void EncodeData() override;
         void DecodeData() override;
         bool AddTuioCursor(TUIO::TuioCursor *tcur) override;
-        virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
+        bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
     protected:
         void toggleMouseGrab();
