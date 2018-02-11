@@ -112,8 +112,8 @@ namespace viscom {
             }
             DrawProgramWindow(&program_window);
         });
-        if(nullptr != nextPass) {
-            nextPass->Draw2D(fbo);
+        if(nullptr != nextPass_) {
+            nextPass_->Draw2D(fbo);
         }
     }
 
@@ -143,6 +143,7 @@ namespace viscom {
                 ImGui::TreePop();
             }
         }
+        if(nullptr != nextPass_) { ImGui::Separator(); }
         ImGui::End();
     }
 
@@ -196,7 +197,6 @@ namespace viscom {
     }
 
     //TODO instead of these functions, add the method AddPass(IntrospectalbleFsq).
-    //TODO then pass the textures from this render to the next pass.
     //TODO use a map to update uniforms in. this will serve several purposes:
     //TODO 1. serialization of the state/uniforms to a file for later reloading of the parameters.
     //TODO 2. actually introspecting the values of uniforms updated from the outside
@@ -218,7 +218,6 @@ namespace viscom {
             gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
             /*TODO
              * uniform vec4 u_date;  // year, month, day and seconds
-             * uniform vec2 u_resolution;  // viewport resolution (in pixels)
              * uniform vec2 u_mouse;  // mouse pixel coords
              */
             fsq_->Draw();
@@ -229,15 +228,31 @@ namespace viscom {
 
     void IntrospectableFsq::AddPass(const std::string &fragmentProgram)
     {
-        nextPass = std::make_unique<IntrospectableFsq>(fragmentProgram, app_);
+        nextPass_ = std::make_unique<IntrospectableFsq>(fragmentProgram, app_);
     }
     void IntrospectableFsq::DrawFrame(FrameBuffer &fbo)
     {
-        if(nullptr == nextPass) {
+        if(nullptr == nextPass_) {
             DrawToBuffer(fbo);
         } else {
             DrawToBackBuffer();
-            nextPass->DrawFrame(fbo);
+            //TODO then pass the textures from this render to the next pass.
+            nextPass_->DrawFrame(fbo);
+        }
+    }
+    void IntrospectableFsq::ClearBuffer(FrameBuffer &fbo)
+    {
+        if(nullptr == nextPass_) {
+            fbo.DrawToFBO([]() {
+                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+            });
+        } else {
+            app_->SelectOffscreenBuffer(backBuffers_)->DrawToFBO([](){
+                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+            });
+            nextPass_->ClearBuffer(fbo);
         }
     }
 

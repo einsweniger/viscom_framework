@@ -73,27 +73,27 @@ struct ShaderLog
     {
     public:
         IntrospectableFsq(const std::string& fragmentProgram, ApplicationNodeBase* appNode);
-
+        void ClearBuffer(FrameBuffer& fbo);
         void DrawFrame(FrameBuffer& fbo);
-        void DrawToBackBuffer();
-        void DrawToBuffer(const FrameBuffer& fbo);
-        void DrawToBuffer(const FrameBuffer& fbo, const IntrospectableFsq& prev);
         void Draw2D(FrameBuffer& fbo);
-        const GPUProgram* GetGPUProgram() const { return gpuProgram_.get(); }
-        const std::vector<FrameBuffer> GetBackBuffer() {return backBuffers_;};
         void UpdateFrame(double currentTime, double elapsedTime);
+
         void AddPass(const std::string& fragmentProgram);
+        IntrospectableFsq* GetNextPass() { return nextPass_.get(); }
 
     private:
+        void DrawToBackBuffer();
+        void DrawToBuffer(const FrameBuffer& fbo);
         void DrawProgramWindow(bool *p_open);
         void loadProgramInterfaceInformation();
         void SendUniforms() const;
         std::unique_ptr<FullscreenQuad> fsq_;
-        std::unique_ptr<IntrospectableFsq> nextPass = nullptr;
+        std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
         std::shared_ptr<GPUProgram> gpuProgram_;
         std::string shaderName_;
         std::vector<FrameBuffer> backBuffers_;
         std::vector<glwrap::uniform_container> uniforms_;
+        std::map<std::string, glwrap::uniform_container> uniformMap_;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
         ApplicationNodeBase* app_;
