@@ -11,6 +11,7 @@
 #include <app/gfx/gl/util.h>
 #include "enh/gfx/postprocessing/DepthOfField.h"
 #include "core/glfw.h"
+#include "gfx/IntrospectableFsq.h"
 
 namespace viscom {
 
@@ -46,33 +47,10 @@ namespace viscom {
             if(imDemoWindow_) ImGui::ShowTestWindow();
             if(imMainMenu_) drawMainMenu(&imMainMenu_);
             if(imOverlay_) drawOverlay(&imOverlay_, elapsedTime_);
-            if (imBuffersWindow_) {
-                if(ImGui::Begin("Buffers:", &imBuffersWindow_)) {
-
-                    const auto& textures = SelectOffscreenBuffer(quad_->GetBackBuffer())->GetTextures();
-                    for (auto& tex : textures) { //TODO, this seems to be empty?
-                        std::string name = mglGetProgramResourceName(quad_->GetGPUProgram()->getProgramId(), gl::GL_PROGRAM_OUTPUT, tex);
-                        std::string headerName = std::to_string(tex);//name + ": "+ std::to_string(tex);
-                        if (ImGui::CollapsingHeader(headerName.c_str())) {
-                            ImVec2 uv0(0, 1);
-                            ImVec2 uv1(1, 0);
-                            ImVec2 region(ImGui::GetWindowContentRegionWidth(), ImGui::GetWindowContentRegionWidth() / 1.7f);
-                            ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) tex), region, uv0, uv1);
-                        };
-                    }
-                }
-                ImGui::End();
-            }
-
-//            ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
-//            if (ImGui::Begin("", nullptr, ImGuiWindowFlags_ShowBorders)) {
-//                GetDOF()->RenderParameterSliders();
-//            }
-//            ImGui::End();
+            if (imBuffersWindow_) {} //removed. delegated to Ifsq.
         });
         if(imProgramRecourceWindow_) {
             quad_->Draw2D(fbo);
-            tex_->Draw2D(fbo);
         }
 
         ApplicationNodeImplementation::Draw2D(fbo);
@@ -105,7 +83,7 @@ namespace viscom {
         if (ApplicationNodeImplementation::KeyboardCallback(key, scancode, action, mods)) {return true;}
 
         if(!(action == GLFW_PRESS || action == GLFW_REPEAT)) {
-            return false;
+            return false;  //fast exit if not pressed or repeated
         }
 
         switch (key) {
@@ -115,7 +93,7 @@ namespace viscom {
             case GLFW_KEY_M: imMainMenu_ = !imMainMenu_; return true;
             case GLFW_KEY_B: imBuffersWindow_= !imBuffersWindow_; return true;
             case GLFW_KEY_G: imProgramRecourceWindow_= !imProgramRecourceWindow_; return true;
-            case GLFW_KEY_S: {
+            case GLFW_KEY_S: {  //Ctl+s
                 if(mods == GLFW_MOD_CONTROL) {
                     imShaderWindow_ = !imShaderWindow_;
                     return true;
