@@ -74,21 +74,22 @@ struct ShaderLog
     public:
         IntrospectableFsq(const std::string& fragmentProgram, ApplicationNodeBase* appNode);
 
-
+        void DrawFrame(FrameBuffer& fbo);
         void DrawToBackBuffer();
         void DrawToBuffer(const FrameBuffer& fbo);
         void DrawToBuffer(const FrameBuffer& fbo, const IntrospectableFsq& prev);
         void Draw2D(FrameBuffer& fbo);
         const GPUProgram* GetGPUProgram() const { return gpuProgram_.get(); }
-//        const std::vector<subroutine_info_t> GetSubroutineCompatibleUniforms(GLuint uniform);
-//        void SendSubroutines() const;
         const std::vector<FrameBuffer> GetBackBuffer() {return backBuffers_;};
         void UpdateFrame(double currentTime, double elapsedTime);
+        void AddPass(const std::string& fragmentProgram);
+
     private:
         void DrawProgramWindow(bool *p_open);
         void loadProgramInterfaceInformation();
         void SendUniforms() const;
         std::unique_ptr<FullscreenQuad> fsq_;
+        std::unique_ptr<IntrospectableFsq> nextPass = nullptr;
         std::shared_ptr<GPUProgram> gpuProgram_;
         std::string shaderName_;
         std::vector<FrameBuffer> backBuffers_;
