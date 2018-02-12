@@ -10,8 +10,8 @@
 #include <glbinding/gl/gl.h>
 #include <variant>
 #include <map>
-#include <type_traits>
 #include "util.h"
+
 namespace minuseins::glwrap {
     namespace constants {
         static const std::vector<gl::GLenum> programInterfaces { // NOLINT
@@ -39,52 +39,21 @@ namespace minuseins::glwrap {
         };
     }
 
-    template <gl::GLenum>
-    struct PI{};
-
-    using interface_t = std::variant<
-        PI<gl::GL_UNIFORM>,
-        PI<gl::GL_UNIFORM_BLOCK>,
-        PI<gl::GL_ATOMIC_COUNTER_BUFFER>,
-        PI<gl::GL_PROGRAM_INPUT>,
-        PI<gl::GL_PROGRAM_OUTPUT>,
-        PI<gl::GL_VERTEX_SUBROUTINE>,
-        PI<gl::GL_VERTEX_SUBROUTINE_UNIFORM>,
-        PI<gl::GL_TESS_CONTROL_SUBROUTINE>,
-        PI<gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM>,
-        PI<gl::GL_TESS_EVALUATION_SUBROUTINE>,
-        PI<gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM>,
-        PI<gl::GL_GEOMETRY_SUBROUTINE>,
-        PI<gl::GL_GEOMETRY_SUBROUTINE_UNIFORM>,
-        PI<gl::GL_FRAGMENT_SUBROUTINE>,
-        PI<gl::GL_FRAGMENT_SUBROUTINE_UNIFORM>,
-        PI<gl::GL_COMPUTE_SUBROUTINE>,
-        PI<gl::GL_COMPUTE_SUBROUTINE_UNIFORM>,
-        PI<gl::GL_TRANSFORM_FEEDBACK_VARYING>,
-        PI<gl::GL_TRANSFORM_FEEDBACK_BUFFER>,
-        PI<gl::GL_BUFFER_VARIABLE>,
-        PI<gl::GL_SHADER_STORAGE_BLOCK>
-    >;
-
-    struct program_output_t
-    {
-        const std::string name;
-        const gl::GLenum type;
-        const gl::GLint location;
-        const gl::GLsizei textureLocation;
-    };
-
-    //template<gl::GLenum T>
-    struct program_interface_t {
-        program_interface_t(gl::GLuint prog, gl::GLenum interf) :
-            program{prog}, programInterface{interf}
-        {}
-        const gl::GLuint program;
-        const gl::GLenum programInterface;
-
+    namespace functional {
         /**
          * queries a property of the interface programInterface in program program, returning its value in params.
          * The property to return is specified by pname.
+         *
+         * If pname is ACTIVE_RESOURCES , the value returned is the number of resources in the active resource list for programInterface.
+         * If the list of active resources for programInterface is empty, zero is returned
+         * If pname is MAX_NAME_LENGTH , the value returned is the length of the longest active name string for an active resource in programInterface.
+         * This length includes an extra character for the null terminator.
+         * If the list of active resources for programInterface is empty, zero is returned.
+         * An INVALID_OPERATION error is generated if pname is MAX_NAME_LENGTH and programInterface is ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER , since active atomic counter and transform feedback buffer resources are not assigned name strings.
+         * If pname is MAX_NUM_ACTIVE_VARIABLES , the value returned is the number of active variables belonging to the interface block or atomic counter buffer resource in programInterface with the most active variables. If the list of active resources for programInterface is empty, zero is returned.
+         * An INVALID_OPERATION error is generated if pname is MAX_NUM_ACTIVE_VARIABLES and programInterface is not ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK .
+         * If pname is MAX_NUM_COMPATIBLE_SUBROUTINES , the value returned is the number of compatible subroutines for the active subroutine uniform in programInterface with the most compatible subroutines. If the list of active resources for programInterface is empty, zero is returned.
+         * An INVALID_OPERATION error is generated if pname is MAX_NUM_COMPATIBLE_SUBROUTINES and programInterface is not VERTEX_SUBROUTINE_UNIFORM , TESS_CONTROL_SUBROUTINE_UNIFORM , TESS_EVALUATION_SUBROUTINE_UNIFORM , GEOMETRY_SUBROUTINE_UNIFORM , FRAGMENT_SUBROUTINE_UNIFORM , or COMPUTE_SUBROUTINE_UNIFORM
          *
          * Errors:
          *
@@ -93,40 +62,11 @@ namespace minuseins::glwrap {
          * An INVALID_ENUM error is generated if programInterface is not one of the interfaces described in the introduction to section 7.3.1.
          * An INVALID_ENUM error is generated if pname is not ACTIVE_RESOURCES, MAX_NAME_LENGTH, MAX_NUM_ACTIVE_VARIABLES, or MAX_NUM_COMPATIBLE_SUBROUTINES.
          */
-        auto get_program_interface_iv = [program, programInterface](gl::GLenum query) {
-            return util::glGetProgramInterfaceiv(program, programInterface, query);
-        };
-        /**
-         * If pname is ACTIVE_RESOURCES , the value returned is the number of resources in the active resource list for programInterface.
-         * If the list of active resources for programInterface is empty, zero is returned
-         */
-        auto active_resources = []() {
-            return get_program_interface_iv(gl::GL_ACTIVE_RESOURCES);
-        };
-        /**
-         * If pname is MAX_NAME_LENGTH , the value returned is the length of the longest active name string for an active resource in programInterface.
-         * This length includes an extra character for the null terminator.
-         * If the list of active resources for programInterface is empty, zero is returned.
-         * An INVALID_OPERATION error is generated if pname is MAX_NAME_LENGTH and programInterface is ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER , since active atomic counter and transform feedback buffer resources are not assigned name strings.
-         */
-        auto max_name_length = []() {
-            return get_program_interface_iv(gl::GL_MAX_NAME_LENGTH);
-        };
-        /**
-         * If pname is MAX_NUM_ACTIVE_VARIABLES , the value returned is the number of active variables belonging to the interface block or atomic counter buffer resource in programInterface with the most active variables. If the list of active resources for programInterface is empty, zero is returned.
-         * An INVALID_OPERATION error is generated if pname is MAX_NUM_ACTIVE_VARIABLES and programInterface is not ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK .
-         */
-        auto max_num_active_variables = []() {
-            return get_program_interface_iv(gl::GL_MAX_NUM_ACTIVE_VARIABLES);
-        };
-        /**
-         * If pname is MAX_NUM_COMPATIBLE_SUBROUTINES , the value returned is the number of compatible subroutines for the active subroutine uniform in programInterface with the most compatible subroutines. If the list of active resources for programInterface is empty, zero is returned.
-         * An INVALID_OPERATION error is generated if pname is MAX_NUM_COMPATIBLE_SUBROUTINES and programInterface is not VERTEX_SUBROUTINE_UNIFORM , TESS_CONTROL_SUBROUTINE_UNIFORM , TESS_EVALUATION_SUBROUTINE_UNIFORM , GEOMETRY_SUBROUTINE_UNIFORM , FRAGMENT_SUBROUTINE_UNIFORM , or COMPUTE_SUBROUTINE_UNIFORM
-         */
-        auto max_num_compatible_subroutines = []() {
-            return get_program_interface_iv(gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
-        };
-
+        auto getProgramInterfaceiv(gl::GLuint program, gl::GLenum programInterface){
+            return [program, programInterface](const gl::GLenum pname){
+                return util::glGetProgramInterfaceiv(program, programInterface, pname);
+            };
+        }
         /**
          * returns the unsigned integer index assigned to a resource named name in the interface type programInterface of program object program.
          * If name exactly matches the name string of one of the active resources for programInterface, the index of the matched resource is returned.
@@ -141,9 +81,11 @@ namespace minuseins::glwrap {
          * An INVALID_ENUM error is generated if programInterface is ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER , since active atomic counter and transform feedback buffer resources are not assigned name strings.
          * If name does not match a resource as described above, the value INVALID_INDEX is returned, but no GL error is generated.
          */
-        auto get_program_resource_index = [program, programInterface](const std::string name) {
-            return util::glGetProgramResourceIndex(program, programInterface, name);
-        };
+        auto glGetProgramResourceIndex(gl::GLuint program, gl::GLenum programInterface) {
+            return [program, programInterface](const std::string name) {
+                return util::glGetProgramResourceIndex(program, programInterface, name);
+            };
+        }
 
         /**
          * returns the name string assigned to the single active resource with an index of index in the interface programInterface of program object program.
@@ -161,11 +103,11 @@ namespace minuseins::glwrap {
          * An INVALID_VALUE error is generated if index is greater than or equal to the number of entries in the active resource list for programInterface.
          * An INVALID_VALUE error is generated if bufSize is negative.
          */
-        auto get_program_resource_name = [program, programInterface](gl::GLuint index, gl::GLsizei bufSize) {
-            //static_assert(std::is_same<decltype(T),decltype(gl::GL_ATOMIC_COUNTER_BUFFER)>::value);
-            return util::glGetProgramResourceName(program, programInterface, index, bufSize);
-        };
-
+        auto glGetProgramResourceName(gl::GLuint program, gl::GLenum programInterface) {
+            return [program, programInterface](gl::GLuint index, gl::GLsizei bufSize) {
+                return util::glGetProgramResourceName(program, programInterface, index, bufSize);
+            };
+        }
         /**
          * Errors:
          * An INVALID_VALUE error is generated if program is not the name of either a program or shader object.
@@ -175,53 +117,99 @@ namespace minuseins::glwrap {
          * An INVALID_ENUM error is generated if any value in props is not one of the properties described above.
          * An INVALID_OPERATION error is generated if any value in props is not allowed for programInterface. The set of allowed programInterface values for each property can be found in table 7.2.
          */
-        auto get_program_resource_iv = [program, programInterface](gl::GLuint index, const std::vector<gl::GLenum>& props) {
-            //static_assert()
-            return util::glGetProgramResourceiv(program, programInterface, index, props);
-        };
+        auto glGetProgramResourceiv(gl::GLuint program, gl::GLenum programInterface)
+        {
+            return [program, programInterface](gl::GLuint index, const std::vector<gl::GLenum> &props)
+            {
+                return util::glGetProgramResourceiv(program, programInterface, index, props);
+            };
+        }
+        auto glGetProgramResourceiv_vector(gl::GLuint program, gl::GLenum programInterface)
+        {
+            return [program, programInterface](gl::GLuint index, gl::GLenum props, gl::GLuint size)
+            {
+                return util::glGetProgramResourceiv(program, programInterface, index, props, size);
+            };
+        }
+        auto glGetProgramResourceiv_single(gl::GLuint program, gl::GLenum programInterface)
+        {
+            return [program, programInterface](gl::GLuint index, gl::GLenum props)
+            {
+                return glGetProgramResourceiv_vector(program, programInterface)(index, props, 1).front();
+            };
+        }
+        auto get_num_compatible_subroutines(gl::GLuint program, gl::GLenum programInterface) {
+            return [program, programInterface](gl::GLuint uniformLocation) {
+                return util::positive(glGetProgramResourceiv_single(program, programInterface)(uniformLocation, gl::GL_NUM_COMPATIBLE_SUBROUTINES));
+            };
+        }
+        auto get_compatible_subroutines(gl::GLuint program, gl::GLenum programInterface) {
+            return [program, programInterface](gl::GLuint uniformLocation, gl::GLuint count) {
+                return glGetProgramResourceiv_vector(program, programInterface)(uniformLocation, gl::GL_COMPATIBLE_SUBROUTINES, count);
+            };
+        }
+    }
 
-        auto get_program_resource_iv_single = [program, programInterface](gl::GLuint index, gl::GLenum props) {
-            return util::glGetProgramResourceiv(program, programInterface, index, props, 1).front();
-        };
-
-        auto get_program_resource_iv_vector = [program, programInterface](gl::GLuint index, gl::GLenum props, gl::GLuint size) {
-            return util::glGetProgramResourceiv(program, programInterface, index, props, size);
-        };
-
-//        auto get_program_resource_name_location_type = [](gl::GLuint index) {
-//            return get_program_resource_iv(index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
-//        };
-    };
-
-    struct program_output_interface_t : public program_interface_t {
-        explicit program_output_interface_t(gl::GLuint program) : program_interface_t(program, gl::GL_PROGRAM_OUTPUT)
+    //template<gl::GLenum T>
+    struct program_interface_t {
+        program_interface_t(gl::GLuint prog, gl::GLenum interf) :
+            getiv{functional::getProgramInterfaceiv(prog, interf)},
+            getResourceIndex{functional::glGetProgramResourceIndex(prog, interf)},
+            getResourceName{functional::glGetProgramResourceName(prog, interf)},
+            getResourceiv{functional::glGetProgramResourceiv(prog, interf)},
+            getResourceiv_single{functional::glGetProgramResourceiv_single(prog, interf)},
+            getResourceiv_vector{functional::glGetProgramResourceiv_vector(prog, interf)}
         {
         }
-        struct info_t {
-            const std::string name;
-            const gl::GLenum type;
-            const gl::GLint location;
-        };
+        using prop_t = std::unordered_map<gl::GLenum, gl::GLint>;
+        using intv_t = std::vector<gl::GLint>;
+        const std::function<gl::GLuint(gl::GLenum)> getiv;
+        const std::function<gl::GLuint(std::string)> getResourceIndex;
+        const std::function<std::string(gl::GLuint, gl::GLsizei)> getResourceName;
+        const std::function<prop_t(gl::GLuint, std::vector<gl::GLenum>)> getResourceiv;
+        const std::function<intv_t(gl::GLuint, std::vector<gl::GLenum>)> getResourceiv_vector;
+        const std::function<gl::GLint(gl::GLuint, gl::GLenum)> getResourceiv_single;
+        const std::function<gl::GLuint()> iv_active_resources = std::bind(getiv, gl::GL_ACTIVE_RESOURCES);
+        const std::function<gl::GLuint()> iv_max_name_length = std::bind(getiv, gl::GL_MAX_NAME_LENGTH);
+        const std::function<gl::GLuint()> iv_max_num_active_variables = std::bind(getiv, gl::GL_MAX_NUM_ACTIVE_VARIABLES);
+        const std::function<gl::GLuint()> iv_max_num_compatible_subroutines = std::bind(getiv, gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
+    };
 
-        std::vector<info_t> get_name_location_type() {
-            auto activeResCount = active_resources();
-            if (0 == activeResCount) {
-                return std::vector<info_t>();
-            }
-            std::vector<info_t> result;
-            result.reserve(activeResCount);
-            for(gl::GLuint index = 0; index < activeResCount; ++index) {
-                auto props = get_program_resource_iv(index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
-                std::string name = get_program_resource_name(index, props[gl::GL_NAME_LENGTH]);
-                result.push_back({name, util::getType(props[gl::GL_TYPE]), props[gl::GL_LOCATION]});
+    struct p_i_name_location_type_t : public program_interface_t {
+        p_i_name_location_type_t(gl::GLuint prog, gl::GLenum interf) :
+            program_interface_t(prog, interf)
+        {}
+
+        using nlt = std::tuple<std::string, gl::GLint, gl::GLenum>;
+        std::vector<nlt> get_name_location_type() {
+            std::vector<nlt> result(iv_active_resources());
+            for(gl::GLuint index = 0; index < result.size(); ++index) {
+                auto props = getResourceiv(index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
+                std::string name = getResourceName(index, props[gl::GL_NAME_LENGTH]);
+                result.push_back(std::make_tuple(name, props[gl::GL_LOCATION], util::getType(props[gl::GL_TYPE])));
             }
 
             return result;
         }
+    };
+
+    struct program_output_t
+    {
+        std::string name;
+        gl::GLint location;
+        gl::GLenum type;
+        gl::GLsizei textureLocation;
+    };
+
+    struct program_output_interface_t : public p_i_name_location_type_t {
+        explicit program_output_interface_t(gl::GLuint program) :
+            p_i_name_location_type_t(program, gl::GL_PROGRAM_OUTPUT)
+        {}
         std::vector<program_output_t> get_program_output() {
             std::vector<program_output_t> result{};
-            for(const auto& info : get_name_location_type()){
-                result.push_back(program_output_t{info.name, info.type, info.location, 0});
+            for(const auto& [name, location, type] : get_name_location_type()){
+                //const auto [name, location, type] = info;
+                result.push_back(program_output_t{name, location, type, 0});
             }
             std::sort(result.begin(), result.end(), [](glwrap::program_output_t a, glwrap::program_output_t b) {
                 return a.location < b.location;
@@ -230,94 +218,79 @@ namespace minuseins::glwrap {
         }
     };
 
-    struct subroutine_interface_t : public program_interface_t {
-        gl::GLenum subroutineInterface;
-        subroutine_interface_t(gl::GLuint program, gl::GLenum uniformInterface, gl::GLenum subroutineInterface) :
-            program_interface_t(program, uniformInterface),
-            subroutineInterface{subroutineInterface}
-        {
-        }
-        auto get_num_compatible_subroutines = [](gl::GLuint uniformLocation) {
-            return util::positive(get_program_resource_iv_single(uniformLocation, gl::GL_NUM_COMPATIBLE_SUBROUTINES));
-        };
-        auto get_compatible_subroutines = [](gl::GLuint uniformLocation, gl::GLuint count) {
-            return get_program_resource_iv_vector(uniformLocation, gl::GL_COMPATIBLE_SUBROUTINES, count);
-        };
-        auto get_subroutine_max_name_len = [program, subroutineInterface]() {
-            return util::glGetProgramInterfaceiv(program, subroutineInterface, gl::GL_MAX_NAME_LENGTH);
-        };
+    struct p_i_name_location_t : public program_interface_t {
+        p_i_name_location_t(gl::GLuint prog, gl::GLenum interf) :
+            program_interface_t(prog, interf)
+        {}
 
-        auto get_subroutine_name = [program, subroutineInterface](gl::GLuint index, gl::GLsizei bufSize) {
-            return util::glGetProgramResourceName(program, subroutineInterface, index, bufSize);
-        };
-
-        struct name_location_t {
-            std::string name;
-            gl::GLuint location;
-        };
-
-        struct subroutine_t {
-            std::string name;
-            gl::GLuint value;
-        };
-        struct subroutine_uniform_t {
-            std::string name;
-            gl::GLuint location;
-            std::vector<subroutine_t> compatibleSubroutines;
-        };
-
-        std::vector<gl::GLuint> compatible_subroutines(gl::GLuint uniform) {
-            auto count = get_num_compatible_subroutines(uniform);
-            if(0 == count) {
-                return std::vector<gl::GLuint>();
+        using nl = std::tuple<std::string, gl::GLint>;
+        std::vector<nl> get_name_location() {
+            std::vector<nl> result(iv_active_resources());
+            for(gl::GLuint index = 0; index < result.size(); ++index) {
+                auto props = getResourceiv(index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
+                std::string name = getResourceName(index, props[gl::GL_NAME_LENGTH]);
+                result.emplace_back(name, props[gl::GL_LOCATION]);
             }
 
-            std::vector<gl::GLuint> result(count);
-            for (auto subroutine : get_compatible_subroutines(uniform, count)) {
+            return result;
+        }
+    };
+
+    struct subroutine_interface_t : public program_interface_t {
+        subroutine_interface_t(gl::GLuint program, gl::GLenum interface) :
+            program_interface_t(program, interface),
+            getCompatibleSubroutines{functional::get_compatible_subroutines(program, interface)},
+            getCompatibleSubroutineCount{functional::get_num_compatible_subroutines(program, interface)}
+        {}
+
+        const std::function<std::vector<gl::GLuint>(gl::GLuint, gl::GLuint)> getCompatibleSubroutines;
+        const std::function<gl::GLuint(gl::GLuint)> getCompatibleSubroutineCount;
+        std::vector<gl::GLuint> compatible_subroutines(gl::GLuint uniform) const {
+            std::vector<gl::GLuint> result(getCompatibleSubroutineCount(uniform));
+            for (auto subroutine : getCompatibleSubroutines(uniform, static_cast<gl::GLuint>(result.size()))) {
                 result.push_back(util::positive(subroutine));  //TODO use transform.
             }
             return result;
         }
 
-        std::vector<name_location_t> get_name_location() {
-            auto activeResCount = active_resources();
-            if(0 == activeResCount) {
-                return std::vector<name_location_t>();
-            }
-            //TODO since subroutine names come from here, and this is using max name len, this is probably why there's NUL char padding
-            auto maxNameLen = max_name_length();
-            std::vector<name_location_t> result;
-            result.reserve(activeResCount);
-            for(gl::GLuint index = 0; index < activeResCount; ++index) {
-                auto name = get_program_resource_name(index, maxNameLen);
-                result.push_back({name, index});
-            }
-
-            return result;
-        }
-
-        std::vector<subroutine_t> get_subroutine_compatible_uniforms(gl::GLuint uniform)
+        using subroutine_t = std::pair<std::string, gl::GLuint>;
+        std::vector<subroutine_t> get_subroutine_compatible_uniforms(gl::GLuint uniform) const
         {
             auto compatibleSubroutines = compatible_subroutines(uniform);
             std::vector<subroutine_t> result;
-            auto maxNameLen = get_subroutine_max_name_len();
+            auto maxNameLen = iv_max_name_length();
             result.reserve(compatibleSubroutines.size());
             for(auto subroutine : compatibleSubroutines) {  //TODO somehow the names are padded with \0?
-                subroutine_t data;
-                data.name = get_subroutine_name(subroutine, maxNameLen);
-                data.value = subroutine;
-                result.push_back(data);
+                auto name = getResourceName(subroutine, maxNameLen);
+                result.emplace_back(name,subroutine);
             }
             return result;
         }
+    };
+
+    struct subroutine_uniform_t {
+        std::string name;
+        gl::GLuint location;
+        std::vector<std::pair<std::string, gl::GLuint>> compatibleSubroutines;
+    };
+
+    struct subroutine_uniform_interface_t : public p_i_name_location_t {
+        subroutine_uniform_interface_t(gl::GLuint program, gl::GLenum uniformInterface, gl::GLenum subroutineInterface) :
+            p_i_name_location_t(program, uniformInterface),
+            subroutines{program, subroutineInterface}
+        {
+        }
+        const subroutine_interface_t subroutines;
+
+        using subroutine_t = std::pair<std::string, gl::GLuint>;
         std::vector<subroutine_uniform_t> make_subroutine_uniforms()
         {
             std::vector<subroutine_uniform_t> uniforms;
-            for(const auto& name_loc : get_name_location()){
+            for(const auto& [name, location] : get_name_location()){
                 subroutine_uniform_t uniform;
-                uniform.location = name_loc.location;
-                uniform.name = name_loc.name;
-                uniform.compatibleSubroutines = get_subroutine_compatible_uniforms(uniform.location);
+                uniform.location = location;
+                uniform.name = name;
+                uniform.compatibleSubroutines = subroutines.get_subroutine_compatible_uniforms(uniform.location);
                 uniforms.push_back(uniform);
             }
             return uniforms;

@@ -381,7 +381,7 @@ namespace viscom {
                 case gl::GL_BOOL_VEC4:
                     return 4;
                 default:
-                    LOG(WARNING) << "asking for size of unimplemented type. expect failure!";
+                    //LOG(WARNING) << "asking for size of unimplemented type. expect failure!";
                     return 0;
 
             }
