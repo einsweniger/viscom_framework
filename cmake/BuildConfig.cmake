@@ -19,7 +19,7 @@ if(UNIX)
     add_compile_options(-fvisibility=hidden -fvisibility-inlines-hidden)
   elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # clang does not work well with gcc-stdlib, so this is necessary o_0
-    add_compile_options(-stdlib=libc++)
+    add_compile_options(-stdlib=libc++ -isystem /usr/include/c++/v1)
     list(APPEND CORE_LIBS c++experimental c++abi)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
   endif()
