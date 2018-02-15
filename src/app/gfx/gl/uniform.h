@@ -251,10 +251,6 @@ namespace viscom::glwrap
         return result;
     }
 
-    static std::vector<info_t> get_uniforms(const gl::GLuint program) {
-        return get_name_location_type(program, gl::GL_UNIFORM);
-    }
-
     static std::vector<name_location_t> get_subroutine_uniforms(gl::GLuint program, gl::GLenum interface)
     {
         return get_name_location(program, interface);
@@ -281,9 +277,10 @@ namespace viscom::glwrap
         for(const auto& info : get_name_location_type(program, gl::GL_PROGRAM_OUTPUT)){
             result.push_back(program_output_t{info.name, info.type, info.location, 0});
         }
-        std::sort(result.begin(), result.end(), [](glwrap::program_output_t a, glwrap::program_output_t b) {
-            return a.location < b.location;
-        }); // have to sort output, otherwise mapping name to texture is wrong.
+        std::sort(result.begin(), result.end(),
+                  [](const glwrap::program_output_t& a, const glwrap::program_output_t& b) -> bool {
+                      return a.location < b.location;
+                  }); // have to sort output, otherwise mapping name to texture is wrong.
         return result;
     }
     template<gl::GLenum>
@@ -414,7 +411,19 @@ namespace viscom::glwrap
         }
     }
 
-    //TODO add a struct that creates the uniforms and collects subroutines and program output to their respective structs.
+    static std::vector<subroutine_uniform_t> make_subroutine_uniforms(GLuint program, const gl::GLenum &stage)
+    {
+        std::vector<subroutine_uniform_t> uniforms;
+        for(const auto& name_loc : get_subroutine_uniforms(program, constants::getSubroutineUniformEnumForProgramStage(stage))){
+            subroutine_uniform_t uniform;
+            uniform.location = name_loc.location;
+            uniform.name = name_loc.name;
+            uniform.compatibleSubroutines = get_subroutine_compatible_uniforms(program, stage, uniform.location);
+            uniforms.push_back(uniform);
+        }
+        return uniforms;
+    }
+    
     static uniform_container make_uniform(gl::GLuint program, std::string name, gl::GLint location, gl::GLenum type)
     {
         if (is_int(type)) {
@@ -437,30 +446,69 @@ namespace viscom::glwrap
             gl::glGetUniformiv(program, positive(location), &intValues[0]);
             return bool_t{name, type, location, intValues};
         };
-
+            
         //fallthrough
         return unhandled_t{name, type, location};
     }
-
-    static std::vector<subroutine_uniform_t> make_subroutine_uniforms(GLuint program, const gl::GLenum &stage)
-    {
-        std::vector<subroutine_uniform_t> uniforms;
-        for(const auto& name_loc : get_subroutine_uniforms(program, constants::getSubroutineUniformEnumForProgramStage(stage))){
-            subroutine_uniform_t uniform;
-            uniform.location = name_loc.location;
-            uniform.name = name_loc.name;
-            uniform.compatibleSubroutines = get_subroutine_compatible_uniforms(program, stage, uniform.location);
-            uniforms.push_back(uniform);
+    
+    struct uniform_interface_t {
+        uniform_interface_t(gl::GLuint program) :
+            program{program}
+        {}
+        gl::GLuint program;
+        std::vector<uniform_container> uniforms;
+        
+        program_samplers_t collected_samplers{};
+        
+        void read_uniforms_from_program()
+        {
+            std::vector<uniform_container> result;
+            // "normal" uniforms
+            for (const auto &uniform : get_name_location_type(program, gl::GL_UNIFORM)) {
+                make_uniform(uniform.name, uniform.location, uniform.type);
+            }
+            // add collected samplers to result
+            if(0 != collected_samplers.samplers.size()){
+                uniforms.push_back(collected_samplers);
+            }
         }
-        return uniforms;
-    }
+        
+        void make_uniform(std::string name, gl::GLint location, gl::GLenum type)
+        { 
+            if (is_int(type)) {
+                auto value = std::vector<gl::GLint>(glwrap::getSize(type));
+                gl::glGetUniformiv(program, positive(location), &value[0]);
+                uniforms.push_back(integer_t{name, type, location, value});
+            } else if (is_float(type)) {
+                auto value = std::vector<gl::GLfloat>(glwrap::getSize(type));
+                gl::glGetUniformfv(program,  positive(location), &value[0]);
+                uniforms.push_back(float_t{name, type, location, value});
+            } else if (is_uint(type)) {
+                auto value = std::vector<gl::GLuint>(glwrap::getSize(type));
+                gl::glGetUniformuiv(program,  positive(location), &value[0]);
+                uniforms.push_back(uinteger_t{name, type, location, value});
+            } else if (is_bool(type)) {
+                auto intValues = std::vector<gl::GLint>(glwrap::getSize(type));
+                gl::glGetUniformiv(program, positive(location), &intValues[0]);
+                uniforms.push_back(bool_t{name, type, location, intValues});
+            } else if (is_sampler(type)){
+                collected_samplers.samplers.push_back(sampler_t{name, type, location, 0});
+            } else {
+                uniforms.push_back(unhandled_t{name, type, location});
+            }
+            
+            //fallthrough
+
+        }
+        
+    };
 
     static std::vector<uniform_container> read_uniforms_from_program(gl::GLuint program)
     {
         std::vector<uniform_container> result;
         program_samplers_t collected_samplers{};
         // "normal" uniforms
-        for (const auto &uniform : get_uniforms(program)) {
+        for (const auto &uniform : get_name_location_type(program, gl::GL_UNIFORM)) {
             auto created_uniform = make_uniform(program, uniform.name, uniform.location, uniform.type);
             //check if uniform is a sampler of any kind.
             if(std::holds_alternative<unhandled_t>(created_uniform)) {
@@ -545,4 +593,72 @@ namespace viscom::glwrap
             std::visit(sender, u);
         }
     }
+}
+
+namespace minuseins::glwrap {
+    namespace functional {
+        static auto getProgramInterfaceiv(gl::GLuint program, gl::GLenum programInterface){
+            return [program, programInterface](const gl::GLenum pname){
+                return util::glGetProgramInterfaceiv(program, programInterface, pname);
+            };
+        }
+
+        static auto glGetProgramResourceIndex(gl::GLuint program, gl::GLenum programInterface) {
+            return [program, programInterface](const std::string name) {
+                return util::glGetProgramResourceIndex(program, programInterface, name);
+            };
+        }
+
+        static auto glGetProgramResourceName(gl::GLuint program, gl::GLenum programInterface) {
+            return [program, programInterface](gl::GLuint index, gl::GLsizei bufSize) {
+                return util::glGetProgramResourceName(program, programInterface, index, bufSize);
+            };
+        }
+        static auto glGetProgramResourceiv(gl::GLuint program, gl::GLenum programInterface)
+        {
+            return [program, programInterface](gl::GLuint index, const std::vector<gl::GLenum> &props)
+            {
+                return util::glGetProgramResourceiv(program, programInterface, index, props);
+            };
+        }
+        static auto glGetProgramResourceiv_vector(gl::GLuint program, gl::GLenum programInterface)
+        {
+            return [program, programInterface](gl::GLuint index, gl::GLenum props, gl::GLuint size)
+            {
+                return util::glGetProgramResourceiv_vector(program, programInterface, index, props, size);
+            };
+        }
+        static auto glGetProgramResourceiv_single(gl::GLuint program, gl::GLenum programInterface)
+        {
+            return [program, programInterface](gl::GLuint index, gl::GLenum props)
+            {
+                return util::glGetProgramResourceiv_vector(program, programInterface, index, props, 1).front();
+            };
+        }
+    }
+
+    //template<gl::GLenum T>
+    struct program_interface_t {
+        program_interface_t(gl::GLuint prog, gl::GLenum interf) :
+            getiv{functional::getProgramInterfaceiv(prog, interf)},
+            getResourceIndex{functional::glGetProgramResourceIndex(prog, interf)},
+            getResourceName{functional::glGetProgramResourceName(prog, interf)},
+            getResourceiv{functional::glGetProgramResourceiv(prog, interf)},
+            getResourceiv_single{functional::glGetProgramResourceiv_single(prog, interf)},
+            getResourceiv_vector{functional::glGetProgramResourceiv_vector(prog, interf)}
+        {
+        }
+        using prop_t = std::unordered_map<gl::GLenum, gl::GLint>;
+        using intv_t = std::vector<gl::GLint>;
+        const std::function<gl::GLuint(gl::GLenum)> getiv;
+        const std::function<gl::GLuint(std::string)> getResourceIndex;
+        const std::function<std::string(gl::GLuint, gl::GLsizei)> getResourceName;
+        const std::function<prop_t(gl::GLuint, std::vector<gl::GLenum>)> getResourceiv;
+        const std::function<gl::GLint(gl::GLuint, gl::GLenum)> getResourceiv_single;
+        const std::function<intv_t(gl::GLuint, gl::GLenum, gl::GLuint)> getResourceiv_vector;
+        const std::function<gl::GLuint()> iv_active_resources = std::bind(getiv, gl::GL_ACTIVE_RESOURCES);
+        const std::function<gl::GLuint()> iv_max_name_length = std::bind(getiv, gl::GL_MAX_NAME_LENGTH);
+        const std::function<gl::GLuint()> iv_max_num_active_variables = std::bind(getiv, gl::GL_MAX_NUM_ACTIVE_VARIABLES);
+        const std::function<gl::GLuint()> iv_max_num_compatible_subroutines = std::bind(getiv, gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
+    };
 }

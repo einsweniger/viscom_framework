@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <unordered_map>
 #include <glbinding/gl42core/gl.h>
 #include <glbinding/Binding.h>
 
@@ -25,7 +26,7 @@ namespace minuseins::glwrap::util {
 
     static gl::GLuint glGetProgramResourceIndex( gl::GLuint program, gl::GLenum programInterface, std::string name ) {
         return gl::glGetProgramResourceIndex(program, programInterface, &name[0]);
-    };
+    }
 
     /**
      * wraps the original void GetProgramResourceName( uint program, enum programInterface, uint index, sizei bufSize, sizei *length, char *name )
@@ -77,7 +78,7 @@ namespace minuseins::glwrap::util {
      * @param size
      * @return
      */
-    static std::vector<gl::GLint> glGetProgramResourceiv(const gl::GLuint program, const gl::GLenum programInterface, const gl::GLuint index, const gl::GLenum props, const gl::GLuint size) {
+    static std::vector<gl::GLint> glGetProgramResourceiv_vector(const gl::GLuint program, const gl::GLenum programInterface, const gl::GLuint index, const gl::GLenum props, const gl::GLuint size) {
         std::vector<gl::GLint> params(size);
         const gl::GLsizei propCount = 1;
         gl::GLsizei length;

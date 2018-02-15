@@ -13,7 +13,7 @@
 
 
 namespace viscom {
-
+    
 struct ShaderLog
 {
     ImGuiTextBuffer Buf;
