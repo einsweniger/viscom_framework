@@ -21,12 +21,12 @@ namespace viscom::glwrap::constants
 {
      constexpr std::array<gl::GLenum,6> programStagesWithSubroutines() {
         return {
-            gl::GL_VERTEX_SHADER,
+            {gl::GL_VERTEX_SHADER,
             gl::GL_TESS_CONTROL_SHADER,
             gl::GL_TESS_EVALUATION_SHADER,
             gl::GL_GEOMETRY_SHADER,
             gl::GL_FRAGMENT_SHADER,
-            gl::GL_COMPUTE_SHADER
+            gl::GL_COMPUTE_SHADER}
         };
     }
     constexpr gl::GLenum getSubroutineUniformEnumForProgramStage(gl::GLenum stage) {
@@ -286,34 +286,68 @@ namespace viscom::glwrap
     template<gl::GLenum>
     struct U {};
 
-    struct integer_t
-    {
-        std::string name;
-        gl::GLenum type;
-        gl::GLint location;
-        std::vector<gl::GLint> value;
-    };
-
-    struct float_t
-    {
-        std::string name;
-        gl::GLenum type;
-        gl::GLint location;
-        std::vector<gl::GLfloat> value;
-    };
-
-    struct uinteger_t
-    {
-        std::string name;
-        gl::GLenum type;
-        gl::GLint location;
-        std::vector<gl::GLuint> value;
-    };
     struct unhandled_t
     {
+        unhandled_t(std::string name_, gl::GLenum type_, gl::GLint location_) :
+            name{name_}, type{type_}, location{location_}
+        {}
         std::string name;
         gl::GLenum type;
         gl::GLint location;
+    };
+
+    struct integer_t : public unhandled_t
+    {
+        integer_t(std::string name_, gl::GLenum type_, gl::GLint location_) :
+            unhandled_t(name_, type_, location_),
+            value{std::vector<gl::GLint>(getSize(type_))}
+        {}
+        std::vector<gl::GLint> value;
+        void retrieve_value(gl::GLuint program) {
+            gl::glGetUniformiv(program, positive(location), &value[0]);
+        }
+    };
+
+    struct bool_t : integer_t {
+        bool_t(std::string name_, gl::GLenum type_, gl::GLint location_) :
+            integer_t(name_, type_, location_)
+        {}
+    };
+
+    struct float_t : public unhandled_t
+    {
+        float_t(std::string name_, gl::GLenum type_, gl::GLint location_) :
+            unhandled_t(name_, type_, location_),
+            value{std::vector<gl::GLfloat>(getSize(type_))}
+        {}
+        std::vector<gl::GLfloat> value;
+        void retrieve_value(gl::GLuint program) {
+            gl::glGetUniformfv(program, positive(location), &value[0]);
+        }
+    };
+
+    struct uinteger_t : public unhandled_t
+    {
+        uinteger_t(std::string name_, gl::GLenum type_, gl::GLint location_) :
+            unhandled_t(name_, type_, location_),
+            value{std::vector<gl::GLuint>(getSize(type_))}
+        {}
+        std::vector<gl::GLuint> value;
+        void retrieve_value(gl::GLuint program) {
+            gl::glGetUniformuiv(program, positive(location), &value[0]);
+        }
+    };
+
+    struct sampler_t : public unhandled_t {
+        sampler_t(std::string name_, gl::GLenum type_, gl::GLint location_) :
+            unhandled_t(name_, type_, location_),
+            boundTexture{0}
+        {}
+        gl::GLint boundTexture;
+    };
+
+    struct program_samplers_t {
+        std::vector<sampler_t> samplers;
     };
 
     struct subroutine_t {
@@ -331,24 +365,6 @@ namespace viscom::glwrap
         gl::GLenum programStage;  //gl::GL_FRAGMENT_SHADER,...
         std::vector<gl::GLuint> activeSubroutines;
         std::vector<subroutine_uniform_t> subroutineUniforms;
-    };
-
-    struct sampler_t {
-        std::string name;
-        gl::GLenum type;
-        gl::GLint location;
-        gl::GLint boundTexture;
-    };
-
-    struct program_samplers_t {
-        std::vector<sampler_t> samplers;
-    };
-
-    struct bool_t {
-        std::string name;
-        gl::GLenum type;
-        gl::GLint location;
-        std::vector<gl::GLint> value; //imgui does not like GLboolean, so we're doing int's instead.
     };
 
     using uniform_container = std::variant<
@@ -429,41 +445,66 @@ namespace viscom::glwrap
         if (is_int(type)) {
             auto value = std::vector<gl::GLint>(glwrap::getSize(type));
             gl::glGetUniformiv(program, positive(location), &value[0]);
-            return integer_t{name, type, location, value};
+            return integer_t{name, type, location};
         }
         if (is_float(type)) {
             auto value = std::vector<gl::GLfloat>(glwrap::getSize(type));
             gl::glGetUniformfv(program,  positive(location), &value[0]);
-            return float_t{name, type, location, value};
+            return float_t{name, type, location};
         }
         if (is_uint(type)) {
             auto value = std::vector<gl::GLuint>(glwrap::getSize(type));
             gl::glGetUniformuiv(program,  positive(location), &value[0]);
-            return uinteger_t{name, type, location, value};
+            return uinteger_t{name, type, location,};
         }
         if (is_bool(type)) {
             auto intValues = std::vector<gl::GLint>(glwrap::getSize(type));
             gl::glGetUniformiv(program, positive(location), &intValues[0]);
-            return bool_t{name, type, location, intValues};
-        };
-            
+            return bool_t{name, type, location};
+        }
         //fallthrough
         return unhandled_t{name, type, location};
     }
-    
+
     struct uniform_interface_t {
+        struct uniform_initializer_t {
+            uniform_initializer_t(gl::GLuint program) : program{program}                                                       
+            {}
+            gl::GLuint program;            
+            void operator()(integer_t arg) {
+                gl::glGetUniformiv(program, positive(arg.location), &arg.value[0]);
+            }
+            void operator()(bool_t arg){
+                gl::glGetUniformiv(program, positive(arg.location), &arg.value[0]);
+            }
+            void operator()(float_t arg){
+                gl::glGetUniformfv(program, positive(arg.location), &arg.value[0]);
+            }
+            void operator()(uinteger_t arg){
+                gl::glGetUniformuiv(program, positive(arg.location), &arg.value[0]);
+            }
+            void operator()(stage_subroutines_t){}
+            void operator()(program_output_t){}
+            void operator()(program_samplers_t){}
+            void operator()(unhandled_t){}
+        };
+
         uniform_interface_t(gl::GLuint program) :
             program{program}
-        {}
+        {
+            read_uniforms_from_program();
+            const auto init = uniform_initializer_t(program);
+            for(auto uniform : uniforms) {
+                std::visit(init, uniform);
+            }
+        }
+        
         gl::GLuint program;
         std::vector<uniform_container> uniforms;
-        
         program_samplers_t collected_samplers{};
         
         void read_uniforms_from_program()
         {
-            std::vector<uniform_container> result;
-            // "normal" uniforms
             for (const auto &uniform : get_name_location_type(program, gl::GL_UNIFORM)) {
                 make_uniform(uniform.name, uniform.location, uniform.type);
             }
@@ -472,35 +513,31 @@ namespace viscom::glwrap
                 uniforms.push_back(collected_samplers);
             }
         }
-        
+
         void make_uniform(std::string name, gl::GLint location, gl::GLenum type)
         { 
             if (is_int(type)) {
                 auto value = std::vector<gl::GLint>(glwrap::getSize(type));
                 gl::glGetUniformiv(program, positive(location), &value[0]);
-                uniforms.push_back(integer_t{name, type, location, value});
+                uniforms.push_back(integer_t{name, type, location});
             } else if (is_float(type)) {
                 auto value = std::vector<gl::GLfloat>(glwrap::getSize(type));
                 gl::glGetUniformfv(program,  positive(location), &value[0]);
-                uniforms.push_back(float_t{name, type, location, value});
+                uniforms.push_back(float_t{name, type, location});
             } else if (is_uint(type)) {
                 auto value = std::vector<gl::GLuint>(glwrap::getSize(type));
                 gl::glGetUniformuiv(program,  positive(location), &value[0]);
-                uniforms.push_back(uinteger_t{name, type, location, value});
+                uniforms.push_back(uinteger_t{name, type, location});
             } else if (is_bool(type)) {
                 auto intValues = std::vector<gl::GLint>(glwrap::getSize(type));
                 gl::glGetUniformiv(program, positive(location), &intValues[0]);
-                uniforms.push_back(bool_t{name, type, location, intValues});
+                uniforms.push_back(bool_t{name, type, location});
             } else if (is_sampler(type)){
-                collected_samplers.samplers.push_back(sampler_t{name, type, location, 0});
+                collected_samplers.samplers.push_back(sampler_t{name, type, location});
             } else {
                 uniforms.push_back(unhandled_t{name, type, location});
             }
-            
-            //fallthrough
-
         }
-        
     };
 
     static std::vector<uniform_container> read_uniforms_from_program(gl::GLuint program)
@@ -515,7 +552,7 @@ namespace viscom::glwrap
                 auto test = std::get<unhandled_t>(created_uniform);
                 if(is_sampler(test.type)) {
                     //if type is sampler, collect;
-                    collected_samplers.samplers.push_back(sampler_t{test.name, test.type, test.location, 0});
+                    collected_samplers.samplers.push_back(sampler_t{test.name, test.type, test.location});
                 } else {
                     //otherwise push as unhandled;
                     result.push_back(test);
@@ -581,10 +618,9 @@ namespace viscom::glwrap
                 gl::glUniform1i(sampler.location, counter);
                 counter++;
             }
-
         }
-        void operator()(program_output_t& arg) { } //do nothing
-        void operator()(unhandled_t& arg) { } //fallthrough
+        void operator()(program_output_t&) { } //do nothing
+        void operator()(unhandled_t&) { } //fallthrough
     };
 
     static void send_uniform_values(std::vector<uniform_container> uniforms) {
