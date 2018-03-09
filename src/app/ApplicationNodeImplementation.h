@@ -10,10 +10,12 @@
 
 #include "enh/ApplicationNodeBase.h"
 
+namespace minuseins {
+    class IntrospectableFsq;
+}
 namespace viscom {
 
     class MeshRenderable;
-    class IntrospectableFsq;
     class MyFreeCamera;
 
     class ApplicationNodeImplementation : public enh::ApplicationNodeBase
@@ -39,7 +41,7 @@ namespace viscom {
     protected:
         void toggleMouseGrab();
 
-        std::unique_ptr<IntrospectableFsq> quad_;
+        std::unique_ptr<minuseins::IntrospectableFsq> quad_;
         bool grabMouse_ = false;
         std::shared_ptr<MyFreeCamera> freeCam_;
 

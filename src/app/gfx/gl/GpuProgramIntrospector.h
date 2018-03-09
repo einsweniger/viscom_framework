@@ -10,16 +10,19 @@
 #include <variant>
 #include <app/gfx/gl/interface/UniformInterface.h>
 #include <app/gfx/gl/interface/ProgramOutputInterface.h>
+namespace minuseins {
+    class GpuProgramIntrospector {
+    public:
+        explicit GpuProgramIntrospector(gl::GLuint programId);
 
-class GpuProgramIntrospector {
-public:
-    explicit GpuProgramIntrospector(gl::GLuint programId);
+    private:
+        void init_uniform_values();
 
-private:
-    void init_uniform_values();
-    void init_program_output();
-    gl::GLuint programId_;
-    std::vector<interface_types::uniform_container> uniforms_;
-    std::vector<interface_types::program_output_t> outputs_;
-};
+        void init_program_output();
 
+        gl::GLuint programId_;
+        std::vector<interfaces::types::uniform_container> uniforms_;
+        std::vector<interfaces::types::program_output_t> outputs_;
+    };
+
+}

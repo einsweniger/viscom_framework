@@ -13,7 +13,7 @@
 #include <app/gfx/gl/interface/SubroutineUniformInterface.h>
 #include <app/gfx/gl/interface/ProgramOutputInterface.h>
 
-namespace viscom {
+namespace minuseins {
     
 struct ShaderLog
 {
@@ -93,28 +93,31 @@ struct ShaderLog
             gl::GL_COMPUTE_SUBROUTINE,
             gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
     };
-
+namespace {
+    using namespace minuseins::interfaces;
     using drawable_container = std::variant<
-            interface_types::integer_t
-            ,interface_types::generic_uniform
-            ,interface_types::float_t
-            ,interface_types::uinteger_t
-            ,interface_types::stage_subroutines_t
-            ,interface_types::program_output_t
-            ,interface_types::program_samplers_t
-            ,interface_types::bool_t
+            types::integer_t
+            ,types::generic_uniform
+            ,types::float_t
+            ,types::uinteger_t
+            ,types::stage_subroutines_t
+            ,types::program_output_t
+            ,types::program_samplers_t
+            ,types::bool_t
     >;
     struct converter {
         std::vector<drawable_container> result{};
-        void operator()(interface_types::integer_t& arg) {result.push_back(arg);}
-        void operator()(interface_types::generic_uniform& arg) {result.push_back(arg);}
-        void operator()(interface_types::float_t& arg) {result.push_back(arg);}
-        void operator()(interface_types::uinteger_t& arg) {result.push_back(arg);}
-        void operator()(interface_types::program_samplers_t& arg) {result.push_back(arg);}
-        void operator()(interface_types::bool_t& arg) {result.push_back(arg);}
+        void operator()(types::integer_t& arg) {result.push_back(arg);}
+        void operator()(types::generic_uniform& arg) {result.push_back(arg);}
+        void operator()(types::float_t& arg) {result.push_back(arg);}
+        void operator()(types::uinteger_t& arg) {result.push_back(arg);}
+        void operator()(types::program_samplers_t& arg) {result.push_back(arg);}
+        void operator()(types::bool_t& arg) {result.push_back(arg);}
     };
+}
     static std::vector<drawable_container> read_uniforms_from_program(gl::GLuint program)
     {
+        using namespace minuseins::interfaces;
         //std::vector<drawable_container> result;
         //program_samplers_t collected_samplers{};
         auto ui = UniformInterface(program);
@@ -127,7 +130,7 @@ struct ShaderLog
         auto result = c.result;
 
         // add subroutine uniforms
-        for (auto& subs : SubroutineUniformInterface::GetSubroutines(program)) {
+        for (auto& subs : SubroutineUniformInterface::GetAllStages(program)) {
             result.push_back(subs);
         }
 
@@ -141,10 +144,10 @@ struct ShaderLog
     class IntrospectableFsq
     {
     public:
-        IntrospectableFsq(const std::string& fragmentProgram, ApplicationNodeBase* appNode);
-        void ClearBuffer(FrameBuffer& fbo);
-        void DrawFrame(FrameBuffer& fbo);
-        void Draw2D(FrameBuffer& fbo);
+        IntrospectableFsq(const std::string& fragmentProgram, viscom::ApplicationNodeBase* appNode);
+        void ClearBuffer(viscom::FrameBuffer& fbo);
+        void   DrawFrame(viscom::FrameBuffer& fbo);
+        void      Draw2D(viscom::FrameBuffer& fbo);
         void UpdateFrame(double currentTime, double elapsedTime);
 
         void AddPass(const std::string& fragmentProgram);
@@ -152,16 +155,16 @@ struct ShaderLog
 
     private:
         void DrawToBackBuffer();
-        void DrawToBuffer(const FrameBuffer& fbo);
+        void DrawToBuffer(const viscom::FrameBuffer& fbo);
         void DrawProgramWindow(bool *p_open);
         void loadProgramInterfaceInformation();
         void SendUniforms() const;
-        std::unique_ptr<FullscreenQuad> fsq_;
-        ApplicationNodeBase* app_;
+        std::unique_ptr<viscom::FullscreenQuad> fsq_;
+        viscom::ApplicationNodeBase* app_;
         std::string shaderName_;
-        std::shared_ptr<GPUProgram> gpuProgram_;
+        std::shared_ptr<viscom::GPUProgram> gpuProgram_;
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
-        std::vector<FrameBuffer> backBuffers_;
+        std::vector<viscom::FrameBuffer> backBuffers_;
         std::vector<drawable_container> uniforms_;
         std::map<std::string, drawable_container> uniformMap_;
         gl::GLfloat currentTime_;

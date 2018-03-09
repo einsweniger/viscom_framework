@@ -8,10 +8,11 @@
 
 #include "IntrospectableFsq.h"
 
-namespace viscom {
+namespace minuseins {
+    namespace interfaces {
     struct uniform_draw_menu {
-        void operator()(interface_types::generic_uniform& u) {ImGui::Text("%s(%d) %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());}
-        void operator()(interface_types::float_t& uniform) {
+        void operator()(types::generic_uniform& u) {ImGui::Text("%s(%d) %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());}
+        void operator()(types::float_t& uniform) {
             std::string header = uniform.name + "(" + std::to_string(uniform.location) + ")";
             const float v_speed = 0.0001f;
             const float v_min = 0.0f;
@@ -24,14 +25,14 @@ namespace viscom {
             if(gl::GL_FLOAT_VEC3 == uniform.type) ImGui::DragFloat3(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
             if(gl::GL_FLOAT_VEC4 == uniform.type) ImGui::DragFloat4(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
         }
-        void operator()(interface_types::integer_t& uniform) {
+        void operator()(types::integer_t& uniform) {
             std::string header = uniform.name + "(" + std::to_string(uniform.location) + ")";
             if(gl::GL_INT      == uniform.type) ImGui::DragInt (header.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(header.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(header.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(header.c_str(), &uniform.value[0]);
         }
-        void operator()(interface_types::bool_t& uniform) {
+        void operator()(types::bool_t& uniform) {
             int counter = 0;
             for(auto& value : uniform.value) {
                 std::string label = uniform.name + "[" + std::to_string(counter)+ "]";
@@ -39,14 +40,14 @@ namespace viscom {
                 counter++;
             }
         }
-        void operator()(interface_types::program_samplers_t& arg) {
+        void operator()(types::program_samplers_t& arg) {
             ImGui::Text("samplers:");
             for(auto& sampler : arg.samplers) {
                 ImGui::InputInt(sampler.name.c_str(), static_cast<int*>(&sampler.boundTexture));
             }
 
         }
-        void operator()(interface_types::uinteger_t& u) {
+        void operator()(types::uinteger_t& u) {
             //DragInt(const char* label, int* v, float v_speed = 1.0f, int v_min = 0, int v_max = 0, const char* display_format = "%.0f");
 //            const float v_speed = 1.0f;
 //            const int v_min = 0;
@@ -57,7 +58,7 @@ namespace viscom {
 //            if(gl::GL_UNSIGNED_INT_VEC4 == uniform.type) ImGui::DragInt4(uniform.name.c_str(), &uniform.value[0], v_speed, v_min, v_max);
             ImGui::Text("%s: %d, %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());
         }
-        void operator()(interface_types::stage_subroutines_t& stage){
+        void operator()(types::stage_subroutines_t& stage){
             ImGui::Text("stage: %s",glbinding::Meta::getString(stage.programStage).c_str());
             for (auto& uniform: stage.subroutineUniforms) {
 
@@ -69,7 +70,7 @@ namespace viscom {
                 }
             }
         }
-        void operator()(interface_types::program_output_t output) {
+        void operator()(types::program_output_t output) {
             //TODO name_str to TexId mapping is off. Also, name seems to be null terminated. so everything after is not output?
             std::string headerName = std::to_string(output.textureLocation) +  ":" + output.name.append("(" +std::to_string(output.location) + ") "+glbinding::Meta::getString(output.type)) ;
             if (ImGui::TreeNode(headerName.c_str())) {
@@ -81,7 +82,8 @@ namespace viscom {
             };
         }
     };
-    IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  ApplicationNodeBase* appNode) :
+    }
+    IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  viscom::ApplicationNodeBase* appNode) :
     fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
     app_{appNode},
     shaderName_{fragmentShader},
@@ -90,7 +92,7 @@ namespace viscom {
         loadProgramInterfaceInformation();
     }
 
-    void IntrospectableFsq::Draw2D(FrameBuffer &fbo)
+    void IntrospectableFsq::Draw2D(viscom::FrameBuffer &fbo)
     {
         //TODO remove static log, move to class, so log output is inserted into the correct log.
         static ShaderLog log;
@@ -104,7 +106,7 @@ namespace viscom {
                             gpuProgram_->recompileProgram();
                             loadProgramInterfaceInformation();
                             log.AddLog("reload succesful\n");
-                        } catch (shader_compiler_error& compilerError) {
+                        } catch (viscom::shader_compiler_error& compilerError) {
                             log.AddLog("%s",compilerError.what());
                         }
                     }
@@ -155,16 +157,16 @@ namespace viscom {
 
         uniforms_ = read_uniforms_from_program(program);
 
-        auto progOutInterface = ProgramOutputInterface(program);
+        auto progOutInterface = minuseins::interfaces::ProgramOutputInterface(program);
         auto programOutput = progOutInterface.GetProgramOutput();
-        std::vector<FrameBufferTextureDescriptor> backBufTextures{};
+        std::vector<viscom::FrameBufferTextureDescriptor> backBufTextures{};
         for(auto& output : programOutput) {
             if(gl::GL_FLOAT_VEC4 == output.type) {
                 LOG(INFO) << "adding texture descriptor for " << output.name;
                 backBufTextures.emplace_back(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
             }
         }
-        backBuffers_ = app_->CreateOffscreenBuffers(FrameBufferDescriptor{backBufTextures,{}});
+        backBuffers_ = app_->CreateOffscreenBuffers(viscom::FrameBufferDescriptor{backBufTextures,{}});
         auto buffer = app_->SelectOffscreenBuffer(backBuffers_);
         gl::GLuint counter = 0;
 
@@ -178,36 +180,36 @@ namespace viscom {
         }
         gl::glUseProgram(0);
     }
-
+namespace interfaces {
     struct drawable_sender {
-        void operator()(interface_types::integer_t& arg) {
+        void operator()(types::integer_t& arg) {
             if (gl::GL_INT == arg.type)      gl::glUniform1iv(arg.location, 1, &arg.value[0]);
             if (gl::GL_INT_VEC2 == arg.type) gl::glUniform2iv(arg.location, 1, &arg.value[0]);
             if (gl::GL_INT_VEC3 == arg.type) gl::glUniform3iv(arg.location, 1, &arg.value[0]);
             if (gl::GL_INT_VEC4 == arg.type) gl::glUniform4iv(arg.location, 1, &arg.value[0]);
         }
-        void operator()(interface_types::uinteger_t& arg) {
+        void operator()(types::uinteger_t& arg) {
             if (gl::GL_UNSIGNED_INT == arg.type)      gl::glUniform1uiv(arg.location, 1, &arg.value[0]);
             if (gl::GL_UNSIGNED_INT_VEC2 == arg.type) gl::glUniform2uiv(arg.location, 1, &arg.value[0]);
             if (gl::GL_UNSIGNED_INT_VEC3 == arg.type) gl::glUniform3uiv(arg.location, 1, &arg.value[0]);
             if (gl::GL_UNSIGNED_INT_VEC4 == arg.type) gl::glUniform4uiv(arg.location, 1, &arg.value[0]);
         }
-        void operator()(interface_types::float_t& arg) {
+        void operator()(types::float_t& arg) {
             if (gl::GL_FLOAT == arg.type)      gl::glUniform1fv(arg.location, 1, &arg.value[0]);
             if (gl::GL_FLOAT_VEC2 == arg.type) gl::glUniform2fv(arg.location, 1, &arg.value[0]);
             if (gl::GL_FLOAT_VEC3 == arg.type) gl::glUniform3fv(arg.location, 1, &arg.value[0]);
             if (gl::GL_FLOAT_VEC4 == arg.type) gl::glUniform4fv(arg.location, 1, &arg.value[0]);
         }
-        void operator()(interface_types::bool_t& arg) {
+        void operator()(types::bool_t& arg) {
             if (gl::GL_BOOL == arg.type)      gl::glUniform1iv(arg.location, 1, &arg.value[0]);
             if (gl::GL_BOOL_VEC2 == arg.type) gl::glUniform2iv(arg.location, 1, &arg.value[0]);
             if (gl::GL_BOOL_VEC3 == arg.type) gl::glUniform3iv(arg.location, 1, &arg.value[0]);
             if (gl::GL_BOOL_VEC4 == arg.type) gl::glUniform4iv(arg.location, 1, &arg.value[0]);
         }
-        void operator()(interface_types::stage_subroutines_t& arg) {
+        void operator()(types::stage_subroutines_t& arg) {
             gl::glUniformSubroutinesuiv(arg.programStage, static_cast<GLsizei>(arg.activeSubroutines.size()), &arg.activeSubroutines[0]);
         }
-        void operator()(interface_types::program_samplers_t& arg) {
+        void operator()(types::program_samplers_t& arg) {
             gl::GLint counter = 0;
             for(auto sampler : arg.samplers) {
                 gl::glActiveTexture(gl::GLenum::GL_TEXTURE0 + counter);
@@ -216,10 +218,10 @@ namespace viscom {
                 counter++;
             }
         }
-        void operator()(interface_types::program_output_t&) { } //do nothing
-        void operator()(interface_types::generic_uniform&) { } //fallthrough
+        void operator()(types::program_output_t&) { } //do nothing
+        void operator()(types::generic_uniform&) { } //fallthrough
     };
-
+}
     void IntrospectableFsq::SendUniforms() const
     {
         auto visitor = drawable_sender{};
@@ -246,7 +248,7 @@ namespace viscom {
     //TODO 2. actually introspecting the values of uniforms updated from the outside
     //TODO 3. having a checkbox for u_time, to select if time will run or if we update it ourselves.
     //TODO 4. when recompiling the program, we can merge the values/state into the new program, so no reset.
-    void IntrospectableFsq::DrawToBuffer(const FrameBuffer& fbo)
+    void IntrospectableFsq::DrawToBuffer(const viscom::FrameBuffer& fbo)
     {
         fbo.DrawToFBO([this,&fbo]{
             gl::glUseProgram(gpuProgram_->getProgramId());
@@ -274,7 +276,7 @@ namespace viscom {
     {
         nextPass_ = std::make_unique<IntrospectableFsq>(fragmentProgram, app_);
     }
-    void IntrospectableFsq::DrawFrame(FrameBuffer &fbo)
+    void IntrospectableFsq::DrawFrame(viscom::FrameBuffer &fbo)
     {
         if(nullptr == nextPass_) {
             DrawToBuffer(fbo);
@@ -284,7 +286,7 @@ namespace viscom {
             nextPass_->DrawFrame(fbo);
         }
     }
-    void IntrospectableFsq::ClearBuffer(FrameBuffer &fbo)
+    void IntrospectableFsq::ClearBuffer(viscom::FrameBuffer &fbo)
     {
         if(nullptr == nextPass_) {
             fbo.DrawToFBO([]() {

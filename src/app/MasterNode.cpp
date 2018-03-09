@@ -10,8 +10,7 @@
 #include <imgui.h>
 #include "enh/gfx/postprocessing/DepthOfField.h"
 #include "core/glfw.h"
-#include "gfx/IntrospectableFsq.h"
-
+#include "app/gfx/IntrospectableFsq.h"
 namespace viscom {
 
     MasterNode::MasterNode(ApplicationNodeInternal* appNode) :

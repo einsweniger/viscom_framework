@@ -4,76 +4,90 @@
 
 #include "SubroutineUniformInterface.h"
 #include <glbinding/Meta.h>
+namespace minuseins::interfaces {
+    SubroutineUniformInterface::SubroutineUniformInterface(gl::GLenum stage, gl::GLuint program) :
+            Interface(getSubroutineUniformEnumForProgramStage(stage), program),
+            stage{stage} {}
 
-SubroutineUniformInterface::SubroutineUniformInterface(gl::GLenum interface, gl::GLuint program) : Interface(interface, program) {}
-
-std::vector<interface_types::subroutine_t>
-SubroutineUniformInterface::get_subroutine_compatible_uniforms(gl::GLenum stage, gl::GLuint uniform) {
-    auto subuniform_interface = SubroutineUniformInterface(getSubroutineUniformEnumForProgramStage(stage), program);
-    auto compatibleSubroutines = subuniform_interface.GetCompatibleSubroutines(uniform);
-
-    std::vector<interface_types::subroutine_t> result;
-    result.reserve(compatibleSubroutines.size());
-    auto subroutineInterface = Interface(getSubroutineEnumForProgramStage(stage), program);
-    for(auto subroutine : compatibleSubroutines) {  //TODO somehow the names are padded with \0?
-        interface_types::subroutine_t data;
-        data.name = subroutineInterface.GetProgramResourceName(subroutine);
-        data.value = subroutine;
-        result.push_back(data);
-    }
-    return result;
-}
-
-std::vector<gl::GLuint>
-SubroutineUniformInterface::GetCompatibleSubroutines(gl::GLuint uniform) {
-    // interface must be *_SUBROUTINE_UNIFORM
-    auto props = GetProgramResourceiv(uniform, {gl::GL_NUM_COMPATIBLE_SUBROUTINES});
-    auto count = positive(props[gl::GL_NUM_COMPATIBLE_SUBROUTINES]);
-    if(0 == count) {
-        return std::vector<gl::GLuint>();
-    }
-    std::vector<gl::GLuint> result;
-    result.reserve(count);
-
-    for (auto subroutine : GetProgramResourceiv_vector(uniform, gl::GL_COMPATIBLE_SUBROUTINES, count)) {
-        result.push_back(positive(subroutine));
-    }
-    return result;
-}
-
-std::vector<interface_types::subroutine_uniform_t> SubroutineUniformInterface::make_subroutine_uniforms(const gl::GLenum &stage) {
-    std::vector<interface_types::subroutine_uniform_t> uniforms;
-    for(const auto& name_loc : get_subroutine_uniforms()){
-        interface_types::subroutine_uniform_t uniform;
-        uniform.location = name_loc.location;
-        uniform.name = name_loc.name;
-        uniform.compatibleSubroutines = get_subroutine_compatible_uniforms(stage, uniform.location);
-        uniforms.push_back(uniform);
-    }
-    return uniforms;
-
-}
-
-std::vector<interface_types::name_location_t> SubroutineUniformInterface::get_subroutine_uniforms() {
-    auto activeResCount = GetActiveResourceCount();
-    if(0 == activeResCount) {
-        return std::vector<interface_types::name_location_t>();
-    }
-    //TODO since subroutine names come from here, and this is using max name len, this is probably why there's NUL char padding
-    auto maxNameLen = GetProgramInterfaceiv(gl::GL_MAX_NAME_LENGTH);
-    std::vector<interface_types::name_location_t> result;
-    result.reserve(activeResCount);
-    for(gl::GLuint index = 0; index < activeResCount; ++index) {
-        auto name = GetProgramResourceName(index, maxNameLen);
-        result.push_back({name, index});
+    gl::GLuint SubroutineUniformInterface::GetCompatibleSubroutineCount(gl::GLuint uniform) const {
+        auto props = GetProgramResourceiv(uniform, {gl::GL_NUM_COMPATIBLE_SUBROUTINES});
+        return positive(props[gl::GL_NUM_COMPATIBLE_SUBROUTINES]);
     }
 
-    return result;
-}
+    std::vector<gl::GLuint> SubroutineUniformInterface::GetCompatibleSubroutines(gl::GLuint uniform) const {
+        auto count = GetCompatibleSubroutineCount(uniform);
+        if (0 == count) {
+            return std::vector<gl::GLuint>();
+        }
+        std::vector<gl::GLuint> result;
+        result.reserve(count);
 
-gl::GLuint SubroutineUniformInterface::GetUniformSubroutineuiv(const gl::GLenum shadertype, const gl::GLint uniform) {
-    gl::GLuint params;
-    //shadertype must be VERTEX_SHADER or something
-    gl::glGetUniformSubroutineuiv(shadertype, uniform, &params);
-    return params;
+        for (auto subroutine : GetProgramResourceiv_vector(uniform, gl::GL_COMPATIBLE_SUBROUTINES, count)) {
+            result.push_back(positive(subroutine));
+        }
+        return result;
+    }
+
+    std::vector<types::subroutine_uniform_t> SubroutineUniformInterface::GetSubroutineUniforms() const {
+        std::vector<types::subroutine_uniform_t> uniforms;
+        auto subroutineInterface = SubroutineInterface::from_stage(stage, program);
+        for (const auto&
+        [name, location] : GetUniformNameLocation()){
+            types::subroutine_uniform_t uniform;
+            uniform.location = location;
+            uniform.name = name;
+            uniform.compatibleSubroutines = subroutineInterface.GetSubroutines(GetCompatibleSubroutines(location));
+            uniforms.push_back(uniform);
+        }
+        return uniforms;
+
+    }
+
+    std::vector<std::tuple<std::string, gl::GLuint>> SubroutineUniformInterface::GetUniformNameLocation() const {
+        auto activeResCount = GetActiveResourceCount();
+        if (0 == activeResCount) {
+            return std::vector<std::tuple<std::string, gl::GLuint>>();
+        }
+        auto maxNameLen = GetProgramInterfaceiv(gl::GL_MAX_NAME_LENGTH);
+        std::vector<std::tuple<std::string, gl::GLuint>> result;
+        result.reserve(activeResCount);
+        for (gl::GLuint index = 0; index < activeResCount; ++index) {
+            auto name = GetProgramResourceName(index, maxNameLen);
+            result.emplace_back(name, index);
+        }
+
+        return result;
+    }
+
+    gl::GLuint SubroutineUniformInterface::GetUniformSubroutineuiv(const gl::GLint uniform) const {
+        gl::GLuint params;
+        gl::glGetUniformSubroutineuiv(stage, uniform, &params);
+        return params;
+    }
+
+    SubroutineUniformInterface SubroutineUniformInterface::from_stage(gl::GLenum stage, gl::GLuint program) {
+        return SubroutineUniformInterface(stage, program);
+    }
+
+    types::stage_subroutines_t SubroutineUniformInterface::GetStageSubroutines() const {
+        using namespace types;
+        auto activeUniformCount = GetActiveResourceCount();
+        stage_subroutines_t stage_subroutines{};
+        stage_subroutines.programStage = stage;
+        stage_subroutines.activeSubroutines = std::vector<gl::GLuint>(activeUniformCount);
+        stage_subroutines.subroutineUniforms = GetSubroutineUniforms();
+        for (const auto &uniform : stage_subroutines.subroutineUniforms) {
+            stage_subroutines.activeSubroutines[uniform.location] = GetUniformSubroutineuiv(uniform.location);
+        }
+        return stage_subroutines;
+    }
+
+    std::vector<types::stage_subroutines_t> SubroutineUniformInterface::GetAllStages(gl::GLuint program) {
+        using namespace types;
+        auto result = std::vector<stage_subroutines_t>();
+        for (const auto stage : programStagesWithSubroutines()) {
+            result.push_back(from_stage(stage, program).GetStageSubroutines());
+        }
+        return result;
+    }
 }

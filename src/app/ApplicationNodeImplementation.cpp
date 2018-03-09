@@ -41,7 +41,7 @@ namespace viscom {
         enh::ApplicationNodeBase::InitOpenGL();
 
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
-        quad_ = std::make_unique<IntrospectableFsq>("test.frag", this);
+        quad_ = std::make_unique<minuseins::IntrospectableFsq>("test.frag", this);
         quad_->AddPass("renderTexture.frag");
     }
 
