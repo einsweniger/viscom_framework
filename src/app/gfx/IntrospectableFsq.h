@@ -9,8 +9,9 @@
 #include <variant>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
-#include "app/gfx/gl/uniform.h"
-
+#include <app/gfx/gl/interface/UniformInterface.h>
+#include <app/gfx/gl/interface/SubroutineUniformInterface.h>
+#include <app/gfx/gl/interface/ProgramOutputInterface.h>
 
 namespace viscom {
     
@@ -65,6 +66,74 @@ struct ShaderLog
         ImGui::End();
     }
 };
+
+    //TODO move clutter to GpuProgramInspector
+    static const std::vector<gl::GLenum> programInterfaces {
+            gl::GL_UNIFORM,
+            gl::GL_UNIFORM_BLOCK,
+            gl::GL_ATOMIC_COUNTER_BUFFER,
+            gl::GL_PROGRAM_INPUT,
+            gl::GL_PROGRAM_OUTPUT,
+
+            gl::GL_TRANSFORM_FEEDBACK_VARYING,
+            gl::GL_TRANSFORM_FEEDBACK_BUFFER,
+            gl::GL_BUFFER_VARIABLE,
+            gl::GL_SHADER_STORAGE_BLOCK,
+
+            gl::GL_VERTEX_SUBROUTINE,
+            gl::GL_VERTEX_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_CONTROL_SUBROUTINE,
+            gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_EVALUATION_SUBROUTINE,
+            gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
+            gl::GL_GEOMETRY_SUBROUTINE,
+            gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
+            gl::GL_FRAGMENT_SUBROUTINE,
+            gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
+            gl::GL_COMPUTE_SUBROUTINE,
+            gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
+    };
+
+    using drawable_container = std::variant<
+            interface_types::integer_t
+            ,interface_types::generic_uniform
+            ,interface_types::float_t
+            ,interface_types::uinteger_t
+            ,interface_types::stage_subroutines_t
+            ,interface_types::program_output_t
+            ,interface_types::program_samplers_t
+            ,interface_types::bool_t
+    >;
+    struct converter {
+        std::vector<drawable_container> result{};
+        void operator()(interface_types::integer_t& arg) {result.push_back(arg);}
+        void operator()(interface_types::generic_uniform& arg) {result.push_back(arg);}
+        void operator()(interface_types::float_t& arg) {result.push_back(arg);}
+        void operator()(interface_types::uinteger_t& arg) {result.push_back(arg);}
+        void operator()(interface_types::program_samplers_t& arg) {result.push_back(arg);}
+        void operator()(interface_types::bool_t& arg) {result.push_back(arg);}
+    };
+    static std::vector<drawable_container> read_uniforms_from_program(gl::GLuint program)
+    {
+        //std::vector<drawable_container> result;
+        //program_samplers_t collected_samplers{};
+        auto ui = UniformInterface(program);
+        // "normal" uniforms
+        auto c = converter{};
+
+        for(auto& uniform : ui.get_uniforms()) {
+            std::visit(c, uniform);
+        }
+        auto result = c.result;
+
+        // add subroutine uniforms
+        for (auto& subs : SubroutineUniformInterface::GetSubroutines(program)) {
+            result.push_back(subs);
+        }
+
+        return result;
+    }
+
     /**
      * Encapsulates a FullscreenQuad and enables editing uniforms for the fragment shader.
      * We don't care for any other shader types here, since we only draw on a FSQ.
@@ -88,14 +157,14 @@ struct ShaderLog
         void loadProgramInterfaceInformation();
         void SendUniforms() const;
         std::unique_ptr<FullscreenQuad> fsq_;
-        std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
-        std::shared_ptr<GPUProgram> gpuProgram_;
+        ApplicationNodeBase* app_;
         std::string shaderName_;
+        std::shared_ptr<GPUProgram> gpuProgram_;
+        std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
         std::vector<FrameBuffer> backBuffers_;
-        std::vector<glwrap::uniform_container> uniforms_;
-        std::map<std::string, glwrap::uniform_container> uniformMap_;
+        std::vector<drawable_container> uniforms_;
+        std::map<std::string, drawable_container> uniformMap_;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
-        ApplicationNodeBase* app_;
     };
 }

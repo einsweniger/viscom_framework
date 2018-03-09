@@ -8,7 +8,6 @@
 
 #include "MasterNode.h"
 #include <imgui.h>
-#include <app/gfx/gl/util.h>
 #include "enh/gfx/postprocessing/DepthOfField.h"
 #include "core/glfw.h"
 #include "gfx/IntrospectableFsq.h"
