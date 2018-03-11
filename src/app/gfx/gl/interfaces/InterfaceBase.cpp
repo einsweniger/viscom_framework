@@ -21,46 +21,46 @@ namespace minuseins::interfaces {
 //  +--------------------+---+---+---+ |   |   +---------- ARRAY_STRIDE
 //  |PROGRAM_INPUT       | x | x | x | |   |   |   +------ MATRIX_STRIDE
 //  +--------------------+---+---+---+ |   |   |   |   ,-- IS_ROW_MAYOR
-//  |PROGRAM_OUTPUT      | x | x | x | v   v   v   v   v
-//  +--------------------+---+---+---+---+---+---+---+---+
-//  |UNIFORM             | x | x | x | x | x | x | x | x |
-//  +--------------------+---+---+---+---+---+---+---+---+
-//  |BUFFER_VARIABLE     | x | x |   | x | x | x | x | x |
-//  +--------------------+---+---+---+---+---+---+---+---+
-//  |TRANSFORM_FEEDBACK- | x | x |   | x |   |   |   |   |
-//  |VARYING             |   |   |   |   |   |   |   |   |
-//  +--------------------+---+---+---+---+---+---+---+---+
+//  |PROGRAM_OUTPUT      | x | x | x | v   v   v   v   v   +------ TOP_LEVEL_ARRAY_SIZE
+//  +--------------------+---+---+---+---+---+---+---+---+ |   ,-- TOP_LEVEL_ARRAY_STRIDE
+//  |UNIFORM             | x | x | x | x | x | x | x | x | v   v
+//  +--------------------+---+---+---+---+---+---+---+---+---+---+ ,-- TRANSFORM_FEEDBACK_BUFFER_INDEX
+//  |BUFFER_VARIABLE     | x | x |   | x | x | x | x | x | x | x | v
+//  +--------------------+---+---+---+---+---+---+---+---+---+---+---+
+//  |TRANSFORM_FEEDBACK- | x | x |   | x |   |   |   |   |   |   | x |
+//  |VARYING             |   |   |   |   |   |   |   |   |   |   |   |
+//  +--------------------+---+---+---+---+---+---+---+---+---+---+---+
 //
-//
-//    +-------------- BUFFER_BINDING
-//    |   +---------- ACTIVE_VARIABLES (Array!)
-//    |   |   +------ NUM_ACTIVE_VARIABLES
-//    |   |   |   ,-- BUFFER_DATA_SIZE
-//    v   v   v   v                         +------ NAME_LENGTH
-//  +---+---+---+---+---------------------+ |   ,-- REFERENCED_BY_XXX_SHADER
-//  | x | x | x |   |TRANSFORM_FEEDBACK_BF| v   v
-//  +---+---+---+---+---------------------+---+---+
-//  | x | x | x | x |ATOMIC_COUNTER_BUFFER|   | x |
-//  +---+---+---+---+---------------------+---+---+
-//  | x | x | x | x |UNIFORM_BLOCK        | x | x | +------ IS_PER_PATCH
-//  +---+---+---+---+---------------------+---+---+ |   ,-- LOCATION_COMPONENT
-//  | x | x | x | x |SHADER_STORAGE_BLOCK | x | x | v   v
-//  +---+---+---+---+---------------------+---+---+---+---+
-//                  |PROGRAM_INPUT        | x | x | x | x |
-//                  +---------------------+---+---+---+---+
-//                  |PROGRAM_OUTPUT       | x | x | x | x |
-//                  +---------------------+---+---+---+---+
-//                  |UNIFORM              | x | x |
-//                  +---------------------+---+---+
-//                  |BUFFER_VARIABLE      | x | x |
-//                  +---------------------+---+---+
-//                  |TRANSFORM_FEEDBACK-  | x |   |
-//                  |VARYING              |   |   |
-//                  +---------------------+---+---+
-//                  |_SUBROUTINE          | x |   |
-//                  +---------------------+---+---+
-//                  |_SUBROUTINE_UNIFORM  | x |   |
-//                  +---------------------+---+---+
+//       +-- TRANSFORM_FEEDBACK_BUFFER_STRIDE
+//       |   +-------------- BUFFER_BINDING
+//       |   |   +---------- ACTIVE_VARIABLES (Array!)
+//       |   |   |   +------ NUM_ACTIVE_VARIABLES
+//       |   |   |   |   ,-- BUFFER_DATA_SIZE
+//       v   v   v   v   v                         +------ NAME_LENGTH
+//     +---+---+---+---+---+---------------------+ |   ,-- REFERENCED_BY_XXX_SHADER
+//     | x | x | x | x |   |TRANSFORM_FEEDBACK_BF| v   v
+//     +---+---+---+---+---+---------------------+---+---+
+//         | x | x | x | x |ATOMIC_COUNTER_BUFFER|   | x |
+//         +---+---+---+---+---------------------+---+---+
+//         | x | x | x | x |UNIFORM_BLOCK        | x | x | +------ IS_PER_PATCH
+//         +---+---+---+---+---------------------+---+---+ |   ,-- LOCATION_COMPONENT
+//         | x | x | x | x |SHADER_STORAGE_BLOCK | x | x | v   v
+//         +---+---+---+---+---------------------+---+---+---+---+ ,-- LOCATION_INDEX
+//                         |PROGRAM_INPUT        | x | x | x | x | v
+//                         +---------------------+---+---+---+---+---+ ,-- ATOMIC_COUNTER_BUFFER_INDEX
+//                         |PROGRAM_OUTPUT       | x | x | x | x | x | v
+//                         +---------------------+---+---+---+---+---+---+
+//                         |UNIFORM              | x | x | x |   |   | x |
+//                         +---------------------+---+---+---+---+---+---+
+//                         |BUFFER_VARIABLE      | x | x |
+//                         +---------------------+---+---+
+//                         |TRANSFORM_FEEDBACK-  | x |   |
+//                         |VARYING              |   |   | +------ NUM_COMPATIBLE_SUBROUTINES
+//                         +---------------------+---+---+ |   ,-- COMPATIBLE_SUBROUTINES (Array!)
+//                         |_SUBROUTINE          | x |   | v   v
+//                         +---------------------+---+---+---+---+
+//                         |_SUBROUTINE_UNIFORM  | x |   | x | x |
+//                         +---------------------+---+---+---+---+
 //
 
     std::unordered_map<gl::GLenum, gl::GLint>
