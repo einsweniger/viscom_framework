@@ -8,8 +8,8 @@
 #include <cassert>
 #include <utility>
 #include <variant>
-#include <app/gfx/gl/interface/UniformInterface.h>
-#include <app/gfx/gl/interface/ProgramOutputInterface.h>
+#include <app/gfx/gl/interfaces/Uniform.h>
+#include <app/gfx/gl/interfaces/ProgramOutput.h>
 namespace minuseins {
     class GpuProgramIntrospector {
     public:

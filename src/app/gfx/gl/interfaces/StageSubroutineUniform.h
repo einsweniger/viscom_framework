@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "Interface.h"
-#include "SubroutineInterface.h"
+#include "InterfaceBase.h"
+#include "StageSubroutine.h"
 namespace minuseins::interfaces {
     constexpr std::array<gl::GLenum, 6> programStagesWithSubroutines() {
         return {
@@ -43,16 +43,16 @@ namespace minuseins::interfaces {
         };
     }
 
-    class SubroutineUniformInterface : public Interface {
+    class StageSubroutineUniform : public InterfaceBase {
     public:
         types::stage_subroutines_t GetStageSubroutines() const;
 
-        static SubroutineUniformInterface from_stage(gl::GLenum stage, gl::GLuint program);
+        static StageSubroutineUniform from_stage(gl::GLenum stage, gl::GLuint program);
 
         static std::vector<types::stage_subroutines_t> GetAllStages(gl::GLuint program);
 
     private:
-        SubroutineUniformInterface(gl::GLenum stage, gl::GLuint program);
+        StageSubroutineUniform(gl::GLenum stage, gl::GLuint program);
 
         gl::GLuint GetCompatibleSubroutineCount(const gl::GLuint uniform) const;
 

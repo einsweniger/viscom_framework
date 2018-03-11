@@ -12,12 +12,12 @@ namespace minuseins {
     }
 
     void GpuProgramIntrospector::init_uniform_values() {
-        auto ui = interfaces::UniformInterface(programId_);
+        auto ui = interfaces::Uniform(programId_);
         uniforms_ = ui.get_uniforms();
     }
 
     void GpuProgramIntrospector::init_program_output() {
-        auto po = interfaces::ProgramOutputInterface(programId_);
+        auto po = interfaces::ProgramOutput(programId_);
         outputs_ = po.GetProgramOutput();
     }
 }

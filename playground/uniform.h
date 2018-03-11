@@ -11,9 +11,9 @@
 #include <utility>
 #include <variant>
 #include <glbinding/Meta.h>
-#include <app/gfx/gl/interface/UniformInterface.h>
-#include <app/gfx/gl/interface/ProgramOutputInterface.h>
-#include <app/gfx/gl/interface/SubroutineUniformInterface.h>
+#include <app/gfx/gl/interface/Uniform.h>
+#include <app/gfx/gl/interface/ProgramOutput.h>
+#include <app/gfx/gl/interface/StageSubroutineUniform.h>
 
 
 
@@ -23,18 +23,7 @@
 
 namespace viscom::glwrap::constants
 {
-    /**
-     * OpenGL Shading Language type tokens, and corre-
-sponding shading language keywords declaring each such type.
-Types whose “Attrib” column is marked may be declared as ver-
-tex attributes (see section 11.1.1). Types whose “Xfb” column
-is marked may be the types of variables returned by transform
-feedback (see section 11.1.2.1). Types whose “Buffer” column is
-marked may be declared as buffer variables (see section 7.8).
-     declared in gl4.6 core pg 114 -
 
-     valid for BUFFER_VARIABLE, PROGRAM_INPUT, PROGRAM_OUTPUT, TRANSFORM_FEEDBACK_VARYING and UNIFORM
-     */
     static const std::vector<gl::GLenum> uniformTypes {
     // these are all allowed as Attrib, Xfb and Buffer
         gl::GL_FLOAT, //float
@@ -152,13 +141,4 @@ marked may be declared as buffer variables (see section 7.8).
         gl::GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY, //uimage2DMSArray
         gl::GL_UNSIGNED_INT_ATOMIC_COUNTER, //atomic_ui
     };
-}
-
-namespace viscom::glwrap
-{
-
-
-
-
-
 }

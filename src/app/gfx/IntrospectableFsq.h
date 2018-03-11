@@ -9,9 +9,9 @@
 #include <variant>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
-#include <app/gfx/gl/interface/UniformInterface.h>
-#include <app/gfx/gl/interface/SubroutineUniformInterface.h>
-#include <app/gfx/gl/interface/ProgramOutputInterface.h>
+#include <app/gfx/gl/interfaces/Uniform.h>
+#include <app/gfx/gl/interfaces/StageSubroutineUniform.h>
+#include <app/gfx/gl/interfaces/ProgramOutput.h>
 
 namespace minuseins {
     
@@ -120,7 +120,7 @@ namespace {
         using namespace minuseins::interfaces;
         //std::vector<drawable_container> result;
         //program_samplers_t collected_samplers{};
-        auto ui = UniformInterface(program);
+        auto ui = Uniform(program);
         // "normal" uniforms
         auto c = converter{};
 
@@ -130,7 +130,7 @@ namespace {
         auto result = c.result;
 
         // add subroutine uniforms
-        for (auto& subs : SubroutineUniformInterface::GetAllStages(program)) {
+        for (auto& subs : StageSubroutineUniform::GetAllStages(program)) {
             result.push_back(subs);
         }
 

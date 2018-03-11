@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Interface.h"
+#include "InterfaceBase.h"
 namespace minuseins::interfaces {
     namespace types {
         struct program_output_t
@@ -15,9 +15,9 @@ namespace minuseins::interfaces {
             gl::GLsizei textureLocation;
         };
     }
-    class ProgramOutputInterface : public Interface {
+    class ProgramOutput : public InterfaceBase {
     public:
-        explicit ProgramOutputInterface(gl::GLuint program);
+        explicit ProgramOutput(gl::GLuint program);
         std::vector<types::program_output_t> GetProgramOutput();
     };
 }

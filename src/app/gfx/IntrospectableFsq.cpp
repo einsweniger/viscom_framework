@@ -157,7 +157,7 @@ namespace minuseins {
 
         uniforms_ = read_uniforms_from_program(program);
 
-        auto progOutInterface = minuseins::interfaces::ProgramOutputInterface(program);
+        auto progOutInterface = minuseins::interfaces::ProgramOutput(program);
         auto programOutput = progOutInterface.GetProgramOutput();
         std::vector<viscom::FrameBufferTextureDescriptor> backBufTextures{};
         for(auto& output : programOutput) {

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Interface.h"
+#include "InterfaceBase.h"
 namespace minuseins::interfaces {
     namespace types {
         struct subroutine_t {
@@ -23,14 +23,14 @@ namespace minuseins::interfaces {
         return gl::GL_DEBUG_TYPE_ERROR;
     }
 
-    class SubroutineInterface : public Interface {
+    class StageSubroutine : public InterfaceBase {
     public:
-        static SubroutineInterface from_stage(gl::GLenum stage, gl::GLuint program);
+        static StageSubroutine from_stage(gl::GLenum stage, gl::GLuint program);
 
         std::vector<types::subroutine_t> GetSubroutines(std::vector<gl::GLuint> subroutines) const;
 
     protected:
-        SubroutineInterface(gl::GLenum interface, gl::GLuint program);
+        StageSubroutine(gl::GLenum interface, gl::GLuint program);
 
         types::subroutine_t GetSubroutine(gl::GLuint subroutine) const;
     };

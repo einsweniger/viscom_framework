@@ -2,7 +2,7 @@
 // Created by bone on 09.03.18.
 //
 
-#include "UniformInterface.h"
+#include "Uniform.h"
 namespace minuseins::interfaces {
     namespace types {
         void uinteger_t::retrieve_value(gl::GLuint program) {
@@ -18,11 +18,11 @@ namespace minuseins::interfaces {
         }
     }
 
-    UniformInterface::UniformInterface(gl::GLuint program) :
-            Interface(gl::GL_UNIFORM, program) {}
+    Uniform::Uniform(gl::GLuint program) :
+            InterfaceBase(gl::GL_UNIFORM, program) {}
 
     types::uniform_container
-    UniformInterface::make_uniform(std::string name, gl::GLint location, gl::GLenum type) {
+    Uniform::make_uniform(std::string name, gl::GLint location, gl::GLenum type) {
         using namespace types;
         using namespace types::info;
         if (is_int(type)) {
@@ -50,7 +50,7 @@ namespace minuseins::interfaces {
 
     }
 
-    std::vector<types::uniform_container> UniformInterface::get_uniforms() {
+    std::vector<types::uniform_container> Uniform::get_uniforms() {
         using namespace types;
         std::vector<uniform_container> result;
         program_samplers_t collected_samplers{};

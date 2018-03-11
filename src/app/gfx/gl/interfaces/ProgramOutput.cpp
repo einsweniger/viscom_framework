@@ -2,12 +2,12 @@
 // Created by bone on 09.03.18.
 //
 
-#include "ProgramOutputInterface.h"
+#include "ProgramOutput.h"
 namespace minuseins::interfaces {
-    ProgramOutputInterface::ProgramOutputInterface(gl::GLuint program) :
-            Interface(gl::GL_PROGRAM_OUTPUT, program) {}
+    ProgramOutput::ProgramOutput(gl::GLuint program) :
+            InterfaceBase(gl::GL_PROGRAM_OUTPUT, program) {}
 
-    std::vector<types::program_output_t> ProgramOutputInterface::GetProgramOutput() {
+    std::vector<types::program_output_t> ProgramOutput::GetProgramOutput() {
         using namespace types;
         std::vector<program_output_t> result{};
         for (const auto &info : GetNameLocationType()) {

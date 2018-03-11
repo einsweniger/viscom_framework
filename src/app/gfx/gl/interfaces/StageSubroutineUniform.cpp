@@ -2,19 +2,19 @@
 // Created by bone on 09.03.18.
 //
 
-#include "SubroutineUniformInterface.h"
+#include "StageSubroutineUniform.h"
 #include <glbinding/Meta.h>
 namespace minuseins::interfaces {
-    SubroutineUniformInterface::SubroutineUniformInterface(gl::GLenum stage, gl::GLuint program) :
-            Interface(getSubroutineUniformEnumForProgramStage(stage), program),
+    StageSubroutineUniform::StageSubroutineUniform(gl::GLenum stage, gl::GLuint program) :
+            InterfaceBase(getSubroutineUniformEnumForProgramStage(stage), program),
             stage{stage} {}
 
-    gl::GLuint SubroutineUniformInterface::GetCompatibleSubroutineCount(gl::GLuint uniform) const {
+    gl::GLuint StageSubroutineUniform::GetCompatibleSubroutineCount(gl::GLuint uniform) const {
         auto props = GetProgramResourceiv(uniform, {gl::GL_NUM_COMPATIBLE_SUBROUTINES});
         return positive(props[gl::GL_NUM_COMPATIBLE_SUBROUTINES]);
     }
 
-    std::vector<gl::GLuint> SubroutineUniformInterface::GetCompatibleSubroutines(gl::GLuint uniform) const {
+    std::vector<gl::GLuint> StageSubroutineUniform::GetCompatibleSubroutines(gl::GLuint uniform) const {
         auto count = GetCompatibleSubroutineCount(uniform);
         if (0 == count) {
             return std::vector<gl::GLuint>();
@@ -28,9 +28,9 @@ namespace minuseins::interfaces {
         return result;
     }
 
-    std::vector<types::subroutine_uniform_t> SubroutineUniformInterface::GetSubroutineUniforms() const {
+    std::vector<types::subroutine_uniform_t> StageSubroutineUniform::GetSubroutineUniforms() const {
         std::vector<types::subroutine_uniform_t> uniforms;
-        auto subroutineInterface = SubroutineInterface::from_stage(stage, program);
+        auto subroutineInterface = StageSubroutine::from_stage(stage, program);
         for (const auto&
         [name, location] : GetUniformNameLocation()){
             types::subroutine_uniform_t uniform;
@@ -43,12 +43,12 @@ namespace minuseins::interfaces {
 
     }
 
-    std::vector<std::tuple<std::string, gl::GLuint>> SubroutineUniformInterface::GetUniformNameLocation() const {
+    std::vector<std::tuple<std::string, gl::GLuint>> StageSubroutineUniform::GetUniformNameLocation() const {
         auto activeResCount = GetActiveResourceCount();
         if (0 == activeResCount) {
             return std::vector<std::tuple<std::string, gl::GLuint>>();
         }
-        auto maxNameLen = GetProgramInterfaceiv(gl::GL_MAX_NAME_LENGTH);
+        auto maxNameLen = GetMaxNameLenght();
         std::vector<std::tuple<std::string, gl::GLuint>> result;
         result.reserve(activeResCount);
         for (gl::GLuint index = 0; index < activeResCount; ++index) {
@@ -59,17 +59,17 @@ namespace minuseins::interfaces {
         return result;
     }
 
-    gl::GLuint SubroutineUniformInterface::GetUniformSubroutineuiv(const gl::GLint uniform) const {
+    gl::GLuint StageSubroutineUniform::GetUniformSubroutineuiv(const gl::GLint uniform) const {
         gl::GLuint params;
         gl::glGetUniformSubroutineuiv(stage, uniform, &params);
         return params;
     }
 
-    SubroutineUniformInterface SubroutineUniformInterface::from_stage(gl::GLenum stage, gl::GLuint program) {
-        return SubroutineUniformInterface(stage, program);
+    StageSubroutineUniform StageSubroutineUniform::from_stage(gl::GLenum stage, gl::GLuint program) {
+        return StageSubroutineUniform(stage, program);
     }
 
-    types::stage_subroutines_t SubroutineUniformInterface::GetStageSubroutines() const {
+    types::stage_subroutines_t StageSubroutineUniform::GetStageSubroutines() const {
         using namespace types;
         auto activeUniformCount = GetActiveResourceCount();
         stage_subroutines_t stage_subroutines{};
@@ -82,7 +82,7 @@ namespace minuseins::interfaces {
         return stage_subroutines;
     }
 
-    std::vector<types::stage_subroutines_t> SubroutineUniformInterface::GetAllStages(gl::GLuint program) {
+    std::vector<types::stage_subroutines_t> StageSubroutineUniform::GetAllStages(gl::GLuint program) {
         using namespace types;
         auto result = std::vector<stage_subroutines_t>();
         for (const auto stage : programStagesWithSubroutines()) {
