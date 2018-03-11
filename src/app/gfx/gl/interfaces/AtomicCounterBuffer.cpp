@@ -5,5 +5,5 @@
 #include "AtomicCounterBuffer.h"
 
 minuseins::interfaces::AtomicCounterBuffer::AtomicCounterBuffer(gl::GLuint program)
-        : InterfaceBase(gl::GL_ATOMIC_COUNTER_BUFFER, program)
+        : BlockOrBufferInterfaceBase(gl::GL_ATOMIC_COUNTER_BUFFER, program)
 {}

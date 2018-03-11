@@ -4,5 +4,5 @@
 
 #include "ShaderStorageBlock.h"
 
-minuseins::interfaces::ShaderStorageBlock::ShaderStorageBlock(gl::GLuint program) : InterfaceBase(
-        gl::GL_SHADER_STORAGE_BLOCK, program) {}
+minuseins::interfaces::ShaderStorageBlock::ShaderStorageBlock(gl::GLuint program) :
+        BlockOrBufferInterfaceBase(gl::GL_SHADER_STORAGE_BLOCK, program) {}

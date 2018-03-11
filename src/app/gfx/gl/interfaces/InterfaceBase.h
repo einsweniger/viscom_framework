@@ -182,8 +182,15 @@ namespace minuseins::interfaces {
         };
     }
     class InterfaceBase {
+    protected:
+        gl::GLenum interface;
+        gl::GLuint program;
+
+
     public:
         InterfaceBase(gl::GLenum interface, gl::GLuint program);
+        virtual std::vector<gl::GLenum> validInterfaceProperties() const = 0;
+        std::unordered_map<gl::GLenum, gl::GLint> GetResourceProperties(gl::GLuint index);
 
     protected:
         /**
@@ -216,7 +223,7 @@ namespace minuseins::interfaces {
         /**
          * override when requesting an array from the program, like for compatible subroutines
          * @param index
-         * @param property
+         * @param property is either GL_ACTIVE_VARIABLES or GL_COMPATIBLE_SUBROUTINES
          * @param size
          * @return
          */
@@ -250,9 +257,6 @@ namespace minuseins::interfaces {
          * @return number of compatible subroutines for the active subroutine uniform in programInterface with the most compatible subroutines, zero if empty.
          */
         gl::GLuint GetMaxNumCompatibleSubroutines() const;
-
-        gl::GLenum interface;
-        gl::GLuint program;
 
     private:
         /**

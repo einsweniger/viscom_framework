@@ -28,6 +28,13 @@ namespace minuseins::interfaces {
         static StageSubroutine from_stage(gl::GLenum stage, gl::GLuint program);
 
         std::vector<types::subroutine_t> GetSubroutines(std::vector<gl::GLuint> subroutines) const;
+        std::vector<gl::GLenum> validInterfaceProperties() const override {
+            using namespace gl;
+            return {
+                    GL_NAME_LENGTH
+            };
+        }
+
 
     protected:
         StageSubroutine(gl::GLenum interface, gl::GLuint program);

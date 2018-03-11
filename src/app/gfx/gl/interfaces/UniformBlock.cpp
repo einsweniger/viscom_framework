@@ -5,5 +5,5 @@
 #include "UniformBlock.h"
 
 minuseins::interfaces::UniformBlock::UniformBlock(gl::GLuint program) :
-        InterfaceBase(gl::GL_UNIFORM_BLOCK, program)
+        BlockOrBufferInterfaceBase(gl::GL_UNIFORM_BLOCK, program)
 {}

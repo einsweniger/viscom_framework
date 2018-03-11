@@ -145,6 +145,7 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_atomic_uint:
                     return is_atomic_unit{};
             }
+
         }
 
         constexpr bool is_int(gl::GLenum type) {
@@ -396,6 +397,18 @@ namespace minuseins::interfaces {
     class Uniform : public InterfaceBase {
     public:
         explicit Uniform(gl::GLuint program);
+
+        std::vector<gl::GLenum> validInterfaceProperties() const override {
+            using namespace gl;
+            return {
+                    GL_TYPE, GL_ARRAY_SIZE, GL_LOCATION,
+                    GL_OFFSET, GL_BLOCK_INDEX, GL_ARRAY_STRIDE, GL_MATRIX_STRIDE, GL_IS_ROW_MAJOR,
+                    GL_NAME_LENGTH,
+                    GL_REFERENCED_BY_VERTEX_SHADER, GL_REFERENCED_BY_TESS_CONTROL_SHADER, GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                    GL_REFERENCED_BY_GEOMETRY_SHADER, GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,
+                    GL_ATOMIC_COUNTER_BUFFER_INDEX
+            };
+        }
 
         types::uniform_container make_uniform(std::string name, gl::GLint location, gl::GLenum type);
 

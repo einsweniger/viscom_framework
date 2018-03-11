@@ -50,13 +50,13 @@ namespace minuseins::interfaces {
 //                         +---------------------+---+---+---+---+---+ ,-- ATOMIC_COUNTER_BUFFER_INDEX
 //                         |PROGRAM_OUTPUT       | x | x | x | x | x | v
 //                         +---------------------+---+---+---+---+---+---+
-//                         |UNIFORM              | x | x | x |   |   | x |
+//                         |UNIFORM              | x | x |   |   |   | x |
 //                         +---------------------+---+---+---+---+---+---+
 //                         |BUFFER_VARIABLE      | x | x |
 //                         +---------------------+---+---+
 //                         |TRANSFORM_FEEDBACK-  | x |   |
-//                         |VARYING              |   |   | +------ NUM_COMPATIBLE_SUBROUTINES
-//                         +---------------------+---+---+ |   ,-- COMPATIBLE_SUBROUTINES (Array!)
+//                         |VARYING              |   |   | +------ COMPATIBLE_SUBROUTINES (Array!)
+//                         +---------------------+---+---+ |   ,-- NUM_COMPATIBLE_SUBROUTINES
 //                         |_SUBROUTINE          | x |   | v   v
 //                         +---------------------+---+---+---+---+
 //                         |_SUBROUTINE_UNIFORM  | x |   | x | x |
@@ -143,6 +143,10 @@ namespace minuseins::interfaces {
 
     gl::GLuint InterfaceBase::GetProgramResourceIndex(const std::string name) const {
         return gl::glGetProgramResourceIndex(program, interface, &name[0]);
+    }
+
+    std::unordered_map<gl::GLenum, gl::GLint> InterfaceBase::GetResourceProperties(gl::GLuint index) {
+        return GetProgramResourceiv(index, validInterfaceProperties());
     }
 
 }

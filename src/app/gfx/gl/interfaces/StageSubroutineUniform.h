@@ -9,13 +9,12 @@
 namespace minuseins::interfaces {
     constexpr std::array<gl::GLenum, 6> programStagesWithSubroutines() {
         return {
-                {
-                        gl::GL_VERTEX_SHADER,
-                        gl::GL_TESS_CONTROL_SHADER,
-                        gl::GL_TESS_EVALUATION_SHADER,
-                        gl::GL_GEOMETRY_SHADER,
-                        gl::GL_FRAGMENT_SHADER,
-                        gl::GL_COMPUTE_SHADER}
+                gl::GL_VERTEX_SHADER,
+                gl::GL_TESS_CONTROL_SHADER,
+                gl::GL_TESS_EVALUATION_SHADER,
+                gl::GL_GEOMETRY_SHADER,
+                gl::GL_FRAGMENT_SHADER,
+                gl::GL_COMPUTE_SHADER
         };
     }
 
@@ -50,6 +49,15 @@ namespace minuseins::interfaces {
         static StageSubroutineUniform from_stage(gl::GLenum stage, gl::GLuint program);
 
         static std::vector<types::stage_subroutines_t> GetAllStages(gl::GLuint program);
+        std::vector<gl::GLenum> validInterfaceProperties() const override {
+            using namespace gl;
+            return {
+                    GL_ARRAY_SIZE, GL_LOCATION,
+                    GL_NAME_LENGTH,
+                    GL_NUM_COMPATIBLE_SUBROUTINES
+            };
+        }
+
 
     private:
         StageSubroutineUniform(gl::GLenum stage, gl::GLuint program);
