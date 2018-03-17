@@ -93,49 +93,16 @@ struct ShaderLog
             gl::GL_COMPUTE_SUBROUTINE,
             gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
     };
-namespace {
-    using namespace minuseins::interfaces;
     using drawable_container = std::variant<
-            types::integer_t
-            ,types::generic_uniform
-            ,types::float_t
-            ,types::uinteger_t
-            ,types::stage_subroutines_t
-            ,types::program_output_t
-            ,types::program_samplers_t
-            ,types::bool_t
+             minuseins::interfaces::types::integer_t
+            ,minuseins::interfaces::types::generic_uniform
+            ,minuseins::interfaces::types::float_t
+            ,minuseins::interfaces::types::uinteger_t
+            ,minuseins::interfaces::types::stage_subroutines_t
+            ,minuseins::interfaces::types::program_output_t
+            ,minuseins::interfaces::types::program_samplers_t
+            ,minuseins::interfaces::types::bool_t
     >;
-    struct converter {
-        std::vector<drawable_container> result{};
-        void operator()(types::integer_t& arg) {result.push_back(arg);}
-        void operator()(types::generic_uniform& arg) {result.push_back(arg);}
-        void operator()(types::float_t& arg) {result.push_back(arg);}
-        void operator()(types::uinteger_t& arg) {result.push_back(arg);}
-        void operator()(types::program_samplers_t& arg) {result.push_back(arg);}
-        void operator()(types::bool_t& arg) {result.push_back(arg);}
-    };
-}
-    static std::vector<drawable_container> read_uniforms_from_program(gl::GLuint program)
-    {
-        using namespace minuseins::interfaces;
-        //std::vector<drawable_container> result;
-        //program_samplers_t collected_samplers{};
-        auto ui = Uniform(program);
-        // "normal" uniforms
-        auto c = converter{};
-
-        for(auto& uniform : ui.get_uniforms()) {
-            std::visit(c, uniform);
-        }
-        auto result = c.result;
-
-        // add subroutine uniforms
-        for (auto& subs : StageSubroutineUniform::GetAllStages(program)) {
-            result.push_back(subs);
-        }
-
-        return result;
-    }
 
     /**
      * Encapsulates a FullscreenQuad and enables editing uniforms for the fragment shader.
@@ -159,6 +126,7 @@ namespace {
         void DrawProgramWindow(bool *p_open);
         void loadProgramInterfaceInformation();
         void SendUniforms() const;
+        void read_uniforms_from_program();
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
         viscom::ApplicationNodeBase* app_;
         std::string shaderName_;

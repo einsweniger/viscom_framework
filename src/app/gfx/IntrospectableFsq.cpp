@@ -7,10 +7,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "IntrospectableFsq.h"
+#include "gl/interfaces/UniformBlock.h"
 
 namespace minuseins {
     namespace interfaces {
     struct uniform_draw_menu {
+        gl::GLuint program;
         void operator()(types::generic_uniform& u) {ImGui::Text("%s(%d) %s", u.name.c_str(), u.location, glbinding::Meta::getString(u.type).c_str());}
         void operator()(types::float_t& uniform) {
             std::string header = uniform.name + "(" + std::to_string(uniform.location) + ")";
@@ -20,10 +22,24 @@ namespace minuseins {
             const char* display_format = "%.5f";
             const float power = 1.0f;
             //DragFloat(const char* label, float* v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* display_format = "%.3f", float power = 1.0f);
-            if(gl::GL_FLOAT      == uniform.type) ImGui::DragFloat (header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-            if(gl::GL_FLOAT_VEC2 == uniform.type) ImGui::DragFloat2(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-            if(gl::GL_FLOAT_VEC3 == uniform.type) ImGui::DragFloat3(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-            if(gl::GL_FLOAT_VEC4 == uniform.type) ImGui::DragFloat4(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            if     (gl::GL_FLOAT      == uniform.type) ImGui::DragFloat (header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            else if(gl::GL_FLOAT_VEC2 == uniform.type) ImGui::DragFloat2(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            else if(gl::GL_FLOAT_VEC3 == uniform.type) ImGui::DragFloat3(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            else if(gl::GL_FLOAT_VEC4 == uniform.type) ImGui::DragFloat4(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            else ImGui::Text("%s(%d) %s", uniform.name.c_str(), uniform.location, glbinding::Meta::getString(uniform.type).c_str());
+            if(-1 == uniform.location) {
+                Uniform a{program};
+                ImGui::Text("block member, index: %d", uniform.index);
+                for (const auto& prop : a.GetResourceProperties(uniform.index)){
+                    ImGui::Text("%s: %d", glbinding::Meta::getString(prop.first).c_str(), prop.second);
+                }
+            }
+            if(uniform.name == std::string("u_MVP")) {
+                Uniform a{program};
+                for (const auto& prop : a.GetResourceProperties(uniform.index)){
+                    ImGui::Text("%s: %d", glbinding::Meta::getString(prop.first).c_str(), prop.second);
+                }
+            }
         }
         void operator()(types::integer_t& uniform) {
             std::string header = uniform.name + "(" + std::to_string(uniform.location) + ")";
@@ -139,12 +155,25 @@ namespace minuseins {
 
             ImGui::SameLine();
             if(ImGui::TreeNode(std::string("better uniform locations##").append(shaderName_).c_str())) {
-                auto visitor = uniform_draw_menu{};
+                auto visitor = interfaces::uniform_draw_menu{program};
                 for(auto& uniform : uniforms_) {
                     std::visit(visitor, uniform);
                 }
                 ImGui::TreePop();
             }
+            if(ImGui::TreeNode(std::string("uniform block##").append(shaderName_).c_str())) {
+                interfaces::UniformBlock block{program};
+
+                ImGui::Text("%s, active res count: %d", block.getResName(0).c_str(), block.getCount());
+                for(const auto& props : block.GetResourceProperties(0)) {
+                    ImGui::Text("%s: %d", glbinding::Meta::getString(props.first).c_str(), props.second);
+                }
+                for(const auto& activeVars : block.getActiveVars(0,2)) {
+                    ImGui::Text("active var: %d", activeVars);
+                }
+                ImGui::TreePop();
+            }
+
         }
         if(nullptr != nextPass_) { ImGui::Separator(); }
         ImGui::End();
@@ -154,8 +183,7 @@ namespace minuseins {
     {
         auto program = gpuProgram_->getProgramId();
         gl::glUseProgram(program);
-
-        uniforms_ = read_uniforms_from_program(program);
+        read_uniforms_from_program();
 
         auto progOutInterface = minuseins::interfaces::ProgramOutput(program);
         auto programOutput = progOutInterface.GetProgramOutput();
@@ -182,6 +210,7 @@ namespace minuseins {
     }
 namespace interfaces {
     struct drawable_sender {
+        //TODO could also use glProgramUniform**() w/ ARB_seperate_shader_objects; core since 4.1
         void operator()(types::integer_t& arg) {
             if (gl::GL_INT == arg.type)      gl::glUniform1iv(arg.location, 1, &arg.value[0]);
             if (gl::GL_INT_VEC2 == arg.type) gl::glUniform2iv(arg.location, 1, &arg.value[0]);
@@ -207,7 +236,10 @@ namespace interfaces {
             if (gl::GL_BOOL_VEC4 == arg.type) gl::glUniform4iv(arg.location, 1, &arg.value[0]);
         }
         void operator()(types::stage_subroutines_t& arg) {
-            gl::glUniformSubroutinesuiv(arg.programStage, static_cast<GLsizei>(arg.activeSubroutines.size()), &arg.activeSubroutines[0]);
+            if (!arg.activeSubroutines.empty()){
+                gl::glUniformSubroutinesuiv(arg.programStage, static_cast<GLsizei>(arg.activeSubroutines.size()), &arg.activeSubroutines[0]);
+            }
+
         }
         void operator()(types::program_samplers_t& arg) {
             gl::GLint counter = 0;
@@ -224,7 +256,7 @@ namespace interfaces {
 }
     void IntrospectableFsq::SendUniforms() const
     {
-        auto visitor = drawable_sender{};
+        auto visitor = interfaces::drawable_sender{};
         for(auto u : uniforms_) {
             std::visit(visitor,u);
         }
@@ -300,6 +332,65 @@ namespace interfaces {
             });
             nextPass_->ClearBuffer(fbo);
         }
+    }
+namespace interfaces {
+    struct use_shader_defaults {
+        explicit use_shader_defaults(gl::GLuint program) : program(program) {}
+        gl::GLuint program;
+        void operator()(types::integer_t& arg) {gl::glGetUniformiv(program, arg.location, &arg.value[0]);}
+        void operator()(types::generic_uniform& arg) {}
+        void operator()(types::float_t& arg) {gl::glGetUniformfv(program, arg.location, &arg.value[0]);}
+        void operator()(types::double_t& arg) {gl::glGetUniformdv(program, arg.location, &arg.value[0]);}
+        void operator()(types::uinteger_t& arg) {gl::glGetUniformuiv(program, arg.location, &arg.value[0]);}
+        void operator()(types::sampler_t& arg) {}
+        void operator()(types::bool_t& arg) {gl::glGetUniformiv(program, arg.location, &arg.value[0]);}
+    };
+    struct converter {
+        std::vector<drawable_container> result{};
+        interfaces::types::program_samplers_t samplers{};
+        void operator()(types::integer_t& arg) {result.push_back(arg);}
+        void operator()(types::generic_uniform& arg) {result.push_back(arg);}
+        void operator()(types::float_t& arg) {result.push_back(arg);}
+        void operator()(types::uinteger_t& arg) {result.push_back(arg);}
+        void operator()(types::sampler_t& arg) {samplers.samplers.push_back(arg);}
+        void operator()(types::bool_t& arg) {result.push_back(arg);}
+    };
+}
+
+    void IntrospectableFsq::read_uniforms_from_program() {
+        using namespace minuseins::interfaces;
+        auto program = gpuProgram_->getProgramId();
+        //std::vector<drawable_container> result;
+        //program_samplers_t collected_samplers{};
+        auto uniforms = Uniform(program).get_uniforms();
+        if(uniforms_.empty()) {
+            //initialize from shader defaults.
+            auto visitor = interfaces::use_shader_defaults{program};
+            for (auto& u : uniforms){
+                std::visit(visitor, u);
+            }
+        } else {
+            //TODO merge with local values
+            auto visitor = interfaces::use_shader_defaults{program};
+            for (auto& u : uniforms){
+                std::visit(visitor, u);
+            }
+        }
+        auto c = interfaces::converter{};
+
+        for(auto& uniform : uniforms) {
+            std::visit(c, uniform);
+        }
+        auto result = c.result;
+        result.push_back(c.samplers);
+
+        // add subroutine uniforms
+        for (auto& subs : StageSubroutineUniform::GetAllStages(program)) {
+            if(!subs.subroutineUniforms.empty()){
+                result.push_back(subs);
+            }
+        }
+        uniforms_ = result;
     }
 
 }
