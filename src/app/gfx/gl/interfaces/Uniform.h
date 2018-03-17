@@ -8,6 +8,30 @@
 #include "types.h"
 
 namespace minuseins::interfaces {
+    namespace types::info {
+        constexpr size_t getSize(gl::GLenum type) {
+            switch (type) {
+                case gl::GL_FLOAT:     case gl::GL_DOUBLE:     case gl::GL_INT:     case gl::GL_UNSIGNED_INT:     case gl::GL_BOOL:     return 1;
+                case gl::GL_FLOAT_VEC2:case gl::GL_DOUBLE_VEC2:case gl::GL_INT_VEC2:case gl::GL_UNSIGNED_INT_VEC2:case gl::GL_BOOL_VEC2:return 2;
+                case gl::GL_FLOAT_VEC3:case gl::GL_DOUBLE_VEC3:case gl::GL_INT_VEC3:case gl::GL_UNSIGNED_INT_VEC3:case gl::GL_BOOL_VEC3:return 3;
+                case gl::GL_FLOAT_VEC4:case gl::GL_DOUBLE_VEC4:case gl::GL_INT_VEC4:case gl::GL_UNSIGNED_INT_VEC4:case gl::GL_BOOL_VEC4:return 4;
+                case gl::GL_FLOAT_MAT2:case gl::GL_DOUBLE_MAT2: return 2*2;
+                case gl::GL_FLOAT_MAT3:case gl::GL_DOUBLE_MAT3: return 3*3;
+                case gl::GL_FLOAT_MAT4:case gl::GL_DOUBLE_MAT4: return 4*4;
+                case gl::GL_FLOAT_MAT2x3:case gl::GL_DOUBLE_MAT2x3: return 2*3;
+                case gl::GL_FLOAT_MAT2x4:case gl::GL_DOUBLE_MAT2x4: return 2*4;
+                case gl::GL_FLOAT_MAT3x4:case gl::GL_DOUBLE_MAT3x4: return 3*4;
+                case gl::GL_FLOAT_MAT3x2:case gl::GL_DOUBLE_MAT3x2: return 3*2;
+                case gl::GL_FLOAT_MAT4x2:case gl::GL_DOUBLE_MAT4x2: return 4*2;
+                case gl::GL_FLOAT_MAT4x3:case gl::GL_DOUBLE_MAT4x3: return 4*3;
+
+                default:
+                    assert(false);
+                    return 0;
+
+            }
+        }
+    }
     namespace types {
         struct generic_uniform {
             generic_uniform(std::string &name, gl::GLint location, gl::GLenum type)
@@ -195,29 +219,6 @@ namespace minuseins::interfaces {
             }
             //should not happen, enum class covers all types.
             throw "tried to get type of wrong enum";
-        }
-
-        constexpr size_t getSize(gl::GLenum type) {
-            switch (type) {
-                case gl::GL_FLOAT:     case gl::GL_DOUBLE:     case gl::GL_INT:     case gl::GL_UNSIGNED_INT:     case gl::GL_BOOL:     return 1;
-                case gl::GL_FLOAT_VEC2:case gl::GL_DOUBLE_VEC2:case gl::GL_INT_VEC2:case gl::GL_UNSIGNED_INT_VEC2:case gl::GL_BOOL_VEC2:return 2;
-                case gl::GL_FLOAT_VEC3:case gl::GL_DOUBLE_VEC3:case gl::GL_INT_VEC3:case gl::GL_UNSIGNED_INT_VEC3:case gl::GL_BOOL_VEC3:return 3;
-                case gl::GL_FLOAT_VEC4:case gl::GL_DOUBLE_VEC4:case gl::GL_INT_VEC4:case gl::GL_UNSIGNED_INT_VEC4:case gl::GL_BOOL_VEC4:return 4;
-                case gl::GL_FLOAT_MAT2:case gl::GL_DOUBLE_MAT2: return 2*2;
-                case gl::GL_FLOAT_MAT3:case gl::GL_DOUBLE_MAT3: return 3*3;
-                case gl::GL_FLOAT_MAT4:case gl::GL_DOUBLE_MAT4: return 4*4;
-                case gl::GL_FLOAT_MAT2x3:case gl::GL_DOUBLE_MAT2x3: return 2*3;
-                case gl::GL_FLOAT_MAT2x4:case gl::GL_DOUBLE_MAT2x4: return 2*4;
-                case gl::GL_FLOAT_MAT3x4:case gl::GL_DOUBLE_MAT3x4: return 3*4;
-                case gl::GL_FLOAT_MAT3x2:case gl::GL_DOUBLE_MAT3x2: return 3*2;
-                case gl::GL_FLOAT_MAT4x2:case gl::GL_DOUBLE_MAT4x2: return 4*2;
-                case gl::GL_FLOAT_MAT4x3:case gl::GL_DOUBLE_MAT4x3: return 4*3;
-
-                default:
-                    assert(false);
-                    return 0;
-
-            }
         }
     }
 
