@@ -8,45 +8,93 @@
 #include "types.h"
 
 namespace minuseins::interfaces {
+    namespace types {
+        struct generic_uniform {
+            generic_uniform(std::string &name, gl::GLint location, gl::GLenum type)
+                    : name(name), location(location), type(type)
+            {}
+
+            generic_uniform(std::string &name, gl::GLint location, gl::GLenum type, gl::GLuint resourceIndex)
+                    : name(name), location(location), type(type), index{resourceIndex}
+            {}
+
+            std::string name;
+            gl::GLint location;
+            gl::GLenum type;
+            gl::GLuint index = 0;
+        };
+
+        template<typename T>
+        struct uniform_and_value_t : public generic_uniform {
+            uniform_and_value_t(std::string &name, gl::GLint location, gl::GLenum type, gl::GLuint index) :
+                    generic_uniform(name, location, type, index), value{std::vector<T>(info::getSize(type))} {}
+
+            std::vector<T> value;
+        };
+
+
+        struct integer_t : public uniform_and_value_t<gl::GLint> {
+            using uniform_and_value_t::uniform_and_value_t;
+        };
+
+        struct bool_t : public integer_t {
+            using integer_t::integer_t;
+        };
+
+        struct float_t : public uniform_and_value_t<gl::GLfloat> {
+            using uniform_and_value_t::uniform_and_value_t;
+        };
+
+        struct double_t : public uniform_and_value_t<gl::GLdouble> {
+            using uniform_and_value_t::uniform_and_value_t;
+        };
+
+        struct uinteger_t : public uniform_and_value_t<gl::GLuint> {
+            using uniform_and_value_t::uniform_and_value_t;
+        };
+
+        struct sampler_t : public generic_uniform {
+            using generic_uniform::generic_uniform;
+            gl::GLint boundTexture = 0;
+        };
+
+        struct program_samplers_t {
+            std::vector<sampler_t> samplers;
+        };
+
+        using uniform_container = std::variant<
+                integer_t, generic_uniform, float_t, double_t, uinteger_t, sampler_t, bool_t
+        >;
+    }
+
     namespace types::info {
-        struct is_int{};
-        struct is_uint{};
-        struct is_float{};
-        struct is_double{};
-        struct is_bool{};
-        struct is_sampler{};
-        struct is_image{};
-        struct is_atomic_unit{};
-        
-        using type_token = std::variant<is_int, is_uint, is_float, is_double, is_bool, is_sampler, is_image, is_atomic_unit>;
-        
-        static type_token find_uniform_handler(interface_type type) {
-            switch (type) {
+        static uniform_container make_container(name_location_type_t& uniform) {
+            switch (static_cast<types::interface_type>(uniform.type)) {
                 case interface_type::glsl_float:
                 case interface_type::glsl_vec2:
                 case interface_type::glsl_vec3:
                 case interface_type::glsl_vec4:
-                    return is_float{};
+                    return float_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_double:
                 case interface_type::glsl_dvec2:
                 case interface_type::glsl_dvec3:
                 case interface_type::glsl_dvec4:
-                    return is_double{};                                
+                    return double_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_int:
                 case interface_type::glsl_ivec2:
                 case interface_type::glsl_ivec3:
                 case interface_type::glsl_ivec4:
-                    return is_int{};
+                    return integer_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_uint:
                 case interface_type::glsl_uvec2:
                 case interface_type::glsl_uvec3:
                 case interface_type::glsl_uvec4:
-                    return is_uint{};
+                    return uinteger_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_bool:
                 case interface_type::glsl_bvec2:
                 case interface_type::glsl_bvec3:
                 case interface_type::glsl_bvec4:
-                    return is_bool{};
+                    return bool_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_mat2:
                 case interface_type::glsl_mat3:
                 case interface_type::glsl_mat4:
@@ -56,7 +104,7 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_mat3x4:
                 case interface_type::glsl_mat4x2:
                 case interface_type::glsl_mat4x3:
-                    return is_float{};
+                    return float_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_dmat2:
                 case interface_type::glsl_dmat3:
                 case interface_type::glsl_dmat4:
@@ -66,7 +114,7 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_dmat3x4:
                 case interface_type::glsl_dmat4x2:
                 case interface_type::glsl_dmat4x3:
-                    return is_double{};
+                    return double_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_sampler1D:
                 case interface_type::glsl_sampler2D:
                 case interface_type::glsl_sampler3D:
@@ -107,7 +155,7 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_usampler2DMSArray:
                 case interface_type::glsl_usamplerBuffer:
                 case interface_type::glsl_usampler2DRect:
-                    return is_sampler{};
+                    return sampler_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_image1D:
                 case interface_type::glsl_image2D:
                 case interface_type::glsl_image3D:
@@ -141,178 +189,12 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_uimageCubeArray:
                 case interface_type::glsl_uimage2DMS:
                 case interface_type::glsl_uimage2DMSArray:
-                    return is_image{};
+                    return generic_uniform{uniform.name,uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_atomic_uint:
-                    return is_atomic_unit{};
+                    return generic_uniform{uniform.name,uniform.location, uniform.type, uniform.resIndex};
             }
-
-        }
-
-        constexpr bool is_int(gl::GLenum type) {
-            switch (type) {
-                case gl::GL_INT:
-                case gl::GL_INT_VEC2:
-                case gl::GL_INT_VEC3:
-                case gl::GL_INT_VEC4:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        constexpr bool is_float(gl::GLenum type) {
-            switch (type) {
-                case gl::GL_FLOAT:
-                case gl::GL_FLOAT_VEC2:
-                case gl::GL_FLOAT_VEC3:
-                case gl::GL_FLOAT_VEC4:
-                case gl::GL_FLOAT_MAT2: //mat2
-                case gl::GL_FLOAT_MAT3: //mat3
-                case gl::GL_FLOAT_MAT4: //mat4
-                case gl::GL_FLOAT_MAT2x3: //mat2x3
-                case gl::GL_FLOAT_MAT2x4: //mat2x4
-                case gl::GL_FLOAT_MAT3x2: //mat3x2
-                case gl::GL_FLOAT_MAT3x4: //mat3x4
-                case gl::GL_FLOAT_MAT4x2: //mat4x2
-                case gl::GL_FLOAT_MAT4x3: //mat4x3
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        constexpr bool is_double(gl::GLenum type) {
-            switch (type) {
-                case gl::GL_DOUBLE:
-                case gl::GL_DOUBLE_VEC2:
-                case gl::GL_DOUBLE_VEC3:
-                case gl::GL_DOUBLE_VEC4:
-                case gl::GL_DOUBLE_MAT2: //mat2
-                case gl::GL_DOUBLE_MAT3: //mat3
-                case gl::GL_DOUBLE_MAT4: //mat4
-                case gl::GL_DOUBLE_MAT2x3: //mat2x3
-                case gl::GL_DOUBLE_MAT2x4: //mat2x4
-                case gl::GL_DOUBLE_MAT3x2: //mat3x2
-                case gl::GL_DOUBLE_MAT3x4: //mat3x4
-                case gl::GL_DOUBLE_MAT4x2: //mat4x2
-                case gl::GL_DOUBLE_MAT4x3: //mat4x3
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        constexpr bool is_uint(gl::GLenum type) {
-            switch (type) {
-                case gl::GL_UNSIGNED_INT:
-                case gl::GL_UNSIGNED_INT_VEC2:
-                case gl::GL_UNSIGNED_INT_VEC3:
-                case gl::GL_UNSIGNED_INT_VEC4:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        constexpr bool is_sampler(gl::GLenum type) {
-            switch (type) {
-                case gl::GL_SAMPLER_1D:
-                case gl::GL_SAMPLER_2D:
-                case gl::GL_SAMPLER_3D:
-                case gl::GL_SAMPLER_CUBE: //samplerCube
-                case gl::GL_SAMPLER_1D_SHADOW: //sampler1DShadow
-                case gl::GL_SAMPLER_2D_SHADOW: //sampler2DShadow
-                case gl::GL_SAMPLER_1D_ARRAY: //sampler1DArray
-                case gl::GL_SAMPLER_2D_ARRAY: //sampler2DArray
-                case gl::GL_SAMPLER_CUBE_MAP_ARRAY: //samplerCubeArray
-                case gl::GL_SAMPLER_1D_ARRAY_SHADOW: //sampler1DArrayShadow
-                case gl::GL_SAMPLER_2D_ARRAY_SHADOW: //sampler2DArrayShadow
-                case gl::GL_SAMPLER_2D_MULTISAMPLE: //sampler2DMS
-                case gl::GL_SAMPLER_2D_MULTISAMPLE_ARRAY: //sampler2DMSArray
-                case gl::GL_SAMPLER_CUBE_SHADOW: //samplerCubeShadow
-                case gl::GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW: //samplerCubeArrayShadow
-                case gl::GL_SAMPLER_BUFFER: //samplerBuffer
-                case gl::GL_SAMPLER_2D_RECT: //sampler2DRect
-                case gl::GL_SAMPLER_2D_RECT_SHADOW: //sampler2DRectShadow
-                case gl::GL_INT_SAMPLER_1D: //isampler1D
-                case gl::GL_INT_SAMPLER_2D: //isampler2D
-                case gl::GL_INT_SAMPLER_3D: //isampler3D
-                case gl::GL_INT_SAMPLER_CUBE: //isamplerCube
-                case gl::GL_INT_SAMPLER_1D_ARRAY: //isampler1DArray
-                case gl::GL_INT_SAMPLER_2D_ARRAY: //isampler2DArray
-                case gl::GL_INT_SAMPLER_CUBE_MAP_ARRAY: //isamplerCubeArray
-                case gl::GL_INT_SAMPLER_2D_MULTISAMPLE: //isampler2DMS
-                case gl::GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: //isampler2DMSArray
-                case gl::GL_INT_SAMPLER_BUFFER: //isamplerBuffer
-                case gl::GL_INT_SAMPLER_2D_RECT: //isampler2DRect
-                case gl::GL_UNSIGNED_INT_SAMPLER_1D: //usampler1D
-                case gl::GL_UNSIGNED_INT_SAMPLER_2D: //usampler2D
-                case gl::GL_UNSIGNED_INT_SAMPLER_3D: //usampler3D
-                case gl::GL_UNSIGNED_INT_SAMPLER_CUBE: //usamplerCube
-                case gl::GL_UNSIGNED_INT_SAMPLER_1D_ARRAY: //usampler1DArray
-                case gl::GL_UNSIGNED_INT_SAMPLER_2D_ARRAY: //usampler2DArray
-                case gl::GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY: //usamplerCubeArray
-                case gl::GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: //usampler2DMS
-                case gl::GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: //usampler2DMSArray
-                case gl::GL_UNSIGNED_INT_SAMPLER_BUFFER: //usamplerBuffer
-                case gl::GL_UNSIGNED_INT_SAMPLER_2D_RECT: //usampler2DRect
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        constexpr bool is_image(gl::GLenum type){
-            switch (type) {
-                case gl::GL_IMAGE_1D: //image1D
-                case gl::GL_IMAGE_2D: //image2D
-                case gl::GL_IMAGE_3D: //image3D
-                case gl::GL_IMAGE_2D_RECT: //image2DRect
-                case gl::GL_IMAGE_CUBE: //imageCube
-                case gl::GL_IMAGE_BUFFER: //imageBuffer
-                case gl::GL_IMAGE_1D_ARRAY: //image1DArray
-                case gl::GL_IMAGE_2D_ARRAY: //image2DArray
-                case gl::GL_IMAGE_CUBE_MAP_ARRAY: //imageCubeArray
-                case gl::GL_IMAGE_2D_MULTISAMPLE: //image2DMS
-                case gl::GL_IMAGE_2D_MULTISAMPLE_ARRAY: //image2DMSArray
-                case gl::GL_INT_IMAGE_1D: //iimage1D
-                case gl::GL_INT_IMAGE_2D: //iimage2D
-                case gl::GL_INT_IMAGE_3D: //iimage3D
-                case gl::GL_INT_IMAGE_2D_RECT: //iimage2DRect
-                case gl::GL_INT_IMAGE_CUBE: //iimageCube
-                case gl::GL_INT_IMAGE_BUFFER: //iimageBuffer
-                case gl::GL_INT_IMAGE_1D_ARRAY: //iimage1DArray
-                case gl::GL_INT_IMAGE_2D_ARRAY: //iimage2DArray
-                case gl::GL_INT_IMAGE_CUBE_MAP_ARRAY: //iimageCubeArray
-                case gl::GL_INT_IMAGE_2D_MULTISAMPLE: //iimage2DMS
-                case gl::GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY: //iimage2DMSArray
-                case gl::GL_UNSIGNED_INT_IMAGE_1D: //uimage1D
-                case gl::GL_UNSIGNED_INT_IMAGE_2D: //uimage2D
-                case gl::GL_UNSIGNED_INT_IMAGE_3D: //uimage3D
-                case gl::GL_UNSIGNED_INT_IMAGE_2D_RECT: //uimage2DRect
-                case gl::GL_UNSIGNED_INT_IMAGE_CUBE: //uimageCube
-                case gl::GL_UNSIGNED_INT_IMAGE_BUFFER: //uimageBuffer
-                case gl::GL_UNSIGNED_INT_IMAGE_1D_ARRAY: //uimage1DArray
-                case gl::GL_UNSIGNED_INT_IMAGE_2D_ARRAY: //uimage2DArray
-                case gl::GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY: //uimageCubeArray
-                case gl::GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE: //uimage2DMS
-                case gl::GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY: //uimage2DMSArray
-                case gl::GL_UNSIGNED_INT_ATOMIC_COUNTER: //atomic_ui
-                    return true;
-                default:
-                    return false;
-            }
-        }
-        constexpr bool is_bool(gl::GLenum type) {
-            switch (type) {
-                case gl::GL_BOOL:
-                case gl::GL_BOOL_VEC2:
-                case gl::GL_BOOL_VEC3:
-                case gl::GL_BOOL_VEC4:
-                    return true;
-                default:
-                    return false;
-            }
+            //should not happen, enum class covers all types.
+            throw "tried to get type of wrong enum";
         }
 
         constexpr size_t getSize(gl::GLenum type) {
@@ -332,68 +214,13 @@ namespace minuseins::interfaces {
                 case gl::GL_FLOAT_MAT4x3:case gl::GL_DOUBLE_MAT4x3: return 4*3;
 
                 default:
-                    //LOG(WARNING) << "asking for size of unimplemented type. expect failure!";
+                    assert(false);
                     return 0;
 
             }
         }
     }
-    namespace types {
-        struct generic_uniform {
-            generic_uniform(std::string &name, gl::GLint location, gl::GLenum type)
-                    : name(name), location(location), type(type) {}
 
-            std::string name;
-            gl::GLint location;
-            gl::GLenum type;
-        };
-
-        template<typename T>
-        struct uniform_and_value_t : public generic_uniform {
-            uniform_and_value_t(std::string &name, gl::GLint location, gl::GLenum type) :
-                    generic_uniform(name, location, type), value{std::vector<T>(info::getSize(type))} {}
-
-            virtual void retrieve_value(gl::GLuint program) = 0;
-
-            std::vector<T> value;
-        };
-
-
-        struct integer_t : public uniform_and_value_t<gl::GLint> {
-            using uniform_and_value_t::uniform_and_value_t;
-
-            void retrieve_value(gl::GLuint program) override;
-        };
-
-        struct bool_t : public integer_t {
-            using integer_t::integer_t;
-        };
-
-        struct float_t : public uniform_and_value_t<gl::GLfloat> {
-            using uniform_and_value_t::uniform_and_value_t;
-
-            void retrieve_value(gl::GLuint program) override;
-        };
-
-        struct uinteger_t : public uniform_and_value_t<gl::GLuint> {
-            using uniform_and_value_t::uniform_and_value_t;
-
-            void retrieve_value(gl::GLuint program) override;
-        };
-
-        struct sampler_t : public generic_uniform {
-            using generic_uniform::generic_uniform;
-            gl::GLint boundTexture;
-        };
-
-        struct program_samplers_t {
-            std::vector<sampler_t> samplers;
-        };
-
-        using uniform_container = std::variant<
-                integer_t, generic_uniform, float_t, uinteger_t, program_samplers_t, bool_t
-        >;
-    }
     class Uniform : public InterfaceBase {
     public:
         explicit Uniform(gl::GLuint program);
@@ -409,8 +236,6 @@ namespace minuseins::interfaces {
                     GL_ATOMIC_COUNTER_BUFFER_INDEX
             };
         }
-
-        types::uniform_container make_uniform(std::string name, gl::GLint location, gl::GLenum type);
 
         std::vector<types::uniform_container> get_uniforms();
     };
