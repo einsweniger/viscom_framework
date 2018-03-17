@@ -179,6 +179,7 @@ namespace minuseins::interfaces {
             std::string name;
             gl::GLint location;
             gl::GLenum type;
+            gl::GLuint resIndex;
         };
     }
     class InterfaceBase {

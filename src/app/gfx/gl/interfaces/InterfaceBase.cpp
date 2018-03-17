@@ -135,7 +135,7 @@ namespace minuseins::interfaces {
         for (gl::GLuint index = 0; index < activeResCount; ++index) {
             auto props = GetProgramResourceiv(index, {gl::GL_NAME_LENGTH, gl::GL_LOCATION, gl::GL_TYPE});
             std::string name = GetProgramResourceName(index, props[gl::GL_NAME_LENGTH]);
-            result.push_back({name, props[gl::GL_LOCATION], getType(props[gl::GL_TYPE])});
+            result.push_back({name, props[gl::GL_LOCATION], getType(props[gl::GL_TYPE]), index});
         }
 
         return result;
