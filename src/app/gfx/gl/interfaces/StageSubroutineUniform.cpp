@@ -31,8 +31,7 @@ namespace minuseins::interfaces {
     std::vector<types::subroutine_uniform_t> StageSubroutineUniform::GetSubroutineUniforms() const {
         std::vector<types::subroutine_uniform_t> uniforms;
         auto subroutineInterface = StageSubroutine::from_stage(stage, program);
-        for (const auto&
-        [name, location] : GetUniformNameLocation()){
+        for (const auto& [name, location] : GetUniformNameLocation()){
             types::subroutine_uniform_t uniform;
             uniform.location = location;
             uniform.name = name;
