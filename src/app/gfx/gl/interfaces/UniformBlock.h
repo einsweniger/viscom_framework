@@ -10,6 +10,13 @@ namespace minuseins::interfaces {
     class UniformBlock : public BlockOrBufferInterfaceBase {
     public:
         UniformBlock(gl::GLuint program);
+        gl::GLuint getCount();
+        std::vector<gl::GLint> getActiveVars(gl::GLuint idx, gl::GLuint count) {
+            return GetActiveVariables(idx, count);
+        }
+        std::string getResName(gl::GLuint idx) {
+            return GetProgramResourceName(idx);
+        }
 
         std::vector<gl::GLenum> validInterfaceProperties() const override {
             using namespace gl;
