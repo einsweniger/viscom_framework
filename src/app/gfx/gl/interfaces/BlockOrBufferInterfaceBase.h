@@ -5,12 +5,13 @@
 #include "InterfaceBase.h"
 
 namespace minuseins::interfaces {
-    class BlockOrBufferInterfaceBase : InterfaceBase {
+    class BlockOrBufferInterfaceBase : public InterfaceBase {
     public:
         BlockOrBufferInterfaceBase(gl::GLenum interface, gl::GLuint program);
 
     protected:
         std::vector<gl::GLint> GetActiveVariables(const gl::GLuint resourceIndex, const gl::GLuint size) const;
+
     };
 
 }
