@@ -6,6 +6,13 @@
 
 namespace minuseins::interfaces::types {
 
+    interface_resource_t::interface_resource_t(const property_t &properties)
+            : properties(properties)
+    {}
+
+    named_interface_resource_t::named_interface_resource_t(const std::string name, const property_t &properties)
+            : interface_resource_t(properties), name{name}
+    {}
 }
 
 namespace minuseins::interfaces {
@@ -71,7 +78,10 @@ namespace minuseins::interfaces {
         gl::GLsizei length; //If length is not NULL , the actual number of values written to params will be written to length
         gl::glGetProgramResourceiv(program, interface, index, propCount, &props[0], bufSize, &length, &params[0]);
         std::unordered_map<gl::GLenum, gl::GLint> result;
-        std::transform(props.begin(), props.end(), params.begin(), std::inserter(result, result.end()),
+
+        //result = zip(props, params)
+        std::transform(props.begin(), props.end(), params.begin(),
+                       std::inserter(result, result.end()),
                        std::make_pair<gl::GLenum const &, gl::GLint const &>);
         return result;
     }
@@ -147,6 +157,15 @@ namespace minuseins::interfaces {
 
     std::unordered_map<gl::GLenum, gl::GLint> InterfaceBase::GetResourceProperties(gl::GLuint index) {
         return GetProgramResourceiv(index, validInterfaceProperties());
+    }
+
+    types::interface_resource_t InterfaceBase::GetResource(gl::GLuint index) {
+        return types::interface_resource_t{GetResourceProperties(index)};
+    }
+
+    types::named_interface_resource_t InterfaceBase::GetNamedResource(gl::GLuint index) {
+        auto props = GetResourceProperties(index);
+        return types::named_interface_resource_t{GetProgramResourceName(index, props[gl::GL_MAX_NAME_LENGTH]), props};
     }
 
 }

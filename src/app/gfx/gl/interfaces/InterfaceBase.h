@@ -175,23 +175,39 @@ namespace minuseins::interfaces {
     }
 
     namespace types {
+        using property_t = std::unordered_map<gl::GLenum, gl::GLint>;
+        using node = property_t::node_type;
+
         struct name_location_type_t {
             std::string name;
             gl::GLint location;
             gl::GLenum type;
             gl::GLuint resIndex;
         };
+        struct interface_resource_t {
+            interface_resource_t(const property_t &properties);
+
+            property_t properties;
+        };
+
+        struct named_interface_resource_t : public interface_resource_t {
+            named_interface_resource_t(const std::string name, const property_t &properties);
+
+            std::string name;
+        };
     }
     class InterfaceBase {
     protected:
-        gl::GLenum interface;
-        gl::GLuint program;
+        const gl::GLenum interface;
+        const gl::GLuint program;
 
 
     public:
         InterfaceBase(gl::GLenum interface, gl::GLuint program);
         virtual std::vector<gl::GLenum> validInterfaceProperties() const = 0;
         std::unordered_map<gl::GLenum, gl::GLint> GetResourceProperties(gl::GLuint index);
+        types::interface_resource_t GetResource(gl::GLuint index);
+        types::named_interface_resource_t GetNamedResource(gl::GLuint index);
 
     protected:
         /**

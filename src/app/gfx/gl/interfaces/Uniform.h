@@ -31,8 +31,158 @@ namespace minuseins::interfaces {
 
             }
         }
+        constexpr size_t getSize(interface_type type) {
+            switch (type) {
+                case interface_type::glsl_float:
+                case interface_type::glsl_double:
+                case interface_type::glsl_int:
+                case interface_type::glsl_uint:
+                case interface_type::glsl_bool:
+                    return 1;
+                case interface_type::glsl_vec2:
+                case interface_type::glsl_dvec2:
+                case interface_type::glsl_ivec2:
+                case interface_type::glsl_uvec2:
+                case interface_type::glsl_bvec2:
+                    return 2;
+                case interface_type::glsl_vec3:
+                case interface_type::glsl_dvec3:
+                case interface_type::glsl_ivec3:
+                case interface_type::glsl_uvec3:
+                case interface_type::glsl_bvec3:
+                    return 3;
+                case interface_type::glsl_vec4:
+                case interface_type::glsl_dvec4:
+                case interface_type::glsl_ivec4:
+                case interface_type::glsl_uvec4:
+                case interface_type::glsl_bvec4:
+                    return 4;
+                case interface_type::glsl_mat2:
+                case interface_type::glsl_dmat2:
+                    return 2 * 2;
+                case interface_type::glsl_mat3:
+                case interface_type::glsl_dmat3:
+                    return 3 * 3;
+                case interface_type::glsl_mat4:
+                case interface_type::glsl_dmat4:
+                    return 4 * 4;
+                case interface_type::glsl_mat2x3:
+                case interface_type::glsl_dmat2x3:
+                    return 2 * 3;
+
+                case interface_type::glsl_mat2x4:
+                case interface_type::glsl_dmat2x4:
+                    return 2 * 4;
+                case interface_type::glsl_mat3x2:
+                case interface_type::glsl_dmat3x2:
+                    return 3 * 2;
+
+                case interface_type::glsl_mat3x4:
+                case interface_type::glsl_dmat3x4:
+                    return 3 * 4;
+                case interface_type::glsl_mat4x2:
+                case interface_type::glsl_dmat4x2:
+                    return 4 * 2;
+                case interface_type::glsl_mat4x3:
+                case interface_type::glsl_dmat4x3:
+                    return 4 * 3;
+                case interface_type::glsl_sampler1D:
+                case interface_type::glsl_sampler2D:
+                case interface_type::glsl_sampler3D:
+                case interface_type::glsl_samplerCube:
+                case interface_type::glsl_sampler1DShadow:
+                case interface_type::glsl_sampler2DShadow:
+                case interface_type::glsl_sampler1DArray:
+                case interface_type::glsl_sampler2DArray:
+                case interface_type::glsl_samplerCubeArray:
+                case interface_type::glsl_sampler1DArrayShadow:
+                case interface_type::glsl_sampler2DArrayShadow:
+                case interface_type::glsl_sampler2DMS:
+                case interface_type::glsl_sampler2DMSArray:
+                case interface_type::glsl_samplerCubeShadow:
+                case interface_type::glsl_samplerCubeArrayShadow:
+                case interface_type::glsl_samplerBuffer:
+                case interface_type::glsl_sampler2DRect:
+                case interface_type::glsl_sampler2DRectShadow:
+                case interface_type::glsl_isampler1D:
+                case interface_type::glsl_isampler2D:
+                case interface_type::glsl_isampler3D:
+                case interface_type::glsl_isamplerCube:
+                case interface_type::glsl_isampler1DArray:
+                case interface_type::glsl_isampler2DArray:
+                case interface_type::glsl_isamplerCubeArray:
+                case interface_type::glsl_isampler2DMS:
+                case interface_type::glsl_isampler2DMSArray:
+                case interface_type::glsl_isamplerBuffer:
+                case interface_type::glsl_isampler2DRect:
+                case interface_type::glsl_usampler1D:
+                case interface_type::glsl_usampler2D:
+                case interface_type::glsl_usampler3D:
+                case interface_type::glsl_usamplerCube:
+                case interface_type::glsl_usampler1DArray:
+                case interface_type::glsl_usampler2DArray:
+                case interface_type::glsl_usamplerCubeArray:
+                case interface_type::glsl_usampler2DMS:
+                case interface_type::glsl_usampler2DMSArray:
+                case interface_type::glsl_usamplerBuffer:
+                case interface_type::glsl_usampler2DRect:
+                case interface_type::glsl_image1D:
+                case interface_type::glsl_image2D:
+                case interface_type::glsl_image3D:
+                case interface_type::glsl_image2DRect:
+                case interface_type::glsl_imageCube:
+                case interface_type::glsl_imageBuffer:
+                case interface_type::glsl_image1DArray:
+                case interface_type::glsl_image2DArray:
+                case interface_type::glsl_imageCubeArray:
+                case interface_type::glsl_image2DMS:
+                case interface_type::glsl_image2DMSArray:
+                case interface_type::glsl_iimage1D:
+                case interface_type::glsl_iimage2D:
+                case interface_type::glsl_iimage3D:
+                case interface_type::glsl_iimage2DRect:
+                case interface_type::glsl_iimageCube:
+                case interface_type::glsl_iimageBuffer:
+                case interface_type::glsl_iimage1DArray:
+                case interface_type::glsl_iimage2DArray:
+                case interface_type::glsl_iimageCubeArray:
+                case interface_type::glsl_iimage2DMS:
+                case interface_type::glsl_iimage2DMSArray:
+                case interface_type::glsl_uimage1D:
+                case interface_type::glsl_uimage2D:
+                case interface_type::glsl_uimage3D:
+                case interface_type::glsl_uimage2DRect:
+                case interface_type::glsl_uimageCube:
+                case interface_type::glsl_uimageBuffer:
+                case interface_type::glsl_uimage1DArray:
+                case interface_type::glsl_uimage2DArray:
+                case interface_type::glsl_uimageCubeArray:
+                case interface_type::glsl_uimage2DMS:
+                case interface_type::glsl_uimage2DMSArray:
+                case interface_type::glsl_atomic_uint:
+                    return 0;
+            }
+        }
     }
     namespace types {
+
+        struct uniform_resource_t : public named_interface_resource_t {
+            uniform_resource_t(const std::string &name, std::unordered_map<gl::GLenum, gl::GLint> &properties);
+            node block_index;
+            node location;
+            interface_type type;
+            gl::GLuint index;
+        };
+
+        template<typename T>
+        struct uni_value_res_t : public uniform_resource_t {
+            uni_value_res_t(const std::string &name, std::unordered_map<gl::GLenum, gl::GLint> &properties)
+                    : uniform_resource_t(name, properties),
+                      value{std::vector<T>(info::getSize(type))}
+            {}
+            std::vector<T> value;
+        };
+
         struct generic_uniform {
             generic_uniform(std::string &name, gl::GLint location, gl::GLenum type)
                     : name(name), location(location), type(type)
@@ -56,6 +206,9 @@ namespace minuseins::interfaces {
             std::vector<T> value;
         };
 
+        struct int_res_t : public uni_value_res_t<gl::GLint> {
+            using uni_value_res_t::uni_value_res_t;
+        };
 
         struct integer_t : public uniform_and_value_t<gl::GLint> {
             using uniform_and_value_t::uniform_and_value_t;
@@ -222,9 +375,13 @@ namespace minuseins::interfaces {
         }
     }
 
+    namespace types {
+    }
     class Uniform : public InterfaceBase {
     public:
         explicit Uniform(gl::GLuint program);
+
+
 
         std::vector<gl::GLenum> validInterfaceProperties() const override {
             using namespace gl;

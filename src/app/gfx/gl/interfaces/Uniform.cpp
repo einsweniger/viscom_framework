@@ -15,4 +15,10 @@ namespace minuseins::interfaces {
         std::transform(nlt.begin(), nlt.end(), std::back_inserter(result), types::info::make_container);
         return result;
     }
+
+    types::uniform_resource_t::uniform_resource_t(const std::string &name, property_t &properties)
+            : named_interface_resource_t(name, properties),
+              block_index{properties.extract(gl::GL_BLOCK_INDEX)},
+              location{properties.extract(gl::GL_LOCATION)}
+    {}
 }

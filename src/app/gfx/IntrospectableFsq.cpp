@@ -47,6 +47,27 @@ namespace minuseins {
             if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(header.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(header.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(header.c_str(), &uniform.value[0]);
+//            ImGui::Text("%s", header.c_str());
+            auto ui = interfaces::Uniform(program);
+            auto res = ui.GetNamedResource(uniform.index);
+            interfaces::types::int_res_t interesting{res.name, res.properties};
+//            ImGui::BulletText("%s: %d", glbinding::Meta::getString(gl::GL_BLOCK_INDEX).c_str(), interesting.block_index.mapped());
+            if(ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                auto ui = interfaces::Uniform(program);
+                auto res = ui.GetNamedResource(uniform.index);
+                interfaces::types::int_res_t interesting{res.name, res.properties};
+                for(auto prop : interesting.properties) {
+                    if(prop.first == gl::GL_BLOCK_INDEX) {
+                        ImGui::BulletText("%s: %d", glbinding::Meta::getString(prop.first).c_str(), interesting.block_index.mapped());
+                    } else {
+                        ImGui::BulletText("%s: %d", glbinding::Meta::getString(prop.first).c_str(), prop.second);
+                    }
+
+                }
+                ImGui::EndTooltip();
+            }
+
         }
         void operator()(types::bool_t& uniform) {
             int counter = 0;
