@@ -6,6 +6,7 @@
 
 #include "InterfaceBase.h"
 #include "types.h"
+#include <vector>
 
 namespace minuseins::interfaces {
     namespace types::info {
@@ -162,21 +163,22 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_atomic_uint:
                     return 0;
             }
+            return 0;
         }
     }
     namespace types {
 
         struct uniform_resource_t : public named_interface_resource_t {
-            uniform_resource_t(const std::string &name, std::unordered_map<gl::GLenum, gl::GLint> &properties);
-            node block_index;
-            node location;
+            uniform_resource_t(const std::string& name, std::unordered_map<gl::GLenum, gl::GLint> &properties);
+            gl::GLint block_index;
+            gl::GLint location;
             interface_type type;
             gl::GLuint index;
         };
 
         template<typename T>
         struct uni_value_res_t : public uniform_resource_t {
-            uni_value_res_t(const std::string &name, std::unordered_map<gl::GLenum, gl::GLint> &properties)
+            uni_value_res_t(const std::string& name, std::unordered_map<gl::GLenum, gl::GLint> &properties)
                     : uniform_resource_t(name, properties),
                       value{std::vector<T>(info::getSize(type))}
             {}
@@ -184,23 +186,20 @@ namespace minuseins::interfaces {
         };
 
         struct generic_uniform {
-            generic_uniform(std::string &name, gl::GLint location, gl::GLenum type)
-                    : name(name), location(location), type(type)
-            {}
 
-            generic_uniform(std::string &name, gl::GLint location, gl::GLenum type, gl::GLuint resourceIndex)
-                    : name(name), location(location), type(type), index{resourceIndex}
+            generic_uniform(std::string& name, gl::GLint location, gl::GLenum type, gl::GLuint resourceIndex)
+                    : name(name), location(location), type(type), resourceIndex{resourceIndex}
             {}
 
             std::string name;
             gl::GLint location;
             gl::GLenum type;
-            gl::GLuint index = 0;
+            gl::GLuint resourceIndex = 0;
         };
 
         template<typename T>
         struct uniform_and_value_t : public generic_uniform {
-            uniform_and_value_t(std::string &name, gl::GLint location, gl::GLenum type, gl::GLuint index) :
+            uniform_and_value_t(std::string& name, gl::GLint location, gl::GLenum type, gl::GLuint index) :
                     generic_uniform(name, location, type, index), value{std::vector<T>(info::getSize(type))} {}
 
             std::vector<T> value;
@@ -244,6 +243,7 @@ namespace minuseins::interfaces {
         >;
     }
 
+
     namespace types::info {
         static uniform_container make_container(name_location_type_t& uniform) {
             switch (static_cast<types::interface_type>(uniform.type)) {
@@ -251,27 +251,27 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_vec2:
                 case interface_type::glsl_vec3:
                 case interface_type::glsl_vec4:
-                    return float_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return float_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_double:
                 case interface_type::glsl_dvec2:
                 case interface_type::glsl_dvec3:
                 case interface_type::glsl_dvec4:
-                    return double_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return double_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_int:
                 case interface_type::glsl_ivec2:
                 case interface_type::glsl_ivec3:
                 case interface_type::glsl_ivec4:
-                    return integer_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return integer_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_uint:
                 case interface_type::glsl_uvec2:
                 case interface_type::glsl_uvec3:
                 case interface_type::glsl_uvec4:
-                    return uinteger_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return uinteger_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_bool:
                 case interface_type::glsl_bvec2:
                 case interface_type::glsl_bvec3:
                 case interface_type::glsl_bvec4:
-                    return bool_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return bool_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_mat2:
                 case interface_type::glsl_mat3:
                 case interface_type::glsl_mat4:
@@ -281,7 +281,7 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_mat3x4:
                 case interface_type::glsl_mat4x2:
                 case interface_type::glsl_mat4x3:
-                    return float_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return float_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_dmat2:
                 case interface_type::glsl_dmat3:
                 case interface_type::glsl_dmat4:
@@ -291,7 +291,7 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_dmat3x4:
                 case interface_type::glsl_dmat4x2:
                 case interface_type::glsl_dmat4x3:
-                    return double_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return double_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_sampler1D:
                 case interface_type::glsl_sampler2D:
                 case interface_type::glsl_sampler3D:
@@ -332,7 +332,7 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_usampler2DMSArray:
                 case interface_type::glsl_usamplerBuffer:
                 case interface_type::glsl_usampler2DRect:
-                    return sampler_t{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return sampler_t{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_image1D:
                 case interface_type::glsl_image2D:
                 case interface_type::glsl_image3D:
@@ -366,9 +366,9 @@ namespace minuseins::interfaces {
                 case interface_type::glsl_uimageCubeArray:
                 case interface_type::glsl_uimage2DMS:
                 case interface_type::glsl_uimage2DMSArray:
-                    return generic_uniform{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return generic_uniform{uniform.name, uniform.location, uniform.type, uniform.resIndex};
                 case interface_type::glsl_atomic_uint:
-                    return generic_uniform{uniform.name,uniform.location, uniform.type, uniform.resIndex};
+                    return generic_uniform{uniform.name, uniform.location, uniform.type, uniform.resIndex};
             }
             //should not happen, enum class covers all types.
             throw "tried to get type of wrong enum";

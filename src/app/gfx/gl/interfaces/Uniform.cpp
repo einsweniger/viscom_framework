@@ -2,6 +2,7 @@
 // Created by bone on 09.03.18.
 //
 
+#include <vector>
 #include "Uniform.h"
 namespace minuseins::interfaces {
     Uniform::Uniform(gl::GLuint program) :
@@ -16,9 +17,10 @@ namespace minuseins::interfaces {
         return result;
     }
 
-    types::uniform_resource_t::uniform_resource_t(const std::string &name, property_t &properties)
+    types::uniform_resource_t::uniform_resource_t(const std::string& name, property_t &properties)
             : named_interface_resource_t(name, properties),
-              block_index{properties.extract(gl::GL_BLOCK_INDEX)},
-              location{properties.extract(gl::GL_LOCATION)}
+              block_index{properties.at(gl::GL_BLOCK_INDEX)},
+              location{properties.at(gl::GL_LOCATION)},
+              type{static_cast<types::interface_type>(properties.at(gl::GL_TYPE))}
     {}
 }
