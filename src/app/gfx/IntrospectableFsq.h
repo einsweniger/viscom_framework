@@ -97,11 +97,13 @@ struct ShaderLog
              minuseins::interfaces::types::integer_t
             ,minuseins::interfaces::types::generic_uniform
             ,minuseins::interfaces::types::float_t
+            ,minuseins::interfaces::types::double_t
             ,minuseins::interfaces::types::uinteger_t
             ,minuseins::interfaces::types::stage_subroutines_t
             ,minuseins::interfaces::types::program_output_t
             ,minuseins::interfaces::types::program_samplers_t
             ,minuseins::interfaces::types::bool_t
+
     >;
 
     /**
@@ -133,7 +135,6 @@ struct ShaderLog
         std::shared_ptr<viscom::GPUProgram> gpuProgram_;
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
         std::vector<viscom::FrameBuffer> backBuffers_;
-        std::vector<drawable_container> uniforms_;
         std::map<std::string, drawable_container> uniformMap_;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;

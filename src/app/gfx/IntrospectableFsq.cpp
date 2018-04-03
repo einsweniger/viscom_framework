@@ -5,7 +5,8 @@
 #include <core/gfx/Shader.h>
 #include <glbinding/Meta.h>
 #include <glm/gtc/type_ptr.hpp>
-
+#include <utility>
+#include <iostream>
 #include "IntrospectableFsq.h"
 #include "gl/interfaces/UniformBlock.h"
 
@@ -29,14 +30,14 @@ namespace minuseins {
             else ImGui::Text("%s(%d) %s", uniform.name.c_str(), uniform.location, glbinding::Meta::getString(uniform.type).c_str());
             if(-1 == uniform.location) {
                 Uniform a{program};
-                ImGui::Text("block member, index: %d", uniform.index);
-                for (const auto& prop : a.GetResourceProperties(uniform.index)){
+                ImGui::Text("block member, index: %d", uniform.resourceIndex);
+                for (const auto& prop : a.GetResourceProperties(uniform.resourceIndex)){
                     ImGui::Text("%s: %d", glbinding::Meta::getString(prop.first).c_str(), prop.second);
                 }
             }
             if(uniform.name == std::string("u_MVP")) {
                 Uniform a{program};
-                for (const auto& prop : a.GetResourceProperties(uniform.index)){
+                for (const auto& prop : a.GetResourceProperties(uniform.resourceIndex)){
                     ImGui::Text("%s: %d", glbinding::Meta::getString(prop.first).c_str(), prop.second);
                 }
             }
@@ -47,19 +48,14 @@ namespace minuseins {
             if(gl::GL_INT_VEC2 == uniform.type) ImGui::DragInt2(header.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC3 == uniform.type) ImGui::DragInt3(header.c_str(), &uniform.value[0]);
             if(gl::GL_INT_VEC4 == uniform.type) ImGui::DragInt4(header.c_str(), &uniform.value[0]);
-//            ImGui::Text("%s", header.c_str());
-            auto ui = interfaces::Uniform(program);
-            auto res = ui.GetNamedResource(uniform.index);
-            interfaces::types::int_res_t interesting{res.name, res.properties};
-//            ImGui::BulletText("%s: %d", glbinding::Meta::getString(gl::GL_BLOCK_INDEX).c_str(), interesting.block_index.mapped());
             if(ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
                 auto ui = interfaces::Uniform(program);
-                auto res = ui.GetNamedResource(uniform.index);
+                auto res = ui.GetNamedResource(uniform.resourceIndex);
                 interfaces::types::int_res_t interesting{res.name, res.properties};
                 for(auto prop : interesting.properties) {
                     if(prop.first == gl::GL_BLOCK_INDEX) {
-                        ImGui::BulletText("%s: %d", glbinding::Meta::getString(prop.first).c_str(), interesting.block_index.mapped());
+                        ImGui::BulletText("%s: %d", glbinding::Meta::getString(prop.first).c_str(), interesting.block_index);
                     } else {
                         ImGui::BulletText("%s: %d", glbinding::Meta::getString(prop.first).c_str(), prop.second);
                     }
@@ -124,7 +120,8 @@ namespace minuseins {
     fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
     app_{appNode},
     shaderName_{fragmentShader},
-    gpuProgram_{appNode->GetGPUProgramManager().GetResource("fullScreenQuad_" + fragmentShader, std::vector<std::string>{ "fullScreenQuad.vert", fragmentShader })}
+    gpuProgram_{appNode->GetGPUProgramManager().GetResource("fullScreenQuad_" + fragmentShader, std::vector<std::string>{ "fullScreenQuad.vert", fragmentShader })},
+    uniformMap_{}
     {
         loadProgramInterfaceInformation();
     }
@@ -177,8 +174,8 @@ namespace minuseins {
             ImGui::SameLine();
             if(ImGui::TreeNode(std::string("better uniform locations##").append(shaderName_).c_str())) {
                 auto visitor = interfaces::uniform_draw_menu{program};
-                for(auto& uniform : uniforms_) {
-                    std::visit(visitor, uniform);
+                for(auto& uniform : uniformMap_) {
+                    std::visit(visitor, uniform.second);
                 }
                 ImGui::TreePop();
             }
@@ -225,7 +222,7 @@ namespace minuseins {
             ++counter;
         }
         for(const auto& output : programOutput) {
-            uniforms_.push_back(output);
+            uniformMap_.insert(std::make_pair("output:"+output.name, output));
         }
         gl::glUseProgram(0);
     }
@@ -278,8 +275,8 @@ namespace interfaces {
     void IntrospectableFsq::SendUniforms() const
     {
         auto visitor = interfaces::drawable_sender{};
-        for(auto u : uniforms_) {
-            std::visit(visitor,u);
+        for(auto u : uniformMap_) {
+            std::visit(visitor,u.second);
         }
     }
 
@@ -287,6 +284,24 @@ namespace interfaces {
     {
         currentTime_ = static_cast<gl::GLfloat>(currentTime);
         elapsedTime_ = static_cast<gl::GLfloat>(elapsedTime);
+
+        //TODO add checkbox to time variables so updates can be ignored
+        //move uniform value assignment to draw2D?
+        auto it = uniformMap_.find("u_time");
+        if(uniformMap_.end() != it) {
+            if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
+                uni->value[0] = currentTime_;
+            }
+        }
+        it = uniformMap_.find("u_delta");
+        if(uniformMap_.end() != it) {
+            if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
+                uni->value[0] = elapsedTime_;
+            }
+        }
+        if(nullptr != nextPass_) {
+            nextPass_->UpdateFrame(currentTime, elapsedTime);
+        }
     }
 
     void IntrospectableFsq::DrawToBackBuffer()
@@ -295,7 +310,6 @@ namespace interfaces {
         DrawToBuffer(*backbuffer);
     }
 
-    //TODO instead of these functions, add the method AddPass(IntrospectalbleFsq).
     //TODO use a map to update uniforms in. this will serve several purposes:
     //TODO 1. serialization of the state/uniforms to a file for later reloading of the parameters.
     //TODO 2. actually introspecting the values of uniforms updated from the outside
@@ -305,20 +319,14 @@ namespace interfaces {
     {
         fbo.DrawToFBO([this,&fbo]{
             gl::glUseProgram(gpuProgram_->getProgramId());
+
             SendUniforms();
-            //TODO merge outer context to local variables, then SendSubroutines()
-            //TODO add checkbox to variables updated through context so updates can be ignored
-            auto position = app_->GetCamera()->GetPosition();
             auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
-            gl::glUniform1f(gpuProgram_->getUniformLocation("u_time"), currentTime_);
-            gl::glUniform1f(gpuProgram_->getUniformLocation("u_delta"), elapsedTime_);
             gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
+            auto position = app_->GetCamera()->GetPosition();
             gl::glUniform3f(gpuProgram_->getUniformLocation("u_eye"), position.x, position.y, position.z);
             gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
-            /*TODO
-             * uniform vec4 u_date;  // year, month, day and seconds
-             * uniform vec2 u_mouse;  // mouse pixel coords
-             */
+            //TODO mouse pixel coords?
             fsq_->Draw();
             gl::glUseProgram(0);
         });
@@ -327,6 +335,7 @@ namespace interfaces {
 
     void IntrospectableFsq::AddPass(const std::string &fragmentProgram)
     {
+        //TODO nextpass can only be used once, iterate until nullptr, then add? Or use list of several passes?
         nextPass_ = std::make_unique<IntrospectableFsq>(fragmentProgram, app_);
     }
     void IntrospectableFsq::DrawFrame(viscom::FrameBuffer &fbo)
@@ -335,7 +344,7 @@ namespace interfaces {
             DrawToBuffer(fbo);
         } else {
             DrawToBackBuffer();
-            //TODO then pass the textures from this render to the next pass.
+            //TODO then pass the textures/programOutput from this render to the next pass.
             nextPass_->DrawFrame(fbo);
         }
     }
@@ -359,59 +368,94 @@ namespace interfaces {
         explicit use_shader_defaults(gl::GLuint program) : program(program) {}
         gl::GLuint program;
         void operator()(types::integer_t& arg) {gl::glGetUniformiv(program, arg.location, &arg.value[0]);}
-        void operator()(types::generic_uniform& arg) {}
         void operator()(types::float_t& arg) {gl::glGetUniformfv(program, arg.location, &arg.value[0]);}
         void operator()(types::double_t& arg) {gl::glGetUniformdv(program, arg.location, &arg.value[0]);}
         void operator()(types::uinteger_t& arg) {gl::glGetUniformuiv(program, arg.location, &arg.value[0]);}
-        void operator()(types::sampler_t& arg) {}
         void operator()(types::bool_t& arg) {gl::glGetUniformiv(program, arg.location, &arg.value[0]);}
+        void operator()(types::sampler_t&) {}
+        void operator()(types::generic_uniform&) {}
     };
     struct converter {
         std::vector<drawable_container> result{};
+        std::map<std::string, drawable_container> resmap{};
         interfaces::types::program_samplers_t samplers{};
-        void operator()(types::integer_t& arg) {result.push_back(arg);}
-        void operator()(types::generic_uniform& arg) {result.push_back(arg);}
-        void operator()(types::float_t& arg) {result.push_back(arg);}
-        void operator()(types::uinteger_t& arg) {result.push_back(arg);}
-        void operator()(types::sampler_t& arg) {samplers.samplers.push_back(arg);}
-        void operator()(types::bool_t& arg) {result.push_back(arg);}
+        //samplers are collected
+        void operator()(types::sampler_t& arg) {
+            samplers.samplers.push_back(arg);
+        }
+        //the rest is added as usual.
+        void operator()(auto&& arg) {
+            resmap.insert(std::make_pair(arg.name, arg));
+        }
     };
+    struct reuse_uniforms {
+        explicit reuse_uniforms(gl::GLuint program, std::map<std::string, drawable_container>& known) :
+                program(program),
+                known(known)
+        {}
+        gl::GLuint program;
+        std::map<std::string, drawable_container> known;
+
+        bool operator()(types::generic_uniform&) {return true;}
+        //TODO could use name of program outputs to restore sane value?
+        bool operator()(types::sampler_t&) { return true;}
+        bool operator()(auto&& arg){
+            using T = std::decay_t<decltype(arg)>;
+            auto it = known.find(arg.name);
+            if (known.end() != it) { //is in map
+                if (auto old = std::get_if<T>(&it->second)) { //has same type
+                    if (old->type == arg.type) {
+                        arg.value = old->value;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+};
+
 }
 
     void IntrospectableFsq::read_uniforms_from_program() {
         using namespace minuseins::interfaces;
         auto program = gpuProgram_->getProgramId();
-        //std::vector<drawable_container> result;
-        //program_samplers_t collected_samplers{};
         auto uniforms = Uniform(program).get_uniforms();
-        if(uniforms_.empty()) {
+        //init uniform values
+        if(uniformMap_.empty()) {
             //initialize from shader defaults.
             auto visitor = interfaces::use_shader_defaults{program};
             for (auto& u : uniforms){
                 std::visit(visitor, u);
             }
         } else {
-            //TODO merge with local values
-            auto visitor = interfaces::use_shader_defaults{program};
+            //try to use known values when initializing
+            auto local_values_init = interfaces::reuse_uniforms{program, uniformMap_};
+            auto shader_value_init = interfaces::use_shader_defaults{program};
             for (auto& u : uniforms){
-                std::visit(visitor, u);
+                if(!std::visit(local_values_init, u)) {
+                    //otherwise fall back to values set in shader.
+                    std::visit(shader_value_init, u);
+                }
             }
         }
-        auto c = interfaces::converter{};
 
+        //convert to local types and collect samplers
+        auto c = interfaces::converter{};
         for(auto& uniform : uniforms) {
             std::visit(c, uniform);
         }
         auto result = c.result;
-        result.push_back(c.samplers);
+        uniformMap_ = c.resmap;
+
+        uniformMap_.insert(std::make_pair("samplers:", c.samplers));
 
         // add subroutine uniforms
         for (auto& subs : StageSubroutineUniform::GetAllStages(program)) {
             if(!subs.subroutineUniforms.empty()){
-                result.push_back(subs);
+                uniformMap_.insert(std::make_pair("subroutine:"+glbinding::Meta::getString(subs.programStage), subs));
             }
         }
-        uniforms_ = result;
+        //uniforms_ = result;
     }
 
 }
