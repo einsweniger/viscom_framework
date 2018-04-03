@@ -7,6 +7,9 @@
 #include <glbinding/gl/gl.h>
 #include <cassert>
 #include <variant>
+#include <unordered_map>
+#include <vector>
+
 namespace minuseins::interfaces {
 
     namespace types::info {
@@ -176,7 +179,6 @@ namespace minuseins::interfaces {
 
     namespace types {
         using property_t = std::unordered_map<gl::GLenum, gl::GLint>;
-        using node = property_t::node_type;
 
         struct name_location_type_t {
             std::string name;
