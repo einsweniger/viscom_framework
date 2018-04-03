@@ -1,6 +1,11 @@
 #version 410 core
 #extension GL_ARB_shader_subroutine : require
 
+uniform ColorBlock {
+    vec4 diffuser;
+    vec4 ambient;
+};
+
 // shader inputs and uniforms
 in vec2 texCoord;
 uniform float timescale =1.0;
@@ -164,6 +169,7 @@ out vec4 test_color;
 out vec4 test_shaded;
 out vec4 test_texCoord;
 out vec4 test_worldPos;
+out vec4 test_block;
 
 void main()
 {
@@ -182,4 +188,5 @@ void main()
     test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     test_texCoord = vec4(texCoord,0.f, 1.f);
     test_worldPos = hit; // does not accomodate for repetitions
+    test_block = ambient+diffuser;
 }
