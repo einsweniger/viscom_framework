@@ -181,10 +181,10 @@ void main()
     vec3 ray_direction = normalize(vec3(dir_projection/dir_projection.w));
 
     //trace
-    vec4 hit = raymarch(u_eye, ray_direction);
     vec3 position = u_eye;
     //position.z -= u_time*.5;
-    vec3 color = shade_scene(u_eye, ray_direction, hit.xyz, hit.w);
+    vec4 hit = raymarch(position, ray_direction);
+    vec3 color = shade_scene(position, ray_direction, hit.xyz, hit.w);
     test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     test_texCoord = vec4(texCoord,0.f, 1.f);
     test_worldPos = hit; // does not accomodate for repetitions
