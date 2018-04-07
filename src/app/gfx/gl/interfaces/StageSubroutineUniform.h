@@ -7,6 +7,22 @@
 #include "abstract/InterfaceBase.h"
 #include "StageSubroutine.h"
 namespace minuseins::interfaces {
+    namespace types {
+        struct subroutine_uniform_t : named_resource {
+            subroutine_uniform_t(const std::string &name, const gl::GLuint resourceIndex, const property_t &properties);
+
+            gl::GLuint location;
+            gl::GLuint num_compatible_subroutines;
+            std::vector<named_resource> compatibleSubroutines;
+        };
+
+        struct stage_subroutines_t {
+            gl::GLenum programStage;
+            std::vector<gl::GLuint> activeSubroutines;
+            std::vector<subroutine_uniform_t> subroutineUniforms;
+        };
+    }
+
     constexpr std::array<gl::GLenum, 6> programStagesWithSubroutines() {
         return {
                 gl::GL_VERTEX_SHADER,
@@ -26,20 +42,6 @@ namespace minuseins::interfaces {
         if (gl::GL_FRAGMENT_SHADER == stage) return gl::GL_FRAGMENT_SUBROUTINE_UNIFORM;
         if (gl::GL_COMPUTE_SHADER == stage) return gl::GL_COMPUTE_SUBROUTINE_UNIFORM;
         return gl::GL_DEBUG_TYPE_ERROR;
-    }
-
-    namespace types {
-        struct subroutine_uniform_t {
-            std::string name;
-            gl::GLuint location;
-            std::vector<subroutine_t> compatibleSubroutines;
-        };
-
-        struct stage_subroutines_t {
-            gl::GLenum programStage;
-            std::vector<gl::GLuint> activeSubroutines;
-            std::vector<subroutine_uniform_t> subroutineUniforms;
-        };
     }
 
     class StageSubroutineUniform : public InterfaceBase {
@@ -62,13 +64,7 @@ namespace minuseins::interfaces {
     private:
         StageSubroutineUniform(gl::GLenum stage, gl::GLuint program);
 
-        gl::GLuint GetCompatibleSubroutineCount(const gl::GLuint uniform) const;
-
-        std::vector<gl::GLuint> GetCompatibleSubroutines(const gl::GLuint uniform) const;
-
         std::vector<types::subroutine_uniform_t> GetSubroutineUniforms() const;
-
-        std::vector<std::tuple<std::string, gl::GLuint>> GetUniformNameLocation() const;
 
         gl::GLuint GetUniformSubroutineuiv(const gl::GLint uniform) const;
 

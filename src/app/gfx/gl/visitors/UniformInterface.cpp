@@ -101,9 +101,9 @@ namespace minuseins::interfaces::visitors {
 
             ImGui::Text("%s (%d): active subroutine: %d", uniform.name.c_str(), uniform.location, stage.activeSubroutines[uniform.location]);
             for(const auto& subroutine : uniform.compatibleSubroutines) {
-                std::string header = subroutine.name + "(" + std::to_string(subroutine.value) + ")";
+                std::string header = subroutine.name + "(" + std::to_string(subroutine.resourceIndex) + ")";
                 //ImGui::BulletText("subroutine %d:", subroutine.value); ImGui::SameLine();
-                ImGui::RadioButton(header.c_str(), reinterpret_cast<int *>(&stage.activeSubroutines[uniform.location]), subroutine.value);
+                ImGui::RadioButton(header.c_str(), reinterpret_cast<int *>(&stage.activeSubroutines[uniform.location]), subroutine.resourceIndex);
             }
         }
     }

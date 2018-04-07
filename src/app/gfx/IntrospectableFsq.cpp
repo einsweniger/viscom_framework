@@ -58,36 +58,49 @@ namespace minuseins {
 
         if(ImGui::Begin("GPUProgram", p_open)) {
             gl::GLuint program = gpuProgram_->getProgramId();
-            ImGui::Text("Program: %d", program);
+            ImGui::Text("Program: %s", shaderName_.c_str());
             //TODO re-enable introspection on active resources
-//            if(ImGui::IsItemHovered()) {
-//                ImGui::BeginTooltip();
-//                for(auto interface : programInterfaces) {
-//                    auto count = glwrap::getActiveResourceCount(program, interface);
-//                    if(0 == count) continue;
-//                    ImGui::BulletText("%s: %d", Meta::getString(interface).c_str(), count);
-//                }
-//                ImGui::EndTooltip();
-//            }
-
             ImGui::SameLine();
-            if(ImGui::TreeNode(std::string("better uniform locations##").append(shaderName_).c_str())) {
+            ImGui::TextUnformatted("(?)");
+            if(ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                for(auto interface : programInterfaces) {
+                    gl::GLint count;
+                    gl::glGetProgramInterfaceiv(program, interface, gl::GL_ACTIVE_RESOURCES, &count);
+                    if(0 >= count) continue;
+                    ImGui::BulletText("%s: %d", Meta::getString(interface).c_str(), count);
+                }
+                ImGui::EndTooltip();
+            }
+
+            if(ImGui::TreeNode(std::string("uniforms##").append(shaderName_).c_str())) {
                 auto visitor = interfaces::visitors::uniform_draw_menu{program};
                 for(auto& uniform : uniformMap_) {
                     std::visit(visitor, uniform.second);
                 }
                 ImGui::TreePop();
             }
-            if(ImGui::TreeNode(std::string("uniform block##").append(shaderName_).c_str())) {
-                interfaces::UniformBlock block{program};
+            if(ImGui::TreeNode(std::string("uniform blocks##").append(shaderName_).c_str())) {
+                interfaces::UniformBlock u_block{program};
+                interfaces::Uniform u{program};
+                auto visitor = interfaces::visitors::uniform_draw_menu{program};
+                for (auto& res : u_block.GetAllNamedResources()) {
+                    ImGui::TextUnformatted(res.name.c_str());
+                    ImGui::SameLine();
+                    ImGui::TextUnformatted("(?)");
+                    if(ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        for(const auto& props : res.properties) {
+                            ImGui::Text("%s: %d", glbinding::Meta::getString(props.first).c_str(), props.second);
+                        }
+                        ImGui::EndTooltip();
+                    }
+                    for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
+                        std::visit(visitor, uniformMap_.at(u.GetNamedResource(activeVar).name));
+                    }
+                }
 
-                ImGui::Text("%s, active res count: %d", block.getResName(0).c_str(), block.getCount());
-                for(const auto& props : block.GetResourceProperties(0)) {
-                    ImGui::Text("%s: %d", glbinding::Meta::getString(props.first).c_str(), props.second);
-                }
-                for(const auto& activeVars : block.getActiveVars(0,2)) {
-                    ImGui::Text("active var: %d", activeVars);
-                }
+
                 ImGui::TreePop();
             }
 

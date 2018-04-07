@@ -11,18 +11,14 @@ namespace minuseins::interfaces {
         return StageSubroutine(stage, program);
     }
 
-    types::subroutine_t StageSubroutine::GetSubroutine(gl::GLuint subroutine) const {
-        return types::subroutine_t{GetProgramResourceName(subroutine), subroutine};
-    }
-
-    std::vector<types::subroutine_t>
+    std::vector<types::named_resource>
     StageSubroutine::GetSubroutines(std::vector<gl::GLuint> subroutines) const {
         using namespace types;
-        std::vector<subroutine_t> result;
-        result.reserve(subroutines.size());
+        std::vector<named_resource> result;
         for (auto subroutine : subroutines) {
-            result.push_back(GetSubroutine(subroutine));
+            result.push_back(GetNamedResource(subroutine));
         }
         return result;
     }
+
 }

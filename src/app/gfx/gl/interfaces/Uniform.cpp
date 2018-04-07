@@ -11,10 +11,10 @@ namespace minuseins::interfaces {
 
     namespace types {
         generic_uniform::generic_uniform(const std::string& name, gl::GLuint resourceIndex, property_t& properties) :
-                named_interface_resource_t(name, resourceIndex, properties),
+                named_resource(name, resourceIndex, properties),
                 block_index{properties.at(gl::GL_BLOCK_INDEX)},
                 location{properties.at(gl::GL_LOCATION)},
-                type{static_cast<types::resource_type>(info::getType(properties.at(gl::GL_TYPE)))},
+                type{toType(properties.at(gl::GL_TYPE))},
                 resourceIndex{resourceIndex}
         {}
     }
@@ -24,8 +24,7 @@ namespace minuseins::interfaces {
         std::vector<types::uniform_container> result;
         auto resources = GetAllNamedResources();
         //make containers
-        std::transform(resources.begin(), resources.end(), std::back_inserter(result), [this](types::named_interface_resource_t& uniform) -> uniform_container {
-            auto name = GetProgramResourceName(uniform.resourceIndex, uniform.properties.at(gl::GL_NAME_LENGTH));
+        std::transform(resources.begin(), resources.end(), std::back_inserter(result), [this](types::named_resource& uniform) -> uniform_container {
             switch (static_cast<types::resource_type>(uniform.properties.at(gl::GL_TYPE))) {
                 case resource_type::glsl_float:
                 case resource_type::glsl_vec2:

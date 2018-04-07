@@ -6,13 +6,6 @@
 
 #include "abstract/InterfaceBase.h"
 namespace minuseins::interfaces {
-    namespace types {
-        struct subroutine_t {
-            std::string name;
-            gl::GLuint value;
-        };
-    }
-
     constexpr gl::GLenum getSubroutineEnumForProgramStage(gl::GLenum stage) {
         if (gl::GL_VERTEX_SHADER == stage) return gl::GL_VERTEX_SUBROUTINE;
         if (gl::GL_TESS_CONTROL_SHADER == stage) return gl::GL_TESS_CONTROL_SUBROUTINE;
@@ -27,18 +20,12 @@ namespace minuseins::interfaces {
     public:
         static StageSubroutine from_stage(gl::GLenum stage, gl::GLuint program);
 
-        std::vector<types::subroutine_t> GetSubroutines(std::vector<gl::GLuint> subroutines) const;
+        std::vector<types::named_resource> GetSubroutines(std::vector<gl::GLuint> subroutines) const;
+
         std::vector<gl::GLenum> validInterfaceProperties() const override {
-            using namespace gl;
-            return {
-                    GL_NAME_LENGTH
-            };
+            return { gl::GL_NAME_LENGTH };
         }
-
-
     protected:
         StageSubroutine(gl::GLenum interface, gl::GLuint program);
-
-        types::subroutine_t GetSubroutine(gl::GLuint subroutine) const;
     };
 }

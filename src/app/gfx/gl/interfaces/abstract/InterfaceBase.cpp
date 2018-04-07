@@ -7,13 +7,13 @@
 
 namespace minuseins::interfaces::types {
 
-    interface_resource_t::interface_resource_t(const gl::GLuint resourceIndex, const property_t& properties) :
+    resource::resource(const gl::GLuint resourceIndex, const property_t& properties) :
             resourceIndex(resourceIndex),
             properties(properties)
     {}
 
-    named_interface_resource_t::named_interface_resource_t(const std::string name, const gl::GLuint resourceIndex, const property_t& properties) :
-            interface_resource_t(resourceIndex, properties),
+    named_resource::named_resource(const std::string name, const gl::GLuint resourceIndex, const property_t& properties) :
+            resource(resourceIndex, properties),
             name{name}
     {}
 
@@ -144,25 +144,25 @@ namespace minuseins::interfaces {
         return GetProgramResourceiv(index, validInterfaceProperties());
     }
 
-    types::interface_resource_t InterfaceBase::GetResource(gl::GLuint index) const {
-        return types::interface_resource_t{index,GetResourceProperties(index)};
+    types::resource InterfaceBase::GetResource(gl::GLuint index) const {
+        return types::resource{index,GetResourceProperties(index)};
     }
 
-    types::named_interface_resource_t InterfaceBase::GetNamedResource(gl::GLuint index) const {
+    types::named_resource InterfaceBase::GetNamedResource(gl::GLuint index) const {
         auto props = GetResourceProperties(index);
-        return types::named_interface_resource_t{GetProgramResourceName(index, props.at(gl::GL_NAME_LENGTH)), index, props};
+        return types::named_resource{GetProgramResourceName(index, props.at(gl::GL_NAME_LENGTH)), index, props};
     }
 
-    std::vector<types::interface_resource_t> InterfaceBase::GetAllResources() const {
-        auto result = std::vector<types::interface_resource_t>{};
+    std::vector<types::resource> InterfaceBase::GetAllResources() const {
+        auto result = std::vector<types::resource>{};
         for (auto resourceIndex : util::range(GetActiveResourceCount())) {
             result.push_back(GetResource(resourceIndex));
         }
         return result;
     }
 
-    std::vector<types::named_interface_resource_t> InterfaceBase::GetAllNamedResources() const {
-        auto result = std::vector<types::named_interface_resource_t>();
+    std::vector<types::named_resource> InterfaceBase::GetAllNamedResources() const {
+        auto result = std::vector<types::named_resource>();
         for (auto resourceIndex : util::range(GetActiveResourceCount())) {
             result.push_back(GetNamedResource(resourceIndex));
         }

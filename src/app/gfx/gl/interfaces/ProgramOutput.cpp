@@ -22,8 +22,9 @@ namespace minuseins::interfaces {
     }
 
     types::program_output_t::program_output_t(const std::string &name, const gl::GLuint resourceIndex, const types::property_t &properties) :
-            named_interface_resource_t(name, resourceIndex, properties),
-            type{static_cast<types::resource_type>(info::getType(properties.at(gl::GL_TYPE)))},
+            named_resource(name, resourceIndex, properties),
+            //type{static_cast<types::resource_type>(toEnum(properties.at(gl::GL_TYPE)))},
+            type{toType(properties.at(gl::GL_TYPE))},
             location{properties.at(gl::GL_LOCATION)}
     {}
 }

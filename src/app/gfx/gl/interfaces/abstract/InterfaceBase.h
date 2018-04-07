@@ -11,163 +11,6 @@
 #include <vector>
 
 namespace minuseins::interfaces {
-
-    namespace types::info {
-        constexpr gl::GLenum getType(gl::GLint type) {
-            switch (static_cast<gl::GLenum>(type)) {
-                case gl::GLenum::GL_FLOAT:
-                    return gl::GL_FLOAT;
-                case gl::GLenum::GL_FLOAT_VEC2:
-                    return gl::GL_FLOAT_VEC2;
-                case gl::GLenum::GL_FLOAT_VEC3:
-                    return gl::GL_FLOAT_VEC3;
-                case gl::GLenum::GL_FLOAT_VEC4:
-                    return gl::GL_FLOAT_VEC4;
-                case gl::GLenum::GL_DOUBLE:
-                    return gl::GL_DOUBLE;
-                case gl::GLenum::GL_DOUBLE_VEC2:
-                    return gl::GL_DOUBLE_VEC2;
-                case gl::GLenum::GL_DOUBLE_VEC3:
-                    return gl::GL_DOUBLE_VEC3;
-                case gl::GLenum::GL_DOUBLE_VEC4:
-                    return gl::GL_DOUBLE_VEC4;
-                case gl::GLenum::GL_INT:
-                    return gl::GL_INT;
-                case gl::GLenum::GL_INT_VEC2:
-                    return gl::GL_INT_VEC2;
-                case gl::GLenum::GL_INT_VEC3:
-                    return gl::GL_INT_VEC3;
-                case gl::GLenum::GL_INT_VEC4:
-                    return gl::GL_INT_VEC4;
-                case gl::GLenum::GL_UNSIGNED_INT:
-                    return gl::GL_UNSIGNED_INT;
-                case gl::GLenum::GL_UNSIGNED_INT_VEC2:
-                    return gl::GL_UNSIGNED_INT_VEC2;
-                case gl::GLenum::GL_UNSIGNED_INT_VEC3:
-                    return gl::GL_UNSIGNED_INT_VEC3;
-                case gl::GLenum::GL_UNSIGNED_INT_VEC4:
-                    return gl::GL_UNSIGNED_INT_VEC4;
-                case gl::GLenum::GL_BOOL:
-                    return gl::GL_BOOL;
-                case gl::GLenum::GL_BOOL_VEC2:
-                    return gl::GL_BOOL_VEC2;
-                case gl::GLenum::GL_BOOL_VEC3:
-                    return gl::GL_BOOL_VEC3;
-                case gl::GLenum::GL_BOOL_VEC4:
-                    return gl::GL_BOOL_VEC4;
-                case gl::GLenum::GL_FLOAT_MAT2:
-                    return gl::GL_FLOAT_MAT2;
-                case gl::GLenum::GL_FLOAT_MAT3:
-                    return gl::GL_FLOAT_MAT3;
-                case gl::GLenum::GL_FLOAT_MAT4:
-                    return gl::GL_FLOAT_MAT4;
-                case gl::GLenum::GL_FLOAT_MAT2x3:
-                    return gl::GL_FLOAT_MAT2x3;
-                case gl::GLenum::GL_FLOAT_MAT2x4:
-                    return gl::GL_FLOAT_MAT2x4;
-                case gl::GLenum::GL_FLOAT_MAT3x2:
-                    return gl::GL_FLOAT_MAT3x2;
-                case gl::GLenum::GL_FLOAT_MAT3x4:
-                    return gl::GL_FLOAT_MAT3x4;
-                case gl::GLenum::GL_FLOAT_MAT4x2:
-                    return gl::GL_FLOAT_MAT4x2;
-                case gl::GLenum::GL_FLOAT_MAT4x3:
-                    return gl::GL_FLOAT_MAT4x3;
-                case gl::GLenum::GL_DOUBLE_MAT2:
-                    return gl::GL_DOUBLE_MAT2;
-                case gl::GLenum::GL_DOUBLE_MAT3:
-                    return gl::GL_DOUBLE_MAT3;
-                case gl::GLenum::GL_DOUBLE_MAT4:
-                    return gl::GL_DOUBLE_MAT4;
-                case gl::GLenum::GL_DOUBLE_MAT2x3:
-                    return gl::GL_DOUBLE_MAT2x3;
-                case gl::GLenum::GL_DOUBLE_MAT2x4:
-                    return gl::GL_DOUBLE_MAT2x4;
-                case gl::GLenum::GL_DOUBLE_MAT3x2:
-                    return gl::GL_DOUBLE_MAT3x2;
-                case gl::GLenum::GL_DOUBLE_MAT3x4:
-                    return gl::GL_DOUBLE_MAT3x4;
-                case gl::GLenum::GL_DOUBLE_MAT4x2:
-                    return gl::GL_DOUBLE_MAT4x2;
-                case gl::GLenum::GL_DOUBLE_MAT4x3:
-                    return gl::GL_DOUBLE_MAT4x3;
-                case gl::GLenum::GL_SAMPLER_1D:
-                    return gl::GL_SAMPLER_1D;
-                case gl::GLenum::GL_SAMPLER_2D:
-                    return gl::GL_SAMPLER_2D;
-                case gl::GLenum::GL_SAMPLER_3D:
-                    return gl::GL_SAMPLER_3D;
-                case gl::GLenum::GL_SAMPLER_CUBE:
-                    return gl::GL_SAMPLER_CUBE;
-                case gl::GLenum::GL_SAMPLER_1D_SHADOW:
-                    return gl::GL_SAMPLER_1D_SHADOW;
-                case gl::GLenum::GL_SAMPLER_2D_SHADOW:
-                    return gl::GL_SAMPLER_2D_SHADOW;
-                case gl::GLenum::GL_SAMPLER_1D_ARRAY:
-                    return gl::GL_SAMPLER_1D_ARRAY;
-                case gl::GLenum::GL_SAMPLER_2D_ARRAY:
-                    return gl::GL_SAMPLER_2D_ARRAY;
-                case gl::GLenum::GL_SAMPLER_1D_ARRAY_SHADOW:
-                    return gl::GL_SAMPLER_1D_ARRAY_SHADOW;
-                case gl::GLenum::GL_SAMPLER_2D_ARRAY_SHADOW:
-                    return gl::GL_SAMPLER_2D_ARRAY_SHADOW;
-                case gl::GLenum::GL_SAMPLER_2D_MULTISAMPLE:
-                    return gl::GL_SAMPLER_2D_MULTISAMPLE;
-                case gl::GLenum::GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
-                    return gl::GL_SAMPLER_2D_MULTISAMPLE_ARRAY;
-                case gl::GLenum::GL_SAMPLER_CUBE_SHADOW:
-                    return gl::GL_SAMPLER_CUBE_SHADOW;
-                case gl::GLenum::GL_SAMPLER_BUFFER:
-                    return gl::GL_SAMPLER_BUFFER;
-                case gl::GLenum::GL_SAMPLER_2D_RECT:
-                    return gl::GL_SAMPLER_2D_RECT;
-                case gl::GLenum::GL_SAMPLER_2D_RECT_SHADOW:
-                    return gl::GL_SAMPLER_2D_RECT_SHADOW;
-                case gl::GLenum::GL_INT_SAMPLER_1D:
-                    return gl::GL_INT_SAMPLER_1D;
-                case gl::GLenum::GL_INT_SAMPLER_2D:
-                    return gl::GL_INT_SAMPLER_2D;
-                case gl::GLenum::GL_INT_SAMPLER_3D:
-                    return gl::GL_INT_SAMPLER_3D;
-                case gl::GLenum::GL_INT_SAMPLER_CUBE:
-                    return gl::GL_INT_SAMPLER_CUBE;
-                case gl::GLenum::GL_INT_SAMPLER_1D_ARRAY:
-                    return gl::GL_INT_SAMPLER_1D_ARRAY;
-                case gl::GLenum::GL_INT_SAMPLER_2D_ARRAY:
-                    return gl::GL_INT_SAMPLER_2D_ARRAY;
-                case gl::GLenum::GL_INT_SAMPLER_2D_MULTISAMPLE:
-                    return gl::GL_INT_SAMPLER_2D_MULTISAMPLE;
-                case gl::GLenum::GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
-                    return gl::GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY;
-                case gl::GLenum::GL_INT_SAMPLER_BUFFER:
-                    return gl::GL_INT_SAMPLER_BUFFER;
-                case gl::GLenum::GL_INT_SAMPLER_2D_RECT:
-                    return gl::GL_INT_SAMPLER_2D_RECT;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_1D:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_1D;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_2D:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_2D;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_3D:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_3D;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_CUBE:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_CUBE;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_1D_ARRAY;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_2D_ARRAY;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_BUFFER:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_BUFFER;
-                case gl::GLenum::GL_UNSIGNED_INT_SAMPLER_2D_RECT:
-                    return gl::GL_UNSIGNED_INT_SAMPLER_2D_RECT;
-                default:
-                    return gl::GL_FRAMEBUFFER_UNDEFINED;
-            }
-        }
-    }
     constexpr gl::GLuint positive(const gl::GLint num) {
 //    assert(0 >=num);
         if (0 >= num) {
@@ -180,16 +23,17 @@ namespace minuseins::interfaces {
     namespace types {
         using property_t = std::map<gl::GLenum, gl::GLint>;
 
-        struct interface_resource_t {
-            interface_resource_t(const gl::GLuint resourceIndex, const property_t &properties);
+        struct resource {
+            resource(const gl::GLuint resourceIndex, const property_t &properties);
 
             gl::GLuint resourceIndex;
             property_t properties;
 
         };
 
-        struct named_interface_resource_t : public interface_resource_t {
-            named_interface_resource_t(const std::string name, const gl::GLuint resourceIndex, const property_t &properties);
+        struct named_resource : public resource {
+            named_resource(const std::string name, const gl::GLuint resourceIndex, const property_t &properties);
+
 
             std::string name;
         };
@@ -204,10 +48,10 @@ namespace minuseins::interfaces {
         InterfaceBase(gl::GLenum interface, gl::GLuint program);
         virtual std::vector<gl::GLenum> validInterfaceProperties() const = 0;
         types::property_t GetResourceProperties(gl::GLuint index) const;
-        types::interface_resource_t GetResource(gl::GLuint index) const;
-        std::vector<types::interface_resource_t> GetAllResources() const;
-        std::vector<types::named_interface_resource_t> GetAllNamedResources() const;
-        types::named_interface_resource_t GetNamedResource(gl::GLuint index) const;
+        types::resource GetResource(gl::GLuint index) const;
+        std::vector<types::resource> GetAllResources() const;
+        std::vector<types::named_resource> GetAllNamedResources() const;
+        types::named_resource GetNamedResource(gl::GLuint index) const;
 
     protected:
         /**
