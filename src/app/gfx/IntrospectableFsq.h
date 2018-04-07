@@ -136,6 +136,7 @@ struct ShaderLog
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
         std::vector<viscom::FrameBuffer> backBuffers_;
         std::map<std::string, drawable_container> uniformMap_;
+        std::map<std::string, interfaces::types::program_output_t> programOutput_;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
     };

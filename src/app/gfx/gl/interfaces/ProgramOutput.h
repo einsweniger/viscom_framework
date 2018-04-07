@@ -4,15 +4,18 @@
 
 #pragma once
 
-#include "InterfaceBase.h"
+#include "abstract/InterfaceBase.h"
+#include "types.h"
+
 namespace minuseins::interfaces {
     namespace types {
-        struct program_output_t
+        struct program_output_t : public named_interface_resource_t
         {
-            std::string name;
-            gl::GLenum type;
+            program_output_t(const std::string &name, const gl::GLuint resourceIndex, const property_t &properties);
+
+            resource_type type;
             gl::GLint location;
-            gl::GLsizei textureLocation;
+            gl::GLsizei textureLocation = 0;
         };
     }
     class ProgramOutput : public InterfaceBase {

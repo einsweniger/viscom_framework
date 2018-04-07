@@ -3,6 +3,7 @@
 //
 
 #include "ProgramOutput.h"
+
 namespace minuseins::interfaces {
     ProgramOutput::ProgramOutput(gl::GLuint program) :
             InterfaceBase(gl::GL_PROGRAM_OUTPUT, program) {}
@@ -10,8 +11,8 @@ namespace minuseins::interfaces {
     std::vector<types::program_output_t> ProgramOutput::GetProgramOutput() {
         using namespace types;
         std::vector<program_output_t> result{};
-        for (const auto &info : GetNameLocationType()) {
-            result.push_back(program_output_t{info.name, info.type, info.location, 0});
+        for (const auto &info : GetAllNamedResources()) {
+            result.emplace_back(info.name, info.resourceIndex, info.properties);
         }
         std::sort(result.begin(), result.end(),
                   [](const program_output_t &a, const program_output_t &b) -> bool {
@@ -19,4 +20,10 @@ namespace minuseins::interfaces {
                   }); // have to sort output, otherwise mapping name to texture is wrong.
         return result;
     }
+
+    types::program_output_t::program_output_t(const std::string &name, const gl::GLuint resourceIndex, const types::property_t &properties) :
+            named_interface_resource_t(name, resourceIndex, properties),
+            type{static_cast<types::resource_type>(info::getType(properties.at(gl::GL_TYPE)))},
+            location{properties.at(gl::GL_LOCATION)}
+    {}
 }

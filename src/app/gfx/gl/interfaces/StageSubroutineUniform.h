@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "InterfaceBase.h"
+#include "abstract/InterfaceBase.h"
 #include "StageSubroutine.h"
 namespace minuseins::interfaces {
     constexpr std::array<gl::GLenum, 6> programStagesWithSubroutines() {

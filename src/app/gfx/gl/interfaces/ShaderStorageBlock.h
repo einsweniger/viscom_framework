@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "BlockOrBufferInterfaceBase.h"
+#include "abstract/BlockOrBufferInterfaceBase.h"
 
 namespace minuseins::interfaces {
     class ShaderStorageBlock : public BlockOrBufferInterfaceBase {

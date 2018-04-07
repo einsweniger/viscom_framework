@@ -5,7 +5,7 @@
 #pragma once
 
 #include <glbinding/gl/gl.h>
-
+#include <glbinding/Meta.h>
 namespace minuseins::interfaces::types {
     /**
  * OpenGL Shading Language type tokens, and corre-
@@ -19,7 +19,7 @@ marked may be declared as buffer variables (see section 7.8).
 
  valid for BUFFER_VARIABLE, PROGRAM_INPUT, PROGRAM_OUTPUT, TRANSFORM_FEEDBACK_VARYING and UNIFORM
  */
-enum class interface_type {
+enum class resource_type {
     glsl_float                   = static_cast<unsigned int>(gl::GL_FLOAT),
     glsl_vec2                    = static_cast<unsigned int>(gl::GL_FLOAT_VEC2),
     glsl_vec3                    = static_cast<unsigned int>(gl::GL_FLOAT_VEC3),
@@ -133,5 +133,13 @@ enum class interface_type {
     glsl_uimage2DMSArray         = static_cast<unsigned int>(gl::GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY),
     glsl_atomic_uint             = static_cast<unsigned int>(gl::GL_UNSIGNED_INT_ATOMIC_COUNTER),
 };
-
+  static std::string toString(resource_type type) {
+      return glbinding::Meta::getString(static_cast<gl::GLenum>(type));
+  }
+  static std::string toString(gl::GLint type) {
+      return glbinding::Meta::getString(static_cast<gl::GLenum>(type));
+  }
+  static std::string toString(gl::GLenum type) {
+      return glbinding::Meta::getString(type);
+  }
 }

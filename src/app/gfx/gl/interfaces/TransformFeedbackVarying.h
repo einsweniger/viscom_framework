@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "InterfaceBase.h"
+#include "abstract/InterfaceBase.h"
 
 namespace minuseins::interfaces {
     class TransformFeedbackVarying : InterfaceBase {
