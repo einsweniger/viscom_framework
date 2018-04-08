@@ -7,15 +7,36 @@
 
 namespace minuseins::interfaces::types {
 
-    resource::resource(const gl::GLuint resourceIndex, const property_t& properties) :
+    resource::resource(gl::GLuint resourceIndex, property_t properties) :
             resourceIndex(resourceIndex),
-            properties(properties)
+            properties(std::move(properties))
     {}
 
-    named_resource::named_resource(const std::string name, const gl::GLuint resourceIndex, const property_t& properties) :
-            resource(resourceIndex, properties),
-            name{name}
+//    resource::resource(const resource &res) :
+//        resourceIndex{res.resourceIndex},
+//        properties{res.properties}
+//    {}
+//
+//    resource::resource(resource &&res) :
+//        resourceIndex{std::move(res.resourceIndex)},
+//        properties{std::move(res.properties)}
+//    {}
+//
+//    named_resource::named_resource(std::string name, gl::GLuint resourceIndex, property_t properties) :
+//            resource(resourceIndex, std::move(properties)),
+//            name{std::move(name)}
+//    {}
+
+    named_resource::named_resource(std::string name, resource res) :
+        resource(std::move(res)),
+        name{std::move(name)}
     {}
+
+//    named_resource::named_resource(named_resource &&res) :
+//            named_resource(std::move(res.name), std::move(res.resourceIndex), std::move(res.properties))
+//    {
+//
+//    }
 
 }
 
@@ -145,18 +166,20 @@ namespace minuseins::interfaces {
     }
 
     types::resource InterfaceBase::GetResource(gl::GLuint index) const {
-        return types::resource{index,GetResourceProperties(index)};
+        auto props = GetResourceProperties(index);
+        return {index, props};
     }
 
     types::named_resource InterfaceBase::GetNamedResource(gl::GLuint index) const {
-        auto props = GetResourceProperties(index);
-        return types::named_resource{GetProgramResourceName(index, props.at(gl::GL_NAME_LENGTH)), index, props};
+        auto res = GetResource(index);
+        auto name = GetProgramResourceName(index, res.properties.at(gl::GL_NAME_LENGTH));
+        return {name, GetResource(index)};
     }
 
     std::vector<types::resource> InterfaceBase::GetAllResources() const {
         auto result = std::vector<types::resource>{};
         for (auto resourceIndex : util::range(GetActiveResourceCount())) {
-            result.push_back(GetResource(resourceIndex));
+            result.emplace_back(GetResource(resourceIndex));
         }
         return result;
     }
@@ -164,7 +187,7 @@ namespace minuseins::interfaces {
     std::vector<types::named_resource> InterfaceBase::GetAllNamedResources() const {
         auto result = std::vector<types::named_resource>();
         for (auto resourceIndex : util::range(GetActiveResourceCount())) {
-            result.push_back(GetNamedResource(resourceIndex));
+            result.emplace_back(GetNamedResource(resourceIndex));
         }
         return result;
     }

@@ -13,8 +13,24 @@
 #include <app/gfx/gl/interfaces/ProgramOutput.h>
 #include <app/gfx/IntrospectableFsq.h>
 
+namespace minuseins::interfaces::types {
+
+}
+
 namespace minuseins::interfaces::visitors {
+    struct abstract_visitor {
+        virtual void operator()(types::generic_uniform& u) = 0;
+        virtual void operator()(types::float_t& uniform) = 0;
+        virtual void operator()(types::integer_t& uniform) = 0;
+        virtual void operator()(types::bool_t& uniform) = 0;
+        virtual void operator()(types::program_samplers_t& arg) = 0;
+        virtual void operator()(types::uinteger_t& u) = 0;
+        virtual void operator()(types::stage_subroutines_t& stage) = 0;
+        virtual void operator()(types::program_output_t output) = 0;
+    };
     struct uniform_draw_menu {
+        uniform_draw_menu(GLuint program);
+
         gl::GLuint program;
         static void tooltip(const types::property_t& props);
         void operator()(types::generic_uniform& u);

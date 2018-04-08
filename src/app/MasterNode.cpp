@@ -26,23 +26,36 @@ namespace viscom {
         static float histData[90] = { 0 };
         histData[histIdx] = static_cast<float>(timeDelta*1000);
         histIdx = (1 + histIdx) % 90;
-        ImGui::SetNextWindowPos(ImVec2(10,20));
-        if (!ImGui::Begin("Example: Fixed Overlay", p_open, ImVec2(0,0), 0.3f, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings))
+        const float DISTANCE = 10.0f;
+        static int corner = 0;
+        ImVec2 window_pos = ImVec2((corner & 1) ? ImGui::GetIO().DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? ImGui::GetIO().DisplaySize.y - DISTANCE : DISTANCE);
+        ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+        ImGui::SetNextWindowBgAlpha(0.3f); // Transparent background
+        if (ImGui::Begin("Overlay", p_open, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_NoFocusOnAppearing|ImGuiWindowFlags_NoNav))
         {
+            ImGui::Text("Draw Time (ms): %.2f", timeDelta*1000);
+            ImGui::PlotHistogram("", histData, 90, 0, nullptr, 0.0f, 60.0f, ImVec2(0,90));
+            ImGui::Separator();
+            ImGui::Text("Mouse Position: (%.1f,%.1f)", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+            if (ImGui::BeginPopupContextWindow())
+            {
+                if (ImGui::MenuItem("Top-left", NULL, corner == 0)) corner = 0;
+                if (ImGui::MenuItem("Top-right", NULL, corner == 1)) corner = 1;
+                if (ImGui::MenuItem("Bottom-left", NULL, corner == 2)) corner = 2;
+                if (ImGui::MenuItem("Bottom-right", NULL, corner == 3)) corner = 3;
+                if (p_open && ImGui::MenuItem("Close")) *p_open = false;
+                ImGui::EndPopup();
+            }
             ImGui::End();
-            return;
         }
-        ImGui::Text("Draw Time (ms): %.2f", timeDelta*1000);
-        ImGui::PlotHistogram("", histData, 90, 0, nullptr, 0.0f, 60.0f, ImVec2(0,90));
-        ImGui::Separator();
-        ImGui::Text("Mouse Position: (%.1f,%.1f)", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
-        ImGui::End();
     }
 
     void MasterNode::Draw2D(FrameBuffer& fbo)
     {
         fbo.DrawToFBO([this]() {
-            if(imDemoWindow_) ImGui::ShowTestWindow();
+            if(imDemoWindow_) ImGui::ShowDemoWindow();
+//            ImGui::ShowDemoWindow();
             if(imMainMenu_) drawMainMenu(&imMainMenu_);
             if(imOverlay_) drawOverlay(&imOverlay_, elapsedTime_);
             if (imBuffersWindow_) {} //removed. delegated to Ifsq.

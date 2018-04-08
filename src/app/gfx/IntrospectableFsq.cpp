@@ -27,41 +27,79 @@ namespace minuseins {
 
     void IntrospectableFsq::Draw2D(viscom::FrameBuffer &fbo)
     {
-        //TODO remove static log, move to class, so log output is inserted into the correct log.
-        static ShaderLog log;
-        static bool shader_log_window = true;
+        //static ShaderLog log;
         static bool program_window;
         fbo.DrawToFBO([this]() {
-            if(shader_log_window) {
-                log.Draw(std::string("Shader Reloading##").append(shaderName_).c_str(), &shader_log_window, [this]() {
-                    if (ImGui::Button(std::string("recompile ").append(shaderName_).c_str())) {
-                        try {
-                            gpuProgram_->recompileProgram();
-                            loadProgramInterfaceInformation();
-                            log.AddLog("reload succesful\n");
-                        } catch (viscom::shader_compiler_error& compilerError) {
-                            log.AddLog("%s",compilerError.what());
-                        }
-                    }
-                });
-            }
+//            if(shader_log_window) {
+//                log_.Draw(std::string("Shader Reloading##").append(shaderName_).c_str(), &shader_log_window, [this]() {
+//                    if (ImGui::Button(std::string("recompile ").append(shaderName_).c_str())) {
+//                        try {
+//                            gpuProgram_->recompileProgram();
+//                            loadProgramInterfaceInformation();
+//                            log_.AddLog("reload succesful\n");
+//                        } catch (viscom::shader_compiler_error& compilerError) {
+//                            log_.AddLog("%s",compilerError.what());
+//                        }
+//                    }
+//                });
+//            }
             DrawProgramWindow(&program_window);
+
         });
         if(nullptr != nextPass_) {
             nextPass_->Draw2D(fbo);
         }
     }
+    static const std::vector<gl::GLenum> programInterfaces {
+            gl::GL_UNIFORM,
+            gl::GL_UNIFORM_BLOCK,
+            gl::GL_ATOMIC_COUNTER_BUFFER,
+            gl::GL_PROGRAM_INPUT,
+            gl::GL_PROGRAM_OUTPUT,
 
+            gl::GL_TRANSFORM_FEEDBACK_VARYING,
+            gl::GL_TRANSFORM_FEEDBACK_BUFFER,
+            gl::GL_BUFFER_VARIABLE,
+            gl::GL_SHADER_STORAGE_BLOCK,
+
+            gl::GL_VERTEX_SUBROUTINE,
+            gl::GL_VERTEX_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_CONTROL_SUBROUTINE,
+            gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_EVALUATION_SUBROUTINE,
+            gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
+            gl::GL_GEOMETRY_SUBROUTINE,
+            gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
+            gl::GL_FRAGMENT_SUBROUTINE,
+            gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
+            gl::GL_COMPUTE_SUBROUTINE,
+            gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
+    };
     void IntrospectableFsq::DrawProgramWindow(bool* p_open) {
         using glbinding::Meta;
-        //static ShaderLog log;
+        gl::GLuint program = gpuProgram_->getProgramId();
 
         if(ImGui::Begin("GPUProgram", p_open)) {
-            gl::GLuint program = gpuProgram_->getProgramId();
-            ImGui::Text("Program: %s", shaderName_.c_str());
+            ImGui::TextUnformatted(shaderName_.c_str());
             //TODO re-enable introspection on active resources
             ImGui::SameLine();
-            ImGui::TextUnformatted("(?)");
+            if(ImGui::SmallButton("recompile")){
+                log_.Clear();
+                try {
+                    gpuProgram_->recompileProgram();
+                    loadProgramInterfaceInformation();
+                    program = gpuProgram_->getProgramId();
+                    log_.visible = false;
+                } catch (viscom::shader_compiler_error& compilerError) {
+                    log_.AddLog("%s",compilerError.what());
+                    log_.visible = true;
+                }
+            }
+            if(log_.visible) {
+                log_.Draw(std::string("Shader Reloading##").append(shaderName_).c_str(), &log_.visible);
+            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("(?)");
             if(ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
                 for(auto interface : programInterfaces) {
@@ -127,13 +165,6 @@ namespace minuseins {
         }
         backBuffers_ = app_->CreateOffscreenBuffers(viscom::FrameBufferDescriptor{backBufTextures,{}});
         auto buffer = app_->SelectOffscreenBuffer(backBuffers_);
-        gl::GLuint counter = 0;
-
-        for(const auto& tex : buffer->GetTextures()) {
-            LOG(INFO) << "available texture: " << tex;
-            programOutput.at(counter).textureLocation = tex;
-            ++counter;
-        }
         for(const auto [index, value] : util::enumerate(buffer->GetTextures())) {
             LOG(INFO) << "available texture: " << value;
             programOutput.at(index).textureLocation = value;

@@ -10,10 +10,9 @@ namespace minuseins::interfaces {
 
     std::vector<types::program_output_t> ProgramOutput::GetProgramOutput() {
         using namespace types;
-        std::vector<program_output_t> result{};
-        for (const auto &info : GetAllNamedResources()) {
-            result.emplace_back(info.name, info.resourceIndex, info.properties);
-        }
+        auto res = GetAllNamedResources();
+        std::vector<program_output_t> result{res.begin(),res.end()};
+        //result.insert(std::end(result), res.begin(), res.end());
         std::sort(result.begin(), result.end(),
                   [](const program_output_t &a, const program_output_t &b) -> bool {
                       return a.location < b.location;
@@ -21,9 +20,8 @@ namespace minuseins::interfaces {
         return result;
     }
 
-    types::program_output_t::program_output_t(const std::string &name, const gl::GLuint resourceIndex, const types::property_t &properties) :
-            named_resource(name, resourceIndex, properties),
-            //type{static_cast<types::resource_type>(toEnum(properties.at(gl::GL_TYPE)))},
+    types::program_output_t::program_output_t(types::named_resource res) :
+            named_resource(std::move(res)),
             type{toType(properties.at(gl::GL_TYPE))},
             location{properties.at(gl::GL_LOCATION)}
     {}

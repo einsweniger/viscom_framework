@@ -6,12 +6,12 @@
 #include <glbinding/Meta.h>
 namespace minuseins::interfaces {
     namespace types {
-        subroutine_uniform_t::subroutine_uniform_t(const std::string &name, const gl::GLuint resourceIndex, const property_t &properties) :
-                named_resource(name, resourceIndex, properties),
+        subroutine_uniform_t::subroutine_uniform_t(named_resource res) :
+                named_resource(std::move(res)),
                 location{positive(properties.at(gl::GL_LOCATION))},
-                num_compatible_subroutines{positive(properties.at(gl::GL_NUM_COMPATIBLE_SUBROUTINES))},
-                compatibleSubroutines{}
+                num_compatible_subroutines{positive(properties.at(gl::GL_NUM_COMPATIBLE_SUBROUTINES))}//,
         {}
+
     }
 
     StageSubroutineUniform::StageSubroutineUniform(gl::GLenum stage, gl::GLuint program) :
@@ -21,22 +21,26 @@ namespace minuseins::interfaces {
 
     std::vector<types::subroutine_uniform_t> StageSubroutineUniform::GetSubroutineUniforms() const {
         std::vector<types::subroutine_uniform_t> result;
-        auto subroutineInterface = StageSubroutine::from_stage(stage, program);
         auto uniforms = GetAllNamedResources();
-        for (const auto& res : uniforms){
-            auto uniform = types::subroutine_uniform_t{res.name, res.resourceIndex, res.properties};
-
-            auto nameRes = std::vector<types::named_resource>{};
-
-            //for each compatible subroutine
-            for(auto& resIndex : GetProgramResourceiv_vector(uniform.resourceIndex, gl::GL_COMPATIBLE_SUBROUTINES, uniform.num_compatible_subroutines)) {
-                nameRes.push_back(subroutineInterface.GetNamedResource(positive(resIndex)));
-            }
-            uniform.compatibleSubroutines = nameRes;
+        for (auto& res : uniforms){
+            auto uniform = types::subroutine_uniform_t{res};
+            uniform.compatibleSubroutines = GetCompatibleSubroutines(uniform);
             result.push_back(uniform);
         }
         return result;
 
+    }
+
+    std::vector<types::named_resource> StageSubroutineUniform::GetCompatibleSubroutines(const types::subroutine_uniform_t &uniform) const {
+        auto subroutineInterface = StageSubroutine::from_stage(stage, program);
+
+        auto nameRes = std::vector<types::named_resource>{};
+
+        //for each compatible subroutine
+        for(auto& resIndex : GetProgramResourceiv_vector(uniform.resourceIndex, gl::GL_COMPATIBLE_SUBROUTINES, uniform.num_compatible_subroutines)) {
+                nameRes.push_back(subroutineInterface.GetNamedResource(positive(resIndex)));
+        }
+        return nameRes;
     }
 
     gl::GLuint StageSubroutineUniform::GetUniformSubroutineuiv(const gl::GLint uniform) const {

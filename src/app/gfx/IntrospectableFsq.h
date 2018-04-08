@@ -14,95 +14,61 @@
 #include <app/gfx/gl/interfaces/ProgramOutput.h>
 
 namespace minuseins {
-    
-struct ShaderLog
-{
-    ImGuiTextBuffer Buf;
-    ImVector<int> LineOffsets;        // Index to lines offset
-    bool ScrollToBottom = false;
-
-    void Clear()
+    struct ShaderLog
     {
-        Buf.clear();
-        LineOffsets.clear();
-    }
+        bool visible = false;
+        ImGuiTextBuffer     Buf;
+        ImVector<int>       LineOffsets;        // Index to lines offset
+        bool                ScrollToBottom;
 
-    void AddLog(const char* fmt, ...) IM_PRINTFARGS(2)
-    {
-        int old_size = Buf.size();
-        va_list args;
+        void    Clear()     { Buf.clear(); LineOffsets.clear(); }
+
+        void    AddLog(const char* fmt, ...) IM_FMTARGS(2)
+        {
+            int old_size = Buf.size();
+            va_list args;
             va_start(args, fmt);
-        Buf.appendv(fmt, args);
+            Buf.appendfv(fmt, args);
             va_end(args);
-        for (int new_size = Buf.size(); old_size < new_size; old_size++) {
-            if (Buf[old_size] == '\n') {
-                LineOffsets.push_back(old_size);
+            for (int new_size = Buf.size(); old_size < new_size; old_size++)
+                if (Buf[old_size] == '\n')
+                    LineOffsets.push_back(old_size);
+            ScrollToBottom = true;
+        }
+
+        void    Draw(const char* title, bool* p_open = nullptr)
+        {
+            ImGui::SetNextWindowSize(ImVec2(500,400), ImGuiCond_FirstUseEver);
+            if(ImGui::Begin(title, p_open)) {
+                bool copy = ImGui::Button("Copy");
+                ImGui::SameLine();
+                ImGui::Separator();
+                ImGui::BeginChild("scrolling", ImVec2(0,0), false, ImGuiWindowFlags_HorizontalScrollbar);
+                if (copy) ImGui::LogToClipboard();
+
+                ImGui::TextUnformatted(Buf.begin());
+
+                if (ScrollToBottom) {
+                    ImGui::SetScrollHere(1.0f);
+                }
+                ScrollToBottom = false;
+                ImGui::EndChild();
+                ImGui::End();
             }
         }
-        ScrollToBottom = true;
-    }
-
-    void Draw(const char* title, bool* p_open = nullptr, const std::function<void()>& drawFn = nullptr)
-    {
-        ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-        ImGui::Begin(title, p_open);
-        drawFn();
-        ImGui::SameLine();
-        if (ImGui::Button("Clear")) { Clear(); }
-//        ImGui::SameLine();
-//        bool copy = ImGui::Button("Copy");
-//        ImGui::SameLine();
-        ImGui::Separator();
-        ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
-//        if (copy) { ImGui::LogToClipboard(); }
-
-        ImGui::TextUnformatted(Buf.begin());
-
-        if (ScrollToBottom) {
-            ImGui::SetScrollHere(1.0f);
-        }
-        ScrollToBottom = false;
-        ImGui::EndChild();
-        ImGui::End();
-    }
-};
+    };
 
     //TODO move clutter to GpuProgramInspector
-    static const std::vector<gl::GLenum> programInterfaces {
-            gl::GL_UNIFORM,
-            gl::GL_UNIFORM_BLOCK,
-            gl::GL_ATOMIC_COUNTER_BUFFER,
-            gl::GL_PROGRAM_INPUT,
-            gl::GL_PROGRAM_OUTPUT,
-
-            gl::GL_TRANSFORM_FEEDBACK_VARYING,
-            gl::GL_TRANSFORM_FEEDBACK_BUFFER,
-            gl::GL_BUFFER_VARIABLE,
-            gl::GL_SHADER_STORAGE_BLOCK,
-
-            gl::GL_VERTEX_SUBROUTINE,
-            gl::GL_VERTEX_SUBROUTINE_UNIFORM,
-            gl::GL_TESS_CONTROL_SUBROUTINE,
-            gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
-            gl::GL_TESS_EVALUATION_SUBROUTINE,
-            gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
-            gl::GL_GEOMETRY_SUBROUTINE,
-            gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
-            gl::GL_FRAGMENT_SUBROUTINE,
-            gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
-            gl::GL_COMPUTE_SUBROUTINE,
-            gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
-    };
     using drawable_container = std::variant<
-             minuseins::interfaces::types::integer_t
-            ,minuseins::interfaces::types::generic_uniform
-            ,minuseins::interfaces::types::float_t
-            ,minuseins::interfaces::types::double_t
-            ,minuseins::interfaces::types::uinteger_t
-            ,minuseins::interfaces::types::stage_subroutines_t
-            ,minuseins::interfaces::types::program_output_t
-            ,minuseins::interfaces::types::program_samplers_t
-            ,minuseins::interfaces::types::bool_t
+             interfaces::types::integer_t
+            ,interfaces::types::generic_uniform
+            ,interfaces::types::float_t
+            ,interfaces::types::double_t
+            ,interfaces::types::uinteger_t
+            ,interfaces::types::stage_subroutines_t
+            ,interfaces::types::program_output_t
+            ,interfaces::types::program_samplers_t
+            ,interfaces::types::bool_t
 
     >;
 
@@ -139,5 +105,6 @@ struct ShaderLog
         std::map<std::string, interfaces::types::program_output_t> programOutput_;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
+        ShaderLog log_{};
     };
 }

@@ -11,7 +11,8 @@ namespace minuseins::interfaces {
     namespace types {
         struct program_output_t : public named_resource
         {
-            program_output_t(const std::string &name, const gl::GLuint resourceIndex, const property_t &properties);
+            //program_output_t(std::string &name, gl::GLuint resourceIndex, property_t &properties);
+            program_output_t(named_resource res);
 
             resource_type type;
             gl::GLint location;

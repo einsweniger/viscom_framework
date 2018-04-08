@@ -24,7 +24,7 @@ namespace minuseins::interfaces {
         using property_t = std::map<gl::GLenum, gl::GLint>;
 
         struct resource {
-            resource(const gl::GLuint resourceIndex, const property_t &properties);
+            resource(gl::GLuint resourceIndex, property_t properties);
 
             gl::GLuint resourceIndex;
             property_t properties;
@@ -32,8 +32,8 @@ namespace minuseins::interfaces {
         };
 
         struct named_resource : public resource {
-            named_resource(const std::string name, const gl::GLuint resourceIndex, const property_t &properties);
-
+            //named_resource(std::string name, gl::GLuint resourceIndex, property_t properties);
+            named_resource(std::string name, resource res);
 
             std::string name;
         };
@@ -42,7 +42,6 @@ namespace minuseins::interfaces {
     protected:
         const gl::GLenum interface;
         const gl::GLuint program;
-
 
     public:
         InterfaceBase(gl::GLenum interface, gl::GLuint program);

@@ -13,8 +13,11 @@ namespace minuseins::interfaces {
 
     }
     namespace types {
+
         struct generic_uniform : public named_resource {
-            generic_uniform(const std::string& name, gl::GLuint resourceIndex, types::property_t& properties);
+            //generic_uniform(const std::string& name, gl::GLuint resourceIndex, types::property_t& properties);
+
+            explicit generic_uniform(named_resource res);
 
             gl::GLint block_index;
             gl::GLint location;
@@ -24,11 +27,17 @@ namespace minuseins::interfaces {
 
         template<typename T>
         struct uniform_and_value_t : public generic_uniform {
-            uniform_and_value_t(std::string& name, gl::GLuint resourceIndex, types::property_t& properties) :
-                    generic_uniform(name, resourceIndex, properties), value{std::vector<T>(getSize(type))} {}
+//            uniform_and_value_t(std::string& name, gl::GLuint resourceIndex, types::property_t& properties) :
+//                    generic_uniform(name, resourceIndex, properties),
+//                    value{std::vector<T>(getSize(type))}
+//                    {}
+
+            explicit uniform_and_value_t(named_resource arg) :
+                generic_uniform(std::move(arg)),
+                value{std::vector<T>(getSize(type))}
+            {}
 
             std::vector<T> value;
-
         };
 
         typedef uniform_and_value_t<gl::GLint> integer_t;
@@ -53,6 +62,7 @@ namespace minuseins::interfaces {
         using uniform_container = std::variant<
                 integer_t, generic_uniform, float_t, double_t, uinteger_t, sampler_t, bool_t
         >;
+        static uniform_container make_container(named_resource res);
     }
 
     class Uniform : public InterfaceBase {

@@ -9,7 +9,7 @@
 namespace minuseins::interfaces {
     namespace types {
         struct subroutine_uniform_t : named_resource {
-            subroutine_uniform_t(const std::string &name, const gl::GLuint resourceIndex, const property_t &properties);
+            explicit subroutine_uniform_t(named_resource res);
 
             gl::GLuint location;
             gl::GLuint num_compatible_subroutines;
@@ -69,5 +69,7 @@ namespace minuseins::interfaces {
         gl::GLuint GetUniformSubroutineuiv(const gl::GLint uniform) const;
 
         gl::GLenum stage;
+
+        std::vector<types::named_resource> GetCompatibleSubroutines(const types::subroutine_uniform_t &uniform) const;
     };
 }

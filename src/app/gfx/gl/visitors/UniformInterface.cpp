@@ -34,6 +34,7 @@ namespace minuseins::interfaces::visitors {
         using namespace types;
         std::string header = uniform.name;// + "(" + std::to_string(uniform.location) + ")";
         std::to_string(0);
+        int color_flags = ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_Float;
         const float v_speed = 0.0001f;
         const float v_min = 0.0f;
         const float v_max = 0.0f;
@@ -42,8 +43,14 @@ namespace minuseins::interfaces::visitors {
         //DragFloat(const char* label, float* v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* display_format = "%.3f", float power = 1.0f);
         if     (resource_type::glsl_float == uniform.type) ImGui::DragFloat (header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
         else if(resource_type::glsl_vec2  == uniform.type) ImGui::DragFloat2(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-        else if(resource_type::glsl_vec3  == uniform.type) ImGui::DragFloat3(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
-        else if(resource_type::glsl_vec4  == uniform.type) ImGui::DragFloat4(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+        else if(resource_type::glsl_vec3  == uniform.type) {
+            //ImGui::DragFloat3(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            ImGui::ColorEdit3(header.c_str(), &uniform.value[0], color_flags);
+        }
+        else if(resource_type::glsl_vec4  == uniform.type) {
+            //ImGui::DragFloat4(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            ImGui::ColorEdit4(header.c_str(), &uniform.value[0], color_flags);
+        }
         else ImGui::TextUnformatted(uniform.name.c_str());
         tooltip(uniform.properties);
     }
@@ -120,6 +127,8 @@ namespace minuseins::interfaces::visitors {
             ImGui::TreePop();
         };
     }
+
+    uniform_draw_menu::uniform_draw_menu(GLuint program) : program(program) {}
 
     void drawable_sender::operator()(types::integer_t &arg) {
         using namespace types;
