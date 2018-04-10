@@ -21,7 +21,8 @@ namespace minuseins {
     shaderName_{fragmentShader},
     gpuProgram_{appNode->GetGPUProgramManager().GetResource("fullScreenQuad_" + fragmentShader, std::vector<std::string>{ "fullScreenQuad.vert", fragmentShader })},
     uniformMap_{},
-    programOutput_{}
+    programOutput_{},
+    buffers_{}
     {
         loadProgramInterfaceInformation();
     }
@@ -31,21 +32,7 @@ namespace minuseins {
         //static ShaderLog log;
         static bool program_window;
         fbo.DrawToFBO([this]() {
-//            if(shader_log_window) {
-//                log_.Draw(std::string("Shader Reloading##").append(shaderName_).c_str(), &shader_log_window, [this]() {
-//                    if (ImGui::Button(std::string("recompile ").append(shaderName_).c_str())) {
-//                        try {
-//                            gpuProgram_->recompileProgram();
-//                            loadProgramInterfaceInformation();
-//                            log_.AddLog("reload succesful\n");
-//                        } catch (viscom::shader_compiler_error& compilerError) {
-//                            log_.AddLog("%s",compilerError.what());
-//                        }
-//                    }
-//                });
-//            }
             DrawProgramWindow(&program_window);
-
         });
         if(nullptr != nextPass_) {
             nextPass_->Draw2D(fbo);
@@ -140,7 +127,6 @@ namespace minuseins {
                     for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
                         auto name = u.GetNamedResource(activeVar).name;
                         std::visit(visitor, uniformMap_.at(name));
-                        //auto bindpoint = app_->GetUBOBindingPoints()->GetBindingPoint(name);
                     }
                 }
 
@@ -158,8 +144,17 @@ namespace minuseins {
         using rt = interfaces::types::resource_type;
         auto program = gpuProgram_->getProgramId();
         gl::glUseProgram(program);
-        buffer_ = std::make_unique<viscom::enh::GLUniformBuffer>("ColorBlock", 32, app_->GetUBOBindingPoints());
-        app_->GetUBOBindingPoints()->BindBufferBlock(program, "ColorBlock");
+        {
+            auto ublock = interfaces::UniformBlock{program};
+            for(auto& block : ublock.GetAllNamedResources()) {
+                buffers_[block.name] = std::make_unique<viscom::enh::GLUniformBuffer>(block.name, block.properties.at(gl::GL_BUFFER_DATA_SIZE), app_->GetUBOBindingPoints());
+                app_->GetUBOBindingPoints()->BindBufferBlock(program, block.name);
+            }
+//            auto u0 = ublock.GetNamedResource(0);
+//            buffer_ = std::make_unique<viscom::enh::GLUniformBuffer>(u0.name, u0.properties.at(gl::GL_BUFFER_DATA_SIZE), app_->GetUBOBindingPoints());
+//            app_->GetUBOBindingPoints()->BindBufferBlock(program, u0.name);
+
+        }
         read_uniforms_from_program();
 
         auto progOutInterface = minuseins::interfaces::ProgramOutput(program);
@@ -227,23 +222,42 @@ namespace minuseins {
     //TODO 3. having a checkbox for u_time, to select if time will run or if we update it ourselves.
     void IntrospectableFsq::DrawToBuffer(const viscom::FrameBuffer& fbo)
     {
-        //buffer_->BindBuffer();
+
         fbo.DrawToFBO([this,&fbo]{
-            buffer_->BindBuffer();
             auto program = gpuProgram_->getProgramId();
-            interfaces::UniformBlock u_block{program};
-            interfaces::Uniform u{program};
-            for(auto& res : u_block.GetAllNamedResources()) {
-                for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
-                    auto uniform = u.GetNamedResource(activeVar);
-                    auto name = uniform.name;
-                    auto flt = std::get<interfaces::types::float_t>(uniformMap_.at(name));
-                    auto offset = flt.properties.at(gl::GL_OFFSET);
-                    //gl::glBufferSubData(gl::GL_UNIFORM_BUFFER, offset, 16, &flt.value[0]);
-                    buffer_->UploadData(offset, 16, &flt.value[0]);
+            auto ublockI = interfaces::UniformBlock{program};
+            auto uniformI = interfaces::Uniform{program};
+            for(auto& block : ublockI.GetAllNamedResources()) {
+                using namespace interfaces;
+                for(auto& activeResourceId : ublockI.getActiveVars(block.resourceIndex, block.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
+                    auto uniform = uniformI.GetNamedResource(activeResourceId);
+                    //auto& u = uniformMap_.at(uniform.name);
+                    if (auto u = std::get_if<types::float_t>(&uniformMap_.at(uniform.name))) {
+                        auto offset = u->properties.at(gl::GL_OFFSET);
+                        buffers_.at(block.name)->UploadData(offset, u->value.size() * sizeof(u->value[0]), &u->value[0]);
+                    } else if (auto u = std::get_if<types::integer_t>(&uniformMap_.at(uniform.name))) {
+                        auto offset = u->properties.at(gl::GL_OFFSET);
+                        buffers_.at(block.name)->UploadData(offset, u->value.size() * sizeof(u->value[0]), &u->value[0]);
+                    }
+
                 }
+                buffers_.at(block.name)->BindBuffer();
+
             }
-            //auto program = gpuProgram_->getProgramId();
+//            buffer_->BindBuffer();
+//
+//            interfaces::UniformBlock u_block{program};
+//            interfaces::Uniform u{program};
+//            for(auto& res : u_block.GetAllNamedResources()) {
+//                for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
+//                    auto uniform = u.GetNamedResource(activeVar);
+//                    auto name = uniform.name;
+//                    interfaces::types::float_t flt = std::get<interfaces::types::float_t>(uniformMap_.at(name));
+//                    auto offset = flt.properties.at(gl::GL_OFFSET);
+//                    //gl::glBufferSubData(gl::GL_UNIFORM_BUFFER, offset, 16, &flt.value[0]);
+//                    buffer_->UploadData(offset, flt.value.size() * sizeof(flt.value[0]), &flt.value[0]);
+//                }
+//            }
             gl::glUseProgram(program);
 
             SendUniforms();

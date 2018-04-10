@@ -102,7 +102,8 @@ namespace minuseins {
         std::string shaderName_;
         std::shared_ptr<viscom::GPUProgram> gpuProgram_;
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
-        std::unique_ptr<viscom::enh::GLUniformBuffer> buffer_ = nullptr;
+        //std::unique_ptr<viscom::enh::GLUniformBuffer> buffer_ = nullptr;
+        std::map<std::string, std::unique_ptr<viscom::enh::GLUniformBuffer>> buffers_;
         std::vector<viscom::FrameBuffer> backBuffers_;
         std::map<std::string, drawable_container> uniformMap_;
         std::map<std::string, interfaces::types::program_output_t> programOutput_;
