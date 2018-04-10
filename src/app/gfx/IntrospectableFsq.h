@@ -5,6 +5,7 @@
 
 #include <core/gfx/FullscreenQuad.h>
 #include <core/ApplicationNodeBase.h>
+#include <enh/gfx/gl/GLUniformBuffer.h>
 #include <memory>
 #include <variant>
 #include <glbinding/gl/gl.h>
@@ -12,6 +13,7 @@
 #include <app/gfx/gl/interfaces/Uniform.h>
 #include <app/gfx/gl/interfaces/StageSubroutineUniform.h>
 #include <app/gfx/gl/interfaces/ProgramOutput.h>
+#include <enh/ApplicationNodeBase.h>
 
 namespace minuseins {
     struct ShaderLog
@@ -79,7 +81,7 @@ namespace minuseins {
     class IntrospectableFsq
     {
     public:
-        IntrospectableFsq(const std::string& fragmentProgram, viscom::ApplicationNodeBase* appNode);
+        IntrospectableFsq(const std::string& fragmentProgram, viscom::enh::ApplicationNodeBase* appNode);
         void ClearBuffer(viscom::FrameBuffer& fbo);
         void   DrawFrame(viscom::FrameBuffer& fbo);
         void      Draw2D(viscom::FrameBuffer& fbo);
@@ -96,10 +98,11 @@ namespace minuseins {
         void SendUniforms() const;
         void read_uniforms_from_program();
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
-        viscom::ApplicationNodeBase* app_;
+        viscom::enh::ApplicationNodeBase* app_;
         std::string shaderName_;
         std::shared_ptr<viscom::GPUProgram> gpuProgram_;
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
+        std::unique_ptr<viscom::enh::GLUniformBuffer> buffer_ = nullptr;
         std::vector<viscom::FrameBuffer> backBuffers_;
         std::map<std::string, drawable_container> uniformMap_;
         std::map<std::string, interfaces::types::program_output_t> programOutput_;

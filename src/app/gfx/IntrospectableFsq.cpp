@@ -9,12 +9,13 @@
 #include <iostream>
 #include <app/util.h>
 #include <app/gfx/gl/visitors/UniformInterface.h>
+
 #include "IntrospectableFsq.h"
 #include "gl/interfaces/UniformBlock.h"
 
 namespace minuseins {
 
-    IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  viscom::ApplicationNodeBase* appNode) :
+    IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  viscom::enh::ApplicationNodeBase* appNode) :
     fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
     app_{appNode},
     shaderName_{fragmentShader},
@@ -119,9 +120,9 @@ namespace minuseins {
                 ImGui::TreePop();
             }
             if(ImGui::TreeNode(std::string("uniform blocks##").append(shaderName_).c_str())) {
-                interfaces::UniformBlock u_block{program};
                 interfaces::Uniform u{program};
                 auto visitor = interfaces::visitors::uniform_draw_menu{program};
+                interfaces::UniformBlock u_block{program};
                 for (auto& res : u_block.GetAllNamedResources()) {
                     ImGui::TextUnformatted(res.name.c_str());
                     ImGui::SameLine();
@@ -131,10 +132,15 @@ namespace minuseins {
                         for(const auto& props : res.properties) {
                             ImGui::Text("%s: %d", glbinding::Meta::getString(props.first).c_str(), props.second);
                         }
+                        auto index = gl::glGetUniformBlockIndex(program, res.name.c_str());
+                        ImGui::Text("block index: %d", index);
+                        ImGui::Text("enh: %d", app_->GetUBOBindingPoints()->GetBindingPoint(res.name));
                         ImGui::EndTooltip();
                     }
                     for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
-                        std::visit(visitor, uniformMap_.at(u.GetNamedResource(activeVar).name));
+                        auto name = u.GetNamedResource(activeVar).name;
+                        std::visit(visitor, uniformMap_.at(name));
+                        //auto bindpoint = app_->GetUBOBindingPoints()->GetBindingPoint(name);
                     }
                 }
 
@@ -152,6 +158,8 @@ namespace minuseins {
         using rt = interfaces::types::resource_type;
         auto program = gpuProgram_->getProgramId();
         gl::glUseProgram(program);
+        buffer_ = std::make_unique<viscom::enh::GLUniformBuffer>("ColorBlock", 32, app_->GetUBOBindingPoints());
+        app_->GetUBOBindingPoints()->BindBufferBlock(program, "ColorBlock");
         read_uniforms_from_program();
 
         auto progOutInterface = minuseins::interfaces::ProgramOutput(program);
@@ -219,8 +227,24 @@ namespace minuseins {
     //TODO 3. having a checkbox for u_time, to select if time will run or if we update it ourselves.
     void IntrospectableFsq::DrawToBuffer(const viscom::FrameBuffer& fbo)
     {
+        //buffer_->BindBuffer();
         fbo.DrawToFBO([this,&fbo]{
-            gl::glUseProgram(gpuProgram_->getProgramId());
+            buffer_->BindBuffer();
+            auto program = gpuProgram_->getProgramId();
+            interfaces::UniformBlock u_block{program};
+            interfaces::Uniform u{program};
+            for(auto& res : u_block.GetAllNamedResources()) {
+                for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
+                    auto uniform = u.GetNamedResource(activeVar);
+                    auto name = uniform.name;
+                    auto flt = std::get<interfaces::types::float_t>(uniformMap_.at(name));
+                    auto offset = flt.properties.at(gl::GL_OFFSET);
+                    //gl::glBufferSubData(gl::GL_UNIFORM_BUFFER, offset, 16, &flt.value[0]);
+                    buffer_->UploadData(offset, 16, &flt.value[0]);
+                }
+            }
+            //auto program = gpuProgram_->getProgramId();
+            gl::glUseProgram(program);
 
             SendUniforms();
             auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
@@ -228,6 +252,10 @@ namespace minuseins {
             auto position = app_->GetCamera()->GetPosition();
             gl::glUniform3fv(gpuProgram_->getUniformLocation("u_eye"), 1, glm::value_ptr(position));
             gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
+
+
+
+
             //TODO mouse pixel coords?
             fsq_->Draw();
             gl::glUseProgram(0);
