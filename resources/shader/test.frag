@@ -2,19 +2,23 @@
 #extension GL_ARB_shader_subroutine : require
 
 uniform ColorBlock {
-    vec4 diffuser;
+    vec4 diffuse;
     vec4 ambient;
+    vec3 arrg;
+} cb;
+
+uniform time {
+    float u_time;             // shader playback time (in seconds)
+    float u_delta;  // delta time between frames (in seconds)
 };
 
 // shader inputs and uniforms
 in vec2 texCoord;
+uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform float timescale =1.0;
-uniform float u_time;             // shader playback time (in seconds)
-uniform float u_delta;  // delta time between frames (in seconds)
 uniform vec4 u_date;  // year, month, day and seconds
 uniform uvec2 u_resolution;  // viewport resolution (in pixels)
 uniform vec2 u_mouse;  // mouse pixel coords
-uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform mat4  u_MVP;
 
 // shadertoystuffs
@@ -188,5 +192,5 @@ void main()
     test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     test_texCoord = vec4(texCoord,0.f, 1.f);
     test_worldPos = hit; // does not accomodate for repetitions
-    test_block = ambient+diffuser;
+    test_block = cb.ambient+cb.diffuse;
 }
