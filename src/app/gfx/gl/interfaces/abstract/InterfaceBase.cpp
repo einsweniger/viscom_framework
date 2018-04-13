@@ -12,32 +12,11 @@ namespace minuseins::interfaces::types {
             properties(std::move(properties))
     {}
 
-//    resource::resource(const resource &res) :
-//        resourceIndex{res.resourceIndex},
-//        properties{res.properties}
-//    {}
-//
-//    resource::resource(resource &&res) :
-//        resourceIndex{std::move(res.resourceIndex)},
-//        properties{std::move(res.properties)}
-//    {}
-//
-//    named_resource::named_resource(std::string name, gl::GLuint resourceIndex, property_t properties) :
-//            resource(resourceIndex, std::move(properties)),
-//            name{std::move(name)}
-//    {}
 
     named_resource::named_resource(std::string name, resource res) :
         resource(std::move(res)),
         name{std::move(name)}
     {}
-
-//    named_resource::named_resource(named_resource &&res) :
-//            named_resource(std::move(res.name), std::move(res.resourceIndex), std::move(res.properties))
-//    {
-//
-//    }
-
 }
 
 namespace minuseins::interfaces {
@@ -157,7 +136,7 @@ namespace minuseins::interfaces {
         return GetProgramInterfaceiv(gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
     }
 
-    gl::GLuint InterfaceBase::GetProgramResourceIndex(const std::string name) const {
+    gl::GLuint InterfaceBase::GetProgramResourceIndex(std::string_view name) const {
         return gl::glGetProgramResourceIndex(program, interface, &name[0]);
     }
 
