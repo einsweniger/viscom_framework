@@ -10,9 +10,9 @@
 #include <variant>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
-#include <app/gfx/gl/interfaces/Uniform.h>
-#include <app/gfx/gl/interfaces/StageSubroutineUniform.h>
-#include <app/gfx/gl/interfaces/ProgramOutput.h>
+#include <app/gfx/gl/interface_defs.h>
+//#include <app/gfx/gl/StageSubroutineUniform.h>
+//#include <app/gfx/gl/interfaces/ProgramOutput.h>
 #include <enh/ApplicationNodeBase.h>
 
 namespace minuseins {

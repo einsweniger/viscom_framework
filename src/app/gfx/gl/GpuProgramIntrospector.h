@@ -8,8 +8,6 @@
 #include <cassert>
 #include <utility>
 #include <variant>
-//#include <app/gfx/gl/interfaces/Uniform.h>
-//#include <app/gfx/gl/interfaces/ProgramOutput.h>
 #include "interface_defs.h"
 
 namespace minuseins {
@@ -23,9 +21,10 @@ namespace minuseins {
         void init_program_output();
 
         gl::GLuint programId_;
-        std::vector<interfaces::types::named_interface_resource> uniforms_;
-        std::vector<interfaces::types::named_interface_resource> outputs_;
-        std::vector<interfaces::types::named_interface_resource> uniformblocks_;
+        std::vector<interfaces::types::named_resource> uniforms_;
+        std::vector<interfaces::types::named_resource> outputs_;
+        std::vector<interfaces::types::named_resource> uniformblocks_;
+        std::vector<interfaces::types::resource> atomicCounterBuffers_;
     };
 
 }

@@ -11,7 +11,7 @@
 #include <app/gfx/gl/visitors/UniformInterface.h>
 
 #include "IntrospectableFsq.h"
-#include "gl/interfaces/UniformBlock.h"
+
 
 namespace minuseins {
 
@@ -71,7 +71,7 @@ namespace minuseins {
             ImGui::TextUnformatted(shaderName_.c_str());
             //TODO re-enable introspection on active resources
             ImGui::SameLine();
-            if(ImGui::SmallButton("recompile")){
+            if(ImGui::SmallButton(std::string("recompile").append(shaderName_).c_str())){
                 log_.Clear();
                 try {
                     gpuProgram_->recompileProgram();
@@ -124,7 +124,7 @@ namespace minuseins {
                         ImGui::Text("enh: %d", app_->GetUBOBindingPoints()->GetBindingPoint(res.name));
                         ImGui::EndTooltip();
                     }
-                    for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
+                    for(const auto& activeVar : u_block.GetActiveVariables(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
                         auto name = u.GetNamedResource(activeVar).name;
                         std::visit(visitor, uniformMap_.at(name));
                     }
@@ -309,6 +309,11 @@ namespace minuseins {
     }
 
     void IntrospectableFsq::read_uniforms_from_program() {
+        auto gman = app_->GetGPUProgramManager();
+        //using T = decltype(gman)::ResourceMap ;
+        std::for_each(gman.cbegin(), gman.cend(),[](auto arg) {
+            std::cout << "Found Prog: " << arg.first << "\n";
+        });
         using namespace minuseins::interfaces;
         using namespace minuseins::interfaces::visitors;
         auto program = gpuProgram_->getProgramId();

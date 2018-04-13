@@ -23,22 +23,18 @@ namespace minuseins::interfaces {
     }
 
     namespace types {
-        using property_t = std::map<const gl::GLenum, const gl::GLint>;
+        using property_t = std::map<gl::GLenum, gl::GLint>;
 
-        struct interface_resource {
-            interface_resource(gl::GLuint resourceIndex, property_t properties);
-//            resource(const resource&) = default;
-//            resource(resource&&) = default;
-//            resource& operator=(const resource&) = default;
-//            resource& operator=(resource&&) = default;
+        struct resource {
+            resource(gl::GLuint resourceIndex, property_t properties);
 
             gl::GLuint resourceIndex;
             property_t properties;
 
         };
 
-        struct named_interface_resource : public interface_resource {
-            named_interface_resource(std::string name, interface_resource res);
+        struct named_resource : public resource {
+            named_resource(std::string name, resource res);
 
             std::string name;
         };
@@ -117,20 +113,11 @@ namespace minuseins::interfaces {
             gl::GL_TYPE
     >{};
 
-    template<gl::GLenum... content>
-    struct arraything {
-        constexpr static std::array<gl::GLenum, sizeof...(content)> value = {content...};
-    };
-
-
     template<gl::GLenum... properties>
     struct properties_valid { static constexpr bool value = (is_property<properties>::value && ...);};
 
-    template<bool...v> struct var_or {
-        static constexpr bool value = (v || ...);
-    };
-
     template<gl::GLenum Interface, gl::GLenum... PROPERTIES>
+    //class ProgramInterface : public InterfaceBase {
     class ProgramInterface {
         static_assert(is_interface<Interface>::value, "chosen enum is not an interface");
         static_assert(properties_valid<PROPERTIES...>::value, "invalid enum for property encountered");
@@ -143,38 +130,46 @@ namespace minuseins::interfaces {
         static constexpr size_t property_size = sizeof...(PROPERTIES);
         static constexpr std::array<gl::GLenum, property_size> properties{{PROPERTIES...}};
         static constexpr bool has_active_vars = has_tag<gl::GL_NUM_ACTIVE_VARIABLES, PROPERTIES...>::value;
+        static constexpr bool has_resource_index = has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>::value;
 
 
+        //ProgramInterface(gl::GLuint program) : InterfaceBase(interface, program){};
         ProgramInterface(gl::GLuint program) : program{program}{};
         types::property_t GetResourceProperties(gl::GLuint index) const {
             return GetProgramResourceiv(index);
         }
-        types::interface_resource GetResource(gl::GLuint index) const{
+        types::resource GetResource(gl::GLuint index) const{
             auto props = GetResourceProperties(index);
             return {index, props};
         }
 
-        std::vector<types::interface_resource> GetAllResources() const {
-            auto result = std::vector<types::interface_resource>{};
+        std::vector<types::resource> GetAllResources() const {
+            auto result = std::vector<types::resource>{};
             for (auto resourceIndex : util::range(GetActiveResourceCount())) {
                 result.emplace_back(GetResource(resourceIndex));
             }
             return result;
         }
 
-        std::vector<types::named_interface_resource> GetAllNamedResources() const {
-            auto result = std::vector<types::named_interface_resource>();
+        std::vector<types::named_resource> GetAllNamedResources() const {
+            auto result = std::vector<types::named_resource>();
             for (auto resourceIndex : util::range(GetActiveResourceCount())) {
                 result.emplace_back(GetNamedResource(resourceIndex));
             }
             return result;
         }
 
-        types::named_interface_resource GetNamedResource(gl::GLuint index) const {
+        types::named_resource GetNamedResource(gl::GLuint index) const {
             auto res = GetResource(index);
             auto name = GetProgramResourceName(index, res.properties.at(gl::GL_NAME_LENGTH));
             return {name, res};
         }
+
+        std::vector<gl::GLint> GetActiveVariables(const gl::GLuint resourceIndex, const gl::GLuint size) const {
+            static_assert(has_tag<gl::GL_NUM_ACTIVE_VARIABLES, PROPERTIES...>::value, "interface does not support GL_ACTIVE_VARIABLES");
+            return GetProgramResourceiv_vector(resourceIndex, gl::GL_ACTIVE_VARIABLES, size);
+        }
+
 
     protected:
         /**
@@ -259,11 +254,6 @@ namespace minuseins::interfaces {
             return params;
         }
 
-        std::vector<gl::GLint> GetActiveVariables(const gl::GLuint resourceIndex, const gl::GLuint size) const {
-            static_assert(has_active_vars, "interface does not support GL_ACTIVE_VARIABLES");
-            return GetProgramResourceiv_vector(resourceIndex, gl::GL_ACTIVE_VARIABLES, size);
-        }
-
         /**
          * @return number of resources in the active resource list for programInterface, zero if empty.
          */
@@ -275,14 +265,14 @@ namespace minuseins::interfaces {
          * @return length of the longest active name string for an active resource in programInterface, zero if empty.
          */
         gl::GLuint GetMaxNameLenght() const{
-            static_assert(std::logical_not<has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>>(), "ATOMIC_COUNTER_BUFFER and TRANSFORM_FEEDBACK_BUFFER don't support this");
+            static_assert(!has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>::value, "ATOMIC_COUNTER_BUFFER and TRANSFORM_FEEDBACK_BUFFER don't support this");
             return GetProgramInterfaceiv(gl::GL_MAX_NAME_LENGTH); }
 
         /**
          * @return number of active variables belonging to the interface block or atomic counter buffer resource in programInterface with the most active variables, zero if empty.
          */
         gl::GLuint GetMaxNumActiveVariables() const {
-            static_assert(has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_SHADER_STORAGE_BLOCK, gl::GL_TRANSFORM_FEEDBACK_BUFFER, gl::GL_UNIFORM_BLOCK>::value, "operation only supported on ATOMIC_COUNTER_BUFFER, SHADER_STORAGE_BLOCK, TRANSFORM_FEEDBACK_BUFFER or UNIFORM_BLOCK");
+            static_assert(has_tag<gl::GL_NUM_ACTIVE_VARIABLES, PROPERTIES...>::value, "operation only supported on ATOMIC_COUNTER_BUFFER, SHADER_STORAGE_BLOCK, TRANSFORM_FEEDBACK_BUFFER or UNIFORM_BLOCK");
             return GetProgramInterfaceiv(gl::GL_MAX_NUM_ACTIVE_VARIABLES);
         }
 
@@ -290,9 +280,8 @@ namespace minuseins::interfaces {
          * @return number of compatible subroutines for the active subroutine uniform in programInterface with the most compatible subroutines, zero if empty.
          */
         gl::GLuint GetMaxNumCompatibleSubroutines() const{
-            static_assert(has_tag<Interface, gl::GL_VERTEX_SUBROUTINE_UNIFORM, gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
-                    gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
-                    gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, gl::GL_COMPUTE_SUBROUTINE_UNIFORM>::value, "operation only allowed for *_SUBROUTINE_UNIFORM interfaces");
+            constexpr bool test = has_tag<gl::GL_NUM_COMPATIBLE_SUBROUTINES, PROPERTIES...>::value;
+            static_assert(test, "operation only allowed for *_SUBROUTINE_UNIFORM interfaces");
             return GetProgramInterfaceiv(gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
         }
 
@@ -335,7 +324,7 @@ namespace minuseins::interfaces {
          * @return unsigned integer index assigned to a resource named name
          */
         gl::GLuint GetProgramResourceIndex(std::string_view name) const {
-            static_assert(std::logical_not<has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>>(),"atomic counter and transform feedback buffer resources are not assigned name strings");
+            static_assert(!has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>::value,"atomic counter and transform feedback buffer resources are not assigned name strings");
             return gl::glGetProgramResourceIndex(program, interface, &name[0]);
         };
 
