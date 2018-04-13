@@ -32,7 +32,7 @@ namespace minuseins::interfaces::visitors {
         uniform_draw_menu(GLuint program);
 
         gl::GLuint program;
-        static void tooltip(const types::property_t& props);
+        static void tooltip(const types::property_t& props, const std::string& extra_text = "");
         void operator()(types::generic_uniform& u);
         void operator()(types::float_t& uniform);
         void operator()(types::integer_t& uniform);

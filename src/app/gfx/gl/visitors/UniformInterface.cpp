@@ -8,7 +8,7 @@
 
 namespace minuseins::interfaces::visitors {
 
-    void uniform_draw_menu::tooltip(const types::property_t &props) {
+    void uniform_draw_menu::tooltip(const types::property_t &props, const std::string& extra_text) {
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
         if(ImGui::IsItemHovered()) {
@@ -22,6 +22,7 @@ namespace minuseins::interfaces::visitors {
                     tooltip << prop.first << ": "<< prop.second << "\n";
                 }
             }
+            tooltip << extra_text;
             ImGui::BeginTooltip();
             ImGui::TextUnformatted(tooltip.str().c_str());
             ImGui::EndTooltip();
@@ -52,7 +53,9 @@ namespace minuseins::interfaces::visitors {
             ImGui::ColorEdit4(header.c_str(), &uniform.value[0], color_flags);
         }
         else ImGui::TextUnformatted(uniform.name.c_str());
-        tooltip(uniform.properties);
+        auto size = sizeof(decltype(uniform.value)::value_type) * uniform.value.size();
+        auto extra = "sizeof(value)=" + std::to_string(size);
+        tooltip(uniform.properties, extra);
     }
 
     void uniform_draw_menu::operator()(types::integer_t &uniform) {
