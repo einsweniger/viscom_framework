@@ -4,7 +4,12 @@
 
 #include "GpuProgramIntrospector.h"
 namespace minuseins {
-    GpuProgramIntrospector::GpuProgramIntrospector(gl::GLuint programId) : programId_(programId) {
+    GpuProgramIntrospector::GpuProgramIntrospector(gl::GLuint programId) :
+            programId_(programId),
+            uniforms_{interfaces::Uniform(programId_).GetAllNamedResources()},
+            outputs_{interfaces::ProgramOutput(programId_).GetAllNamedResources()},
+            uniformblocks_{interfaces::UniformBlock(programId_).GetAllNamedResources()}
+    {
         gl::glUseProgram(programId_);
         init_program_output();
         init_uniform_values();
@@ -12,12 +17,8 @@ namespace minuseins {
     }
 
     void GpuProgramIntrospector::init_uniform_values() {
-        auto ui = interfaces::Uniform(programId_);
-        uniforms_ = ui.GetAllNamedResources();
     }
 
     void GpuProgramIntrospector::init_program_output() {
-        auto po = interfaces::ProgramOutput(programId_);
-        outputs_ = po.GetAllNamedResources();
     }
 }

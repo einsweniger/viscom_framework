@@ -5,6 +5,7 @@
 #pragma once
 
 #include <glbinding/gl/gl.h>
+#include <glbinding/Meta.h>
 #include <cassert>
 #include <variant>
 #include <map>
@@ -58,20 +59,91 @@ namespace minuseins::interfaces {
     template<gl::GLenum check, gl::GLenum... props>
     struct has_tag : is_within<tag<check>, std::tuple<tag<props>...>>{};
 
+    template<gl::GLenum interface>
+    struct is_interface : has_tag<interface,
+            gl::GL_UNIFORM,
+            gl::GL_UNIFORM_BLOCK,
+            gl::GL_ATOMIC_COUNTER_BUFFER,
+            gl::GL_PROGRAM_INPUT,
+            gl::GL_PROGRAM_OUTPUT,
+            gl::GL_TRANSFORM_FEEDBACK_VARYING,
+            gl::GL_TRANSFORM_FEEDBACK_BUFFER,
+            gl::GL_BUFFER_VARIABLE,
+            gl::GL_SHADER_STORAGE_BLOCK,
+            gl::GL_VERTEX_SUBROUTINE,
+            gl::GL_VERTEX_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_CONTROL_SUBROUTINE,
+            gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_EVALUATION_SUBROUTINE,
+            gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
+            gl::GL_GEOMETRY_SUBROUTINE,
+            gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
+            gl::GL_FRAGMENT_SUBROUTINE,
+            gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
+            gl::GL_COMPUTE_SUBROUTINE,
+            gl::GL_COMPUTE_SUBROUTINE_UNIFORM
+    >{};
 
-    template<gl::GLenum INTERFACE, gl::GLenum... PROPERTIES>
+    template<gl::GLenum property>
+    struct is_property : has_tag<property,
+            gl::GL_ACTIVE_VARIABLES,
+            gl::GL_BUFFER_BINDING,
+            gl::GL_NUM_ACTIVE_VARIABLES,
+            gl::GL_ARRAY_SIZE,
+            gl::GL_ARRAY_STRIDE,
+            gl::GL_BLOCK_INDEX,
+            gl::GL_IS_ROW_MAJOR,
+            gl::GL_MATRIX_STRIDE,
+            gl::GL_ATOMIC_COUNTER_BUFFER_INDEX,
+            gl::GL_BUFFER_DATA_SIZE,
+            gl::GL_NUM_COMPATIBLE_SUBROUTINES,
+            gl::GL_COMPATIBLE_SUBROUTINES,
+            gl::GL_IS_PER_PATCH,
+            gl::GL_LOCATION,
+            gl::GL_LOCATION_COMPONENT,
+            gl::GL_LOCATION_INDEX,
+            gl::GL_NAME_LENGTH,
+            gl::GL_OFFSET,
+            gl::GL_REFERENCED_BY_VERTEX_SHADER,
+            gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+            gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+            gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
+            gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
+            gl::GL_REFERENCED_BY_COMPUTE_SHADER,
+            gl::GL_TRANSFORM_FEEDBACK_BUFFER_INDEX,
+            gl::GL_TRANSFORM_FEEDBACK_BUFFER_STRIDE,
+            gl::GL_TOP_LEVEL_ARRAY_SIZE,
+            gl::GL_TOP_LEVEL_ARRAY_STRIDE,
+            gl::GL_TYPE
+    >{};
+
+    template<gl::GLenum... content>
+    struct arraything {
+        constexpr static std::array<gl::GLenum, sizeof...(content)> value = {content...};
+    };
+
+
+    template<gl::GLenum... properties>
+    struct properties_valid { static constexpr bool value = (is_property<properties>::value && ...);};
+
+    template<bool...v> struct var_or {
+        static constexpr bool value = (v || ...);
+    };
+
+    template<gl::GLenum Interface, gl::GLenum... PROPERTIES>
     class ProgramInterface {
-
+        static_assert(is_interface<Interface>::value, "chosen enum is not an interface");
+        static_assert(properties_valid<PROPERTIES...>::value, "invalid enum for property encountered");
     protected:
         //const gl::GLenum interface;
         const gl::GLuint program;
 
     public:
-        static constexpr gl::GLenum interface = INTERFACE;
+        static constexpr gl::GLenum interface = Interface;
         static constexpr size_t property_size = sizeof...(PROPERTIES);
         static constexpr std::array<gl::GLenum, property_size> properties{{PROPERTIES...}};
-        static constexpr bool has_name =        has_tag<gl::GL_NAME_LENGTH, PROPERTIES...>::value;
         static constexpr bool has_active_vars = has_tag<gl::GL_NUM_ACTIVE_VARIABLES, PROPERTIES...>::value;
+
 
         ProgramInterface(gl::GLuint program) : program{program}{};
         types::property_t GetResourceProperties(gl::GLuint index) const {
@@ -117,7 +189,7 @@ namespace minuseins::interfaces {
          * @return the name string assigned to the single active resource
          */
         std::string GetProgramResourceName(const gl::GLuint index, const gl::GLint bufSize) const{
-            static_assert(has_name, "Interface Resources have no name");
+            static_assert(has_tag<gl::GL_NAME_LENGTH, PROPERTIES...>::value, "Resources from this interface have no name, use GetProgramResources instead");
             std::string name; // The name string assigned to is returned as a null-terminated string in name.
             gl::GLsizei length;  // length The actual number of characters written into name, excluding the null terminator, is returned in length. If length is NULL, no length is returned.
             name.resize(bufSize);
@@ -200,41 +272,47 @@ namespace minuseins::interfaces {
         /**
          * This length includes an extra character for the null terminator.
          *
-         * An INVALID_OPERATION error is generated if pname is MAX_NAME_LENGTH and programInterface is ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER , since active atomic counter and transform feedback buffer resources are not assigned name strings.
          * @return length of the longest active name string for an active resource in programInterface, zero if empty.
          */
-        gl::GLuint GetMaxNameLenght() const{ return GetProgramInterfaceiv(gl::GL_MAX_NAME_LENGTH); }
+        gl::GLuint GetMaxNameLenght() const{
+            static_assert(std::logical_not<has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>>(), "ATOMIC_COUNTER_BUFFER and TRANSFORM_FEEDBACK_BUFFER don't support this");
+            return GetProgramInterfaceiv(gl::GL_MAX_NAME_LENGTH); }
 
         /**
-         * An INVALID_OPERATION error is generated if pname is MAX_NUM_ACTIVE_VARIABLES and programInterface is not ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK.
          * @return number of active variables belonging to the interface block or atomic counter buffer resource in programInterface with the most active variables, zero if empty.
          */
-        gl::GLuint GetMaxNumActiveVariables() const {return GetProgramInterfaceiv(gl::GL_MAX_NUM_ACTIVE_VARIABLES);}
+        gl::GLuint GetMaxNumActiveVariables() const {
+            static_assert(has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_SHADER_STORAGE_BLOCK, gl::GL_TRANSFORM_FEEDBACK_BUFFER, gl::GL_UNIFORM_BLOCK>::value, "operation only supported on ATOMIC_COUNTER_BUFFER, SHADER_STORAGE_BLOCK, TRANSFORM_FEEDBACK_BUFFER or UNIFORM_BLOCK");
+            return GetProgramInterfaceiv(gl::GL_MAX_NUM_ACTIVE_VARIABLES);
+        }
 
         /**
-         * An INVALID_OPERATION error is generated if pname is MAX_NUM_COMPATIBLE_SUBROUTINES and programInterface is not VERTEX_SUBROUTINE_UNIFORM , TESS_CONTROL_SUBROUTINE_UNIFORM , TESS_EVALUATION_SUBROUTINE_UNIFORM , GEOMETRY_SUBROUTINE_UNIFORM , FRAGMENT_SUBROUTINE_UNIFORM , or COMPUTE_SUBROUTINE_UNIFORM.
-         *
          * @return number of compatible subroutines for the active subroutine uniform in programInterface with the most compatible subroutines, zero if empty.
          */
-        gl::GLuint GetMaxNumCompatibleSubroutines() const{ return GetProgramInterfaceiv(gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES); }
+        gl::GLuint GetMaxNumCompatibleSubroutines() const{
+            static_assert(has_tag<Interface, gl::GL_VERTEX_SUBROUTINE_UNIFORM, gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
+                    gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
+                    gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, gl::GL_COMPUTE_SUBROUTINE_UNIFORM>::value, "operation only allowed for *_SUBROUTINE_UNIFORM interfaces");
+            return GetProgramInterfaceiv(gl::GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
+        }
 
     private:
-        /**
-         * If pname is ACTIVE_RESOURCES , the value returned is the number of resources in the active resource list for programInterface. If the list of active resources for programInterface is empty, zero is returned.
-         * If pname is MAX_NAME_LENGTH , the value returned is the length of the longest active name string for an active resource in programInterface. This length includes an extra character for the null terminator. If the list of active resources for programInterface is empty, zero is returned.
-         * If pname is MAX_NUM_ACTIVE_VARIABLES , the value returned is the number of active variables belonging to the interface block or atomic counter buffer resource in programInterface with the most active variables. If the list of active resources for programInterface is empty, zero is returned.
-         * If pname is MAX_NUM_COMPATIBLE_SUBROUTINES , the value returned is the number of compatible subroutines for the active subroutine uniform in program- Interface with the most compatible subroutines. If the list of active resources for programInterface is empty, zero is returned.
-         *
-         * An INVALID_VALUE error is generated if program is not the name of either a program or shader object.
-         * An INVALID_OPERATION error is generated if program is the name of a shader object.
-         * An INVALID_ENUM error is generated if programInterface is not one of the interfaces described in the introduction to section 7.3.1.
-         * An INVALID_ENUM error is generated if pname is not ACTIVE_RESOURCES , MAX_NAME_LENGTH , MAX_NUM_ACTIVE_VARIABLES , or MAX_NUM_COMPATIBLE_SUBROUTINES .
-         * An INVALID_OPERATION error is generated if pname is MAX_NAME_LENGTH and programInterface is ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER , since active atomic counter and transform feedback buffer resources are not assigned name strings.
-         * An INVALID_OPERATION error is generated if pname is MAX_NUM_ACTIVE_VARIABLES and programInterface is not ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK .
-         * An INVALID_OPERATION error is generated if pname is MAX_NUM_COMPATIBLE_SUBROUTINES and programInterface is not VERTEX_SUBROUTINE_UNIFORM , TESS_CONTROL_SUBROUTINE_UNIFORM , TESS_EVALUATION_SUBROUTINE_UNIFORM , GEOMETRY_SUBROUTINE_UNIFORM , FRAGMENT_SUBROUTINE_UNIFORM , or COMPUTE_SUBROUTINE_UNIFORM.
-         * @param property
-         * @return
-         */
+
+        //sanity checks from spec:
+        // ✓ An INVALID_ENUM error is generated if pname is not ACTIVE_RESOURCES , MAX_NAME_LENGTH , MAX_NUM_ACTIVE_VARIABLES , or MAX_NUM_COMPATIBLE_SUBROUTINES.
+        //   raw method is private, protected methods only expose allowed values.
+        // ✓ An INVALID_OPERATION error is generated if pname is MAX_NAME_LENGTH and programInterface is ATOMIC_COUNTER_BUFFER or TRANSFORM_FEEDBACK_BUFFER , since active atomic counter and transform feedback buffer resources are not assigned name strings.
+        //   static assert in GetMaxNameLength()
+        // ✓ An INVALID_OPERATION error is generated if pname is MAX_NUM_ACTIVE_VARIABLES and programInterface is not ATOMIC_COUNTER_BUFFER , SHADER_STORAGE_BLOCK , TRANSFORM_FEEDBACK_BUFFER , or UNIFORM_BLOCK.
+        //   static assert in GetMaxNumActiveVariables
+        // ✓ An INVALID_OPERATION error is generated if pname is MAX_NUM_COMPATIBLE_SUBROUTINES and programInterface is not VERTEX_SUBROUTINE_UNIFORM , TESS_CONTROL_SUBROUTINE_UNIFORM , TESS_EVALUATION_SUBROUTINE_UNIFORM , GEOMETRY_SUBROUTINE_UNIFORM , FRAGMENT_SUBROUTINE_UNIFORM , or COMPUTE_SUBROUTINE_UNIFORM.
+        //   static assert in GetMaxNumCompatibleSubroutines
+        // ✓ An INVALID_ENUM error is generated if programInterface is not one of the interfaces described in the introduction to section 7.3.1.
+        //   static assert at the beginning of the class
+        // ✗ An INVALID_VALUE error is generated if program is not the name of either a program or shader object.
+        //   up to you
+        // ✗ An INVALID_OPERATION error is generated if program is the name of a shader object.
+        //   same here.
         gl::GLuint GetProgramInterfaceiv(const gl::GLenum property) const {
             gl::GLint result = 0;
             gl::glGetProgramInterfaceiv(program, interface, property, &result);
@@ -257,6 +335,7 @@ namespace minuseins::interfaces {
          * @return unsigned integer index assigned to a resource named name
          */
         gl::GLuint GetProgramResourceIndex(std::string_view name) const {
+            static_assert(std::logical_not<has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>>(),"atomic counter and transform feedback buffer resources are not assigned name strings");
             return gl::glGetProgramResourceIndex(program, interface, &name[0]);
         };
 
