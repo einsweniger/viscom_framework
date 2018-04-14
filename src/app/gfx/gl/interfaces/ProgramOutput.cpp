@@ -5,6 +5,13 @@
 #include "ProgramOutput.h"
 
 namespace minuseins::interfaces {
+    namespace types {
+        program_output_t::program_output_t(named_resource res) :
+                named_resource(std::move(res)),
+                type{toType(properties.at(gl::GL_TYPE))},
+                location{properties.at(gl::GL_LOCATION)}
+        {}
+    }
     ProgramOutput::ProgramOutput(gl::GLuint program) :
             InterfaceBase(gl::GL_PROGRAM_OUTPUT, program) {}
 
@@ -20,9 +27,4 @@ namespace minuseins::interfaces {
         return result;
     }
 
-    types::program_output_t::program_output_t(types::named_resource res) :
-            named_resource(std::move(res)),
-            type{toType(properties.at(gl::GL_TYPE))},
-            location{properties.at(gl::GL_LOCATION)}
-    {}
 }

@@ -6,10 +6,10 @@
 namespace minuseins {
     GpuProgramIntrospector::GpuProgramIntrospector(gl::GLuint programId) :
             programId_(programId),
-            uniforms_{interfaces::Uniform(programId_).GetAllNamedResources()},
-            outputs_{interfaces::ProgramOutput(programId_).GetAllNamedResources()},
-            uniformblocks_{interfaces::UniformBlock(programId_).GetAllNamedResources()},
-            atomicCounterBuffers_{interfaces::AtomicCounterBuffer(programId_).GetAllResources()}
+            uniforms_{interfaces_V2::Uniform(programId_).GetAllNamedResources()},
+            outputs_{interfaces_V2::ProgramOutput(programId_).GetAllNamedResources()},
+            uniformblocks_{interfaces_V2::UniformBlock(programId_).GetAllNamedResources()},
+            atomicCounterBuffers_{interfaces_V2::AtomicCounterBuffer(programId_).GetAllResources()}
     {
         gl::glUseProgram(programId_);
         init_program_output();

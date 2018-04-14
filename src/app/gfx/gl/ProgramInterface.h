@@ -11,33 +11,16 @@
 #include <map>
 #include <vector>
 #include <app/util.h>
+#include "interfaces/types.h"
 
-namespace minuseins::interfaces {
-    constexpr gl::GLuint positive(const gl::GLint num) {
+namespace minuseins::interfaces_V2 {
+    constexpr gl::GLuint porsitive(const gl::GLint num) {
 //    assert(0 >=num);
         if (0 >= num) {
             return 0;
         } else {
             return static_cast<gl::GLuint>(num);
         }
-    }
-
-    namespace types {
-        using property_t = std::map<gl::GLenum, gl::GLint>;
-
-        struct resource {
-            resource(gl::GLuint resourceIndex, property_t properties);
-
-            gl::GLuint resourceIndex;
-            property_t properties;
-
-        };
-
-        struct named_resource : public resource {
-            named_resource(std::string name, resource res);
-
-            std::string name;
-        };
     }
 
     template<gl::GLenum val>
@@ -135,31 +118,31 @@ namespace minuseins::interfaces {
 
         //ProgramInterface(gl::GLuint program) : InterfaceBase(interface, program){};
         ProgramInterface(gl::GLuint program) : program{program}{};
-        types::property_t GetResourceProperties(gl::GLuint index) const {
+        interfaces::types::property_t GetResourceProperties(gl::GLuint index) const {
             return GetProgramResourceiv(index);
         }
-        types::resource GetResource(gl::GLuint index) const{
+        interfaces::types::resource GetResource(gl::GLuint index) const{
             auto props = GetResourceProperties(index);
             return {index, props};
         }
 
-        std::vector<types::resource> GetAllResources() const {
-            auto result = std::vector<types::resource>{};
+        std::vector<interfaces::types::resource> GetAllResources() const {
+            auto result = std::vector<interfaces::types::resource>{};
             for (auto resourceIndex : util::range(GetActiveResourceCount())) {
                 result.emplace_back(GetResource(resourceIndex));
             }
             return result;
         }
 
-        std::vector<types::named_resource> GetAllNamedResources() const {
-            auto result = std::vector<types::named_resource>();
+        std::vector<interfaces::types::named_resource> GetAllNamedResources() const {
+            auto result = std::vector<interfaces::types::named_resource>();
             for (auto resourceIndex : util::range(GetActiveResourceCount())) {
                 result.emplace_back(GetNamedResource(resourceIndex));
             }
             return result;
         }
 
-        types::named_resource GetNamedResource(gl::GLuint index) const {
+        interfaces::types::named_resource GetNamedResource(gl::GLuint index) const {
             auto res = GetResource(index);
             auto name = GetProgramResourceName(index, res.properties.at(gl::GL_NAME_LENGTH));
             return {name, res};
@@ -208,13 +191,13 @@ namespace minuseins::interfaces {
          * @param props Values for propCount properties specified by the array props are returned.
          * @return values for multiple properties of a single active resource with an index of index in the interface programInterface of program object program.
          */
-        types::property_t GetProgramResourceiv(const gl::GLuint index, const std::vector<gl::GLenum> &properties) const {
+        interfaces::types::property_t GetProgramResourceiv(const gl::GLuint index, const std::vector<gl::GLenum> &properties) const {
             std::vector<gl::GLint> params(properties.size()); //The values associated with the properties of the active resource are written to consecutive entries in params, in increasing order according to position in props.
             auto propCount = static_cast<gl::GLsizei>(properties.size()); //Values for propCount properties specified by the array props are returned.
             auto bufSize = static_cast<gl::GLsizei>(params.size()); //If no error is generated, only the first bufSize integer values will be written to params; any extra values will not be written.
             gl::GLsizei length; //If length is not NULL , the actual number of values written to params will be written to length
             gl::glGetProgramResourceiv(program, interface, index, propCount, &properties[0], bufSize, &length, &params[0]);
-            types::property_t result;
+            interfaces::types::property_t result;
 
             //result = zip(props, params)
             std::transform(properties.begin(), properties.end(), params.begin(),
@@ -223,13 +206,13 @@ namespace minuseins::interfaces {
             return result;
         };
 
-        types::property_t GetProgramResourceiv(const gl::GLuint index) const {
+        interfaces::types::property_t GetProgramResourceiv(const gl::GLuint index) const {
             std::vector<gl::GLint> params(property_size); //The values associated with the properties of the active resource are written to consecutive entries in params, in increasing order according to position in props.
             auto propCount = static_cast<gl::GLsizei>(property_size); //Values for propCount properties specified by the array props are returned.
             auto bufSize = static_cast<gl::GLsizei>(property_size); //If no error is generated, only the first bufSize integer values will be written to params; any extra values will not be written.
             gl::GLsizei length; //If length is not NULL , the actual number of values written to params will be written to length
             gl::glGetProgramResourceiv(program, interface, index, propCount, &properties[0], bufSize, &length, &params[0]);
-            types::property_t result;
+            interfaces::types::property_t result;
 
             //result = zip(props, params)
             std::transform(properties.begin(), properties.end(), params.begin(),
@@ -305,7 +288,7 @@ namespace minuseins::interfaces {
         gl::GLuint GetProgramInterfaceiv(const gl::GLenum property) const {
             gl::GLint result = 0;
             gl::glGetProgramInterfaceiv(program, interface, property, &result);
-            return positive(result);
+            return porsitive(result);
         }
 
         /**

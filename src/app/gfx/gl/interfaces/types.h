@@ -6,7 +6,24 @@
 
 #include <glbinding/gl/gl.h>
 #include <glbinding/Meta.h>
+#include <map>
 namespace minuseins::interfaces::types {
+
+    using property_t = std::map<gl::GLenum, gl::GLint>;
+
+    struct resource {
+        resource(gl::GLuint resourceIndex, property_t properties);
+
+        gl::GLuint resourceIndex;
+        property_t properties;
+
+    };
+
+    struct named_resource : public resource {
+        named_resource(std::string name, resource res);
+
+        std::string name;
+    };
 
     enum class interface_type {
         uniform = static_cast<unsigned int>(gl::GL_UNIFORM),
