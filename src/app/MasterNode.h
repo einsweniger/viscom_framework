@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <app/shadertoy/ShaderToy.h>
 #include "../app/ApplicationNodeImplementation.h"
 #ifdef WITH_TUIO
 #include "core/TuioInputWrapper.h"
@@ -27,6 +28,7 @@ namespace viscom {
 
     private:
         void drawMainMenu(const bool *p_open);
+        std::map<std::string, bool> windowBooleans{};
         bool imMainMenu_ = true;
         bool imOverlay_ = false;
         bool imShaderWindow_ = true;
@@ -35,5 +37,12 @@ namespace viscom {
         bool imProgramRecourceWindow_ = true;
         double absoluteTime_;
         double elapsedTime_;
+
+        void drawShaderToyImportSelect();
+
+        void loadShaderToy(std::experimental::filesystem::path &path);
+        std::unique_ptr<shadertoy::Shader> toy_ = nullptr;
+
+        void drawShaderToy();
     };
 }

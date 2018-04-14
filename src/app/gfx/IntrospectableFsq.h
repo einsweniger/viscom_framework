@@ -11,8 +11,9 @@
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
 #include <app/gfx/gl/interface_defs.h>
-//#include <app/gfx/gl/StageSubroutineUniform.h>
-//#include <app/gfx/gl/interfaces/ProgramOutput.h>
+#include <app/gfx/gl/interfaces/StageSubroutineUniform.h>
+#include <app/gfx/gl/interfaces/ProgramOutput.h>
+#include <app/gfx/gl/interfaces/Uniform.h>
 #include <enh/ApplicationNodeBase.h>
 
 namespace minuseins {
@@ -101,6 +102,7 @@ namespace minuseins {
         viscom::enh::ApplicationNodeBase* app_;
         std::string shaderName_;
         std::shared_ptr<viscom::GPUProgram> gpuProgram_;
+        std::shared_ptr<viscom::Texture> texture_;
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
         //std::unique_ptr<viscom::enh::GLUniformBuffer> buffer_ = nullptr;
         std::map<std::string, std::unique_ptr<viscom::enh::GLUniformBuffer>> buffers_;

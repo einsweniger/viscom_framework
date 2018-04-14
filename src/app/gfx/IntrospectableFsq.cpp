@@ -24,6 +24,9 @@ namespace minuseins {
     programOutput_{},
     buffers_{}
     {
+        if("bufa.frag" == fragmentShader) {
+            texture_= appNode->GetTextureManager().GetResource("/media/a/cbcbb5a6cfb55c36f8f021fbb0e3f69ac96339a39fa85cd96f2017a2192821b5.png", false);
+        }
         loadProgramInterfaceInformation();
     }
 
@@ -109,7 +112,7 @@ namespace minuseins {
             if(ImGui::TreeNode(std::string("uniform blocks##").append(shaderName_).c_str())) {
                 interfaces::Uniform u{program};
                 auto visitor = interfaces::visitors::uniform_draw_menu{program};
-                interfaces::UniformBlock u_block{program};
+                interfaces_V2::UniformBlock u_block{program};
                 for (auto& res : u_block.GetAllNamedResources()) {
                     ImGui::TextUnformatted(res.name.c_str());
                     ImGui::SameLine();
@@ -133,6 +136,16 @@ namespace minuseins {
 
                 ImGui::TreePop();
             }
+            if(nullptr != texture_) {
+                ImVec2 uv0(0, 1);
+                ImVec2 uv1(1, 0);
+                //ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
+                auto dim = texture_->getDimensions();
+                auto aspect = dim.x / dim.y;
+                auto width = ImGui::GetContentRegionAvailWidth();
+                auto region = ImVec2(width, width/aspect);
+                ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture_->getTextureId()), region, uv0, uv1);
+            }
 
         }
         if(nullptr != nextPass_) { ImGui::Separator(); }
@@ -145,7 +158,7 @@ namespace minuseins {
         auto program = gpuProgram_->getProgramId();
         gl::glUseProgram(program);
         {
-            auto ublock = interfaces::UniformBlock{program};
+            auto ublock = interfaces_V2::UniformBlock{program};
             for(auto& block : ublock.GetAllNamedResources()) {
                 buffers_[block.name] = std::make_unique<viscom::enh::GLUniformBuffer>(block.name, block.properties.at(gl::GL_BUFFER_DATA_SIZE), app_->GetUBOBindingPoints());
                 app_->GetUBOBindingPoints()->BindBufferBlock(program, block.name);
@@ -225,11 +238,11 @@ namespace minuseins {
 
         fbo.DrawToFBO([this,&fbo]{
             auto program = gpuProgram_->getProgramId();
-            auto ublockI = interfaces::UniformBlock{program};
+            auto ublockI = interfaces_V2::UniformBlock{program};
             auto uniformI = interfaces::Uniform{program};
             for(auto& block : ublockI.GetAllNamedResources()) {
                 using namespace interfaces;
-                for(auto& activeResourceId : ublockI.getActiveVars(block.resourceIndex, block.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
+                for(auto& activeResourceId : ublockI.GetActiveVariables(block.resourceIndex, block.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
                     auto uniform = uniformI.GetNamedResource(activeResourceId);
                     //auto& u = uniformMap_.at(uniform.name);
                     if (auto u = std::get_if<types::float_t>(&uniformMap_.at(uniform.name))) {
@@ -244,20 +257,6 @@ namespace minuseins {
                 buffers_.at(block.name)->BindBuffer();
 
             }
-//            buffer_->BindBuffer();
-//
-//            interfaces::UniformBlock u_block{program};
-//            interfaces::Uniform u{program};
-//            for(auto& res : u_block.GetAllNamedResources()) {
-//                for(const auto& activeVar : u_block.getActiveVars(res.resourceIndex,res.properties.at(gl::GL_NUM_ACTIVE_VARIABLES))) {
-//                    auto uniform = u.GetNamedResource(activeVar);
-//                    auto name = uniform.name;
-//                    interfaces::types::float_t flt = std::get<interfaces::types::float_t>(uniformMap_.at(name));
-//                    auto offset = flt.properties.at(gl::GL_OFFSET);
-//                    //gl::glBufferSubData(gl::GL_UNIFORM_BUFFER, offset, 16, &flt.value[0]);
-//                    buffer_->UploadData(offset, flt.value.size() * sizeof(flt.value[0]), &flt.value[0]);
-//                }
-//            }
             gl::glUseProgram(program);
 
             SendUniforms();
@@ -280,7 +279,12 @@ namespace minuseins {
     void IntrospectableFsq::AddPass(const std::string &fragmentProgram)
     {
         //TODO nextpass can only be used once, iterate until nullptr, then add? Or use list of several passes?
-        nextPass_ = std::make_unique<IntrospectableFsq>(fragmentProgram, app_);
+        if(nullptr == nextPass_) {
+            nextPass_ = std::make_unique<IntrospectableFsq>(fragmentProgram, app_);
+        } else {
+            nextPass_->AddPass(fragmentProgram);
+        }
+
     }
     void IntrospectableFsq::DrawFrame(viscom::FrameBuffer &fbo)
     {

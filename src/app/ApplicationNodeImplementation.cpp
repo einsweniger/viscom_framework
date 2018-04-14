@@ -41,21 +41,26 @@ namespace viscom {
         enh::ApplicationNodeBase::InitOpenGL();
 
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
-        quad_ = std::make_unique<minuseins::IntrospectableFsq>("test.frag", this);
-        quad_->AddPass("renderTexture.frag");
+//        active_fsq_ = std::make_unique<minuseins::IntrospectableFsq>("bufa.frag", this);
+//        active_fsq_->AddPass("bufb.frag");
+//        active_fsq_->AddPass("image.frag");
     }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
-        quad_->UpdateFrame(currentTime, elapsedTime);
+        if(active_fsq_ != nullptr) {
+            active_fsq_->UpdateFrame(currentTime, elapsedTime);
+        }
+
     }
 
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
     {
-        //TODO also clear backBuffers.
-        quad_->ClearBuffer(fbo);
+        if(nullptr != active_fsq_) {
+            active_fsq_->ClearBuffer(fbo);
+        }
         fbo.DrawToFBO([]() {
             gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
@@ -64,7 +69,9 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
-        quad_->DrawFrame(fbo);
+        if(nullptr != active_fsq_) {
+            active_fsq_->DrawFrame(fbo);
+        }
     }
 
     void ApplicationNodeImplementation::CleanUp()

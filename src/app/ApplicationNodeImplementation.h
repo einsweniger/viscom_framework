@@ -41,7 +41,7 @@ namespace viscom {
     protected:
         void toggleMouseGrab();
 
-        std::unique_ptr<minuseins::IntrospectableFsq> quad_;
+        std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
         bool grabMouse_ = false;
         std::shared_ptr<MyFreeCamera> freeCam_;
 
