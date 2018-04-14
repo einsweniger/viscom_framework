@@ -9,6 +9,7 @@
 #include <variant>
 #include <map>
 #include <vector>
+#include "../types.h"
 
 namespace minuseins::interfaces {
     constexpr gl::GLuint positive(const gl::GLint num) {
@@ -20,23 +21,6 @@ namespace minuseins::interfaces {
         }
     }
 
-    namespace types {
-        using property_t = std::map<const gl::GLenum, const gl::GLint>;
-
-        struct resource {
-            resource(gl::GLuint resourceIndex, property_t properties);
-
-            gl::GLuint resourceIndex;
-            property_t properties;
-
-        };
-
-        struct named_resource : public resource {
-            named_resource(std::string name, resource res);
-
-            std::string name;
-        };
-    }
     class InterfaceBase {
     protected:
         const gl::GLenum interface;
