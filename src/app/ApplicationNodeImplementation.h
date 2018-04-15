@@ -38,12 +38,12 @@ namespace viscom {
         bool AddTuioCursor(TUIO::TuioCursor *tcur) override;
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
+        std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
     protected:
         void toggleMouseGrab();
 
-        std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
         bool grabMouse_ = false;
-        std::shared_ptr<MyFreeCamera> freeCam_;
+        std::unique_ptr<MyFreeCamera> freeCam_;
 
     private:
     };

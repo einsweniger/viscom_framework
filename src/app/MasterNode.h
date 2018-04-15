@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include <app/shadertoy/ShaderToy.h>
+#include "shadertoy/ShaderToy.h"
+#include "gui/MasterNodeGui.h"
 #include "../app/ApplicationNodeImplementation.h"
+
 #ifdef WITH_TUIO
 #include "core/TuioInputWrapper.h"
 #endif
@@ -22,27 +24,15 @@ namespace viscom {
         explicit MasterNode(ApplicationNodeInternal* appNode);
         virtual ~MasterNode() override;
 
-        virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
-        virtual void UpdateFrame(double currentTime, double elapsedTime) override;
+        bool KeyboardCallback(int key, int scancode, int action, int mods) override;
+        void UpdateFrame(double currentTime, double elapsedTime) override;
         void Draw2D(FrameBuffer& fbo) override;
 
+        void CleanUp() override;
     private:
-        void drawMainMenu(const bool *p_open);
-        std::map<std::string, bool> windowBooleans{};
-        bool imMainMenu_ = true;
-        bool imOverlay_ = false;
-        bool imShaderWindow_ = true;
-        bool imDemoWindow_ = false;
-        bool imBuffersWindow_ = false;
         bool imProgramRecourceWindow_ = true;
-        double absoluteTime_;
-        double elapsedTime_;
 
-        void drawShaderToyImportSelect();
 
-        void loadShaderToy(std::experimental::filesystem::path &path);
-        std::unique_ptr<shadertoy::Shader> toy_ = nullptr;
-
-        void drawShaderToy();
+        std::unique_ptr<minuseins::gui::MasterNodeGui> gui_ = nullptr;
     };
 }

@@ -24,8 +24,10 @@ namespace minuseins {
     programOutput_{},
     buffers_{}
     {
-        if("bufa.frag" == fragmentShader) {
+        std::cout << fragmentShader << " loaded" <<std::endl;
+        if("4syGWK/Buf A.frag" == fragmentShader) {
             texture_= appNode->GetTextureManager().GetResource("/media/a/cbcbb5a6cfb55c36f8f021fbb0e3f69ac96339a39fa85cd96f2017a2192821b5.png", false);
+            texture_->getTextureId();
         }
         loadProgramInterfaceInformation();
     }
@@ -145,6 +147,8 @@ namespace minuseins {
                 auto width = ImGui::GetContentRegionAvailWidth();
                 auto region = ImVec2(width, width/aspect);
                 ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture_->getTextureId()), region, uv0, uv1);
+                ImGui::Text("Texture ID: %d", texture_->getTextureId());
+                ImGui::Text("Texture dims: %d, %d", dim.x, dim.y);
             }
 
         }
@@ -207,6 +211,12 @@ namespace minuseins {
         //TODO add checkbox to time variables so updates can be ignored
         //move uniform value assignment to draw2D?
         auto it = uniformMap_.find("u_time");
+        if(uniformMap_.end() != it) {
+            if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
+                uni->value[0] = currentTime_;
+            }
+        }
+        it = uniformMap_.find("iTime");
         if(uniformMap_.end() != it) {
             if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
                 uni->value[0] = currentTime_;

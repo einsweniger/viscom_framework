@@ -31,7 +31,7 @@ namespace viscom {
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
         ApplicationNodeBase{ appNode }
     {
-        freeCam_ = std::make_shared<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
+        freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
     }
 
     ApplicationNodeImplementation::~ApplicationNodeImplementation() = default;
@@ -41,9 +41,8 @@ namespace viscom {
         enh::ApplicationNodeBase::InitOpenGL();
 
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
-//        active_fsq_ = std::make_unique<minuseins::IntrospectableFsq>("bufa.frag", this);
-//        active_fsq_->AddPass("bufb.frag");
-//        active_fsq_->AddPass("image.frag");
+        active_fsq_ = std::make_unique<minuseins::IntrospectableFsq>("test.frag", this);
+        active_fsq_->AddPass("renderTexture.frag");
     }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
