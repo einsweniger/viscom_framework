@@ -58,11 +58,11 @@ namespace viscom {
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
     {
         if(nullptr != active_fsq_) {
-            active_fsq_->ClearBuffer(fbo);
+            //active_fsq_->ClearBuffer(fbo);
         }
         fbo.DrawToFBO([]() {
-            gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+            //gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            //gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
         });
     }
 
@@ -109,4 +109,162 @@ namespace viscom {
         return ApplicationNodeBase::AddTuioCursor(tcur);
     }
 
+//    namespace {
+//        using namespace gl;
+//        template <class T>
+//        class _UniformHandler;
+//
+//        template<>
+//        class _UniformHandler<glm::mat4>
+//        {
+//        public:
+//            inline void SetUniform(const glm::mat4& Data, const GLint &Uniform_in) const
+//            {
+//                glUniformMatrix4fv(Uniform_in, 1, GL_FALSE, glm::value_ptr(Data));
+//            }
+//            inline void SetUniform_DSA(const glm::mat4& Data, const GLuint &Program_in, const GLint &Uniform_in) const
+//            {
+//                glProgramUniformMatrix4fvEXT(Program_in, Uniform_in, 1, GL_FALSE, glm::value_ptr(Data));
+//            }
+//        };
+//        template <>
+//        class _UniformHandler<glm::vec4>
+//        {
+//        public:
+//            inline void SetUniform(const glm::vec4& Data, const GLint &Uniform_in) const
+//            {
+//                glUniform4fv(Uniform_in, 1, glm::value_ptr(Data));
+//            }
+//            inline void SetUniform_DSA(const glm::vec4& Data, const GLuint &Program_in, const GLint &Uniform_in) const
+//            {
+//                glProgramUniform4fvEXT(Program_in, Uniform_in, 1, glm::value_ptr(Data));
+//            }
+//        };
+//
+//        template <>
+//        class _UniformHandler<glm::vec3>
+//        {
+//        public:
+//            inline void SetUniform(const glm::vec3& Data, const GLint &Uniform_in) const
+//            {
+//                glUniform3fv(Uniform_in, 1, glm::value_ptr(Data));
+//            }
+//            inline void SetUniform_DSA(const glm::vec3& Data, const GLuint &Program_in, const GLint &Uniform_in) const
+//            {
+//                glProgramUniform3fvEXT(Program_in, Uniform_in, 1, glm::value_ptr(Data));
+//            }
+//        };
+//
+//        template <>
+//        class _UniformHandler<glm::vec2>
+//        {
+//        public:
+//            inline void SetUniform(const glm::vec2& Data, const GLint &Uniform_in) const
+//            {
+//                glUniform2fv(Uniform_in, 1, glm::value_ptr(Data));
+//            }
+//            inline void SetUniform_DSA(const glm::vec2& Data, const GLuint &Program_in, const GLint &Uniform_in) const
+//            {
+//                glProgramUniform2fvEXT(Program_in, Uniform_in, 1, glm::value_ptr(Data));
+//            }
+//        };
+//
+//        template <>
+//        class _UniformHandler<float>
+//        {
+//        public:
+//            inline void SetUniform(const float& Data, const GLint &Uniform_in) const
+//            {
+//                glUniform1fv(Uniform_in, 1, &Data);
+//            }
+//            inline void SetUniform_DSA(const float& Data, const GLuint &Program_in, const GLint &Uniform_in) const
+//            {
+//                glProgramUniform1fvEXT(Program_in, Uniform_in, 1, &Data);
+//            }
+//        };
+//
+//        template <>
+//        class _UniformHandler<int>
+//        {
+//        public:
+//            inline void SetUniform(const int& Data, const GLint &Uniform_in) const
+//            {
+//                glUniform1iv(Uniform_in, 1, &Data);
+//            }
+//            inline void SetUniform_DSA(const int& Data, const GLuint &Program_in, const GLint &Uniform_in) const
+//            {
+//                glProgramUniform1ivEXT(Program_in, Uniform_in, 1, &Data);
+//            }
+//        };
+//
+//        template <class T>
+//        class _Uniform
+//        {
+//        protected:
+//            // Each program-uniform pair is stored in a forward_list
+//            std::forward_list<std::pair<GLuint,GLint>> Uniforms;
+//            _UniformHandler<T> UniformHandler;
+//
+//        public:
+//            _Uniform() {}
+//            _Uniform(const _Uniform& cp): Uniforms(cp.Uniforms) {}
+//            _Uniform(_Uniform&& mv): Uniforms(std::move(mv.Uniforms)) {}
+//            _Uniform& operator=(const _Uniform& cp)
+//            {
+//                Uniforms = cp.Uniforms;
+//                return *this;
+//            }
+//            _Uniform& operator=(_Uniform&& mv)
+//            {
+//                std::swap(Uniforms, mv.Uniforms);
+//                return *this;
+//            }
+//            ~_Uniform() {}
+//
+//            // Gets a handle to the OpenGL uniform, given the program and the uniform name
+//            int Register(_Program Program_in, const char *Name_in)
+//            {
+//                GLint Location;
+//                GLuint Program = Program_in.GetHandle();
+//                if((Location = glGetUniformLocation(Program, Name_in)) == -1) return 1;
+//                Uniforms.push_front(std::pair<GLuint, GLint>(Program, Location));
+//                return 0;
+//            }
+//
+//            // Clears out the uniform handle list...haven't used it at all
+//            void ClearUniforms()
+//            {
+//                Uniforms.clear();
+//            }
+//
+//            // Sets all stored uniforms to Data_in
+//            void SetData(const T &Data_in)
+//            {
+//                // Can use GL_EXT_direct_state_access extension or plain OpenGL
+//                // Guess which one I like better
+//#ifdef DIRECT_STATE_ACCESS
+//                for(auto &i : Uniforms)
+//            {
+//                UniformHandler.SetUniform_DSA(Data_in, i.first, i.second);
+//            }
+//#else
+//                Data = Data_in;
+//                GLuint Initial;
+//                glGetIntegerv(GL_CURRENT_PROGRAM, (GLint*)(&Initial));
+//                GLuint Previous = Initial;
+//                for(auto &i : Uniforms)
+//                {
+//                    if(i.first != Previous)
+//                    {
+//                        glUseProgram(i.first);
+//                        Previous = i.first;
+//                    }
+//                    UniformHandler.SetUniform(&Data_in, i.second);
+//                }
+//                if(Initial != Previous) glUseProgram(Initial);
+//#endif
+//            }
+//
+//        };
+//    }
 }

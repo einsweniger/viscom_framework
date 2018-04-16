@@ -42,7 +42,11 @@ namespace minuseins::interfaces::visitors {
         const char* display_format = "%.5f";
         const float power = 1.0f;
         //DragFloat(const char* label, float* v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* display_format = "%.3f", float power = 1.0f);
-        if     (resource_type::glsl_float == uniform.type) ImGui::DragFloat (header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+        if     (resource_type::glsl_float == uniform.type){
+            ImGui::DragFloat (header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
+            auto updateheader = "do updates?##" + uniform.name;
+            ImGui::Checkbox(updateheader.c_str(), &uniform.receive_updates);
+        }
         else if(resource_type::glsl_vec2  == uniform.type) ImGui::DragFloat2(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
         else if(resource_type::glsl_vec3  == uniform.type) {
             //ImGui::DragFloat3(header.c_str(), &uniform.value[0], v_speed, v_min, v_max, display_format, power);
@@ -120,8 +124,9 @@ namespace minuseins::interfaces::visitors {
 
     void uniform_draw_menu::operator()(types::program_output_t output) {
         //TODO name_str to TexId mapping is off. Also, name seems to be null terminated. so everything after is not output?
-        std::string headerName = std::to_string(output.textureLocation) +  ":" + output.name.append("(" +std::to_string(output.location) + ") "+glbinding::Meta::getString(
-                static_cast<gl::GLenum>(output.type))) ;
+        std::string headerName = output.name;
+        //std::string headerName = std::to_string(output.textureLocation) +  ":" + output.name.append("(" +std::to_string(output.location) + ") "+glbinding::Meta::getString(
+            //    static_cast<gl::GLenum>(output.type))) ;
         if (ImGui::TreeNode(headerName.c_str())) {
             ImVec2 uv0(0, 1);
             ImVec2 uv1(1, 0);
@@ -129,6 +134,7 @@ namespace minuseins::interfaces::visitors {
             ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) output.textureLocation), region, uv0, uv1);
             ImGui::TreePop();
         };
+        tooltip(output.properties);
     }
 
     uniform_draw_menu::uniform_draw_menu(GLuint program) : program(program) {}

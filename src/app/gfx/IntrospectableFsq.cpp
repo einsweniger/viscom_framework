@@ -74,7 +74,6 @@ namespace minuseins {
 
         if(ImGui::Begin("GPUProgram", p_open)) {
             ImGui::TextUnformatted(shaderName_.c_str());
-            //TODO re-enable introspection on active resources
             ImGui::SameLine();
             if(ImGui::SmallButton(std::string("recompile").append(shaderName_).c_str())){
                 log_.Clear();
@@ -207,19 +206,19 @@ namespace minuseins {
     {
         currentTime_ = static_cast<gl::GLfloat>(currentTime);
         elapsedTime_ = static_cast<gl::GLfloat>(elapsedTime);
+        iFrame++;
 
         //TODO add checkbox to time variables so updates can be ignored
         //move uniform value assignment to draw2D?
+        for (auto& i : uniformMap_) {
+            if(interfaces::types::generic_uniform* uni = std::get_if<interfaces::types::generic_uniform>(&i.second)) {
+                uni->update();
+            }
+        }
         auto it = uniformMap_.find("u_time");
         if(uniformMap_.end() != it) {
             if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
-                uni->value[0] = currentTime_;
-            }
-        }
-        it = uniformMap_.find("iTime");
-        if(uniformMap_.end() != it) {
-            if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
-                uni->value[0] = currentTime_;
+                uni->update();
             }
         }
         it = uniformMap_.find("u_delta");
@@ -228,6 +227,20 @@ namespace minuseins {
                 uni->value[0] = elapsedTime_;
             }
         }
+
+        it = uniformMap_.find("iTime");
+        if(uniformMap_.end() != it) {
+            if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
+                uni->value[0] = currentTime_;
+            }
+        }
+        it = uniformMap_.find("iFrame");
+        if(uniformMap_.end() != it) {
+            if(auto uni = std::get_if<interfaces::types::integer_t>(&it->second)){
+                uni->value[0] = iFrame;
+            }
+        }
+
         if(nullptr != nextPass_) {
             nextPass_->UpdateFrame(currentTime, elapsedTime);
         }
@@ -299,6 +312,7 @@ namespace minuseins {
     void IntrospectableFsq::DrawFrame(viscom::FrameBuffer &fbo)
     {
         if(nullptr == nextPass_) {
+            DrawToBackBuffer();
             DrawToBuffer(fbo);
         } else {
             DrawToBackBuffer();
@@ -309,15 +323,15 @@ namespace minuseins {
     void IntrospectableFsq::ClearBuffer(viscom::FrameBuffer &fbo)
     {
         if(nullptr == nextPass_) {
-            fbo.DrawToFBO([]() {
-                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
-            });
+//            fbo.DrawToFBO([]() {
+//                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+//            });
         } else {
-            app_->SelectOffscreenBuffer(backBuffers_)->DrawToFBO([](){
-                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
-            });
+//            app_->SelectOffscreenBuffer(backBuffers_)->DrawToFBO([](){
+//                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+//            });
             nextPass_->ClearBuffer(fbo);
         }
     }
@@ -330,6 +344,7 @@ namespace minuseins {
         });
         using namespace minuseins::interfaces;
         using namespace minuseins::interfaces::visitors;
+        namespace t = interfaces::types;
         auto program = gpuProgram_->getProgramId();
         auto uniforms = Uniform(program).get_uniform_resources();
         //init uniform values
@@ -366,6 +381,26 @@ namespace minuseins {
                 uniformMap_.insert(std::make_pair("subroutine:"+glbinding::Meta::getString(subs.programStage), subs));
             }
         }
+        for (const auto& time : {"u_time", "iTime"}) {
+            auto it = uniformMap_.find(time);
+            if(uniformMap_.end() != it) {
+                if(t::float_t* uni = std::get_if<t::float_t>(&it->second)){
+                    uni->receive_updates = true;
+                    uni->updatefn = [this, uni]() { uni->value[0] = currentTime_;};
+                }
+            }
+        }
+        for (const auto& resos : {"iResolution","iChannelResolution[0]"}) {
+            auto it = uniformMap_.find(resos);
+            if(uniformMap_.end() != it) {
+                if(auto uni = std::get_if<interfaces::types::float_t>(&it->second)){
+                    uni->value[0] = 1920;
+                    uni->value[1] = 1080;
+                    uni->value[2] = 1;
+                }
+            }
+        }
+
         //uniforms_ = result;
     }
 

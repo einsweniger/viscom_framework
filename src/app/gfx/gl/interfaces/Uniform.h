@@ -14,11 +14,29 @@ namespace minuseins::interfaces {
     }
     namespace types {
 
-        struct generic_uniform : public named_resource {
+        struct foo {
+            virtual void print() =0;
+        };
+
+        template<typename T>
+        struct Uniform : public foo {
+            T value;
+        };
+
+
+        struct FloatUniform : public Uniform<float> {
+            void print() override;
+        };
+        struct gets_updates {
+            virtual void update() = 0;
+        };
+
+        struct generic_uniform : public named_resource, gets_updates {
             //generic_uniform(const std::string& name, gl::GLuint resourceIndex, types::property_t& properties);
 
             explicit generic_uniform(named_resource res);
 
+            void update() override {}
             gl::GLint block_index;
             gl::GLint location;
             resource_type type;
@@ -36,15 +54,25 @@ namespace minuseins::interfaces {
                 generic_uniform(std::move(arg)),
                 value{std::vector<T>(getSize(type))}
             {}
+            bool receive_updates = false;
+            std::function<void()> updatefn;
+            void update() override {
+                if(nullptr != updatefn && receive_updates) {
+                    updatefn();
+                }
+            }
 
             std::vector<T> value;
         };
 
         typedef uniform_and_value_t<gl::GLint> integer_t;
-        typedef uniform_and_value_t<gl::GLfloat> float_t;
+        //typedef uniform_and_value_t<gl::GLfloat> float_t;
         typedef uniform_and_value_t<gl::GLdouble> double_t;
         typedef uniform_and_value_t<gl::GLuint> uinteger_t;
 
+        struct float_t : public uniform_and_value_t<gl::GLfloat> {
+            float_t(named_resource arg);
+        };
         //cannot use typedef, otherwise variant won't work, since it can't distinguish types.
         struct bool_t : public integer_t {
             using integer_t::integer_t;

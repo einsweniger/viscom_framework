@@ -24,6 +24,12 @@ namespace minuseins::interfaces {
                 type{toType(properties.at(gl::GL_TYPE))},
                 resourceIndex{resourceIndex}
         {}
+
+        void FloatUniform::print() {
+
+        }
+
+        float_t::float_t(named_resource arg) : uniform_and_value_t(arg) {}
     }
 
     std::vector<types::uniform_container> Uniform::get_uniform_resources() {

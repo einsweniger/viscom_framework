@@ -100,6 +100,7 @@ namespace minuseins {
         void read_uniforms_from_program();
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
         viscom::enh::ApplicationNodeBase* app_;
+        int iFrame = 0;
         std::string shaderName_;
         std::shared_ptr<viscom::GPUProgram> gpuProgram_;
         std::shared_ptr<viscom::Texture> texture_;

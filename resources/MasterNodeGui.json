@@ -1,0 +1,34 @@
+{
+    "value0": {
+        "activeWindows": [
+            {
+                "key": "Buffers",
+                "value": false
+            },
+            {
+                "key": "GPUProgram",
+                "value": true
+            },
+            {
+                "key": "ImGuiDemo",
+                "value": false
+            },
+            {
+                "key": "MainMenu",
+                "value": true
+            },
+            {
+                "key": "Overlay",
+                "value": true
+            },
+            {
+                "key": "Shader",
+                "value": false
+            },
+            {
+                "key": "ShaderToyImport",
+                "value": false
+            }
+        ]
+    }
+}

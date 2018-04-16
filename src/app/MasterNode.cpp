@@ -74,6 +74,7 @@ namespace viscom {
             } else {
                 active_fsq_->AddPass(outfile);
             }
+            active_fsq_->AddPass("renderTexture.frag");
             gui_->loader = nullptr;
         }
         gui_->Draw2D(fbo);
