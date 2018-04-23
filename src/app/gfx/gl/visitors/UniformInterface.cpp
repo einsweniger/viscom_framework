@@ -16,10 +16,10 @@ namespace minuseins::interfaces::visitors {
             tooltip << "resource properties:\n";
             for(auto prop : props) {
                 if(gl::GL_TYPE == prop.first) {
-                    tooltip << prop.first << ": "
+                    tooltip << glbinding::aux::Meta::getString(prop.first) << ": "
                             << types::toString(prop.second).c_str() << "\n";
                 } else {
-                    tooltip << prop.first << ": "<< prop.second << "\n";
+                    tooltip << glbinding::aux::Meta::getString(prop.first) << ": "<< prop.second << "\n";
                 }
             }
             tooltip << extra_text;
@@ -127,6 +127,7 @@ namespace minuseins::interfaces::visitors {
         std::string headerName = output.name;
         //std::string headerName = std::to_string(output.textureLocation) +  ":" + output.name.append("(" +std::to_string(output.location) + ") "+glbinding::Meta::getString(
             //    static_cast<gl::GLenum>(output.type))) ;
+
         if (ImGui::TreeNode(headerName.c_str())) {
             ImVec2 uv0(0, 1);
             ImVec2 uv1(1, 0);
@@ -134,7 +135,7 @@ namespace minuseins::interfaces::visitors {
             ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) output.textureLocation), region, uv0, uv1);
             ImGui::TreePop();
         };
-        tooltip(output.properties);
+        tooltip(output.properties, "resIdx:" + std::to_string(output.resourceIndex));
     }
 
     uniform_draw_menu::uniform_draw_menu(GLuint program) : program(program) {}

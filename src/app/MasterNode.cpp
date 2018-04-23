@@ -15,12 +15,16 @@
 #include <cereal/archives/json.hpp>
 #include <iostream>
 #include <fstream>
+#include <app/gfx/gl/handlers/UniformHandler.h>
+#include <app/gfx/gl/handlers/ProgramOutputHandler.h>
+#include <app/gfx/gl/handlers/SubroutineUniformHandler.h>
 #include "shadertoy/ShaderToyLoader.h"
+#include "gfx/gl/interfaces/types.h"
 
 namespace viscom {
 
-    std::experimental::filesystem::path findConfig(std::string config_name, ApplicationNodeInternal* app) {
-        namespace fs =std::experimental::filesystem;
+    fs::path findConfig(std::string config_name, ApplicationNodeInternal* app) {
+
         try {
             auto filename = Resource::FindResourceLocation(minuseins::gui::MasterNodeGui::config_name, app);
             return {filename};
@@ -32,15 +36,17 @@ namespace viscom {
 
     MasterNode::MasterNode(ApplicationNodeInternal* appNode) :
         ApplicationNodeImplementation{ appNode },
-        gui_{std::make_unique<minuseins::gui::MasterNodeGui>(appNode)}
+        gui_{std::make_unique<minuseins::gui::MasterNodeGui>(this, appNode)}
     {
         auto cfgPath = findConfig(minuseins::gui::MasterNodeGui::config_name, appNode);
-        if(!std::experimental::filesystem::exists(cfgPath)) {
-            return;
+        if(std::experimental::filesystem::exists(cfgPath)) {
+            auto instr = std::ifstream{cfgPath};
+            cereal::JSONInputArchive ar{instr};
+            ar(*gui_);
         }
-        auto instr = std::ifstream{cfgPath};
-        cereal::JSONInputArchive ar{instr};
-        ar(*gui_);
+        gui_->programCallback = [&](std::shared_ptr<GPUProgram> res) {
+            programCallback(res);
+        };
     }
 
     MasterNode::~MasterNode() = default;
@@ -53,11 +59,15 @@ namespace viscom {
                 active_fsq_->Draw2D(fbo);
             }
         }
+
+        for (auto& gpi : gpis) {
+            bool s = true;
+            gpi.draw_gui(&s);
+        }
         if(nullptr != gui_->loader) {
             if(nullptr != active_fsq_) {
                 active_fsq_ = nullptr;
             }
-            namespace fs = std::experimental::filesystem;
             auto loader = gui_->loader.get();
             for(auto& buf : loader->buffers) {
                 std::cout << buf.name << std::endl;
@@ -71,6 +81,7 @@ namespace viscom {
             auto outfile = fs::path{loader->toy_->info.id}/ fs::path{loader->image->name + ".frag"};
             if(nullptr == active_fsq_) {
                 std::make_unique<minuseins::IntrospectableFsq>(outfile, this);
+
             } else {
                 active_fsq_->AddPass(outfile);
             }
@@ -122,5 +133,29 @@ namespace viscom {
         ar(*gui_);
 
         ApplicationNodeImplementation::CleanUp();
+    }
+
+    void MasterNode::programCallback(std::shared_ptr<GPUProgram> prog) {
+        namespace hdl = minuseins::handlers;
+        ApplicationNodeImplementation::programCallback(prog);
+        auto gpi = minuseins::GpuProgramIntrospector(prog->getProgramId(), prog->getProgramName());
+        gpi.set_recompile_function([&](minuseins::GpuProgramIntrospector& inspector) {
+            auto& program = compiledPrograms.at(inspector.name);
+            auto currentProg = program->getProgramId();
+            try {
+                program->recompileProgram();
+                return program->getProgramId();
+            } catch (viscom::shader_compiler_error& compilerError) {
+                return currentProg;
+            }
+        });
+        namespace tp = minuseins::interfaces::types;
+
+        gpi.addHandler(gl::GL_UNIFORM, std::make_unique<hdl::UniformHandler>());
+        gpi.addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<hdl::ProgramOutputHandler>(this));
+        gpi.addHandler(hdl::subroutineUniformEnum(gl::GL_FRAGMENT_SHADER), std::make_unique<hdl::SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
+        gpi.initialize();
+        std::cout << "new program! " << prog->getProgramName() << std::endl;
+        gpis.push_back(std::move(gpi));
     }
 }

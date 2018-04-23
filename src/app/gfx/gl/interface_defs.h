@@ -58,7 +58,6 @@
 //
 
 namespace minuseins::interfaces_V2 {
-
     namespace detail {
         template<gl::GLenum Interface, gl::GLenum... Properties>
         using InterfaceWithRefs = ProgramInterface<Interface, Properties...,

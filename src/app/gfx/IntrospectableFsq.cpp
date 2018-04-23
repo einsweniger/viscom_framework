@@ -3,7 +3,7 @@
 //
 
 #include <core/gfx/Shader.h>
-#include <glbinding/Meta.h>
+#include <glbinding-aux/Meta.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 #include <iostream>
@@ -19,18 +19,28 @@ namespace minuseins {
     fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
     app_{appNode},
     shaderName_{fragmentShader},
-    gpuProgram_{appNode->GetGPUProgramManager().GetResource("fullScreenQuad_" + fragmentShader, std::vector<std::string>{ "fullScreenQuad.vert", fragmentShader })},
+    gpuProgram_{fsq_->GetGPUProgram()},
     uniformMap_{},
+    buffers_{},
     programOutput_{},
-    buffers_{}
+    gpi_{gpuProgram_->getProgramId()}
     {
-        std::cout << fragmentShader << " loaded" <<std::endl;
-        if("4syGWK/Buf A.frag" == fragmentShader) {
-            texture_= appNode->GetTextureManager().GetResource("/media/a/cbcbb5a6cfb55c36f8f021fbb0e3f69ac96339a39fa85cd96f2017a2192821b5.png", false);
-            texture_->getTextureId();
-        }
+
         loadProgramInterfaceInformation();
     }
+//    IntrospectableFsq::IntrospectableFsq(std::shared_ptr<viscom::GPUProgram> prog, viscom::enh::ApplicationNodeBase *appNode) :
+//            fsq_{appNode->CreateFullscreenQuad("drawSimple.frag")},
+//            app_{appNode},
+//            shaderName_{prog->getProgramName()},
+//            gpuProgram_{prog},
+//            uniformMap_{},
+//            buffers_{},
+//            programOutput_{},
+//            gpi_{gpuProgram_->getProgramId()}
+//    {
+//
+//        loadProgramInterfaceInformation();
+//    }
 
     void IntrospectableFsq::Draw2D(viscom::FrameBuffer &fbo)
     {
@@ -38,6 +48,7 @@ namespace minuseins {
         static bool program_window;
         fbo.DrawToFBO([this]() {
             DrawProgramWindow(&program_window);
+            gpi_.draw_gui(&draw_gpi);
         });
         if(nullptr != nextPass_) {
             nextPass_->Draw2D(fbo);
@@ -69,7 +80,7 @@ namespace minuseins {
             gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
     };
     void IntrospectableFsq::DrawProgramWindow(bool* p_open) {
-        using glbinding::Meta;
+        using glbinding::aux::Meta;
         gl::GLuint program = gpuProgram_->getProgramId();
 
         if(ImGui::Begin("GPUProgram", p_open)) {
@@ -121,7 +132,7 @@ namespace minuseins {
                     if(ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
                         for(const auto& props : res.properties) {
-                            ImGui::Text("%s: %d", glbinding::Meta::getString(props.first).c_str(), props.second);
+                            ImGui::Text("%s: %d", Meta::getString(props.first).c_str(), props.second);
                         }
                         auto index = gl::glGetUniformBlockIndex(program, res.name.c_str());
                         ImGui::Text("block index: %d", index);
@@ -134,9 +145,30 @@ namespace minuseins {
                     }
                 }
 
-
                 ImGui::TreePop();
             }
+
+            if (ImGui::TreeNode(std::string("shaders##").append(std::to_string(program)).c_str())) {
+                for (auto it = gpuProgram_->shaders_begin(); it != gpuProgram_->shaders_end(); ++it) {
+                    auto id = it->get()->getShaderId();
+                    ImGui::Text("shader %d", id);
+                    gl::GLint shaderlen;
+                    gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
+                    ImGui::Text("source len %d", shaderlen);
+                    if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
+                        std::string text;
+                        text.resize(shaderlen);
+                        gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
+                        ImGui::PopStyleVar();
+                        ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
+
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
+            }
+
             if(nullptr != texture_) {
                 ImVec2 uv0(0, 1);
                 ImVec2 uv1(1, 0);
@@ -157,6 +189,19 @@ namespace minuseins {
 
     void IntrospectableFsq::loadProgramInterfaceInformation()
     {
+        gpi_.set_recompile_function([this](auto& unused) {
+            auto currentProg = gpuProgram_->getProgramId();
+            try {
+                gpuProgram_->recompileProgram();
+                //loadProgramInterfaceInformation();
+                return gpuProgram_->getProgramId();
+                log_.visible = false;
+            } catch (viscom::shader_compiler_error& compilerError) {
+                log_.AddLog("%s",compilerError.what());
+                log_.visible = true;
+                return currentProg;
+            }
+        });
         using rt = interfaces::types::resource_type;
         auto program = gpuProgram_->getProgramId();
         gl::glUseProgram(program);
@@ -309,6 +354,17 @@ namespace minuseins {
         }
 
     }
+
+//    void IntrospectableFsq::AddPass(std::shared_ptr<viscom::GPUProgram> prog) {
+//        //TODO nextpass can only be used once, iterate until nullptr, then add? Or use list of several passes?
+//        if(nullptr == nextPass_) {
+//            nextPass_ = std::make_unique<IntrospectableFsq>(prog, app_);
+//        } else {
+//            nextPass_->AddPass(prog);
+//        }
+//
+//    }
+
     void IntrospectableFsq::DrawFrame(viscom::FrameBuffer &fbo)
     {
         if(nullptr == nextPass_) {
@@ -378,7 +434,7 @@ namespace minuseins {
         // add subroutine uniforms
         for (auto& subs : StageSubroutineUniform::GetAllStages(program)) {
             if(!subs.subroutineUniforms.empty()){
-                uniformMap_.insert(std::make_pair("subroutine:"+glbinding::Meta::getString(subs.programStage), subs));
+                uniformMap_.insert(std::make_pair("subroutine:"+glbinding::aux::Meta::getString(subs.programStage), subs));
             }
         }
         for (const auto& time : {"u_time", "iTime"}) {
@@ -401,7 +457,7 @@ namespace minuseins {
             }
         }
 
+
         //uniforms_ = result;
     }
-
 }

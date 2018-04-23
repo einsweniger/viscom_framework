@@ -3,11 +3,34 @@
 //
 
 #include <vector>
+#include <imgui.h>
+#include <sstream>
 #include "Uniform.h"
 namespace minuseins::interfaces {
     Uniform::Uniform(gl::GLuint program) :
             InterfaceBase(gl::GL_UNIFORM, program)
     {}
+
+    void tooltip(const types::property_t &props, const std::string& extra_text) {
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if(ImGui::IsItemHovered()) {
+            std::ostringstream tooltip;
+            tooltip << "resource properties:\n";
+            for(auto prop : props) {
+                if(gl::GL_TYPE == prop.first) {
+                    tooltip << glbinding::aux::Meta::getString(prop.first) << ": "
+                            << types::toString(prop.second).c_str() << "\n";
+                } else {
+                    tooltip << glbinding::aux::Meta::getString(prop.first) << ": "<< prop.second << "\n";
+                }
+            }
+            tooltip << extra_text;
+            ImGui::BeginTooltip();
+            ImGui::TextUnformatted(tooltip.str().c_str());
+            ImGui::EndTooltip();
+        }
+    }
 
     namespace types {
 //        generic_uniform::generic_uniform(const std::string &name, gl::GLuint resourceIndex, property_t &properties) :
@@ -30,6 +53,41 @@ namespace minuseins::interfaces {
         }
 
         float_t::float_t(named_resource arg) : uniform_and_value_t(arg) {}
+
+        void float_t::draw2D() {
+            int color_flags = ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_Float;
+            const float v_speed = 0.0001f;
+            const float v_min = 0.0f;
+            const float v_max = 0.0f;
+            const char* display_format = "%.5f";
+            const float power = 1.0f;
+
+            //named_resource::draw();
+            ImGui::DragFloat(name.c_str(), &value[0], v_speed, v_min, v_max, display_format, power);
+            auto updateheader = "do updates?##" + name;
+            ImGui::Checkbox(updateheader.c_str(), &receive_updates);
+
+            std::string header = name;// + "(" + std::to_string(uniform.location) + ")";
+            std::to_string(0);
+            if(resource_type::glsl_float == type){
+                ImGui::DragFloat (header.c_str(), &value[0], v_speed, v_min, v_max, display_format, power);
+                auto updateheader = "do updates?##" + name;
+                ImGui::Checkbox(updateheader.c_str(), &receive_updates);
+            }
+            else if(resource_type::glsl_vec2  == type) ImGui::DragFloat2(header.c_str(), &value[0], v_speed, v_min, v_max, display_format, power);
+            else if(resource_type::glsl_vec3  == type) {
+                //ImGui::DragFloat3(header.c_str(), &value[0], v_speed, v_min, v_max, display_format, power);
+                ImGui::ColorEdit3(header.c_str(), &value[0], color_flags);
+            }
+            else if(resource_type::glsl_vec4  == type) {
+                //ImGui::DragFloat4(header.c_str(), &value[0], v_speed, v_min, v_max, display_format, power);
+                ImGui::ColorEdit4(header.c_str(), &value[0], color_flags);
+            }
+            else ImGui::TextUnformatted(name.c_str());
+            auto size = sizeof(decltype(value)::value_type) * value.size();
+            auto extra = "sizeof(value)=" + std::to_string(size);
+            tooltip(properties, extra);
+        }
     }
 
     std::vector<types::uniform_container> Uniform::get_uniform_resources() {

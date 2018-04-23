@@ -5,7 +5,7 @@
 #pragma once
 
 #include <glbinding/gl/gl.h>
-#include <glbinding/Meta.h>
+#include <glbinding-aux/Meta.h>
 #include <cassert>
 #include <variant>
 #include <map>
@@ -14,6 +14,7 @@
 #include "interfaces/types.h"
 
 namespace minuseins::interfaces_V2 {
+
     constexpr gl::GLuint porsitive(const gl::GLint num) {
 //    assert(0 >=num);
         if (0 >= num) {
@@ -24,7 +25,9 @@ namespace minuseins::interfaces_V2 {
     }
 
     template<gl::GLenum val>
-    struct tag{};
+    struct tag{
+        gl::GLenum value = val;
+    };
 
     template<class T, class U>
     struct is_within : std::false_type {};
@@ -114,6 +117,7 @@ namespace minuseins::interfaces_V2 {
         static constexpr std::array<gl::GLenum, property_size> properties{{PROPERTIES...}};
         static constexpr bool has_active_vars = has_tag<gl::GL_NUM_ACTIVE_VARIABLES, PROPERTIES...>::value;
         static constexpr bool has_resource_index = has_tag<Interface, gl::GL_ATOMIC_COUNTER_BUFFER, gl::GL_TRANSFORM_FEEDBACK_BUFFER>::value;
+        static constexpr bool has_name = has_tag<gl::GL_NAME_LENGTH, PROPERTIES...>::value;
 
 
         //ProgramInterface(gl::GLuint program) : InterfaceBase(interface, program){};
@@ -144,7 +148,13 @@ namespace minuseins::interfaces_V2 {
 
         interfaces::types::named_resource GetNamedResource(gl::GLuint index) const {
             auto res = GetResource(index);
-            auto name = GetProgramResourceName(index, res.properties.at(gl::GL_NAME_LENGTH));
+            std::string name;
+            try{
+                name = GetProgramResourceName(index, res.properties.at(gl::GL_NAME_LENGTH));
+            } catch (std::out_of_range&) {
+                name = "";
+            }
+
             return {name, res};
         }
 
@@ -167,7 +177,7 @@ namespace minuseins::interfaces_V2 {
          * @return the name string assigned to the single active resource
          */
         std::string GetProgramResourceName(const gl::GLuint index, const gl::GLint bufSize) const{
-            static_assert(has_tag<gl::GL_NAME_LENGTH, PROPERTIES...>::value, "Resources from this interface have no name, use GetProgramResources instead");
+            static_assert(has_tag<gl::GL_NAME_LENGTH, PROPERTIES...>::value, "Resources from interface have no name, use GetProgramResources instead");
             std::string name; // The name string assigned to is returned as a null-terminated string in name.
             gl::GLsizei length;  // length The actual number of characters written into name, excluding the null terminator, is returned in length. If length is NULL, no length is returned.
             name.resize(bufSize);

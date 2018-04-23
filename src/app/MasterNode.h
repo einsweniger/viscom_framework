@@ -17,7 +17,7 @@
 #endif
 
 namespace viscom {
-
+    namespace fs = std::experimental::filesystem;
     class MasterNode final : public ApplicationNodeImplementation
     {
     public:
@@ -29,6 +29,9 @@ namespace viscom {
         void Draw2D(FrameBuffer& fbo) override;
 
         void CleanUp() override;
+
+        void programCallback(std::shared_ptr<GPUProgram> prog) override;
+
     private:
         bool imProgramRecourceWindow_ = true;
 

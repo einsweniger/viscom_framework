@@ -3,7 +3,7 @@
 //
 
 #include "StageSubroutineUniform.h"
-#include <glbinding/Meta.h>
+#include <glbinding-aux/Meta.h>
 namespace minuseins::interfaces {
     namespace types {
         subroutine_uniform_t::subroutine_uniform_t(named_resource res) :

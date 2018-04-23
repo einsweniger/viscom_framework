@@ -72,6 +72,8 @@ namespace minuseins::interfaces {
 
         struct float_t : public uniform_and_value_t<gl::GLfloat> {
             float_t(named_resource arg);
+
+            void draw2D() override;
         };
         //cannot use typedef, otherwise variant won't work, since it can't distinguish types.
         struct bool_t : public integer_t {

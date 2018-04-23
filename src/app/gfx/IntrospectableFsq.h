@@ -15,8 +15,11 @@
 #include <app/gfx/gl/interfaces/ProgramOutput.h>
 #include <app/gfx/gl/interfaces/Uniform.h>
 #include <enh/ApplicationNodeBase.h>
+#include <app/gfx/gl/GpuProgramIntrospector.h>
+#include <experimental/filesystem>
 
 namespace minuseins {
+    namespace fs = std::experimental::filesystem;
     struct ShaderLog
     {
         bool visible = false;
@@ -83,12 +86,14 @@ namespace minuseins {
     {
     public:
         IntrospectableFsq(const std::string& fragmentProgram, viscom::enh::ApplicationNodeBase* appNode);
+        //IntrospectableFsq(std::shared_ptr<viscom::GPUProgram> prog, viscom::enh::ApplicationNodeBase *appNode);
         void ClearBuffer(viscom::FrameBuffer& fbo);
         void   DrawFrame(viscom::FrameBuffer& fbo);
         void      Draw2D(viscom::FrameBuffer& fbo);
         void UpdateFrame(double currentTime, double elapsedTime);
 
         void AddPass(const std::string& fragmentProgram);
+//        void AddPass(std::shared_ptr<viscom::GPUProgram> prog);
         IntrospectableFsq* GetNextPass() { return nextPass_.get(); }
 
     private:
@@ -102,16 +107,18 @@ namespace minuseins {
         viscom::enh::ApplicationNodeBase* app_;
         int iFrame = 0;
         std::string shaderName_;
-        std::shared_ptr<viscom::GPUProgram> gpuProgram_;
+        viscom::GPUProgram* gpuProgram_;
         std::shared_ptr<viscom::Texture> texture_;
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
+        std::map<std::string, drawable_container> uniformMap_;
         //std::unique_ptr<viscom::enh::GLUniformBuffer> buffer_ = nullptr;
         std::map<std::string, std::unique_ptr<viscom::enh::GLUniformBuffer>> buffers_;
         std::vector<viscom::FrameBuffer> backBuffers_;
-        std::map<std::string, drawable_container> uniformMap_;
         std::map<std::string, interfaces::types::program_output_t> programOutput_;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
         ShaderLog log_{};
+        GpuProgramIntrospector gpi_;
+        bool draw_gpi = true;
     };
 }

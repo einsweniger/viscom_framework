@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <app/gfx/gl/GpuProgramIntrospector.h>
 #include "enh/ApplicationNodeBase.h"
 
 namespace minuseins {
@@ -38,7 +39,14 @@ namespace viscom {
         bool AddTuioCursor(TUIO::TuioCursor *tcur) override;
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
+        virtual void programCallback(std::shared_ptr<GPUProgram> prog) {compiledPrograms[prog->getProgramName()] = prog;};
+
         std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
+        std::unique_ptr<FullscreenQuad> dummy_quad;
+        std::vector<std::unique_ptr<GPUProgram>> programs;
+        std::vector<std::unique_ptr<Texture>> textures;
+        std::vector<minuseins::GpuProgramIntrospector> gpis;
+        std::unordered_map<std::string,std::shared_ptr<GPUProgram>> compiledPrograms;
     protected:
         void toggleMouseGrab();
 

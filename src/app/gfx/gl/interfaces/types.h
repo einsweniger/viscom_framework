@@ -5,7 +5,7 @@
 #pragma once
 
 #include <glbinding/gl/gl.h>
-#include <glbinding/Meta.h>
+#include <glbinding-aux/Meta.h>
 #include <map>
 namespace minuseins::interfaces::types {
 
@@ -21,7 +21,7 @@ namespace minuseins::interfaces::types {
 
     struct named_resource : public resource {
         named_resource(std::string name, resource res);
-
+        virtual void draw2D();
         std::string name;
     };
 
@@ -310,12 +310,12 @@ enum class resource_type {
     }
     constexpr resource_type toType(gl::GLint type) {return static_cast<resource_type>(type);}
   static std::string toString(resource_type type) {
-      return glbinding::Meta::getString(static_cast<gl::GLenum>(type));
+      return glbinding::aux::Meta::getString(static_cast<gl::GLenum>(type));
   }
   static std::string toString(gl::GLint type) {
-      return glbinding::Meta::getString(static_cast<gl::GLenum>(type));
+      return glbinding::aux::Meta::getString(static_cast<gl::GLenum>(type));
   }
   static std::string toString(gl::GLenum type) {
-      return glbinding::Meta::getString(type);
+      return glbinding::aux::Meta::getString(type);
   }
 }
