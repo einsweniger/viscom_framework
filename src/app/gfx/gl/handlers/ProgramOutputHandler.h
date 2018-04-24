@@ -5,11 +5,11 @@
 #ifndef VISCOMFRAMEWORK_PROGRAMOUTPUTHANDLER_H
 #define VISCOMFRAMEWORK_PROGRAMOUTPUTHANDLER_H
 
-#include <app/gfx/gl/interfaces/types.h>
 #include <app/gfx/gl/ProgramInspector.h>
 
 namespace viscom {
     class ApplicationNodeBase;
+    class FrameBuffer;
 }
 namespace minuseins::handlers {
     using namespace interfaces::types;

@@ -8,9 +8,8 @@
 
 #pragma once
 
-#include "shadertoy/ShaderToy.h"
 #include "gui/MasterNodeGui.h"
-#include "../app/ApplicationNodeImplementation.h"
+#include "ApplicationNodeImplementation.h"
 
 #ifdef WITH_TUIO
 #include "core/TuioInputWrapper.h"

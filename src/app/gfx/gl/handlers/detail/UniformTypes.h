@@ -5,7 +5,7 @@
 #ifndef VISCOMFRAMEWORK_UNIFORMTYPES_H
 #define VISCOMFRAMEWORK_UNIFORMTYPES_H
 
-#include <app/gfx/gl/interfaces/types.h>
+#include <app/gfx/gl/types.h>
 
 namespace minuseins::handlers {
     using namespace interfaces::types;
@@ -37,7 +37,7 @@ namespace minuseins::handlers {
 
 
         bool do_upload = true;
-        bool receive_updates = false;
+        bool receive_updates = true;
 
         gl::GLint block_index;
         gl::GLint location;

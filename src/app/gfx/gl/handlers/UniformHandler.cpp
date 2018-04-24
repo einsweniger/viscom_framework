@@ -32,6 +32,8 @@ namespace minuseins::handlers {
             return std::move(new_res);
         } catch (std::out_of_range&) {/*no previous value --> new uniform*/}
 
+
+        //TODO remove this and think about how others can hook in here.
         if(("iTime" == new_uniform->name || "u_time" == new_uniform->name) && new_uniform->type == resource_type::glsl_float) {
             auto& timer = dynamic_cast<FloatUniform&>(*new_uniform);
             timer.updatefn = [&](auto& self) {

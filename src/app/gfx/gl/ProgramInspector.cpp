@@ -6,8 +6,8 @@
 #include <core/gfx/Shader.h>
 #include <iostream>
 #include "ProgramInspector.h"
-#include "interfaces/types.h"
-#include "app/gfx/gl/interfaces/BasicInterface.h"
+
+#include "app/gfx/gl/BasicInterface.h"
 
 namespace minuseins {
     ProgramInspector::ProgramInspector(gl::GLuint programId, const std::string& name) :
@@ -196,5 +196,9 @@ namespace minuseins {
 
     gl::GLuint ProgramInspector::GetResourceIndex(gl::GLenum interface, const std::string &name) {
         return name_to_resid.at(interface).at(name);
+    }
+
+    named_resource* ProgramInspector::GetByName(gl::GLenum interface, const std::string &name) {
+        return containers.at(interface).at(GetResourceIndex(interface,name)).get();
     }
 }

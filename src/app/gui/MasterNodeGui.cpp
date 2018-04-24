@@ -154,31 +154,34 @@ namespace minuseins::gui {
         }};
         select.draw("Import ShaderToy", p_open);
     }
-
+    //TODO fix loading
+//        if(nullptr != gui_->loader) {
+//            if(nullptr != active_fsq_) {
+//                active_fsq_ = nullptr;
+//            }
+//            auto loader = gui_->loader.get();
+//            for(auto& buf : loader->buffers) {
+//                std::cout << buf.name << std::endl;
+//                auto outfile = fs::path{loader->toy_->info.id}/ fs::path{buf.name + ".frag"};
+//                if(nullptr == active_fsq_) {
+//                    active_fsq_ = std::make_unique<minuseins::IntrospectableFsq>(outfile, this);
+//                } else {
+//                    active_fsq_->AddPass(outfile);
+//                }
+//            }
+//            auto outfile = fs::path{loader->toy_->info.id}/ fs::path{loader->image->name + ".frag"};
+//            if(nullptr == active_fsq_) {
+//                std::make_unique<minuseins::IntrospectableFsq>(outfile, this);
+//
+//            } else {
+//                active_fsq_->AddPass(outfile);
+//            }
+//            active_fsq_->AddPass("renderTexture.frag");
+//            gui_->loader = nullptr;
+//        }
     void MasterNodeGui::drawShaderWindow(bool *p_open) {
         if(ImGui::Begin("Shaders", p_open)){
-//            for(auto& shader : openShaders) {
-//                auto id = shader->getShaderId();
-//                if (ImGui::TreeNode(shader->getFileName().data())) {
-//                    ImGui::Text("shader %d", id);
-//                    gl::GLint shaderlen=shader->getShaderiv(id, static_cast<GLenum>(gl::GLenum::GL_SHADER_SOURCE_LENGTH));
-//                    //gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
-//                    ImGui::Text("source len %d", shaderlen);
-//                    ImGui::Text("type: %s", glbinding::aux::Meta::getString(static_cast<gl::GLenum>(shader->getType())).c_str());
-//                    if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
-//                        std::string text;
-//                        text.resize(shaderlen);
-//                        gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
-//                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-//                        ImGui::PopStyleVar();
-//                        ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
-//
-//                        ImGui::TreePop();
-//                    }
-//                    ImGui::TreePop();
-//                }
-//
-//            }
+
             ImGui::End();
         }
     }

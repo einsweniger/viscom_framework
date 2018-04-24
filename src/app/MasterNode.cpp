@@ -8,19 +8,14 @@
 
 #include "MasterNode.h"
 #include <imgui.h>
-#include "enh/gfx/postprocessing/DepthOfField.h"
-#include "core/glfw.h"
-#include "app/gfx/IntrospectableFsq.h"
 #include <experimental/filesystem>
 #include <cereal/archives/json.hpp>
 #include <iostream>
 #include <fstream>
-#include <app/gfx/gl/handlers/UniformHandler.h>
-#include <app/gfx/gl/handlers/ProgramOutputHandler.h>
-#include <app/gfx/gl/handlers/SubroutineUniformHandler.h>
-#include <app/gfx/gl/handlers/UniformBlockHandler.h>
-#include "shadertoy/ShaderToyLoader.h"
-#include "gfx/gl/interfaces/types.h"
+
+#include "core/glfw.h"  // for registering key presses.
+#include "gfx/gl/handlers.h"
+
 
 namespace viscom {
 
@@ -61,34 +56,12 @@ namespace viscom {
             }
         }
 
+        //TODO this can go away... right?
         for (auto& gpi : gpis) {
             bool s = true;
             gpi.draw_gui(&s);
         }
-        if(nullptr != gui_->loader) {
-            if(nullptr != active_fsq_) {
-                active_fsq_ = nullptr;
-            }
-            auto loader = gui_->loader.get();
-            for(auto& buf : loader->buffers) {
-                std::cout << buf.name << std::endl;
-                auto outfile = fs::path{loader->toy_->info.id}/ fs::path{buf.name + ".frag"};
-                if(nullptr == active_fsq_) {
-                    active_fsq_ = std::make_unique<minuseins::IntrospectableFsq>(outfile, this);
-                } else {
-                    active_fsq_->AddPass(outfile);
-                }
-            }
-            auto outfile = fs::path{loader->toy_->info.id}/ fs::path{loader->image->name + ".frag"};
-            if(nullptr == active_fsq_) {
-                std::make_unique<minuseins::IntrospectableFsq>(outfile, this);
 
-            } else {
-                active_fsq_->AddPass(outfile);
-            }
-            active_fsq_->AddPass("renderTexture.frag");
-            gui_->loader = nullptr;
-        }
         gui_->Draw2D(fbo);
 
         ApplicationNodeImplementation::Draw2D(fbo);

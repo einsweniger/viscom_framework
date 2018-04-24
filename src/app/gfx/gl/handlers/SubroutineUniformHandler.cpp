@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 #include "SubroutineUniformHandler.h"
-#include "app/gfx/gl/interfaces/BasicInterface.h"
+#include "app/gfx/gl/BasicInterface.h"
 namespace minuseins::handlers {
 
     std::unique_ptr<named_resource>

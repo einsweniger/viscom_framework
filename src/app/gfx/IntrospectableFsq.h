@@ -10,10 +10,6 @@
 #include <variant>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
-#include <app/gfx/gl/interface_defs.h>
-#include <app/gfx/gl/interfaces/StageSubroutineUniform.h>
-#include <app/gfx/gl/interfaces/ProgramOutput.h>
-#include <app/gfx/gl/interfaces/Uniform.h>
 #include <enh/ApplicationNodeBase.h>
 #include <app/gfx/gl/ProgramInspector.h>
 #include <experimental/filesystem>
@@ -64,20 +60,6 @@ namespace minuseins {
         }
     };
 
-    //TODO move clutter to GpuProgramInspector
-    using drawable_container = std::variant<
-             interfaces::types::integer_t
-            ,interfaces::types::generic_uniform
-            ,interfaces::types::float_t
-            ,interfaces::types::double_t
-            ,interfaces::types::uinteger_t
-            ,interfaces::types::stage_subroutines_t
-            ,interfaces::types::program_output_t
-            ,interfaces::types::program_samplers_t
-            ,interfaces::types::bool_t
-
-    >;
-
     /**
      * Encapsulates a FullscreenQuad and enables editing uniforms for the fragment shader.
      * We don't care for any other shader types here, since we only draw on a FSQ.
@@ -86,7 +68,6 @@ namespace minuseins {
     {
     public:
         IntrospectableFsq(const std::string& fragmentProgram, viscom::enh::ApplicationNodeBase* appNode);
-        //IntrospectableFsq(std::shared_ptr<viscom::GPUProgram> prog, viscom::enh::ApplicationNodeBase *appNode);
         void ClearBuffer(viscom::FrameBuffer& fbo);
         void   DrawFrame(viscom::FrameBuffer& fbo);
         void      Draw2D(viscom::FrameBuffer& fbo);
@@ -100,21 +81,13 @@ namespace minuseins {
         void DrawToBackBuffer();
         void DrawToBuffer(const viscom::FrameBuffer& fbo);
         void DrawProgramWindow(bool *p_open);
-        void loadProgramInterfaceInformation();
-        void SendUniforms() const;
-        void read_uniforms_from_program();
+        void set_uniform_update_fns();
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
         viscom::enh::ApplicationNodeBase* app_;
         int iFrame = 0;
-        std::string shaderName_;
         viscom::GPUProgram* gpuProgram_;
         std::shared_ptr<viscom::Texture> texture_;
         std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
-        std::map<std::string, drawable_container> uniformMap_;
-        //std::unique_ptr<viscom::enh::GLUniformBuffer> buffer_ = nullptr;
-        std::map<std::string, std::unique_ptr<viscom::enh::GLUniformBuffer>> buffers_;
-        std::vector<viscom::FrameBuffer> backBuffers_;
-        std::map<std::string, interfaces::types::program_output_t> programOutput_;
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
         ShaderLog log_{};

@@ -4,7 +4,6 @@
 #ifndef VISCOMFRAMEWORK_UNIFORMHANDLER_H
 #define VISCOMFRAMEWORK_UNIFORMHANDLER_H
 
-#include <app/gfx/gl/interfaces/types.h>
 #include <app/gfx/gl/ProgramInspector.h>
 #include "detail/UniformTypes.h"
 

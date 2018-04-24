@@ -3,6 +3,7 @@
 //
 
 #include <app/util.h>
+#include <app/gfx/gl/types.h>
 #include "BasicInterface.h"
 
 namespace minuseins::interfaces {

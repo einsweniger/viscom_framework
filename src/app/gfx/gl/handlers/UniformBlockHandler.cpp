@@ -2,7 +2,7 @@
 // Created by bone on 24.04.18.
 //
 
-#include <app/gfx/gl/interfaces/BasicInterface.h>
+#include <app/gfx/gl/BasicInterface.h>
 #include "UniformBlockHandler.h"
 #include "UniformHandler.h"
 #include <enh/ApplicationNodeBase.h>

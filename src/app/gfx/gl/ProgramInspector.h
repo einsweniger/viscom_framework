@@ -9,9 +9,10 @@
 #include <utility>
 #include <variant>
 #include <memory>
-#include "interface_defs.h"
+#include "types.h"
 
 namespace minuseins {
+    using named_resource = interfaces::types::named_resource;
 
     namespace interfaces {
         class BasicInterface;
@@ -20,7 +21,6 @@ namespace minuseins {
 
     class ProgramInspector {
     public:
-        using named_resource = interfaces::types::named_resource;
         using named_resource_ptr = std::unique_ptr<named_resource>;
         using named_resource_container = std::vector<named_resource_ptr>;
         using handler_fn = std::function<named_resource_ptr(named_resource)>;
@@ -46,12 +46,12 @@ namespace minuseins {
         interfaces::BasicInterface GetInterface(gl::GLenum interface);
         named_resource_container& GetContainer(gl::GLenum interface); //throws!
         gl::GLuint GetResourceIndex(gl::GLenum interface, const std::string& name); //throws!
+        named_resource* GetByName(gl::GLenum interface, const std::string &name);
         handler_fn GetHandlerFunction(gl::GLenum interface);
         resource_handler* GetHandler(gl::GLenum interface);
     };
 
     struct resource_handler {
-        using named_resource = ProgramInspector::named_resource;
         using named_resource_container = ProgramInspector::named_resource_container;
 
         //consume the object and return a unique ptr to it.
