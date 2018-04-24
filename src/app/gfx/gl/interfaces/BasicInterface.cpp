@@ -170,4 +170,12 @@ namespace minuseins::interfaces {
         return unsig;
     }
 
+    std::vector<gl::GLuint> BasicInterface::GetActiveVariables(const gl::GLuint index, const gl::GLuint length) {
+        auto unsig = std::vector<gl::GLuint>{};
+        for (auto sig : GetProgramResourceiv_vector(index, gl::GL_ACTIVE_VARIABLES, length)) {
+            unsig.push_back(positive(sig));
+        }
+        return unsig;
+    }
+
 }

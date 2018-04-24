@@ -38,6 +38,7 @@ namespace minuseins::interfaces {
         types::named_resource GetNamedResource(gl::GLuint index) const;
 
         std::vector<gl::GLuint> GetCompatibleSubroutines(const gl::GLuint index, const gl::GLuint length);
+        std::vector<gl::GLuint> GetActiveVariables(const gl::GLuint index, const gl::GLuint length);
         /**
          * wraps the original void GetProgramResourceName( uint program, enum programInterface, uint index, sizei bufSize, sizei *length, char *name )
          * The length of the longest name string for programInterface, including a null terminator, may be queried by calling GetProgramInterfaceiv with a pname of MAX_NAME_LENGTH.
