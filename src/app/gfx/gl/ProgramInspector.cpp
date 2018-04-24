@@ -5,15 +5,14 @@
 #include <imgui.h>
 #include <core/gfx/Shader.h>
 #include <iostream>
-#include "GpuProgramIntrospector.h"
+#include "ProgramInspector.h"
 #include "interfaces/types.h"
 #include "app/gfx/gl/interfaces/BasicInterface.h"
 
 namespace minuseins {
-    GpuProgramIntrospector::GpuProgramIntrospector(gl::GLuint programId, const std::string& name) :
+    ProgramInspector::ProgramInspector(gl::GLuint programId, const std::string& name) :
             programId_(programId),
-            name{name},
-            handler_fns{}
+            name{name}
     {
     }
     static const std::vector<gl::GLenum> programInterfaces {
@@ -41,6 +40,11 @@ namespace minuseins {
             gl::GL_COMPUTE_SUBROUTINE,
             gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
     };
+    gl::GLuint getActiveProgram() {
+        gl::GLint prog =0;
+        gl::glGetIntegerv(gl::GL_CURRENT_PROGRAM,&prog);
+        return static_cast<gl::GLuint>(prog);
+    }
     void resource_tooltip(const interfaces::types::property_t &props, const std::string& extra_text) {
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
@@ -61,29 +65,23 @@ namespace minuseins {
             ImGui::EndTooltip();
         }
     }
-    void GpuProgramIntrospector::init_uniform_values() {
 
+    void ProgramInspector::set_recompile_function(std::function<gl::GLuint(ProgramInspector&)> fn) {
+        compile_fn = fn;
     }
 
-    void GpuProgramIntrospector::init_program_output() {
-    }
-
-    void GpuProgramIntrospector::set_recompile_function(std::function<gl::GLuint(GpuProgramIntrospector&)> fn) {
-        recompile_fn = fn;
-    }
-
-    void GpuProgramIntrospector::draw_gui(bool *p_open) {
+    void ProgramInspector::draw_gui(bool *p_open) {
         if(!*p_open) {
             return;
         }
         auto window_name = "GPUProgram " + name;
         ImGui::PushID(window_name.c_str());
-        if(nullptr != recompile_fn) {
+        if(nullptr != compile_fn) {
             ImGui::TextUnformatted(name.c_str());
             ImGui::SameLine();
             if(ImGui::SmallButton(std::string("recompile##").append(name).c_str())){
                 ImGui::SameLine();
-                programId_ = recompile_fn(*this);
+                programId_ = compile_fn(*this);
                 //TODO clear or merge
                 initialize();
             }
@@ -114,39 +112,47 @@ namespace minuseins {
         ImGui::PopID();
     }
 
-    void GpuProgramIntrospector::initialize() {
+    void ProgramInspector::initialize() {
+        gl::GLuint activeProgram = getActiveProgram();
         gl::glUseProgram(programId_);
         for(auto interface : programInterfaces) {
-            auto resources = std::vector<std::unique_ptr<named_resource>>{};
-            auto handler = GetHandler(interface);
+            auto resources = named_resource_container{};
             auto basic_interface = GetInterface(interface);
-            if(nullptr != handler) {
+
+            if(auto handler = GetHandler(interface)) {
                 for(auto res : basic_interface.GetAllNamedResources()) {
-                    resources.push_back(handler->initialize(*this, res));
+                    resources.push_back(handler->initialize(*this, std::move(res)));
                 }
             } else {
                 handler_fn hdl = GetHandlerFunction(interface);
                 for(auto res : basic_interface.GetAllNamedResources()) {
-                    resources.push_back(hdl(res));
+                    resources.push_back(hdl(std::move(res)));
                 }
             }
             containers[interface] = std::move(resources);
         }
+        name_to_resid.clear();
+        for(auto& [interface, container] : containers) {
+            auto thing = std::unordered_map<std::string, gl::GLuint>{};
+            for(auto& res : container) {
+                thing.emplace(res->name, res->resourceIndex);
+            }
+            name_to_resid[interface] = std::move(thing);
+        }
         for(auto interface : programInterfaces) {
-            auto handler = GetHandler(interface);
-            if(nullptr != handler) {
-                handler->postInit(*this);
+            if(auto handler = GetHandler(interface)) {
+                handler->postInit(*this, containers[interface]);
             }
         }
-        gl::glUseProgram(0);
+        gl::glUseProgram(activeProgram);
     }
 
-    void GpuProgramIntrospector::addHandlerFunction(gl::GLenum interface, handler_fn hdl_fn) {
+    void ProgramInspector::addHandlerFunction(gl::GLenum interface, handler_fn hdl_fn) {
         std::cout << "add handler" << std::endl;
         handler_fns[interface] = hdl_fn;
     }
 
-    GpuProgramIntrospector::handler_fn GpuProgramIntrospector::GetHandlerFunction(gl::GLenum interface) {
+    ProgramInspector::handler_fn ProgramInspector::GetHandlerFunction(gl::GLenum interface) {
         try {
             return handler_fns.at(interface);
         } catch (std::out_of_range&) {
@@ -155,15 +161,15 @@ namespace minuseins {
 
     }
 
-    GpuProgramIntrospector::named_resource_container &GpuProgramIntrospector::getContainer(gl::GLenum interface) {
+    ProgramInspector::named_resource_container& ProgramInspector::GetContainer(gl::GLenum interface) {
         return containers.at(interface);
     }
 
-    void GpuProgramIntrospector::addHandler(gl::GLenum interface, std::unique_ptr<handler> hdl) {
+    void ProgramInspector::addHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl) {
         handlers[interface] = std::move(hdl);
     }
 
-    handler* GpuProgramIntrospector::GetHandler(gl::GLenum interface) {
+    resource_handler* ProgramInspector::GetHandler(gl::GLenum interface) {
         try {
             return handlers.at(interface).get();
         } catch (std::out_of_range&) {
@@ -172,7 +178,23 @@ namespace minuseins {
 
     }
 
-    interfaces::BasicInterface GpuProgramIntrospector::GetInterface(gl::GLenum interface) {
+    interfaces::BasicInterface ProgramInspector::GetInterface(gl::GLenum interface) {
         return interfaces::get_interface(interface, programId_);
+    }
+
+    void ProgramInspector::prepareDraw() {
+//        gl::GLuint activeProgram = getActiveProgram();
+
+        gl::glUseProgram(programId_);
+        for (auto& interface : programInterfaces) {
+            if(auto handler = GetHandler(interface)) {
+                handler->prepareDraw(*this, containers.at(interface));
+            }
+        }
+//        gl::glUseProgram(activeProgram);
+    }
+
+    gl::GLuint ProgramInspector::GetResourceIndex(gl::GLenum interface, const std::string &name) {
+        return name_to_resid.at(interface).at(name);
     }
 }
