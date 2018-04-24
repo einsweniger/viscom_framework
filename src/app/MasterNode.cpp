@@ -18,6 +18,7 @@
 #include <app/gfx/gl/handlers/UniformHandler.h>
 #include <app/gfx/gl/handlers/ProgramOutputHandler.h>
 #include <app/gfx/gl/handlers/SubroutineUniformHandler.h>
+#include <app/gfx/gl/handlers/UniformBlockHandler.h>
 #include "shadertoy/ShaderToyLoader.h"
 #include "gfx/gl/interfaces/types.h"
 
@@ -138,8 +139,8 @@ namespace viscom {
     void MasterNode::programCallback(std::shared_ptr<GPUProgram> prog) {
         namespace hdl = minuseins::handlers;
         ApplicationNodeImplementation::programCallback(prog);
-        auto gpi = minuseins::GpuProgramIntrospector(prog->getProgramId(), prog->getProgramName());
-        gpi.set_recompile_function([&](minuseins::GpuProgramIntrospector& inspector) {
+        auto gpi = minuseins::ProgramInspector(prog->getProgramId(), prog->getProgramName());
+        gpi.set_recompile_function([&](minuseins::ProgramInspector& inspector) {
             auto& program = compiledPrograms.at(inspector.name);
             auto currentProg = program->getProgramId();
             try {
@@ -151,8 +152,9 @@ namespace viscom {
         });
         namespace tp = minuseins::interfaces::types;
 
-        gpi.addHandler(gl::GL_UNIFORM, std::make_unique<hdl::UniformHandler>());
+        gpi.addHandler(gl::GL_UNIFORM, std::make_unique<hdl::UniformHandler>(this));
         gpi.addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<hdl::ProgramOutputHandler>(this));
+        gpi.addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<hdl::UniformBlockHandler>(this));
         gpi.addHandler(hdl::subroutineUniformEnum(gl::GL_FRAGMENT_SHADER), std::make_unique<hdl::SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
         gpi.initialize();
         std::cout << "new program! " << prog->getProgramName() << std::endl;
