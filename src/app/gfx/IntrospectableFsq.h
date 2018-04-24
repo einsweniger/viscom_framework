@@ -15,7 +15,7 @@
 #include <app/gfx/gl/interfaces/ProgramOutput.h>
 #include <app/gfx/gl/interfaces/Uniform.h>
 #include <enh/ApplicationNodeBase.h>
-#include <app/gfx/gl/GpuProgramIntrospector.h>
+#include <app/gfx/gl/ProgramInspector.h>
 #include <experimental/filesystem>
 
 namespace minuseins {
@@ -118,7 +118,7 @@ namespace minuseins {
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
         ShaderLog log_{};
-        GpuProgramIntrospector gpi_;
+        ProgramInspector gpi_;
         bool draw_gpi = true;
     };
 }
