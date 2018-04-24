@@ -5,7 +5,11 @@
 #define VISCOMFRAMEWORK_UNIFORMHANDLER_H
 
 #include <app/gfx/gl/interfaces/types.h>
-#include <app/gfx/gl/GpuProgramIntrospector.h>
+#include <app/gfx/gl/ProgramInspector.h>
+
+namespace viscom {
+    class ApplicationNodeBase;
+}
 
 namespace minuseins::handlers {
     using namespace interfaces::types;
@@ -20,21 +24,29 @@ namespace minuseins::handlers {
     struct generic_uniform : public named_resource, gets_updates, can_upload {
         explicit generic_uniform(named_resource res);
 
+        virtual void update(const generic_uniform& res);
+
+        void draw2D() override;
+        virtual void init(gl::GLuint program) {};
+
         bool receive_updates = false;
-        std::function<void()> updatefn;
+        std::function<void(generic_uniform& self)> updatefn;
         void update() override {
             if(nullptr != updatefn && receive_updates) {
-                updatefn();
+                updatefn(*this);
             }
         }
 
         bool do_upload = true;
-        std::function<void()> uploadfn;
+        std::function<void(generic_uniform& self)> uploadfn;
         void upload() override {
             if(nullptr != uploadfn && do_upload) {
-                uploadfn();
+                uploadfn(*this);
             }
         }
+
+        virtual size_t uploadSize() {return 0;}
+        virtual void* valuePtr() {return nullptr;}
 
         gl::GLint block_index;
         gl::GLint location;
@@ -49,6 +61,21 @@ namespace minuseins::handlers {
                 value{std::vector<T>(getSize(type))}
         {}
 
+        std::function<void(UniformWithValue<T>& self)> updatefn;
+        void update() override {
+            if(nullptr != updatefn && receive_updates) {
+                updatefn(*this);
+            }
+        }
+
+        size_t uploadSize() override {
+            return value.size() * sizeof(T);
+        }
+
+        void *valuePtr() override {
+            return &value[0];
+        }
+
         std::vector<T> value;
     };
 
@@ -59,11 +86,15 @@ namespace minuseins::handlers {
 
         void upload() override;
 
+        void init(gl::GLuint program) override;
+
         void draw2D() override;
     };
 
     struct FloatUniform : public UniformWithValue<gl::GLfloat> {
         using UniformWithValue::UniformWithValue;
+
+        void init(gl::GLuint program) override;
 
         void upload() override;
 
@@ -78,6 +109,8 @@ namespace minuseins::handlers {
         using UniformWithValue::UniformWithValue;
 
         void upload() override;
+
+        void init(gl::GLuint program) override;
     };
 
     //cannot use typedef, otherwise variant won't work, since it can't distinguish types.
@@ -85,6 +118,8 @@ namespace minuseins::handlers {
         using UniformWithValue::UniformWithValue;
 
         void draw2D() override;
+
+        void init(gl::GLuint program) override;
 
         void upload() override;
     };
@@ -104,10 +139,14 @@ namespace minuseins::handlers {
         std::vector<SamplerUniform> samplers;
     };
 
-    struct UniformHandler : public handler {
-        std::unique_ptr<named_resource> initialize(GpuProgramIntrospector& inspect,named_resource res) override;
+    struct UniformHandler : public resource_handler {
+        UniformHandler(viscom::ApplicationNodeBase *appnode) : appnode(appnode) {}
 
-        void postInit(GpuProgramIntrospector &inspect) override {/* empty */};
+        viscom::ApplicationNodeBase* appnode;
+
+        std::unique_ptr<named_resource> initialize(ProgramInspector& inspect,named_resource res) override;
+        void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override;
+        void postInit(ProgramInspector &inspect, named_resource_container &resources) override {/* empty */};
     };
 
     static std::unique_ptr<generic_uniform> make_uniform(interfaces::types::named_resource res) {

@@ -13,11 +13,31 @@ namespace minuseins::handlers {
     ProgramOutput::ProgramOutput(named_resource res) :
             named_resource(std::move(res)),
             type{toType(properties.at(gl::GL_TYPE))},
-            location{properties.at(gl::GL_LOCATION)}
+            location{static_cast<gl::GLuint>(properties.at(gl::GL_LOCATION))}
     {}
 
+    std::unique_ptr<named_resource> ProgramOutputHandler::initialize(ProgramInspector& inspect, named_resource res) {
+        return std::make_unique<ProgramOutput>(res);
+    }
+
+    void ProgramOutputHandler::postInit(ProgramInspector &inspect, named_resource_container &resources) {
+        try {
+            auto& outputs = inspect.GetContainer(gl::GL_PROGRAM_OUTPUT);
+            auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
+            //this assumes all outputs are vec4!
+            backBuffers_ = appnode->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
+            auto& textureLocations= appnode->SelectOffscreenBuffer(backBuffers_)->GetTextures();
+            for(auto& output : outputs) {
+                auto& po = dynamic_cast<ProgramOutput&>(*output);
+                po.textureLocation = textureLocations.at(po.location);
+            }
+        } catch (std::out_of_range&) {}
+    }
+
     void ProgramOutput::draw2D() {
+        //TODO add texture location to header
         named_resource::draw2D();
+        ImGui::SameLine();
         std::string headerName = name;
         if (ImGui::TreeNode(headerName.c_str())) {
             ImVec2 uv0(0, 1);
@@ -27,29 +47,4 @@ namespace minuseins::handlers {
             ImGui::TreePop();
         };
     }
-
-    std::unique_ptr<named_resource> ProgramOutputHandler::initialize(GpuProgramIntrospector& inspect, named_resource res) {
-        return std::make_unique<ProgramOutput>(res);
-    }
-
-    void ProgramOutputHandler::postInit(GpuProgramIntrospector &inspect) {
-        try {
-            auto& outputs = inspect.getContainer(gl::GL_PROGRAM_OUTPUT);
-            auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
-            //this assumes all outputs are vec4!
-            backBuffers_ = appnode->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
-            auto buffer = appnode->SelectOffscreenBuffer(backBuffers_);
-            for(const auto [index, textureLocation] : minuseins::util::enumerate(buffer->GetTextures())) {
-                try{
-                    dynamic_cast<ProgramOutput&>(*outputs.at(index)).textureLocation = textureLocation;
-                } catch (std::bad_cast&) {
-                    std::cerr << "bad cast to ProgramOutput!" << std::endl;
-                }
-            }
-        } catch (std::out_of_range&) {
-            std::cout << "post init POH, no outputs" << std::endl;
-        }
-    }
-
-    ProgramOutputHandler::ProgramOutputHandler(viscom::ApplicationNodeBase *appnode) : appnode(appnode) {}
 }

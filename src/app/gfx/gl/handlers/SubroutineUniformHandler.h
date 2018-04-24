@@ -5,7 +5,7 @@
 #ifndef VISCOMFRAMEWORK_SUBROUTINEHANDLER_H
 #define VISCOMFRAMEWORK_SUBROUTINEHANDLER_H
 
-#include <app/gfx/gl/GpuProgramIntrospector.h>
+#include <app/gfx/gl/ProgramInspector.h>
 #include <app/gfx/gl/interfaces/types.h>
 
 namespace minuseins::handlers {
@@ -50,27 +50,27 @@ namespace minuseins::handlers {
     struct SubroutineUniform : named_resource {
         SubroutineUniform(gl::GLenum stage, named_resource res);
 
-        // this is upload!
-        //gl::glUniformSubroutinesuiv(stage, uniforms.size(), &active_subs[0]);
-
         void draw2D() override;
 
         gl::GLenum stage;
         gl::GLuint location;
         gl::GLuint num_compatible_subroutines;
         gl::GLuint active_subroutine;
-        std::vector<gl::GLuint> compatibleSubroutines;
+        std::string previous_active = "";
+        std::unordered_map<gl::GLuint, std::string> subroutines{};
         std::vector<std::string> names;
     };
 
-    class SubroutineUniformHandler : public handler {
+    class SubroutineUniformHandler : public resource_handler {
     public:
-        SubroutineUniformHandler(gl::GLenum stage);
+        SubroutineUniformHandler(gl::GLenum stage) : stage(stage) {}
 
-        std::unique_ptr<named_resource> initialize(GpuProgramIntrospector &inspect, named_resource res) override;
+        void prepareDraw(ProgramInspector &inspect, named_resource_container &res) override;
+
+        std::unique_ptr<named_resource> initialize(ProgramInspector &inspect, named_resource res) override;
         gl::GLenum stage;
 
-        void postInit(GpuProgramIntrospector &inspect) override;
+        void postInit(ProgramInspector &inspect, named_resource_container &res) override;
 
     private:
         gl::GLuint GetUniformSubroutineuiv(const gl::GLint location) const {

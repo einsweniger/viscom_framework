@@ -6,7 +6,7 @@
 #define VISCOMFRAMEWORK_PROGRAMOUTPUTHANDLER_H
 
 #include <app/gfx/gl/interfaces/types.h>
-#include <app/gfx/gl/GpuProgramIntrospector.h>
+#include <app/gfx/gl/ProgramInspector.h>
 
 namespace viscom {
     class ApplicationNodeBase;
@@ -20,23 +20,21 @@ namespace minuseins::handlers {
         void draw2D() override;
 
         resource_type type;
-        gl::GLint location;
+        gl::GLuint location;
         gl::GLsizei textureLocation = 0;
     };
 
-    struct ProgramOutputHandler : public handler {
-        ProgramOutputHandler(viscom::ApplicationNodeBase *appnode);
+    struct ProgramOutputHandler : public resource_handler {
+        ProgramOutputHandler(viscom::ApplicationNodeBase *appnode) : appnode(appnode) {}
 
         viscom::ApplicationNodeBase* appnode;
+        std::vector<viscom::FrameBuffer> backBuffers_{};
 
-        std::vector<viscom::FrameBuffer> backBuffers_;
-        std::unique_ptr<named_resource> initialize(GpuProgramIntrospector& inspect, named_resource res) override;
-
-        void postInit(GpuProgramIntrospector &inspect) override;
+        void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override {};
+        std::unique_ptr<named_resource> initialize(ProgramInspector& inspect, named_resource res) override;
+        void postInit(ProgramInspector &inspect, named_resource_container &resources) override;
     };
 
 }
-
-
 
 #endif //VISCOMFRAMEWORK_PROGRAMOUTPUTHANDLER_H
