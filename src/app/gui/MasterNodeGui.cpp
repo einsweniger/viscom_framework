@@ -13,7 +13,7 @@
 #include <core/glfw.h>
 #include <glbinding-aux/Meta.h>
 #include <app/util.h>
-#include <app/gfx/gl/GpuProgramIntrospector.h>
+#include <app/gfx/gl/ProgramInspector.h>
 #include <app/MasterNode.h>
 #include <app/gfx/IntrospectableFsq.h>
 #include "MasterNodeGui.h"
@@ -59,11 +59,9 @@ namespace minuseins::gui {
     }
 
     MasterNodeGui::MasterNodeGui(viscom::ApplicationNodeImplementation *appImpl,
-                                 viscom::ApplicationNodeInternal *appNode)
-            :
+                                 viscom::ApplicationNodeInternal *appNode) :
             appImpl{appImpl},
             appNode{appNode},
-            //quad_{appNode->CreateFullscreenQuad("drawSimple.frag")},
             overlay{}
     {
         try {
@@ -71,15 +69,6 @@ namespace minuseins::gui {
         } catch (viscom::resource_loading_error&) {
             activeWindows["MainMenu"] = true;
         }
-//        auto prog = quad_->GetGPUProgram();
-//        for (auto it = prog->shaders_begin(); it != prog->shaders_end(); ++it) {
-//            if(it->get()->getType() == gl::GLenum::GL_VERTEX_SHADER) {
-//                quad_vertex_shader = it->get()->getShaderId();
-//                std::cout << "found vertex shader" << std::endl;
-//                break;
-//            }
-//        }
-
     }
 
     void MasterNodeGui::UpdateFrame(double currentTime, double elapsedTime) {
@@ -196,7 +185,7 @@ namespace minuseins::gui {
 
     void MasterNodeGui::drawNewScene(bool *p_open) {
         static std::vector<std::unique_ptr<viscom::GPUProgram>> pipeline{};
-        static std::vector<minuseins::GpuProgramIntrospector> gpis{};
+        static std::vector<minuseins::ProgramInspector> gpis{};
         static std::vector<std::unique_ptr<viscom::Shader>> stagedShaders{};
         static std::string stage_name = "";
         if(ImGui::Begin("Scene", p_open)) {
@@ -343,7 +332,6 @@ namespace minuseins::gui {
             ImGui::TextUnformatted(currentPath[base].c_str());
             for(auto& path : pathContents[base]) {
                 if(ImGui::SmallButton(path.filename().c_str())) {
-                    std::cout << "path click: " << currentPath[base] / path.filename() << std::endl;
                     //*p_open = false;
                     if(fs::is_directory(path)) {
                         currentPath[base] = currentPath[base] / path.filename() ;
@@ -365,11 +353,9 @@ namespace minuseins::gui {
 
     std::vector<fs::path> FileSelect::scan(fs::path folder) {
         auto content = std::vector<fs::path>{};
-        std::cout << "scanning: " << folder << std::endl;
         for(auto& p: fs::directory_iterator(folder)) {
             content.push_back(p);
         }
-        std::cout << "found " << content.size() << " entries" << std::endl;
         return content;
     }
 
@@ -379,7 +365,6 @@ namespace minuseins::gui {
     {
         for(auto pathstr : pathstrs) {
             auto base = fs::path{pathstr + basepath_suffix};
-            std::cout << "init w/ basepath = " << base << std::endl;
             basepaths_.push_back(base);
             currentPath[base] = fs::path{"/"};
             pathContents[base] = scan(base);
