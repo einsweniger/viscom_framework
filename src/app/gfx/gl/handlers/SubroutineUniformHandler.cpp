@@ -59,10 +59,16 @@ namespace minuseins::handlers {
 
     void SubroutineUniform::draw2D() {
         named_resource::draw2D();
-        for(const auto& [routineIdx, name] : subroutines) {
-            std::string header = name + "(" + std::to_string(routineIdx) + ")";
-            ImGui::RadioButton(header.c_str(), reinterpret_cast<int *>(&active_subroutine), routineIdx);
+        std::string popupname = "select subroutine##" + name;
+        if (ImGui::BeginPopupContextItem(popupname.c_str()))
+        {
+            for(const auto& [subroutine_index, name] : subroutines) {
+                std::string header = name + "##" + std::to_string(subroutine_index);
+                if(ImGui::Selectable(header.c_str(), subroutine_index == active_subroutine)) {
+                    active_subroutine = subroutine_index;
+                }
+            }
+            ImGui::EndPopup();
         }
-        //TODO use right-click to draw popup, select
     }
 }

@@ -12,10 +12,22 @@
 #include <utility>
 #include <vector>
 #include <tuple>
+#include <cassert>
 
 
 
 namespace minuseins::util {
+    constexpr unsigned int make_positive(const int num) {
+        if (0 >= num) {
+            return 0;
+        } else {
+            return static_cast<unsigned int>(num);
+        }
+    }
+    constexpr unsigned int ensure_positive(const int num) {
+        assert(0 <= num);
+        return static_cast<unsigned int>(num);
+    }
     namespace detail {
         template <class Iterator>
         struct enumerate_iterator {

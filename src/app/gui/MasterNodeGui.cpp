@@ -253,6 +253,7 @@ namespace minuseins::gui {
                 return false;
             }
         }, "shader/"};
+        shader_select.draw("Open Shader", p_open);
         ImGui::Begin("Open Shader");
         ImGui::InputText("program name",&progname[0],50);
         for(auto it = staged_shaders.begin(); it != staged_shaders.end(); it++) {
@@ -277,7 +278,6 @@ namespace minuseins::gui {
             }
         }
         ImGui::End();
-        shader_select.draw("Open Shader", p_open);
     }
 
     void MasterNodeGui::drawTextureImportWindow(bool *p_open) {

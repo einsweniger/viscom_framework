@@ -6,138 +6,13 @@
 
 #include <app/gfx/gl/interfaces/types.h>
 #include <app/gfx/gl/ProgramInspector.h>
+#include "detail/UniformTypes.h"
 
 namespace viscom {
     class ApplicationNodeBase;
 }
 
 namespace minuseins::handlers {
-    using namespace interfaces::types;
-    struct gets_updates {
-        virtual void update() = 0;
-    };
-
-    struct can_upload {
-        virtual void upload() = 0;
-    };
-
-    struct generic_uniform : public named_resource, gets_updates, can_upload {
-        explicit generic_uniform(named_resource res);
-
-        virtual void update(const generic_uniform& res);
-
-        void draw2D() override;
-        virtual void init(gl::GLuint program) {};
-
-        bool receive_updates = false;
-        std::function<void(generic_uniform& self)> updatefn;
-        void update() override {
-            if(nullptr != updatefn && receive_updates) {
-                updatefn(*this);
-            }
-        }
-
-        bool do_upload = true;
-        std::function<void(generic_uniform& self)> uploadfn;
-        void upload() override {
-            if(nullptr != uploadfn && do_upload) {
-                uploadfn(*this);
-            }
-        }
-
-        virtual size_t uploadSize() {return 0;}
-        virtual void* valuePtr() {return nullptr;}
-
-        gl::GLint block_index;
-        gl::GLint location;
-        resource_type type;
-        gl::GLuint array_size;
-    };
-
-    template<typename T>
-    struct UniformWithValue : public generic_uniform {
-        explicit UniformWithValue(named_resource arg) :
-                generic_uniform(std::move(arg)),
-                value{std::vector<T>(getSize(type))}
-        {}
-
-        std::function<void(UniformWithValue<T>& self)> updatefn;
-        void update() override {
-            if(nullptr != updatefn && receive_updates) {
-                updatefn(*this);
-            }
-        }
-
-        size_t uploadSize() override {
-            return value.size() * sizeof(T);
-        }
-
-        void *valuePtr() override {
-            return &value[0];
-        }
-
-        std::vector<T> value;
-    };
-
-    static void uniform_tooltip(const property_t &props, const std::string &extra_text = "");
-
-    struct IntegerUniform : public UniformWithValue<gl::GLint> {
-        using UniformWithValue::UniformWithValue;
-
-        void upload() override;
-
-        void init(gl::GLuint program) override;
-
-        void draw2D() override;
-    };
-
-    struct FloatUniform : public UniformWithValue<gl::GLfloat> {
-        using UniformWithValue::UniformWithValue;
-
-        void init(gl::GLuint program) override;
-
-        void upload() override;
-
-        void draw2D() override;
-    };
-
-    struct DoubleUniform : public UniformWithValue<gl::GLdouble> {
-        using UniformWithValue::UniformWithValue;
-    };
-
-    struct UnsignedUniform : public UniformWithValue<gl::GLuint> {
-        using UniformWithValue::UniformWithValue;
-
-        void upload() override;
-
-        void init(gl::GLuint program) override;
-    };
-
-    //cannot use typedef, otherwise variant won't work, since it can't distinguish types.
-    struct BooleanUniform : public UniformWithValue<gl::GLint> {
-        using UniformWithValue::UniformWithValue;
-
-        void draw2D() override;
-
-        void init(gl::GLuint program) override;
-
-        void upload() override;
-    };
-
-    struct SamplerUniform : public generic_uniform {
-        using generic_uniform::generic_uniform;
-
-        void draw2D() override;
-
-        void upload() override;
-
-        gl::GLint boundTexture = 0;
-        gl::GLint textureUnit = 0;
-    };
-
-    struct CollectedSamplers {
-        std::vector<SamplerUniform> samplers;
-    };
 
     struct UniformHandler : public resource_handler {
         UniformHandler(viscom::ApplicationNodeBase *appnode) : appnode(appnode) {}

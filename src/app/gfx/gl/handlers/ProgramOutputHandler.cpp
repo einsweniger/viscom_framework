@@ -35,10 +35,9 @@ namespace minuseins::handlers {
     }
 
     void ProgramOutput::draw2D() {
-        //TODO add texture location to header
         named_resource::draw2D();
         ImGui::SameLine();
-        std::string headerName = name;
+        std::string headerName = name + " tex idx: " + std::to_string(textureLocation);
         if (ImGui::TreeNode(headerName.c_str())) {
             ImVec2 uv0(0, 1);
             ImVec2 uv1(1, 0);
