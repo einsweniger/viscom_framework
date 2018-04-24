@@ -20,6 +20,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <app/gfx/Primitives.h>
+#include <app/gfx/gl/handlers/ProgramOutputHandler.h>
 
 //#include "Vertices.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
@@ -49,11 +50,12 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
+        currentTime_ = static_cast<float>(currentTime);
+        elapsedTime_ = static_cast<float>(elapsedTime);
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
         if(active_fsq_ != nullptr) {
             active_fsq_->UpdateFrame(currentTime, elapsedTime);
         }
-
     }
 
 
@@ -81,6 +83,17 @@ namespace viscom {
                 }
                 gl::glUseProgram(0);
             });
+        }
+        if(!compiledPrograms.empty()) {
+            for(auto& inspect : gpis) {
+                auto out = inspect.GetHandler(gl::GL_PROGRAM_OUTPUT);
+                auto& prog = dynamic_cast<minuseins::handlers::ProgramOutputHandler&>(*out);
+                auto buffer = SelectOffscreenBuffer(prog.backBuffers_);
+                buffer->DrawToFBO([&](){
+                    inspect.prepareDraw();
+                    dummy_quad->Draw();
+                });
+            }
         }
     }
 

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <app/gfx/gl/GpuProgramIntrospector.h>
+#include <app/gfx/gl/ProgramInspector.h>
 #include "enh/ApplicationNodeBase.h"
 
 namespace minuseins {
@@ -45,8 +45,11 @@ namespace viscom {
         std::unique_ptr<FullscreenQuad> dummy_quad;
         std::vector<std::unique_ptr<GPUProgram>> programs;
         std::vector<std::unique_ptr<Texture>> textures;
-        std::vector<minuseins::GpuProgramIntrospector> gpis;
+        std::vector<minuseins::ProgramInspector> gpis;
         std::unordered_map<std::string,std::shared_ptr<GPUProgram>> compiledPrograms;
+
+        float currentTime_;
+        float elapsedTime_;
     protected:
         void toggleMouseGrab();
 
