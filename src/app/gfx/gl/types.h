@@ -7,7 +7,58 @@
 #include <glbinding/gl/gl.h>
 #include <glbinding-aux/Meta.h>
 #include <map>
+
+namespace minuseins::interfaces {
+    enum type {
+        uniform                              = static_cast<unsigned int>(gl::GL_UNIFORM),
+        uniform_block                        = static_cast<unsigned int>(gl::GL_UNIFORM_BLOCK),
+        atomic_counter_buffer                = static_cast<unsigned int>(gl::GL_ATOMIC_COUNTER_BUFFER),
+        program_input                        = static_cast<unsigned int>(gl::GL_PROGRAM_INPUT),
+        program_output                       = static_cast<unsigned int>(gl::GL_PROGRAM_OUTPUT),
+        transform_feedback_varying           = static_cast<unsigned int>(gl::GL_TRANSFORM_FEEDBACK_VARYING),
+        transform_feedback_buffer            = static_cast<unsigned int>(gl::GL_TRANSFORM_FEEDBACK_BUFFER),
+        buffer_variable                      = static_cast<unsigned int>(gl::GL_BUFFER_VARIABLE),
+        shader_storage_block                 = static_cast<unsigned int>(gl::GL_SHADER_STORAGE_BLOCK),
+        vertex_subroutine                    = static_cast<unsigned int>(gl::GL_VERTEX_SUBROUTINE),
+        vertex_subroutine_uniform            = static_cast<unsigned int>(gl::GL_VERTEX_SUBROUTINE_UNIFORM),
+        tess_control_subroutine              = static_cast<unsigned int>(gl::GL_TESS_CONTROL_SUBROUTINE),
+        tess_control_subroutine_uniform      = static_cast<unsigned int>(gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM),
+        tess_evaluation_subroutine           = static_cast<unsigned int>(gl::GL_TESS_EVALUATION_SUBROUTINE),
+        tess_evaluation_subroutine_uniform   = static_cast<unsigned int>(gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM),
+        geometry_subroutine                  = static_cast<unsigned int>(gl::GL_GEOMETRY_SUBROUTINE),
+        geometry_subroutine_uniform          = static_cast<unsigned int>(gl::GL_GEOMETRY_SUBROUTINE_UNIFORM),
+        fragment_subroutine                  = static_cast<unsigned int>(gl::GL_FRAGMENT_SUBROUTINE),
+        fragment_subroutine_uniform          = static_cast<unsigned int>(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM),
+        compute_subroutine                   = static_cast<unsigned int>(gl::GL_COMPUTE_SUBROUTINE),
+        compute_subroutine_uniform           = static_cast<unsigned int>(gl::GL_COMPUTE_SUBROUTINE_UNIFORM),
+    };
+    const static std::vector<type> all_interfaces = {
+            uniform,
+            uniform_block,
+            atomic_counter_buffer,
+            program_input,
+            program_output,
+            transform_feedback_varying,
+            transform_feedback_buffer,
+            buffer_variable,
+            shader_storage_block,
+            vertex_subroutine,
+            vertex_subroutine_uniform,
+            tess_control_subroutine,
+            tess_control_subroutine_uniform,
+            tess_evaluation_subroutine,
+            tess_evaluation_subroutine_uniform,
+            geometry_subroutine,
+            geometry_subroutine_uniform,
+            fragment_subroutine,
+            fragment_subroutine_uniform,
+            compute_subroutine,
+            compute_subroutine_uniform,
+    };
+    typedef enum type interface_type;
+}
 namespace minuseins::interfaces::types {
+
 
     using property_t = std::map<gl::GLenum, gl::GLint>;
 
@@ -25,29 +76,6 @@ namespace minuseins::interfaces::types {
         std::string name;
     };
 
-    enum class interface_type {
-        uniform = static_cast<unsigned int>(gl::GL_UNIFORM),
-        uniform_block = static_cast<unsigned int>(gl::GL_UNIFORM_BLOCK),
-        atomic_counter_buffer = static_cast<unsigned int>(gl::GL_ATOMIC_COUNTER_BUFFER),
-        program_input= static_cast<unsigned int>(gl::GL_PROGRAM_INPUT),
-        program_output= static_cast<unsigned int>(gl::GL_PROGRAM_OUTPUT),
-        transform_feedback_varying= static_cast<unsigned int>(gl::GL_TRANSFORM_FEEDBACK_VARYING),
-        transform_feedback_buffer= static_cast<unsigned int>(gl::GL_TRANSFORM_FEEDBACK_BUFFER),
-        buffer_variable= static_cast<unsigned int>(gl::GL_BUFFER_VARIABLE),
-        shader_storage_block= static_cast<unsigned int>(gl::GL_SHADER_STORAGE_BLOCK),
-        vertex_subroutine        = static_cast<unsigned int>(gl::GL_VERTEX_SUBROUTINE),
-        vertex_subroutine_uniform= static_cast<unsigned int>(gl::GL_VERTEX_SUBROUTINE_UNIFORM),
-        tess_control_subroutine        = static_cast<unsigned int>(gl::GL_TESS_CONTROL_SUBROUTINE),
-        tess_control_subroutine_uniform= static_cast<unsigned int>(gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM),
-        tess_evaluation_subroutine        = static_cast<unsigned int>(gl::GL_TESS_EVALUATION_SUBROUTINE),
-        tess_evaluation_subroutine_uniform= static_cast<unsigned int>(gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM),
-        geometry_subroutine        = static_cast<unsigned int>(gl::GL_GEOMETRY_SUBROUTINE),
-        geometry_subroutine_uniform= static_cast<unsigned int>(gl::GL_GEOMETRY_SUBROUTINE_UNIFORM),
-        fragment_subroutine        = static_cast<unsigned int>(gl::GL_FRAGMENT_SUBROUTINE),
-        fragment_subroutine_uniform= static_cast<unsigned int>(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM),
-        compute_subroutine        = static_cast<unsigned int>(gl::GL_COMPUTE_SUBROUTINE),
-        compute_subroutine_uniform= static_cast<unsigned int>(gl::GL_COMPUTE_SUBROUTINE_UNIFORM),
-    };
     /**
  * OpenGL Shading Language type tokens, and corre-
 sponding shading language keywords declaring each such type.

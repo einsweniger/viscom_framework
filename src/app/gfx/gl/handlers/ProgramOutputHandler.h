@@ -29,6 +29,7 @@ namespace minuseins::handlers {
 
         viscom::ApplicationNodeBase* appnode;
         std::vector<viscom::FrameBuffer> backBuffers_{};
+        size_t previous_size=0;
 
         void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override {};
         std::unique_ptr<named_resource> initialize(ProgramInspector& inspect, named_resource res) override;

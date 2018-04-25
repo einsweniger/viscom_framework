@@ -21,7 +21,7 @@ namespace minuseins::handlers {
         explicit generic_uniform(named_resource res);
 
         virtual void update_properties(const generic_uniform &res);
-        virtual void init(gl::GLuint program);
+        virtual void init(gl::GLuint program);  //TODO init fns generate errors for uniform block members (location -1)
         virtual size_t uploadSize();
         virtual void* valuePtr();
 

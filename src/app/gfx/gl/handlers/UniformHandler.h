@@ -14,10 +14,11 @@ namespace viscom {
 namespace minuseins::handlers {
 
     struct UniformHandler : public resource_handler {
-        UniformHandler(viscom::ApplicationNodeBase *appnode) : appnode(appnode) {}
+        UniformHandler() {}
 
-        viscom::ApplicationNodeBase* appnode;
-
+        std::vector<std::string> callback_strs{};
+        void set_callback_fn(std::function<void(std::string_view, generic_uniform *res)>);
+        std::function<void(std::string_view, generic_uniform *res)> callback;
         std::unique_ptr<named_resource> initialize(ProgramInspector& inspect,named_resource res) override;
         void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override;
         void postInit(ProgramInspector &inspect, named_resource_container &resources) override {/* empty */};

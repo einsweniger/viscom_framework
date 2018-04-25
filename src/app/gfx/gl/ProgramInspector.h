@@ -19,6 +19,32 @@ namespace minuseins {
     }
     struct resource_handler;
 
+    static const std::vector<gl::GLenum> all_interfaces {
+            gl::GL_UNIFORM,
+            gl::GL_UNIFORM_BLOCK,
+            gl::GL_ATOMIC_COUNTER_BUFFER,
+            gl::GL_PROGRAM_INPUT,
+            gl::GL_PROGRAM_OUTPUT,
+
+            gl::GL_TRANSFORM_FEEDBACK_VARYING,
+            gl::GL_TRANSFORM_FEEDBACK_BUFFER,
+            gl::GL_BUFFER_VARIABLE,
+            gl::GL_SHADER_STORAGE_BLOCK,
+
+            gl::GL_VERTEX_SUBROUTINE,
+            gl::GL_VERTEX_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_CONTROL_SUBROUTINE,
+            gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
+            gl::GL_TESS_EVALUATION_SUBROUTINE,
+            gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
+            gl::GL_GEOMETRY_SUBROUTINE,
+            gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
+            gl::GL_FRAGMENT_SUBROUTINE,
+            gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
+            gl::GL_COMPUTE_SUBROUTINE,
+            gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
+    };
+
     class ProgramInspector {
     public:
         using named_resource_ptr = std::unique_ptr<named_resource>;
@@ -29,7 +55,7 @@ namespace minuseins {
         explicit ProgramInspector(gl::GLuint programId, const std::string& name = "_no_name_");
 
         void set_recompile_function(recompile_fn fn);
-        void draw_gui(bool* p_open);
+        void draw_gui(bool *p_open, std::vector<gl::GLenum> draw_interfaces = all_interfaces);
         void addHandlerFunction(gl::GLenum interface, handler_fn hdl_fn);
         void addHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl);
         void initialize();

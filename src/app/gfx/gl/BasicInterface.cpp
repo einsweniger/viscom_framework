@@ -10,57 +10,6 @@ namespace minuseins::interfaces {
     BasicInterface::BasicInterface(gl::GLenum interface, gl::GLuint program, std::vector<gl::GLenum> properties) :
             interface(interface), program(program), properties{properties} {}
 
-//                         +---------- TYPE
-//                         |   +------ ARRAY_SIZE
-//                         |   |   ,-- LOCATION
-//                         v   v   v
-//  +--------------------+---+---+---+ +------------------ OFFSET
-//  |_SUBROUTINE_UNIFORM |   | x | x | |   +-------------- BLOCK_INDEX
-//  +--------------------+---+---+---+ |   |   +---------- ARRAY_STRIDE
-//  |PROGRAM_INPUT       | x | x | x | |   |   |   +------ MATRIX_STRIDE
-//  +--------------------+---+---+---+ |   |   |   |   ,-- IS_ROW_MAYOR
-//  |PROGRAM_OUTPUT      | x | x | x | v   v   v   v   v   +------ TOP_LEVEL_ARRAY_SIZE
-//  +--------------------+---+---+---+---+---+---+---+---+ |   ,-- TOP_LEVEL_ARRAY_STRIDE
-//  |UNIFORM             | x | x | x | x | x | x | x | x | v   v
-//  +--------------------+---+---+---+---+---+---+---+---+---+---+ ,-- TRANSFORM_FEEDBACK_BUFFER_INDEX
-//  |BUFFER_VARIABLE     | x | x |   | x | x | x | x | x | x | x | v
-//  +--------------------+---+---+---+---+---+---+---+---+---+---+---+
-//  |TRANSFORM_FEEDBACK- | x | x |   | x |   |   |   |   |   |   | x |
-//  |VARYING             |   |   |   |   |   |   |   |   |   |   |   |
-//  +--------------------+---+---+---+---+---+---+---+---+---+---+---+
-//
-//       +-- TRANSFORM_FEEDBACK_BUFFER_STRIDE
-//       |   +-------------- BUFFER_BINDING
-//       |   |   +---------- ACTIVE_VARIABLES (Array!)
-//       |   |   |   +------ NUM_ACTIVE_VARIABLES
-//       |   |   |   |   ,-- BUFFER_DATA_SIZE
-//       v   v   v   v   v                         +------ NAME_LENGTH
-//     +---+---+---+---+---+---------------------+ |   ,-- REFERENCED_BY_XXX_SHADER
-//     | x | x | x | x |   |TRANSFORM_FEEDBACK_BF| v   v
-//     +---+---+---+---+---+---------------------+---+---+
-//         | x | x | x | x |ATOMIC_COUNTER_BUFFER|   | x |
-//         +---+---+---+---+---------------------+---+---+
-//         | x | x | x | x |UNIFORM_BLOCK        | x | x | +------ IS_PER_PATCH
-//         +---+---+---+---+---------------------+---+---+ |   ,-- LOCATION_COMPONENT
-//         | x | x | x | x |SHADER_STORAGE_BLOCK | x | x | v   v
-//         +---+---+---+---+---------------------+---+---+---+---+ ,-- LOCATION_INDEX
-//                         |PROGRAM_INPUT        | x | x | x | x | v
-//                         +---------------------+---+---+---+---+---+ ,-- ATOMIC_COUNTER_BUFFER_INDEX
-//                         |PROGRAM_OUTPUT       | x | x | x | x | x | v
-//                         +---------------------+---+---+---+---+---+---+
-//                         |UNIFORM              | x | x |   |   |   | x |
-//                         +---------------------+---+---+---+---+---+---+
-//                         |BUFFER_VARIABLE      | x | x |
-//                         +---------------------+---+---+
-//                         |TRANSFORM_FEEDBACK-  | x |   |
-//                         |VARYING              |   |   | +------ COMPATIBLE_SUBROUTINES (Array!)
-//                         +---------------------+---+---+ |   ,-- NUM_COMPATIBLE_SUBROUTINES
-//                         |_SUBROUTINE          | x |   | v   v
-//                         +---------------------+---+---+---+---+
-//                         |_SUBROUTINE_UNIFORM  | x |   | x | x |
-//                         +---------------------+---+---+---+---+
-//
-
     types::property_t BasicInterface::GetProgramResourceiv(const gl::GLuint index, const std::vector<gl::GLenum> &props) const {
         std::vector<gl::GLint> params(props.size()); //The values associated with the properties of the active resource are written to consecutive entries in params, in increasing order according to position in props.
         auto propCount = static_cast<gl::GLsizei>(props.size()); //Values for propCount properties specified by the array props are returned.

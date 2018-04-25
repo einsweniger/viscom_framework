@@ -15,31 +15,7 @@ namespace minuseins {
             name{name}
     {
     }
-    static const std::vector<gl::GLenum> programInterfaces {
-            gl::GL_UNIFORM,
-            gl::GL_UNIFORM_BLOCK,
-            gl::GL_ATOMIC_COUNTER_BUFFER,
-            gl::GL_PROGRAM_INPUT,
-            gl::GL_PROGRAM_OUTPUT,
 
-            gl::GL_TRANSFORM_FEEDBACK_VARYING,
-            gl::GL_TRANSFORM_FEEDBACK_BUFFER,
-            gl::GL_BUFFER_VARIABLE,
-            gl::GL_SHADER_STORAGE_BLOCK,
-
-            gl::GL_VERTEX_SUBROUTINE,
-            gl::GL_VERTEX_SUBROUTINE_UNIFORM,
-            gl::GL_TESS_CONTROL_SUBROUTINE,
-            gl::GL_TESS_CONTROL_SUBROUTINE_UNIFORM,
-            gl::GL_TESS_EVALUATION_SUBROUTINE,
-            gl::GL_TESS_EVALUATION_SUBROUTINE_UNIFORM,
-            gl::GL_GEOMETRY_SUBROUTINE,
-            gl::GL_GEOMETRY_SUBROUTINE_UNIFORM,
-            gl::GL_FRAGMENT_SUBROUTINE,
-            gl::GL_FRAGMENT_SUBROUTINE_UNIFORM,
-            gl::GL_COMPUTE_SUBROUTINE,
-            gl::GL_COMPUTE_SUBROUTINE_UNIFORM,
-    };
     gl::GLuint getActiveProgram() {
         gl::GLint prog =0;
         gl::glGetIntegerv(gl::GL_CURRENT_PROGRAM,&prog);
@@ -70,7 +46,7 @@ namespace minuseins {
         compile_fn = fn;
     }
 
-    void ProgramInspector::draw_gui(bool *p_open) {
+    void ProgramInspector::draw_gui(bool *p_open, std::vector<gl::GLenum> draw_interfaces) {
         if(!*p_open) {
             return;
         }
@@ -82,7 +58,6 @@ namespace minuseins {
             if(ImGui::SmallButton(std::string("recompile##").append(name).c_str())){
                 ImGui::SameLine();
                 programId_ = compile_fn(*this);
-                //TODO clear or merge
                 initialize();
             }
 
@@ -91,7 +66,8 @@ namespace minuseins {
         ImGui::TextDisabled("(?)");
         if(ImGui::IsItemHovered()) {
             ImGui::BeginTooltip();
-            for(auto interface : programInterfaces) {
+            ImGui::Text("Program: %2d",  programId_);
+            for(auto interface : all_interfaces) {
                 gl::GLint count;
                 gl::glGetProgramInterfaceiv(programId_, interface, gl::GL_ACTIVE_RESOURCES, &count);
                 if(0 >= count) continue;
@@ -99,15 +75,19 @@ namespace minuseins {
             }
             ImGui::EndTooltip();
         }
-
-        for(auto& [iface, resources] : containers) {
-            std::string header = "iface " + glbinding::aux::Meta::getString(iface);
-            if(!resources.empty() && ImGui::TreeNode(header.c_str())) {
-                for(auto& resource : resources) {
+        ImGui::SameLine();
+        if(ImGui::TreeNode("details")) {
+            for(auto& interface : draw_interfaces) {
+                if(containers.at(interface).empty()) continue;
+                std::string header = glbinding::aux::Meta::getString(interface);
+                ImGui::TextUnformatted(header.c_str());
+                ImGui::SameLine();
+                ImGui::Separator();
+                for(auto& resource: containers.at(interface)) {
                     resource->draw2D();
                 }
-                ImGui::TreePop();
             }
+            ImGui::TreePop();
         }
         ImGui::PopID();
     }
@@ -115,7 +95,7 @@ namespace minuseins {
     void ProgramInspector::initialize() {
         gl::GLuint activeProgram = getActiveProgram();
         gl::glUseProgram(programId_);
-        for(auto interface : programInterfaces) {
+        for(auto interface : all_interfaces) {
             auto resources = named_resource_container{};
             auto basic_interface = GetInterface(interface);
 
@@ -139,7 +119,7 @@ namespace minuseins {
             }
             name_to_resid[interface] = std::move(thing);
         }
-        for(auto interface : programInterfaces) {
+        for(auto interface : all_interfaces) {
             if(auto handler = GetHandler(interface)) {
                 handler->postInit(*this, containers[interface]);
             }
@@ -186,7 +166,7 @@ namespace minuseins {
 //        gl::GLuint activeProgram = getActiveProgram();
 
         gl::glUseProgram(programId_);
-        for (auto& interface : programInterfaces) {
+        for (auto& interface : all_interfaces) {
             if(auto handler = GetHandler(interface)) {
                 handler->prepareDraw(*this, containers.at(interface));
             }

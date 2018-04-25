@@ -4,8 +4,9 @@
 
 #include <imgui.h>
 #include <sstream>
-#include <app/util.h>
 #include <iostream>
+#include <algorithm>
+#include <app/util.h>
 #include "UniformHandler.h"
 #include <core/ApplicationNodeBase.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -33,20 +34,12 @@ namespace minuseins::handlers {
         } catch (std::out_of_range&) {/*no previous value --> new uniform*/}
 
 
-        //TODO remove this and think about how others can hook in here.
-        if(("iTime" == new_uniform->name || "u_time" == new_uniform->name) && new_uniform->type == resource_type::glsl_float) {
-            auto& timer = dynamic_cast<FloatUniform&>(*new_uniform);
-            timer.updatefn = [&](auto& self) {
-                self.value[0] = dynamic_cast<viscom::ApplicationNodeImplementation*>(appnode)->currentTime_;
-            };
-            timer.receive_updates = true;
+        if(std::find(callback_strs.begin(),callback_strs.end(), new_uniform->name) != callback_strs.end()) {
+            if(callback) {
+                callback(new_uniform->name, new_uniform.get());
+            }
         }
-        if("u_MVP" == new_uniform->name) {
-            new_uniform->uploadfn = [&](generic_uniform& self){
-                auto MVP = appnode->GetCamera()->GetViewPerspectiveMatrix();
-                gl::glUniformMatrix4fv(self.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
-            };
-        }
+        //TODO this init function needs to be pluggable, to restore from other values e.g. json file
         new_uniform->init(inspect.programId_);
         return std::move(new_uniform);
     }
@@ -57,6 +50,10 @@ namespace minuseins::handlers {
             uniform.get_updated_value();
             uniform.upload_value();
         }
+    }
+
+    void UniformHandler::set_callback_fn(std::function<void(std::string_view, generic_uniform *res)> fn) {
+        callback = fn;
     }
 
 
