@@ -42,6 +42,13 @@ namespace viscom {
             cereal::JSONInputArchive ar{instr};
             ar(*gui_);
         }
+        cfgPath = findConfig("StartupPrograms.json", appNode);
+        if(fs::exists(cfgPath)) {
+            auto instr = std::ifstream{cfgPath};
+            cereal::JSONInputArchive ar{instr};
+            ar(startupPrograms);
+        }
+
     }
 
     MasterNode::~MasterNode() = default;
@@ -86,15 +93,16 @@ namespace viscom {
     }
 
     void MasterNode::CleanUp() {
+        ApplicationNodeImplementation::CleanUp();
         auto cfgpath = findConfig(minuseins::gui::MasterNodeGui::config_name, GetApplication());
         std::cout<< "dump:" << cfgpath << std::endl;
         auto gui_stream = std::ofstream{cfgpath};
         cereal::JSONOutputArchive ar{gui_stream};
         ar(*gui_);
-//        auto scene_stream = std::ofstream{findConfig("ActiveScene.json", GetApplication())};
-//        cereal::JSONOutputArchive ar2{scene_stream};
-//        ar2(fsqs);
-        ApplicationNodeImplementation::CleanUp();
+        auto startup_stream = std::ofstream{findConfig("StartupPrograms.json", GetApplication())};
+        cereal::JSONOutputArchive ar2{startup_stream};
+        ar2(CEREAL_NVP(startupPrograms));
+
     }
 
 }

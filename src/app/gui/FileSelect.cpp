@@ -28,47 +28,44 @@ namespace minuseins::gui {
         }
     }
 
-    void FileSelect::draw() {
-        auto childsize = ImVec2(ImGui::GetWindowContentRegionWidth() / basepaths_.size(), 300);
-        if(!ImGui::Begin(name.c_str(), &active, ImVec2(0,300),-1.0f, ImGuiWindowFlags_MenuBar)) {
-            return;
-        }
+    void FileSelect::draw(bool *p_open) {
 
-        for (auto it = basepaths_.begin(); it != basepaths_.end(); ++it) {
-            auto& base = (*it);
-            ImGui::PushID(base.c_str());
-            ImGui::BeginChild(base.c_str(),childsize, true, ImGuiWindowFlags_MenuBar);
-            ImGui::BeginMenuBar();
-            if(ImGui::MenuItem("rescan")) {
-                pathContents[base] = scan(base / currentPath[base]);
-            }
-            if(ImGui::MenuItem("up") && currentPath[base].has_parent_path()) {
-                currentPath[base] = currentPath[base].parent_path();
-                pathContents[base] = scan(base / currentPath[base]);
-            }
-            ImGui::EndMenuBar();
-            ImGui::TextUnformatted(currentPath[base].c_str());
-            for(auto& path : pathContents[base]) {
-                if(ImGui::SmallButton(path.filename().c_str())) {
-                    if(fs::is_directory(path)) {
-                        currentPath[base] = currentPath[base] / path.filename() ;
-                        pathContents[base] = scan(base / currentPath[base]);
-                        break;
-                    } else if(callback(currentPath[base] / path.filename())) {
-                        active = false;
-                        break;
+        if(ImGui::Begin(name.c_str(), p_open, ImVec2(0,300),-1.0f, ImGuiWindowFlags_MenuBar)) {
+            auto childsize = ImVec2(ImGui::GetWindowContentRegionWidth() / basepaths_.size(), 0);
+            for (auto it = basepaths_.begin(); it != basepaths_.end(); ++it) {
+                auto& base = (*it);
+                ImGui::PushID(base.c_str());
+                ImGui::BeginChild(base.c_str(),childsize, true, ImGuiWindowFlags_MenuBar);
+                ImGui::BeginMenuBar();
+                if(ImGui::MenuItem("rescan")) {
+                    pathContents[base] = scan(base / currentPath[base]);
+                }
+                if(ImGui::MenuItem("up") && currentPath[base].has_parent_path()) {
+                    currentPath[base] = currentPath[base].parent_path();
+                    pathContents[base] = scan(base / currentPath[base]);
+                }
+                ImGui::EndMenuBar();
+                ImGui::TextUnformatted(currentPath[base].c_str());
+                for(auto& path : pathContents[base]) {
+                    if(ImGui::SmallButton(path.filename().c_str())) {
+                        if(fs::is_directory(path)) {
+                            currentPath[base] = currentPath[base] / path.filename() ;
+                            pathContents[base] = scan(base / currentPath[base]);
+                            break;
+                        } else if(callback(currentPath[base] / path.filename())) {
+                            *p_open = false;
+                            break;
+                        }
                     }
                 }
-            }
 
-            ImGui::EndChild();
-            ImGui::PopID();
-            if(it != basepaths_.end()-1) {
-                ImGui::SameLine();
+                ImGui::EndChild();
+                ImGui::PopID();
+                if(it != basepaths_.end()-1) {
+                    ImGui::SameLine();
+                }
             }
+            ImGui::End();
         }
-        for(auto& base : basepaths_) {
-        }
-        ImGui::End();
     }
 }

@@ -15,9 +15,12 @@ namespace minuseins::handlers {
 
     struct UniformHandler : public resource_handler {
         UniformHandler() {}
+        using callback_fn = std::function<void(std::string_view, generic_uniform *res)>;
 
         std::vector<std::string> callback_strs{};
-        void set_callback_fn(std::function<void(std::string_view, generic_uniform *res)>);
+        void set_callback_fn(callback_fn);
+        std::unordered_map<std::string, callback_fn> init_hooks;
+        void add_init_hook(const std::string& name, callback_fn fn);
         std::function<void(std::string_view, generic_uniform *res)> callback;
         std::unique_ptr<named_resource> initialize(ProgramInspector& inspect,named_resource res) override;
         void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override;

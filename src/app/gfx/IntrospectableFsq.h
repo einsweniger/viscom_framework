@@ -33,7 +33,7 @@ namespace minuseins {
     class IntrospectableFsq
     {
     public:
-        IntrospectableFsq(const std::string& fragmentProgram, viscom::enh::ApplicationNodeBase* appNode);
+        IntrospectableFsq(const std::string& fragmentProgram, viscom::enh::ApplicationNodeBase* appNode, bool wait = false);
         void ClearBuffer(viscom::FrameBuffer& fbo);
         void   DrawFrame(const viscom::FrameBuffer &fbo);
         void      Draw2D(bool *p_open);
@@ -48,6 +48,14 @@ namespace minuseins {
             archive(CEREAL_NVP(fragmentShader));
         }
         std::string fragmentShader;
+
+        handlers::UniformHandler* GetUniformHandler() {
+            return uniformhdl;
+        }
+
+        void init_after_wait() {
+            gpi_.initialize();
+        }
 
     private:
         void uniform_callback(std::string_view name, handlers::generic_uniform* res);

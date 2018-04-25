@@ -39,8 +39,15 @@ namespace minuseins::handlers {
                 callback(new_uniform->name, new_uniform.get());
             }
         }
-        //TODO this init function needs to be pluggable, to restore from other values e.g. json file
-        new_uniform->init(inspect.programId_);
+
+        try {
+            auto hook = init_hooks.at(new_uniform->name);
+            hook(new_uniform->name, new_uniform.get());
+            std::cout << "executed init hook for:" << new_uniform->name << std::endl;
+        } catch (std::out_of_range&) {
+            new_uniform->init(inspect.programId_);
+        }
+
         return std::move(new_uniform);
     }
 
@@ -54,6 +61,10 @@ namespace minuseins::handlers {
 
     void UniformHandler::set_callback_fn(std::function<void(std::string_view, generic_uniform *res)> fn) {
         callback = fn;
+    }
+
+    void UniformHandler::add_init_hook(const std::string &name, UniformHandler::callback_fn fn) {
+        init_hooks.insert({name, fn});
     }
 
 

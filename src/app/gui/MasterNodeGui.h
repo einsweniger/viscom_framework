@@ -25,6 +25,33 @@ namespace viscom {
 }
 namespace minuseins::gui {
     namespace fs = std::experimental::filesystem;
+//    struct menu_item {
+//        bool active;
+//    };
+//    struct menu {
+//        std::map<std::string, menu_item> items{};
+//
+//        void draw() {
+//            for(auto& [name, item] : items) {
+//                ImGui::MenuItem(name.c_str(), &item.active);
+//            }
+//        }
+//    };
+//    struct main_menu {
+//        main_menu(std::unordered_map<std::string, menu> menus) : menus(std::move(menus)) {}
+//
+//        std::unordered_map<std::string, menu> menus{};
+//        void draw(bool* p_open) {
+//            if(*p_open && ImGui::BeginMainMenuBar()) {
+//                for(auto& [name, menu] : menus) {
+//                    ImGui::BeginMenu(name.c_str());
+//                    menu.draw();
+//                    ImGui::EndMenu();
+//                }
+//            }
+//        }
+//
+//    };
 
     struct MasterNodeGui {
         static constexpr auto config_name = "MasterNodeGui.json";
@@ -42,6 +69,8 @@ namespace minuseins::gui {
         std::map<std::string, bool> activeWindows{};
         std::vector<std::unique_ptr<window>> windows{};
         std::vector<gl::GLuint> scene{};
+
+//        main_menu menu;
 
         template<class Archive>
         void serialize(Archive &archive) {
@@ -67,6 +96,8 @@ namespace minuseins::gui {
         bool ShaderToyCallback(fs::path path);
 
         void drawGPUProgram(bool *p_open);
+
+        void check_for_and_attach_texture(IntrospectableFsq* iq, std::vector<shadertoy::Input> &inputs);
     };
 }
 

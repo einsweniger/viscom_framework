@@ -9,15 +9,17 @@
 #include <iostream>
 #include <app/util.h>
 #include <app/gfx/gl/handlers.h>
+#include <core/glfw.h>
 #include "IntrospectableFsq.h"
 
 
 namespace minuseins {
-    IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  viscom::enh::ApplicationNodeBase* appNode) :
-    fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
-    app_{appNode},
-    gpuProgram_{fsq_->GetGPUProgram()},
-    gpi_{gpuProgram_->getProgramId(), gpuProgram_->getProgramName()}
+    IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  viscom::enh::ApplicationNodeBase* appNode, bool wait) :
+            fragmentShader{fragmentShader},
+            fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
+            app_{appNode},
+            gpuProgram_{fsq_->GetGPUProgram()},
+            gpi_{gpuProgram_->getProgramId(), gpuProgram_->getProgramName()}
     {
         gpi_.set_recompile_function([&](auto& unused) {
             auto currentProg = gpuProgram_->getProgramId();
@@ -41,8 +43,9 @@ namespace minuseins {
         subroutinehdl = dynamic_cast<SubroutineUniformHandler*>(gpi_.GetHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM));
 
         init_callbacks();
-        gpi_.initialize();
-
+        if(!wait) {
+            gpi_.initialize();
+        }
     }
 
     //TODO add bool* so Gui can close
@@ -140,12 +143,11 @@ namespace minuseins {
         uniformhdl->set_callback_fn(std::bind(&IntrospectableFsq::uniform_callback, this, _1, _2));
         uniformhdl->callback_strs = {
                 "iTime", "u_time","iResolution","iChannelResolution[0]",
-                "u_eye", "u_MVP", "iFrame"
+                "u_eye", "u_MVP", "iFrame", "iMouse"
         };
     }
 
     void IntrospectableFsq::uniform_callback(std::string_view name, generic_uniform *res) {
-        //TODO mouse pixel coords?
         try{
             switch (res->type) {
                 case resource_type::glsl_float:
@@ -179,6 +181,21 @@ namespace minuseins {
                         };
                         return;
                     }
+                    else if (name == "iMouse") {
+                        uni.updatefn = [&](auto& self) {
+                            //left, right, middle + extras.
+                            if(ImGui::GetIO().MouseDown[1]) {
+                                self.value[0] = ImGui::GetIO().MousePos.x;
+                                self.value[1] = ImGui::GetIO().MousePos.y;
+                            } else {
+                                self.value[0] = 0;
+                                self.value[1] = 0;
+                            }
+
+
+                        };
+                        return;
+                    }
                     [[fallthrough]];
                 }
                 case resource_type::glsl_mat4:
@@ -206,7 +223,7 @@ namespace minuseins {
                     std::cerr << "requested callback, forgot to handle " << name << toString(res->type) << std::endl;
             }
         } catch (std::bad_cast& err) {
-            std::cerr << err.what() << std::endl;
+            std::cerr << err.what() << res->name << std::endl;
         }
 
     }

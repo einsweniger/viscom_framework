@@ -12,7 +12,7 @@ namespace minuseins::gui {
         window(std::string name) : name(name) {}
         std::string name;
         bool active = false;
-        virtual void draw() = 0;
+        virtual void draw(bool *p_open) = 0;
         void setVisibility(bool state) { active = state;}
         void toggleVisibility() {active = !active;}
     };

@@ -19,7 +19,7 @@ namespace minuseins::gui {
         std::unordered_map<std::string, fs::path> currentPath;
         std::vector<fs::path> paths{};
 
-        void draw() override;
+        void draw(bool *p_open) override;
 
         FileSelect(const std::string &name, std::vector<std::string> pathstrs,
                    const std::function<bool(fs::path)> &callback,

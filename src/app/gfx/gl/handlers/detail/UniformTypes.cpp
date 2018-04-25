@@ -102,7 +102,7 @@ namespace minuseins::handlers {
     void FloatUniform::drawValue() {
         using t = interfaces::types::resource_type;
         int color_flags = ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_Float;
-        const float v_speed = 0.0001f;
+        const float v_speed = 0.1000f;
         const float v_min = 0.0f;
         const float v_max = 0.0f;
         const char* display_format = "%.5f";
@@ -182,7 +182,7 @@ namespace minuseins::handlers {
 
     void SamplerUniform::upload_value() {
         generic_uniform::upload_value();
-        gl::glActiveTexture(gl::GLenum::GL_TEXTURE0 + textureUnit);
+        gl::glActiveTexture(gl::GL_TEXTURE0 + textureUnit);
         gl::glBindTexture(gl::GL_TEXTURE_2D, boundTexture);
         gl::glUniform1i(location, textureUnit);
     }
@@ -196,20 +196,19 @@ namespace minuseins::handlers {
     }
 
     void BooleanUniform::init(gl::GLuint program) {
-        gl::glGetUniformiv(program, location, &value[0]);
+        if(location > 0) gl::glGetUniformiv(program, location, &value[0]);
     }
 
     void IntegerUniform::init(gl::GLuint program) {
-        gl::glGetUniformiv(program, location, &value[0]);
+        if(location > 0) gl::glGetUniformiv(program, location, &value[0]);
     }
 
-
     void FloatUniform::init(gl::GLuint program) {
-        gl::glGetUniformfv(program, location, &value[0]);
+        if(location > 0) gl::glGetUniformfv(program, location, &value[0]);
     }
 
     void UnsignedUniform::init(gl::GLuint program) {
-        gl::glGetUniformuiv(program, location, &value[0]);
+        if(location > 0) gl::glGetUniformuiv(program, location, &value[0]);
     }
 
 }

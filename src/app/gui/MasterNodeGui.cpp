@@ -16,6 +16,7 @@
 #include <app/gfx/gl/ProgramInspector.h>
 #include <app/MasterNode.h>
 #include <app/gfx/IntrospectableFsq.h>
+#include <app/gfx/gl/handlers.h>
 #include "MasterNodeGui.h"
 #include "FileSelect.h"
 #include "Overlay.h"
@@ -38,6 +39,7 @@ namespace minuseins::gui {
         //TODO use vector to draw menu and toggles.
         auto searchPaths = appNode->GetConfig().resourceSearchPaths_;
         windows.push_back(std::make_unique<FileSelect>("Open Texture",searchPaths, [&](auto path){return textureCallback(path); }));
+
 
     }
 
@@ -120,7 +122,7 @@ namespace minuseins::gui {
         static FileSelect select{"Import ShaderToy",appNode->GetConfig().resourceSearchPaths_, [this](fs::path path) {
             return ShaderToyCallback(path);
         }};
-        select.draw();
+        select.draw(p_open);
     }
     void MasterNodeGui::drawShaderWindow(bool *p_open) {
         if(ImGui::Begin("Shaders", p_open)){
@@ -181,7 +183,7 @@ namespace minuseins::gui {
                 return false;
             }
         }, "shader/"};
-        shader_select.draw();
+        shader_select.draw(p_open);
         ImGui::Begin("Open Shader");
         ImGui::InputText("program name",&progname[0],50);
         for(auto it = staged_shaders.begin(); it != staged_shaders.end(); it++) {
@@ -214,7 +216,7 @@ namespace minuseins::gui {
         static FileSelect texture_select{"Open Texture",appNode->GetConfig().resourceSearchPaths_, [&](fs::path path) {
             return textureCallback(path);
         }};
-        texture_select.draw();
+        texture_select.draw(p_open);
     }
 
     void MasterNodeGui::drawTextureWindow(bool *p_open) {
@@ -233,6 +235,7 @@ namespace minuseins::gui {
                     ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture->getTextureId()), region, uv0, uv1);
                 }
             });
+
             ImGui::End();
         }
     }
@@ -248,46 +251,81 @@ namespace minuseins::gui {
         }
     }
 
+    void MasterNodeGui::check_for_and_attach_texture(IntrospectableFsq* iq, std::vector<shadertoy::Input> &inputs) {
+        auto& tm = appNode->GetTextureManager();
+        for(auto& inp : inputs) {
+            if("texture" == inp.ctype) {
+                auto tex = tm.GetResource(inp.src);
+                std::cout << "loading texture " << inp.src << std::endl;
+                std::cout << "add hook for " << "iChannel" + std::to_string(inp.channel) << std::endl;
+
+                iq->GetUniformHandler()->add_init_hook("iChannel" + std::to_string(inp.channel), [&](std::string_view name, generic_uniform* gu) {
+                    std::cout << "init hook hit! " << name << std::endl;
+                    auto& sampler = dynamic_cast<SamplerUniform&>(*gu);
+                    auto x = tm.GetResource(inp.src);
+                    sampler.boundTexture = x->getTextureId();
+                    std::cout << "bouund texture " << sampler.boundTexture << std::endl;
+
+                    sampler.textureUnit = static_cast<GLint>(inp.channel);
+
+                    //TODO iChannelresolution!
+                });
+                openTextures.push_back(tex);
+            }
+        }
+    }
+
+
     bool MasterNodeGui::ShaderToyCallback(fs::path path) {
-        if (fs::is_regular_file(path)
-            && path.has_extension()
-            && ".json" == path.extension().generic_string()) {
-            loader = std::make_unique<shadertoy::ShaderToyLoader>(path);
-            return !appNode->IsKeyPressed(GLFW_KEY_LEFT_CONTROL);
-        } else { return false; }
-        //TODO fix loading
-//        if(nullptr != gui_->loader) {
-//            if(nullptr != active_fsq_) {
-//                active_fsq_ = nullptr;
-//            }
-//            auto loader = gui_->loader.get();
-//            for(auto& buf : loader->buffers) {
-//                std::cout << buf.name << std::endl;
-//                auto outfile = fs::path{loader->toy_->info.id}/ fs::path{buf.name + ".frag"};
-//                if(nullptr == active_fsq_) {
-//                    active_fsq_ = std::make_unique<minuseins::IntrospectableFsq>(outfile, this);
-//                } else {
-//                    active_fsq_->AddPass(outfile);
-//                }
-//            }
-//            auto outfile = fs::path{loader->toy_->info.id}/ fs::path{loader->image->name + ".frag"};
-//            if(nullptr == active_fsq_) {
-//                std::make_unique<minuseins::IntrospectableFsq>(outfile, this);
-//
-//            } else {
-//                active_fsq_->AddPass(outfile);
-//            }
-//            active_fsq_->AddPass("renderTexture.frag");
-//            gui_->loader = nullptr;
-//        }
+        //TODO clean loading!
+        try {
+            if (path.has_extension()
+                && ".json" == path.extension().generic_string()) {
+                auto realpath = viscom::Resource::FindResourceLocation(path, appNode);
+                loader = std::make_unique<shadertoy::ShaderToyLoader>(realpath);
+                appImpl->fsqs.clear();
+                for(auto& buf : loader->buffers) {
+                    std::cout << buf.name << std::endl;
+                    auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id}/ fs::path{buf.name + ".frag"};
+                    auto iq = std::make_unique<minuseins::IntrospectableFsq>(outfile, appImpl, true);
+                    check_for_and_attach_texture(iq.get(), buf.inputs);
+                    iq->init_after_wait();
+                    appImpl->fsqs.push_back(std::move(iq));
+                }
+                auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id}/ fs::path{loader->image->name + ".frag"};
+                auto iq = std::make_unique<minuseins::IntrospectableFsq>(outfile, appImpl, true);
+                check_for_and_attach_texture(iq.get(), loader->image->inputs);
+                iq->init_after_wait();
+                appImpl->fsqs.push_back(std::move(iq));
+                return !appNode->IsKeyPressed(GLFW_KEY_LEFT_CONTROL);
+            } else { return false; }
+
+        } catch (viscom::resource_loading_error& err) {
+            std::cerr << err.errorDescription_ << std::endl;
+            return false;
+        } catch (viscom::shader_compiler_error& err) {
+            std::cerr << err.what() << std::endl;
+            return false;
+        }
 
     }
 
     void MasterNodeGui::drawGPUProgram(bool *p_open) {
-        for(auto& fsq : appImpl->fsqs) {
-            fsq->Draw2D(p_open);
-        }
+        auto& fsqs = appImpl->fsqs;
+        for (auto it = fsqs.begin(); it != fsqs.end();) {
+            ImGui::PushID((*it)->fragmentShader.c_str());
+            ImGui::Begin("GPUProgram");
+            if(ImGui::SmallButton("x")) {
+                it = fsqs.erase(it);
+            } else {
+                ImGui::SameLine();
+                (*it)->Draw2D(p_open);
+                ++it;
+            }
 
+            ImGui::End();
+            ImGui::PopID();
+        }
     }
 
 

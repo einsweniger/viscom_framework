@@ -60,7 +60,7 @@ namespace viscom {
         }
         //init examples
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
-        for(const std::string& frag : {"test.frag", "renderTexture.frag"}) {
+        for(const std::string& frag : startupPrograms) {
             fsqs.push_back(std::make_unique<minuseins::IntrospectableFsq>(frag, this));
         }
     }
@@ -78,17 +78,15 @@ namespace viscom {
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
     {
-        if(nullptr != active_fsq_) {
-            //active_fsq_->ClearBuffer(fbo);
-        }
         fbo.DrawToFBO([]() {
-            //gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            //gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+            gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
         });
     }
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
+        if(fsqs.empty()) return;
         auto it = fsqs.begin();
         //draw into backbuffers until next to last.
         while(it != fsqs.end()-1) {
@@ -103,7 +101,10 @@ namespace viscom {
 
     void ApplicationNodeImplementation::CleanUp()
     {
-
+        startupPrograms.clear();
+        for(auto& fsq : fsqs) {
+            startupPrograms.push_back(fsq->fragmentShader);
+        }
         ApplicationNodeBase::CleanUp();
     }
 

@@ -38,9 +38,9 @@ namespace viscom {
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
         std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
-        std::vector<std::unique_ptr<GPUProgram>> programs;
         std::vector<std::unique_ptr<Texture>> textures;
         std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs{};
+        std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
 
         float currentTime_;
         float elapsedTime_;
