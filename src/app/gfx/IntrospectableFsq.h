@@ -4,7 +4,6 @@
 #pragma once
 
 #include <core/gfx/FullscreenQuad.h>
-#include <core/ApplicationNodeBase.h>
 #include <enh/gfx/gl/GLUniformBuffer.h>
 #include <memory>
 #include <variant>
@@ -13,52 +12,19 @@
 #include <enh/ApplicationNodeBase.h>
 #include <app/gfx/gl/ProgramInspector.h>
 #include <experimental/filesystem>
+#include <app/gui/ShaderLog.h>
+#include <cereal/cereal.hpp>
 
 namespace minuseins {
+    namespace handlers {
+        struct ProgramOutputHandler;
+        struct UniformHandler;
+        struct UniformBlockHandler;
+        struct SubroutineUniformHandler;
+        struct generic_uniform;
+    }
     namespace fs = std::experimental::filesystem;
-    struct ShaderLog
-    {
-        bool visible = false;
-        ImGuiTextBuffer     Buf;
-        ImVector<int>       LineOffsets;        // Index to lines offset
-        bool                ScrollToBottom;
 
-        void    Clear()     { Buf.clear(); LineOffsets.clear(); }
-
-        void    AddLog(const char* fmt, ...) IM_FMTARGS(2)
-        {
-            int old_size = Buf.size();
-            va_list args;
-            va_start(args, fmt);
-            Buf.appendfv(fmt, args);
-            va_end(args);
-            for (int new_size = Buf.size(); old_size < new_size; old_size++)
-                if (Buf[old_size] == '\n')
-                    LineOffsets.push_back(old_size);
-            ScrollToBottom = true;
-        }
-
-        void    Draw(const char* title, bool* p_open = nullptr)
-        {
-            ImGui::SetNextWindowSize(ImVec2(500,400), ImGuiCond_FirstUseEver);
-            if(ImGui::Begin(title, p_open)) {
-                bool copy = ImGui::Button("Copy");
-                ImGui::SameLine();
-                ImGui::Separator();
-                ImGui::BeginChild("scrolling", ImVec2(0,0), false, ImGuiWindowFlags_HorizontalScrollbar);
-                if (copy) ImGui::LogToClipboard();
-
-                ImGui::TextUnformatted(Buf.begin());
-
-                if (ScrollToBottom) {
-                    ImGui::SetScrollHere(1.0f);
-                }
-                ScrollToBottom = false;
-                ImGui::EndChild();
-                ImGui::End();
-            }
-        }
-    };
 
     /**
      * Encapsulates a FullscreenQuad and enables editing uniforms for the fragment shader.
@@ -69,29 +35,42 @@ namespace minuseins {
     public:
         IntrospectableFsq(const std::string& fragmentProgram, viscom::enh::ApplicationNodeBase* appNode);
         void ClearBuffer(viscom::FrameBuffer& fbo);
-        void   DrawFrame(viscom::FrameBuffer& fbo);
-        void      Draw2D(viscom::FrameBuffer& fbo);
+        void   DrawFrame(const viscom::FrameBuffer &fbo);
+        void      Draw2D(bool *p_open);
         void UpdateFrame(double currentTime, double elapsedTime);
 
-        void AddPass(const std::string& fragmentProgram);
-//        void AddPass(std::shared_ptr<viscom::GPUProgram> prog);
-        IntrospectableFsq* GetNextPass() { return nextPass_.get(); }
-
-    private:
+        const viscom::FrameBuffer* GetBackbuffer();
         void DrawToBackBuffer();
         void DrawToBuffer(const viscom::FrameBuffer& fbo);
-        void DrawProgramWindow(bool *p_open);
-        void set_uniform_update_fns();
+
+        template<class Archive>
+        void serialize(Archive &archive) {
+            archive(CEREAL_NVP(fragmentShader));
+        }
+        std::string fragmentShader;
+
+    private:
+        void uniform_callback(std::string_view name, handlers::generic_uniform* res);
+        void init_callbacks();
+        void miscinfo();
+
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
         viscom::enh::ApplicationNodeBase* app_;
-        int iFrame = 0;
         viscom::GPUProgram* gpuProgram_;
         std::shared_ptr<viscom::Texture> texture_;
-        std::unique_ptr<IntrospectableFsq> nextPass_ = nullptr;
+
+        ProgramInspector gpi_;
+
+        gui::ShaderLog log_{};
+
+        handlers::ProgramOutputHandler* outputhdl;
+        handlers::UniformHandler* uniformhdl;
+        handlers::UniformBlockHandler* ublockhdl;
+        handlers::SubroutineUniformHandler* subroutinehdl;
+
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
-        ShaderLog log_{};
-        ProgramInspector gpi_;
         bool draw_gpi = true;
+        int iFrame = 0;
     };
 }

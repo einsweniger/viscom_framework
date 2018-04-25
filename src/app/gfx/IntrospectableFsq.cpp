@@ -23,7 +23,7 @@ namespace minuseins {
             auto currentProg = gpuProgram_->getProgramId();
             try {
                 gpuProgram_->recompileProgram();
-                set_uniform_update_fns();
+                init_callbacks();
                 return gpuProgram_->getProgramId();
             } catch (viscom::shader_compiler_error& compilerError) {
                 log_.AddLog("%s",compilerError.what());
@@ -31,67 +31,29 @@ namespace minuseins {
                 return currentProg;
             }
         });
-        gpi_.addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(app_));
+        gpi_.addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>());
         gpi_.addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>(app_));
         gpi_.addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(app_));
-        gpi_.addHandler(subroutineUniformEnum(gl::GL_FRAGMENT_SHADER), std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
+        gpi_.addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
+        uniformhdl = dynamic_cast<UniformHandler*>(gpi_.GetHandler(gl::GL_UNIFORM));
+        outputhdl = dynamic_cast<ProgramOutputHandler*>(gpi_.GetHandler(gl::GL_PROGRAM_OUTPUT));
+        ublockhdl = dynamic_cast<UniformBlockHandler*>(gpi_.GetHandler(gl::GL_UNIFORM_BLOCK));
+        subroutinehdl = dynamic_cast<SubroutineUniformHandler*>(gpi_.GetHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM));
+
+        init_callbacks();
         gpi_.initialize();
 
-        set_uniform_update_fns();
     }
 
     //TODO add bool* so Gui can close
-    void IntrospectableFsq::Draw2D(viscom::FrameBuffer &fbo)
+    void IntrospectableFsq::Draw2D(bool *p_open)
     {
-        fbo.DrawToFBO([this]() {
-            DrawProgramWindow(&draw_gpi);
-        });
-        if(nullptr != nextPass_) {
-            nextPass_->Draw2D(fbo);
-        }
-    }
-    void IntrospectableFsq::DrawProgramWindow(bool* p_open) {
-        gl::GLuint program = gpuProgram_->getProgramId();
-
         if(ImGui::Begin("GPUProgram", p_open)) {
-            gpi_.draw_gui(p_open);
+            gpi_.draw_gui(p_open, {gl::GL_UNIFORM, gl::GL_PROGRAM_OUTPUT, gl::GL_UNIFORM_BLOCK, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM});
 
-            if (ImGui::TreeNode(std::string("shaders##").append(std::to_string(program)).c_str())) {
-                for (auto it = gpuProgram_->shaders_begin(); it != gpuProgram_->shaders_end(); ++it) {
-                    auto id = it->get()->getShaderId();
-                    ImGui::Text("shader %d", id);
-                    gl::GLint shaderlen;
-                    gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
-                    ImGui::Text("source len %d", shaderlen);
-                    if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
-                        std::string text;
-                        text.resize(shaderlen);
-                        gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
-                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-                        ImGui::PopStyleVar();
-                        ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
-
-                        ImGui::TreePop();
-                    }
-                }
-                ImGui::TreePop();
-            }
-
-            if(nullptr != texture_) {
-                ImVec2 uv0(0, 1);
-                ImVec2 uv1(1, 0);
-                //ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
-                auto dim = texture_->getDimensions();
-                auto aspect = dim.x / dim.y;
-                auto width = ImGui::GetContentRegionAvailWidth();
-                auto region = ImVec2(width, width/aspect);
-                ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture_->getTextureId()), region, uv0, uv1);
-                ImGui::Text("Texture ID: %d", texture_->getTextureId());
-                ImGui::Text("Texture dims: %d, %d", dim.x, dim.y);
-            }
+            miscinfo();
 
         }
-        if(nextPass_) { ImGui::Separator(); }
         ImGui::End();
     }
 
@@ -100,18 +62,11 @@ namespace minuseins {
         currentTime_ = static_cast<gl::GLfloat>(currentTime);
         elapsedTime_ = static_cast<gl::GLfloat>(elapsedTime);
         iFrame++;
-
-        if(nullptr != nextPass_) {
-            nextPass_->UpdateFrame(currentTime, elapsedTime);
-        }
     }
 
     void IntrospectableFsq::DrawToBackBuffer()
     {
-        auto out = gpi_.GetHandler(gl::GL_PROGRAM_OUTPUT);
-        auto& prog = dynamic_cast<ProgramOutputHandler&>(*out);
-        auto backbuffer = app_->SelectOffscreenBuffer(prog.backBuffers_);
-        DrawToBuffer(*backbuffer);
+        DrawToBuffer(*GetBackbuffer());
     }
 
     void IntrospectableFsq::DrawToBuffer(const viscom::FrameBuffer& fbo)
@@ -120,91 +75,139 @@ namespace minuseins {
             gpi_.prepareDraw();
             gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
 
-
             fsq_->Draw();
             gl::glUseProgram(0);
         });
 
     }
 
-    void IntrospectableFsq::AddPass(const std::string &fragmentProgram)
+    void IntrospectableFsq::DrawFrame(const viscom::FrameBuffer &fbo)
     {
-        if(nullptr == nextPass_) {
-            nextPass_ = std::make_unique<IntrospectableFsq>(fragmentProgram, app_);
-        } else {
-            nextPass_->AddPass(fragmentProgram);
-        }
-    }
-
-    void IntrospectableFsq::DrawFrame(viscom::FrameBuffer &fbo)
-    {
-        if(nullptr == nextPass_) {
-            DrawToBackBuffer();
-            DrawToBuffer(fbo);
-        } else {
-            DrawToBackBuffer();
-            //TODO then pass the textures/programOutput from this render to the next pass.
-            nextPass_->DrawFrame(fbo);
-        }
+        //TODO undo double draw
+        //TODO then pass the textures/programOutput from this render to the next pass.
+        DrawToBuffer(fbo);
     }
     void IntrospectableFsq::ClearBuffer(viscom::FrameBuffer &fbo)
     {
-        if(nullptr == nextPass_) {
-//            fbo.DrawToFBO([]() {
-//                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-//                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
-//            });
-        } else {
 //            app_->SelectOffscreenBuffer(backBuffers_)->DrawToFBO([](){
 //                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 //                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
 //            });
-            nextPass_->ClearBuffer(fbo);
+    }
+
+    void IntrospectableFsq::miscinfo() {
+        if (ImGui::TreeNode(std::string("shaders##").append(gpuProgram_->getProgramName()).c_str())) {
+            for (auto it = gpuProgram_->shaders_begin(); it != gpuProgram_->shaders_end(); ++it) {
+                auto id = it->get()->getShaderId();
+                ImGui::Text("shader %d", id);
+                gl::GLint shaderlen;
+                gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
+                ImGui::Text("source len %d", shaderlen);
+                if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
+                    std::string text;
+                    text.resize(shaderlen);
+                    gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
+                    ImGui::PopStyleVar();
+                    ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
+
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+
+        if(nullptr != texture_) {
+            ImVec2 uv0(0, 1);
+            ImVec2 uv1(1, 0);
+            //ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
+            auto dim = texture_->getDimensions();
+            auto aspect = dim.x / dim.y;
+            auto width = ImGui::GetContentRegionAvailWidth();
+            auto region = ImVec2(width, width/aspect);
+            ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture_->getTextureId()), region, uv0, uv1);
+            ImGui::Text("Texture ID: %d", texture_->getTextureId());
+            ImGui::Text("Texture dims: %d, %d", dim.x, dim.y);
         }
     }
 
-    void IntrospectableFsq::set_uniform_update_fns() {
-//        auto gman = app_->GetGPUProgramManager();
-//        std::for_each(gman.cbegin(), gman.cend(),[](auto arg) {
-//            std::cout << "Found Prog: " << arg.first << "\n";
-//        });
+    const viscom::FrameBuffer * IntrospectableFsq::GetBackbuffer() {
+        return app_->SelectOffscreenBuffer(outputhdl->backBuffers_);
+    }
 
+    void IntrospectableFsq::init_callbacks() {
+        using namespace std::placeholders;
+        uniformhdl->set_callback_fn(std::bind(&IntrospectableFsq::uniform_callback, this, _1, _2));
+        uniformhdl->callback_strs = {
+                "iTime", "u_time","iResolution","iChannelResolution[0]",
+                "u_eye", "u_MVP", "iFrame"
+        };
+    }
+
+    void IntrospectableFsq::uniform_callback(std::string_view name, generic_uniform *res) {
         //TODO mouse pixel coords?
-        for (const auto& time : {"u_time", "iTime"}) {
-            try{
-                auto idx = gpi_.GetResourceIndex(gl::GL_UNIFORM, time);
-                auto& res = gpi_.GetContainer(gl::GL_UNIFORM).at(idx);
-                auto& uni = dynamic_cast<handlers::FloatUniform&>(*res);
-                uni.updatefn = [&](auto& self) {self.value[0] = currentTime_;};
-            } catch (std::out_of_range&) {} catch (std::bad_cast&) {}
+        try{
+            switch (res->type) {
+                case resource_type::glsl_float:
+                case resource_type::glsl_vec2:
+                case resource_type::glsl_vec3:
+                case resource_type::glsl_vec4:
+                {
+                    auto& uni = dynamic_cast<handlers::FloatUniform&>(*res);
+                    if(name == "iTime" || name == "u_time") {
+                        uni.updatefn = [&](auto& self) {
+                            self.value[0] = currentTime_;
+                        };
+                        return;
+                    }
+                    else if(name == "iResolution" || name == "iChannelResolution[0]") {
+                        std::cout << "hit: " << name << std::endl;
+                        //TODO here is init fn needed.
+                        uni.updatefn = [&](auto& self) {
+                            self.value[0] = 1920;
+                            self.value[1] = 1080;
+                            self.value[2] = 1;
+                        };
+                        return;
+                    }
+                    else if (name == "u_eye") {
+                        uni.updatefn = [&](auto& self) {
+                            auto position = app_->GetCamera()->GetPosition();
+                            self.value[0] = position.x;
+                            self.value[1] = position.y;
+                            self.value[2] = position.z;
+                        };
+                        return;
+                    }
+                    [[fallthrough]];
+                }
+                case resource_type::glsl_mat4:
+                {
+                    if(name == "u_MVP") {
+                        res->uploadfn = [&](auto& self) {
+                            auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
+                            gl::glUniformMatrix4fv(self.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
+                        };
+                        return;
+                    }
+                    [[fallthrough]];
+                }
+                case resource_type::glsl_int: {
+                    auto& uni = dynamic_cast<handlers::IntegerUniform&>(*res);
+                    if(name == "iFrame") {
+                        uni.updatefn = [&](auto& self) {
+                            self.value[0] = iFrame;
+                        };
+                        return;
+                    }
+                    [[fallthrough]];
+                }
+                default:
+                    std::cerr << "requested callback, forgot to handle " << name << toString(res->type) << std::endl;
+            }
+        } catch (std::bad_cast& err) {
+            std::cerr << err.what() << std::endl;
         }
 
-        for (const auto& resolution : {"iResolution","iChannelResolution[0]"}) {
-            try {
-                auto res = gpi_.GetByName(gl::GL_UNIFORM, resolution);
-                auto& uni = dynamic_cast<handlers::FloatUniform&>(*res);
-                uni.value[0] = 1920;
-                uni.value[1] = 1080;
-                uni.value[2] = 1;
-            } catch (std::out_of_range&) {} catch (std::bad_cast&) {}
-        }
-        try {
-            auto res = gpi_.GetByName(gl::GL_UNIFORM, "u_eye");
-            auto& uni = dynamic_cast<handlers::FloatUniform&>(*res);
-            uni.updatefn = [&](auto& self) {
-                auto position = app_->GetCamera()->GetPosition();
-                self.value[0] = position.x;
-                self.value[1] = position.y;
-                self.value[2] = position.z;
-            };
-        } catch (std::out_of_range&) {} catch (std::bad_cast&) {}
-        try {
-            auto res = gpi_.GetByName(gl::GL_UNIFORM, "u_MVP");
-            auto& uni = dynamic_cast<handlers::generic_uniform&>(*res);
-            uni.uploadfn = [&](auto& self) {
-                auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
-                gl::glUniformMatrix4fv(gpuProgram_->getUniformLocation("u_MVP"), 1, gl::GL_FALSE, glm::value_ptr(MVP));
-            };
-        } catch (std::out_of_range&) {} catch (std::bad_cast&) {}
     }
 }
