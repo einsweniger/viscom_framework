@@ -29,8 +29,6 @@ namespace viscom {
 
         void CleanUp() override;
 
-        void programCallback(std::shared_ptr<GPUProgram> prog) override;
-
     private:
         bool imProgramRecourceWindow_ = true;
 

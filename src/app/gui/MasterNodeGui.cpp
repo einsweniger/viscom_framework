@@ -35,6 +35,7 @@ namespace minuseins::gui {
         } catch (viscom::resource_loading_error&) {
             activeWindows["MainMenu"] = true;
         }
+        //TODO use vector to draw menu and toggles.
         auto searchPaths = appNode->GetConfig().resourceSearchPaths_;
         windows.push_back(std::make_unique<FileSelect>("Open Texture",searchPaths, [&](auto path){return textureCallback(path); }));
 

@@ -10,10 +10,8 @@
 
 #include <app/gfx/gl/ProgramInspector.h>
 #include "enh/ApplicationNodeBase.h"
+#include "app/gfx/IntrospectableFsq.h"
 
-namespace minuseins {
-    class IntrospectableFsq;
-}
 namespace viscom {
 
     class MeshRenderable;
@@ -39,14 +37,10 @@ namespace viscom {
         bool AddTuioCursor(TUIO::TuioCursor *tcur) override;
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
-        virtual void programCallback(std::shared_ptr<GPUProgram> prog) {compiledPrograms[prog->getProgramName()] = prog;};
-
         std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
-        std::unique_ptr<FullscreenQuad> dummy_quad;
         std::vector<std::unique_ptr<GPUProgram>> programs;
         std::vector<std::unique_ptr<Texture>> textures;
-        std::vector<minuseins::ProgramInspector> gpis;
-        std::unordered_map<std::string,std::shared_ptr<GPUProgram>> compiledPrograms;
+        std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs{};
 
         float currentTime_;
         float elapsedTime_;

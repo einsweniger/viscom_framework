@@ -8,30 +8,42 @@
 
 #include "ApplicationNodeImplementation.h"
 
-#include "core/glfw.h"
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-//#include <glbinding/callbacks.h>
-#include <glbinding-aux/Meta.h>
 #include <imgui.h>
 #include <iostream>
-#include <glm/gtc/matrix_inverse.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <app/gfx/Primitives.h>
-#include <app/gfx/gl/handlers/ProgramOutputHandler.h>
 
-//#include "Vertices.h"
+#include "core/glfw.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
-#include "app/gfx/IntrospectableFsq.h"
+#include <glbinding-aux/Meta.h>
+#include <glbinding/glbinding.h>
+
+
 #include "app/camera/MyFreeCamera.h"
+
+void errorcallback(const glbinding::FunctionCall & call) {
+    const auto error = gl::glGetError();
+
+    if (gl::GL_NO_ERROR != error) {
+        LOG(WARNING) << "Error: " << glbinding::aux::Meta::getString(error);
+        std::stringstream callOut;
+        callOut << call.function->name() << "(";
+        for (unsigned i = 0; i < call.parameters.size(); ++i) {
+            // callOut << call.parameters[i]->asString();
+            callOut << call.parameters[i].get();
+            if (i < call.parameters.size() - 1)
+                callOut << ", ";
+        }
+        callOut << ")";
+
+        if (call.returnValue)
+            callOut << " -> " << call.returnValue.get();
+        LOG(WARNING) << callOut.str();
+    }
+}
 
 namespace viscom {
 
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
-        ApplicationNodeBase{ appNode },
-        dummy_quad{appNode->CreateFullscreenQuad("drawSimple.frag")}
+        ApplicationNodeBase{ appNode }
     {
         freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
     }
@@ -41,11 +53,16 @@ namespace viscom {
     void ApplicationNodeImplementation::InitOpenGL()
     {
         enh::ApplicationNodeBase::InitOpenGL();
-
+        {  //set error callbacks
+            using namespace glbinding;
+            setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
+            setAfterCallback(errorcallback);
+        }
+        //init examples
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
-        active_fsq_ = std::make_unique<minuseins::IntrospectableFsq>(std::string("test.frag"), this);
-        active_fsq_->AddPass("renderTexture.frag");
-        //active_fsq_  = std::make_unique<minuseins::IntrospectableFsq>("drawSimple.frag", this);
+        for(const std::string& frag : {"test.frag", "renderTexture.frag"}) {
+            fsqs.push_back(std::make_unique<minuseins::IntrospectableFsq>(frag, this));
+        }
     }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
@@ -53,8 +70,8 @@ namespace viscom {
         currentTime_ = static_cast<float>(currentTime);
         elapsedTime_ = static_cast<float>(elapsedTime);
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
-        if(active_fsq_ != nullptr) {
-            active_fsq_->UpdateFrame(currentTime, elapsedTime);
+        for(auto& fsq : fsqs) {
+            fsq->UpdateFrame(currentTime, elapsedTime);
         }
     }
 
@@ -72,40 +89,27 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
-        if(nullptr != active_fsq_) {
-            active_fsq_->DrawFrame(fbo);
+        auto it = fsqs.begin();
+        //draw into backbuffers until next to last.
+        while(it != fsqs.end()-1) {
+            auto& fsq = (*it);
+            fsq->DrawToBackBuffer();
+            it++;
         }
-        if(!programs.empty()) {
-            fbo.DrawToFBO([this]() {
-                for (auto &&program : programs) {
-                    gl::glUseProgram(program->getProgramId());
-                    dummy_quad->Draw();
-                }
-                gl::glUseProgram(0);
-            });
-        }
-        if(!compiledPrograms.empty()) {
-            for(auto& inspect : gpis) {
-                auto out = inspect.GetHandler(gl::GL_PROGRAM_OUTPUT);
-                auto& prog = dynamic_cast<minuseins::handlers::ProgramOutputHandler&>(*out);
-                auto buffer = SelectOffscreenBuffer(prog.backBuffers_);
-                buffer->DrawToFBO([&](){
-                    inspect.prepareDraw();
-                    dummy_quad->Draw();
-                });
-            }
-        }
+        //then draw last to backbuffer
+        auto& fsq = (*it);
+        fsq->DrawFrame(fbo);
     }
 
     void ApplicationNodeImplementation::CleanUp()
     {
+
         ApplicationNodeBase::CleanUp();
     }
 
     bool ApplicationNodeImplementation::KeyboardCallback(int key, int scancode, int action, int mods)
     {
         return ApplicationNodeBase::KeyboardCallback(key, scancode, action, mods);
-        //see MasterNode for usage.
     }
 
     void ApplicationNodeImplementation::toggleMouseGrab()

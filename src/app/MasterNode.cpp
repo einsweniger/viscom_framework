@@ -10,6 +10,8 @@
 #include <imgui.h>
 #include <experimental/filesystem>
 #include <cereal/archives/json.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/memory.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -22,11 +24,11 @@ namespace viscom {
     fs::path findConfig(std::string config_name, ApplicationNodeInternal* app) {
 
         try {
-            auto filename = Resource::FindResourceLocation(minuseins::gui::MasterNodeGui::config_name, app);
+            auto filename = Resource::FindResourceLocation(config_name, app);
             return {filename};
         } catch (resource_loading_error&) {
             auto resdir = fs::path{app->GetConfig().resourceSearchPaths_.at(0)};
-            return resdir/config_name;
+            return resdir/ fs::path{config_name};
         }
     }
 
@@ -35,33 +37,17 @@ namespace viscom {
         gui_{std::make_unique<minuseins::gui::MasterNodeGui>(this, appNode)}
     {
         auto cfgPath = findConfig(minuseins::gui::MasterNodeGui::config_name, appNode);
-        if(std::experimental::filesystem::exists(cfgPath)) {
+        if(fs::exists(cfgPath)) {
             auto instr = std::ifstream{cfgPath};
             cereal::JSONInputArchive ar{instr};
             ar(*gui_);
         }
-        gui_->programCallback = [&](std::shared_ptr<GPUProgram> res) {
-            programCallback(res);
-        };
     }
 
     MasterNode::~MasterNode() = default;
 
     void MasterNode::Draw2D(FrameBuffer& fbo)
     {
-        fbo.DrawToFBO([this]() {});
-        if(imProgramRecourceWindow_) {
-            if(nullptr != active_fsq_) {
-                active_fsq_->Draw2D(fbo);
-            }
-        }
-
-        //TODO this can go away... right?
-        for (auto& gpi : gpis) {
-            bool s = true;
-            gpi.draw_gui(&s);
-        }
-
         gui_->Draw2D(fbo);
 
         ApplicationNodeImplementation::Draw2D(fbo);
@@ -102,35 +88,13 @@ namespace viscom {
     void MasterNode::CleanUp() {
         auto cfgpath = findConfig(minuseins::gui::MasterNodeGui::config_name, GetApplication());
         std::cout<< "dump:" << cfgpath << std::endl;
-        auto fstr = std::ofstream{cfgpath};
-        cereal::JSONOutputArchive ar{fstr};
+        auto gui_stream = std::ofstream{cfgpath};
+        cereal::JSONOutputArchive ar{gui_stream};
         ar(*gui_);
-
+//        auto scene_stream = std::ofstream{findConfig("ActiveScene.json", GetApplication())};
+//        cereal::JSONOutputArchive ar2{scene_stream};
+//        ar2(fsqs);
         ApplicationNodeImplementation::CleanUp();
     }
 
-    void MasterNode::programCallback(std::shared_ptr<GPUProgram> prog) {
-        namespace hdl = minuseins::handlers;
-        ApplicationNodeImplementation::programCallback(prog);
-        auto gpi = minuseins::ProgramInspector(prog->getProgramId(), prog->getProgramName());
-        gpi.set_recompile_function([&](minuseins::ProgramInspector& inspector) {
-            auto& program = compiledPrograms.at(inspector.name);
-            auto currentProg = program->getProgramId();
-            try {
-                program->recompileProgram();
-                return program->getProgramId();
-            } catch (viscom::shader_compiler_error& compilerError) {
-                return currentProg;
-            }
-        });
-        namespace tp = minuseins::interfaces::types;
-
-        gpi.addHandler(gl::GL_UNIFORM, std::make_unique<hdl::UniformHandler>(this));
-        gpi.addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<hdl::ProgramOutputHandler>(this));
-        gpi.addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<hdl::UniformBlockHandler>(this));
-        gpi.addHandler(hdl::subroutineUniformEnum(gl::GL_FRAGMENT_SHADER), std::make_unique<hdl::SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
-        gpi.initialize();
-        std::cout << "new program! " << prog->getProgramName() << std::endl;
-        gpis.push_back(std::move(gpi));
-    }
 }
