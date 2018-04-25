@@ -2,10 +2,6 @@
     "value0": {
         "activeWindows": [
             {
-                "key": "Buffers",
-                "value": false
-            },
-            {
                 "key": "GPUProgram",
                 "value": true
             },
@@ -18,16 +14,32 @@
                 "value": true
             },
             {
-                "key": "Overlay",
-                "value": true
+                "key": "NewScene",
+                "value": false
             },
             {
-                "key": "Shader",
+                "key": "Overlay",
+                "value": false
+            },
+            {
+                "key": "ShaderImport",
                 "value": false
             },
             {
                 "key": "ShaderToyImport",
+                "value": true
+            },
+            {
+                "key": "Shaders",
                 "value": false
+            },
+            {
+                "key": "TextureImport",
+                "value": false
+            },
+            {
+                "key": "Textures",
+                "value": true
             }
         ]
     }

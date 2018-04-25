@@ -12,6 +12,8 @@ uniform time {
     float u_delta;  // delta time between frames (in seconds)
 };
 
+//uniform float iTime;
+
 // shader inputs and uniforms
 in vec2 texCoord;
 uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
@@ -22,7 +24,7 @@ uniform vec2 u_mouse;  // mouse pixel coords
 uniform mat4  u_MVP;
 
 // shadertoystuffs
-float iTime = u_time;
+uniform float iTime;// = u_time;
 
 subroutine vec2 SceneMap(vec3 position);  // function signature type declaration, returns distance and material id
 subroutine uniform SceneMap map;  // uniform instance, can be called like a function
@@ -84,11 +86,13 @@ subroutine(SceneMap) vec2 positionOffsetting( vec3 pos ) {  // https://www.shade
 }
 uniform Box box;
 uniform Capsule capsule;
+uniform vec3 reflection_offset = vec3(0,1,0);
 subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
 {
 
     vec3 offset = pos-vec3(-2,.25,2);
-    pReflect(offset, vec3(0,1,0),1);
+    //pReflect(offset, vec3(0,1,0),1);
+    pReflect(offset, reflection_offset,1);
 
 
 

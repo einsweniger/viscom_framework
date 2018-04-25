@@ -20,8 +20,8 @@ namespace shadertoy {
         iarchive(toy);
         toy_= std::make_unique<shadertoy::Shader>(toy);
 
-        auto shaderResPath = fs::path("../resources/shader/");
-        outputfolder = shaderResPath / fs::path(toy_->info.id);
+        auto shaderResPath = fs::path("../resources/shader");
+        outputfolder = shaderResPath / fs::path("shadertoy/" + toy_->info.id);
         fs::create_directory(outputfolder);
         for(auto& pass : toy_->renderpass) {
             if ("image" == pass.type) {
@@ -33,7 +33,7 @@ namespace shadertoy {
                 assert(nullptr == common); //Shadertoys are assumed to only have one common shader
                 common = std::make_unique<Renderpass>(pass);
             } else {
-                std::cout << pass.type << " is unsupported, sorry";
+                std::cerr << pass.type << " is unsupported, sorry";
                 continue; //skip file creation
             }
         }
