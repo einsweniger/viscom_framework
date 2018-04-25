@@ -16,6 +16,7 @@
 #include <core/gfx/FullscreenQuad.h>
 #include <glbinding/gl/types.h>
 #include <app/gfx/IntrospectableFsq.h>
+#include "Window.h"
 
 namespace viscom {
     class FrameBuffer;
@@ -24,30 +25,6 @@ namespace viscom {
 }
 namespace minuseins::gui {
     namespace fs = std::experimental::filesystem;
-    struct Overlay {
-        static const size_t data_size = 90;
-        int histIdx = 0;
-        float histData[data_size] = { 0 };
-        float DISTANCE = 10.0f;
-        int corner = 0;
-
-        void drawOverlay(bool* p_open);
-        void UpdateFrame(double currentTime, double elapsedTime);
-    };
-
-    struct FileSelect {
-        std::function<bool(fs::path)> callback;
-        std::vector<fs::path> basepaths_;
-        std::unordered_map<std::string, std::vector<fs::path>> pathContents;
-        std::unordered_map<std::string, fs::path> currentPath;
-        std::vector<fs::path> paths{};
-
-        FileSelect(std::vector<std::string> pathstrs, const std::function<bool(fs::path)> &callback, std::string basepath_suffix = "");
-
-        std::vector<fs::path> scan(fs::path folder);
-
-        void draw(std::string_view title, bool* p_open);
-    };
 
     struct MasterNodeGui {
         static constexpr auto config_name = "MasterNodeGui.json";
@@ -58,15 +35,12 @@ namespace minuseins::gui {
 
         viscom::ApplicationNodeImplementation* appImpl;
         viscom::ApplicationNodeInternal* appNode;
-        //std::unique_ptr<viscom::FullscreenQuad> quad_;
         std::unique_ptr<shadertoy::ShaderToyLoader> loader = nullptr;
-        //std::vector<std::unique_ptr<viscom::GPUProgram>> progs{};
-        Overlay overlay{};
-        //std::vector<std::unique_ptr<viscom::Shader>> openShaders{};
         std::vector<std::shared_ptr<viscom::Texture>> openTextures{};
         std::function<void(std::shared_ptr<viscom::GPUProgram>)> programCallback;
 
         std::map<std::string, bool> activeWindows{};
+        std::vector<std::unique_ptr<window>> windows{};
         std::vector<gl::GLuint> scene{};
 
         template<class Archive>
@@ -87,6 +61,12 @@ namespace minuseins::gui {
         void drawTextureImportWindow(bool *p_open);
 
         void drawTextureWindow(bool *p_open);
+
+        bool textureCallback(fs::path path);
+
+        bool ShaderToyCallback(fs::path path);
+
+        void drawGPUProgram(bool *p_open);
     };
 }
 
