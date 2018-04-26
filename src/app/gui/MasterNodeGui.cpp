@@ -18,8 +18,8 @@
 #include <app/gfx/IntrospectableFsq.h>
 #include <app/gfx/gl/handlers.h>
 #include "MasterNodeGui.h"
-#include "FileSelect.h"
-#include "Overlay.h"
+#include "app/gui/dialogs/FileSelect.h"
+#include "app/gui/dialogs/Overlay.h"
 
 
 namespace minuseins::gui {

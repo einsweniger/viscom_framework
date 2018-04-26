@@ -12,7 +12,7 @@
 #include <enh/ApplicationNodeBase.h>
 #include <app/gfx/gl/ProgramInspector.h>
 #include <experimental/filesystem>
-#include <app/gui/ShaderLog.h>
+#include <app/gui/dialogs/ShaderLog.h>
 #include <cereal/cereal.hpp>
 
 namespace minuseins {

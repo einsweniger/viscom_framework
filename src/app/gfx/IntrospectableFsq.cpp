@@ -48,7 +48,6 @@ namespace minuseins {
         }
     }
 
-    //TODO add bool* so Gui can close
     void IntrospectableFsq::Draw2D(bool *p_open)
     {
         if(ImGui::Begin("GPUProgram", p_open)) {
@@ -64,7 +63,7 @@ namespace minuseins {
     {
         currentTime_ = static_cast<gl::GLfloat>(currentTime);
         elapsedTime_ = static_cast<gl::GLfloat>(elapsedTime);
-        iFrame++;
+        iFrame++; //TODO increment iFrame after render.
     }
 
     void IntrospectableFsq::DrawToBackBuffer()
@@ -99,39 +98,26 @@ namespace minuseins {
     }
 
     void IntrospectableFsq::miscinfo() {
-        if (ImGui::TreeNode(std::string("shaders##").append(gpuProgram_->getProgramName()).c_str())) {
-            for (auto it = gpuProgram_->shaders_begin(); it != gpuProgram_->shaders_end(); ++it) {
-                auto id = it->get()->getShaderId();
-                ImGui::Text("shader %d", id);
-                gl::GLint shaderlen;
-                gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
-                ImGui::Text("source len %d", shaderlen);
-                if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
-                    std::string text;
-                    text.resize(shaderlen);
-                    gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
-                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-                    ImGui::PopStyleVar();
-                    ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
-
-                    ImGui::TreePop();
-                }
-            }
-            ImGui::TreePop();
-        }
-
-        if(nullptr != texture_) {
-            ImVec2 uv0(0, 1);
-            ImVec2 uv1(1, 0);
-            //ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
-            auto dim = texture_->getDimensions();
-            auto aspect = dim.x / dim.y;
-            auto width = ImGui::GetContentRegionAvailWidth();
-            auto region = ImVec2(width, width/aspect);
-            ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture_->getTextureId()), region, uv0, uv1);
-            ImGui::Text("Texture ID: %d", texture_->getTextureId());
-            ImGui::Text("Texture dims: %d, %d", dim.x, dim.y);
-        }
+//        if (ImGui::TreeNode(std::string("shaders##").append(gpuProgram_->getProgramName()).c_str())) {
+//            for (auto it = gpuProgram_->shaders_begin(); it != gpuProgram_->shaders_end(); ++it) {
+//                auto id = it->get()->getShaderId();
+//                ImGui::Text("shader %d", id);
+//                gl::GLint shaderlen;
+//                gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
+//                ImGui::Text("source len %d", shaderlen);
+//                if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
+//                    std::string text;
+//                    text.resize(shaderlen);
+//                    gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
+//                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
+//                    ImGui::PopStyleVar();
+//                    ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
+//
+//                    ImGui::TreePop();
+//                }
+//            }
+//            ImGui::TreePop();
+//        }
     }
 
     const viscom::FrameBuffer * IntrospectableFsq::GetBackbuffer() {

@@ -16,7 +16,7 @@
 #include <core/gfx/FullscreenQuad.h>
 #include <glbinding/gl/types.h>
 #include <app/gfx/IntrospectableFsq.h>
-#include "Window.h"
+#include "app/gui/dialogs/Window.h"
 
 namespace viscom {
     class FrameBuffer;

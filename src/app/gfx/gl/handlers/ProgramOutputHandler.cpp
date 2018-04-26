@@ -20,9 +20,8 @@ namespace minuseins::handlers {
         return std::make_unique<ProgramOutput>(res);
     }
 
-    void ProgramOutputHandler::postInit(ProgramInspector &inspect, named_resource_container &resources) {
+    void ProgramOutputHandler::postInit(ProgramInspector &inspect, named_resource_container &outputs) {
         try {
-            auto& outputs = inspect.GetContainer(gl::GL_PROGRAM_OUTPUT);
             //create new offscreen buffers
             if(outputs.size() != previous_size) {
                 auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
