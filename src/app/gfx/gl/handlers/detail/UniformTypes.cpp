@@ -150,7 +150,6 @@ namespace minuseins::handlers {
     void SamplerUniform::draw2D() {
         generic_uniform::draw2D();
         ImGui::InputInt(name.c_str(), static_cast<int*>(&boundTexture));
-        ImGui::SameLine();
         ImGui::InputInt((name+"_texunit").c_str(), &textureUnit);
         //TODO use tooltip to set texture/buffer
         uniform_tooltip(properties);

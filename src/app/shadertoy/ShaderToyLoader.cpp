@@ -33,7 +33,7 @@ namespace shadertoy {
                 assert(nullptr == common); //Shadertoys are assumed to only have one common shader
                 common = std::make_unique<Renderpass>(pass);
             } else {
-                std::cerr << pass.type << " is unsupported, sorry";
+                std::cerr << pass.type << " is unsupported, sorry" << std::endl;
                 continue; //skip file creation
             }
         }
@@ -44,12 +44,13 @@ namespace shadertoy {
             if("common" == pass.type){
                 outstream << pass.code;
                 continue;
+            } else if ("buffer" == pass.type || "image" == pass.type) {
+                outstream << VERSION
+                          << "#include <../" + pass.type + "/header.glsl>\n"
+                          << (hasCommon && "common" != pass.type ? "#include <Common.frag>\n" : "")
+                          <<  pass.code
+                          << "\n#include <../" + pass.type + "/footer.glsl>\n";
             }
-            outstream << VERSION
-                      << "#include <../" + pass.type + "/header.glsl>\n"
-                      << (hasCommon && "common" != pass.type ? "#include <Common.frag>\n" : "")
-                      <<  pass.code
-                      << "\n#include <../" + pass.type + "/footer.glsl>\n";
         }
 
 //        size_t counter =0;

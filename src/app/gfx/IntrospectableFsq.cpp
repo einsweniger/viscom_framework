@@ -152,6 +152,7 @@ namespace minuseins {
                         std::cout << "hit: " << name << std::endl;
                         //TODO here is init fn needed.
                         uni.updatefn = [&](auto& self) {
+                            if(self.value[0] > 1.0) return;
                             self.value[0] = 1920;
                             self.value[1] = 1080;
                             self.value[2] = 1;

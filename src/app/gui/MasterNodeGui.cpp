@@ -256,9 +256,6 @@ namespace minuseins::gui {
         for(auto& inp : inputs) {
             if("texture" == inp.ctype) {
                 auto tex = tm.GetResource(inp.src);
-                std::cout << "loading texture " << inp.src << std::endl;
-                std::cout << "add hook for " << "iChannel" + std::to_string(inp.channel) << std::endl;
-
                 iq->GetUniformHandler()->add_init_hook("iChannel" + std::to_string(inp.channel), [&](std::string_view name, generic_uniform* gu) {
                     std::cout << "init hook hit! " << name << std::endl;
                     auto& sampler = dynamic_cast<SamplerUniform&>(*gu);
@@ -267,8 +264,15 @@ namespace minuseins::gui {
                     std::cout << "bouund texture " << sampler.boundTexture << std::endl;
 
                     sampler.textureUnit = static_cast<GLint>(inp.channel);
+                });
+                iq->GetUniformHandler()->add_init_hook("iChannelResolution[" + std::to_string(inp.channel) + "]", [&](std::string_view name, generic_uniform* gu) {
+                    std::cout << "init hook hit! " << name << std::endl;
+                    auto& floater = dynamic_cast<FloatUniform&>(*gu);
+                    auto x = tm.GetResource(inp.src);
+                    floater.value[0] = x->getDimensions().x;
+                    floater.value[1] = x->getDimensions().y;
+                    floater.value[1] = 0;
 
-                    //TODO iChannelresolution!
                 });
                 openTextures.push_back(tex);
             }
@@ -297,7 +301,7 @@ namespace minuseins::gui {
                 check_for_and_attach_texture(iq.get(), loader->image->inputs);
                 iq->init_after_wait();
                 appImpl->fsqs.push_back(std::move(iq));
-                return !appNode->IsKeyPressed(GLFW_KEY_LEFT_CONTROL);
+                return false;
             } else { return false; }
 
         } catch (viscom::resource_loading_error& err) {
