@@ -1,36 +1,21 @@
-import json
-import requests
+#!/usr/bin/env python3
 
-param = {'key': 'fdnKwD'}
-url = 'https://www.shadertoy.com'
-query_url = url + '/api/v1/shaders/query/'
-shader_url = url + '/api/v1/shaders/'
-#search r = requests.get(query_url + 'paniq', param)
+import Commands
 
-def get_json(shaders):
-  for shader in shaders:
-    resp = requests.get(shader_url + shader, param)
-    with open(shader + '.json', 'w') as file:
-      json.dump(resp.json(), file, indent=2)
-
-def get_media(shaders):
-  for shader in shaders:
-    with open(shader + '.json', 'r') as infile:
-      content = json.load(infile)
-      for rp in content['Shader']['renderpass']:
-        for inp in rp.get('inputs', []):
-          if 'texture' == inp['ctype']:
-            if inp['src'].startswith('res/media/previz'):
-              continue
-            pic = requests.get(url+inp['src']).content
-            with open('res'+inp['src'], 'wb') as outfile:
-              outfile.write(pic)
-
-def search(query):
-  return requests.get(query_url + query, param)
+def main():
+  parser = Commands.get_parser()
+  args, unknown = parser.parse_known_args()
+  if 'func' in args:
+    kwargs = vars(args)
+    func = kwargs.pop('func')
+    func(**kwargs)
+  else:
+    parser.print_help()
 
 
-#import shadertoy
-#response = shadertoy.search('flooding')
-#shadertoy.get_json(response.json()['Results'])
-#shadertoy.get_media(response.json()['Results'])
+if __name__ == '__main__':
+  try:
+    main()
+    print('\nexiting…')
+  except KeyboardInterrupt:
+    print('exiting…')

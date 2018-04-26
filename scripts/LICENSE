@@ -1,0 +1,5 @@
+"Shadertoy.com API" is free and open. Shadertoy.com is not responsible for either the malfunctioning of the API or the malfunctioning of any of the shaders return by the API.
+
+Since the API is part of Shadertoy.com, developers that use the API have to respect the terms of use. For example, developers must respect the specific licenses of each shader.
+
+Any product (app, web...) that uses the "Shadertoy.com API", either free or commercial, must mention that uses "Shadertoy.com API".
