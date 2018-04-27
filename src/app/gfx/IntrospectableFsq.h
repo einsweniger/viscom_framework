@@ -15,6 +15,10 @@
 #include <app/gui/dialogs/ShaderLog.h>
 #include <cereal/cereal.hpp>
 
+namespace viscom {
+    class ApplicationNodeImplementation;
+}
+
 namespace minuseins {
     namespace handlers {
         struct ProgramOutputHandler;
@@ -41,7 +45,6 @@ namespace minuseins {
 
         const viscom::FrameBuffer* GetBackbuffer();
         void DrawToBackBuffer();
-        void DrawToBuffer(const viscom::FrameBuffer& fbo);
 
         template<class Archive>
         void serialize(Archive &archive) {
@@ -56,6 +59,7 @@ namespace minuseins {
         void init_after_wait() {
             gpi_.initialize();
         }
+        bool active = true;
 
     private:
         void uniform_callback(std::string_view name, handlers::generic_uniform* res);
@@ -64,7 +68,8 @@ namespace minuseins {
         void miscinfo();
 
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
-        viscom::enh::ApplicationNodeBase* app_;
+        viscom::enh::ApplicationNodeBase* appBase;
+        viscom::ApplicationNodeImplementation* appImpl;
         viscom::GPUProgram* gpuProgram_;
         std::shared_ptr<viscom::Texture> texture_;
         std::vector<viscom::FrameBuffer> backBuffers_{};

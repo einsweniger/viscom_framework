@@ -74,6 +74,9 @@ namespace minuseins::gui {
             if(activeWindows["GPUProgram"]) {
                 drawGPUProgram(&activeWindows["GPUProgram"]);
             }
+            if(activeWindows["TimeSlider"]) {
+                drawTimeSlider(&activeWindows["TimeSlider"]);
+            }
         });
     }
 
@@ -92,7 +95,8 @@ namespace minuseins::gui {
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Scene")) {
-                ImGui::MenuItem("", "", &activeWindows["NewScene"]);
+                ImGui::MenuItem("NewScene", "", &activeWindows["NewScene"]);
+                ImGui::MenuItem("StopTime", "SPACE", &appImpl->stopTime_);
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Shader")) {
@@ -105,6 +109,7 @@ namespace minuseins::gui {
                 ImGui::MenuItem("Overlay", "O", &activeWindows["Overlay"]);
                 ImGui::MenuItem("Shaders", "Ctrl+S", &activeWindows["Shaders"]);
                 ImGui::MenuItem("GPUProgram","G", &activeWindows["GPUProgram"]);
+                ImGui::MenuItem("TimeSlider", "H",&activeWindows["TimeSlider"]);
                 ImGui::Separator();
                 ImGui::MenuItem("ImGuiDemo", "", &activeWindows["ImGuiDemo"]);
                 ImGui::EndMenu();
@@ -330,6 +335,25 @@ namespace minuseins::gui {
             ImGui::End();
             ImGui::PopID();
         }
+    }
+
+    void MasterNodeGui::drawTimeSlider(bool *b) {
+        auto height = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
+        ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetIO().DisplaySize.y - height));
+        ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, height));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0,0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+
+        auto flags = ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoSavedSettings;
+        if(ImGui::Begin("##TimeSlider", b, flags)) {
+            ImGui::PushItemWidth(-1);
+            ImGui::SliderFloat("##Time", &appImpl->currentTime_,0.0f, 300.f);
+            ImGui::PopItemWidth();
+        }
+
+        ImGui::End();
+        ImGui::PopStyleVar(3);
     }
 
 

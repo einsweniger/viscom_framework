@@ -69,12 +69,18 @@ namespace viscom {
         }
 
         switch (key) {
-            default: return false;
             case GLFW_KEY_TAB: toggleMouseGrab(); return true;
             case GLFW_KEY_O: gui_->toggle("Overlay"); return true;
             case GLFW_KEY_M: gui_->toggle("MainMenu"); return true;
             case GLFW_KEY_B: gui_->toggle("Buffers"); return true;
             case GLFW_KEY_G: gui_->toggle("GPUProgram"); return true;
+            case GLFW_KEY_SPACE:
+                if(!grabMouse_) {
+                    stopTime_ = !stopTime_;
+                    return true;
+                } else {
+                    return false;
+                }
             case GLFW_KEY_S: {  //Ctl+s
                 if(mods == GLFW_MOD_CONTROL) {
                     gui_->toggle("Shader");
@@ -83,6 +89,7 @@ namespace viscom {
                     return false;
                 }
             }
+            default: return false;
         }
     }
 

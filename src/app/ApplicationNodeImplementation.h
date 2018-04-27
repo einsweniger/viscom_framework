@@ -42,8 +42,10 @@ namespace viscom {
         std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs{};
         std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
 
+        float globalTime_;
         float currentTime_;
         float elapsedTime_;
+        bool stopTime_ = false;
     protected:
         void toggleMouseGrab();
 

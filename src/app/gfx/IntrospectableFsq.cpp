@@ -17,7 +17,7 @@ namespace minuseins {
     IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader,  viscom::enh::ApplicationNodeBase* appNode, bool wait) :
             fragmentShader{fragmentShader},
             fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
-            app_{appNode},
+            appBase{appNode},
             gpuProgram_{fsq_->GetGPUProgram()},
             gpi_{gpuProgram_->getProgramId(), gpuProgram_->getProgramName()}
     {
@@ -35,7 +35,7 @@ namespace minuseins {
         });
         gpi_.addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>());
         gpi_.addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>());
-        gpi_.addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(app_));
+        gpi_.addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(appBase));
         gpi_.addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
         uniformhdl = dynamic_cast<UniformHandler*>(gpi_.GetHandler(gl::GL_UNIFORM));
         outputhdl = dynamic_cast<ProgramOutputHandler*>(gpi_.GetHandler(gl::GL_PROGRAM_OUTPUT));
@@ -51,6 +51,9 @@ namespace minuseins {
     void IntrospectableFsq::Draw2D(bool *p_open)
     {
         if(ImGui::Begin("GPUProgram", p_open)) {
+            auto header = "##active##" + fragmentShader;
+            ImGui::Checkbox(header.c_str(), &active);
+            ImGui::SameLine();
             gpi_.draw_gui(p_open, {gl::GL_UNIFORM, gl::GL_PROGRAM_OUTPUT, gl::GL_UNIFORM_BLOCK, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM});
 
             miscinfo();
@@ -68,11 +71,12 @@ namespace minuseins {
 
     void IntrospectableFsq::DrawToBackBuffer()
     {
-        DrawToBuffer(*GetBackbuffer());
+        DrawFrame(*GetBackbuffer());
     }
 
-    void IntrospectableFsq::DrawToBuffer(const viscom::FrameBuffer& fbo)
+    void IntrospectableFsq::DrawFrame(const viscom::FrameBuffer &fbo)
     {
+        if(!active) return;
         fbo.DrawToFBO([this,&fbo]{
             gpi_.prepareDraw();
             gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
@@ -80,14 +84,6 @@ namespace minuseins {
             fsq_->Draw();
             gl::glUseProgram(0);
         });
-
-    }
-
-    void IntrospectableFsq::DrawFrame(const viscom::FrameBuffer &fbo)
-    {
-        //TODO undo double draw
-        //TODO then pass the textures/programOutput from this render to the next pass.
-        DrawToBuffer(fbo);
     }
     void IntrospectableFsq::ClearBuffer(viscom::FrameBuffer &fbo)
     {
@@ -121,7 +117,7 @@ namespace minuseins {
     }
 
     const viscom::FrameBuffer * IntrospectableFsq::GetBackbuffer() {
-        return app_->SelectOffscreenBuffer(backBuffers_);
+        return appBase->SelectOffscreenBuffer(backBuffers_);
     }
 
     void IntrospectableFsq::init_callbacks() {
@@ -161,7 +157,7 @@ namespace minuseins {
                     }
                     else if (name == "u_eye") {
                         uni.updatefn = [&](auto& self) {
-                            auto position = app_->GetCamera()->GetPosition();
+                            auto position = appBase->GetCamera()->GetPosition();
                             self.value[0] = position.x;
                             self.value[1] = position.y;
                             self.value[2] = position.z;
@@ -189,7 +185,7 @@ namespace minuseins {
                 {
                     if(name == "u_MVP") {
                         res->uploadfn = [&](auto& self) {
-                            auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
+                            auto MVP = appBase->GetCamera()->GetViewPerspectiveMatrix();
                             gl::glUniformMatrix4fv(self.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
                         };
                         return;
@@ -220,10 +216,10 @@ namespace minuseins {
         if(outputs.size() != prev_backbuf_size) {
             auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
             //this assumes all outputs are vec4!
-            backBuffers_ = app_->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
+            backBuffers_ = appBase->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
         }
 
-        auto& textureLocations= app_->SelectOffscreenBuffer(backBuffers_)->GetTextures();
+        auto& textureLocations= appBase->SelectOffscreenBuffer(backBuffers_)->GetTextures();
         for(auto& output : outputs) {
             auto& po = dynamic_cast<ProgramOutput&>(*output);
             po.textureLocation = textureLocations.at(po.location);

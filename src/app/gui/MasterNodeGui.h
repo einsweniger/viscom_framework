@@ -97,6 +97,8 @@ namespace minuseins::gui {
         void drawGPUProgram(bool *p_open);
 
         void check_for_and_attach_texture(IntrospectableFsq* iq, std::vector<shadertoy::Input> &inputs);
+
+        void drawTimeSlider(bool* b);
     };
 }
 

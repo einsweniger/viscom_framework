@@ -67,11 +67,14 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
-        currentTime_ = static_cast<float>(currentTime);
+        globalTime_ = static_cast<float>(currentTime);
         elapsedTime_ = static_cast<float>(elapsedTime);
+        if(!stopTime_) {
+            currentTime_ += elapsedTime_;
+        }
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
         for(auto& fsq : fsqs) {
-            fsq->UpdateFrame(currentTime, elapsedTime);
+            fsq->UpdateFrame(currentTime_, elapsedTime_);
         }
     }
 
