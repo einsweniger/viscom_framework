@@ -23,7 +23,7 @@
             },
             {
                 "key": "ShaderImport",
-                "value": false
+                "value": true
             },
             {
                 "key": "ShaderToyImport",
@@ -39,7 +39,7 @@
             },
             {
                 "key": "Textures",
-                "value": true
+                "value": false
             }
         ]
     }
