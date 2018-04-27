@@ -7,6 +7,10 @@ set(VISCOM_SYNCINPUT OFF CACHE BOOL "Synchronize input from master to clients." 
 set(VISCOM_CLIENTMOUSECURSOR OFF CACHE BOOL "Show the mouse cursor on clients." FORCE)
 set(VISCOM_USE_SGCT OFF CACHE BOOL "Use SGCT for local builds.")
 set(TUIO_LIB OFF CACHE BOOL "Use TUIO input library" FORCE)
+set(WITH_ERROR OFF CACHE BOOL "disable -Werror in cereal" FORCE)
+set(SKIP_PORTABILITY_TEST ON CACHE BOOL "skip 32-bit test in cereal" FORCE)
+set(JUST_INSTALL_CEREAL ON CACHE BOOL "skip cereal unittest sandbox and test" FORCE)
+
 set(ENV{SGCT_ROOT_DIR} "${PROJECT_SOURCE_DIR}/extern/SGCT-2.7.3-bin/mscv14_x64")
 
 if(${VISCOM_USE_SGCT} AND NOT MSVC)
