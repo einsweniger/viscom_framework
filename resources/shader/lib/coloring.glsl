@@ -128,6 +128,14 @@ subroutine(SceneShader) vec3 render(vec3 ray_origin, vec3 ray_direction, vec3 hi
     return vec3( saturate(base_color) );  //actually shade by material
 }
 
+uniform vec3 iResolution;
+vec3 dots(vec3 hit) {
+    vec2 U = hit.xy+hit.xy - iResolution.xy;
+    float T = 6.2832, l = length(U) / 30.,  n = floor(l),
+    a = fract( ( atan(U.x,U.y) - iTime *(n-5.1) ) /T ) *n*7.;
+    vec4 color = ( .6 + .4* cos( n + floor(a) + vec4(0,23,21,0) ) ) * min(1., 3.-6.*length(fract(vec2(l,a))-.5) );
+    return color.xyz;
+}
 
 uniform vec3 shade_light_dir = normalize(vec3(.5, 1.0, -.25));
 uniform bool shade_DRAW_DEBUG = false;
