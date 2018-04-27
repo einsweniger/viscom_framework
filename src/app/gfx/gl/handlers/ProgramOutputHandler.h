@@ -25,11 +25,8 @@ namespace minuseins::handlers {
     };
 
     struct ProgramOutputHandler : public resource_handler {
-        ProgramOutputHandler(viscom::ApplicationNodeBase *appnode) : appnode(appnode) {}
 
-        viscom::ApplicationNodeBase* appnode;
-        std::vector<viscom::FrameBuffer> backBuffers_{};
-        size_t previous_size=0;
+        std::function<void(std::vector<std::unique_ptr<named_resource>>& outputs)> post_init_fn;
 
         void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override {};
         std::unique_ptr<named_resource> initialize(ProgramInspector& inspect, named_resource res) override;

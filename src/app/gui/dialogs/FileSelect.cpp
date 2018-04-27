@@ -17,7 +17,7 @@ namespace minuseins::gui {
     FileSelect::FileSelect(const std::string &name, std::vector<std::string> pathstrs,
                            const std::function<bool(fs::path)> &callback,
                            std::string basepath_suffix) :
-            window(name),
+            name{name},
             callback(callback)
     {
         for(auto pathstr : pathstrs) {

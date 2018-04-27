@@ -42,7 +42,7 @@ namespace minuseins {
         });
 
         gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>());
-        gpi_->addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>(app_));
+        gpi_->addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>());
         gpi_->addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(app_));
         gpi_->addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
         uniformhdl = dynamic_cast<UniformHandler*>(gpi_->GetHandler(gl::GL_UNIFORM));
@@ -126,7 +126,7 @@ namespace minuseins {
     }
 
     const viscom::FrameBuffer * ShaderToyFsq::GetBackbuffer() {
-        return app_->SelectOffscreenBuffer(outputhdl->backBuffers_);
+        return app_->SelectOffscreenBuffer(backBuffers_);
     }
 
     void ShaderToyFsq::init_callbacks() {
@@ -181,6 +181,17 @@ namespace minuseins {
         uniformhdl->add_init_hook("iTime", [&](std::string_view name, generic_uniform* gu) {
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
             uni.updatefn = [&](auto& self) { self.value[0] = currentTime_; };
+        });
+        uniformhdl->add_init_hook("iDate", [&](std::string_view name, generic_uniform* gu) { // (year, month, day, time in seconds)
+            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
+            uni.updatefn = [&](auto& self) {
+                std::time_t time_ = std::time(nullptr);
+                auto tm = std::localtime(&time_);
+                self.value[0] = tm->tm_year;
+                self.value[1] = tm->tm_mon;
+                self.value[2] = tm->tm_mday;
+                self.value[3] = tm->tm_hour*3600.0f+tm->tm_min*60.0f+tm->tm_sec;
+            };
         });
         uniformhdl->add_init_hook("iMouse", [&](std::string_view name, generic_uniform* gu) {
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);

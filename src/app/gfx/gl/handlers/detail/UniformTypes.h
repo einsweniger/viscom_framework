@@ -19,6 +19,7 @@ namespace minuseins::handlers {
 
     struct generic_uniform : public named_resource, gets_updates, can_upload {
         explicit generic_uniform(named_resource res);
+        virtual ~generic_uniform(){};
 
         virtual void update_properties(const generic_uniform &res);
         virtual void init(gl::GLuint program);  //TODO init fns generate errors for uniform block members (location -1)

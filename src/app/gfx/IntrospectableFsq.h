@@ -59,6 +59,7 @@ namespace minuseins {
 
     private:
         void uniform_callback(std::string_view name, handlers::generic_uniform* res);
+        void prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs);
         void init_callbacks();
         void miscinfo();
 
@@ -66,6 +67,7 @@ namespace minuseins {
         viscom::enh::ApplicationNodeBase* app_;
         viscom::GPUProgram* gpuProgram_;
         std::shared_ptr<viscom::Texture> texture_;
+        std::vector<viscom::FrameBuffer> backBuffers_{};
 
         ProgramInspector gpi_;
 

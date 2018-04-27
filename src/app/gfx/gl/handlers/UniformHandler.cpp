@@ -43,7 +43,6 @@ namespace minuseins::handlers {
         try {
             auto hook = init_hooks.at(new_uniform->name);
             hook(new_uniform->name, new_uniform.get());
-            std::cout << "executed init hook for:" << new_uniform->name << std::endl;
         } catch (std::out_of_range&) {
             new_uniform->init(inspect.programId_);
         }

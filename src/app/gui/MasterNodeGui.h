@@ -67,7 +67,6 @@ namespace minuseins::gui {
         std::function<void(std::shared_ptr<viscom::GPUProgram>)> programCallback;
 
         std::map<std::string, bool> activeWindows{};
-        std::vector<std::unique_ptr<window>> windows{};
         std::vector<gl::GLuint> scene{};
 
 //        main_menu menu;

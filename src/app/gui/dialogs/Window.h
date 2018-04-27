@@ -7,15 +7,15 @@
 
 #include <string>
 
-namespace minuseins::gui {
-    struct window {
-        window(std::string name) : name(name) {}
-        std::string name;
-        bool active = false;
-        virtual void draw(bool *p_open) = 0;
-        void setVisibility(bool state) { active = state;}
-        void toggleVisibility() {active = !active;}
-    };
-}
+//namespace minuseins::gui {
+//    struct window {
+//        window(std::string name) : name(name) {}
+//        std::string name;
+//        bool active = false;
+//        virtual void draw(bool *p_open) = 0;
+//        void setVisibility(bool state) { active = state;}
+//        void toggleVisibility() {active = !active;}
+//    };
+//}
 
 #endif //VISCOMFRAMEWORK_WINDOW_H

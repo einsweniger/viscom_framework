@@ -166,11 +166,14 @@ namespace minuseins {
 //        gl::GLuint activeProgram = getActiveProgram();
 
         gl::glUseProgram(programId_);
-        for (auto& interface : all_interfaces) {
-            if(auto handler = GetHandler(interface)) {
-                handler->prepareDraw(*this, containers.at(interface));
-            }
+        for(auto& [interface, handler] : handlers) {
+            handler->prepareDraw(*this, containers.at(interface));
         }
+//        for (auto& interface : all_interfaces) {
+//            if(auto handler = GetHandler(interface)) {
+//                handler->prepareDraw(*this, containers.at(interface));
+//            }
+//        }
 //        gl::glUseProgram(activeProgram);
     }
 

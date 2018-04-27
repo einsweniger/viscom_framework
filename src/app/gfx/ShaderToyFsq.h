@@ -7,6 +7,7 @@
 #include <enh/gfx/gl/GLUniformBuffer.h>
 #include <memory>
 #include <variant>
+#include <unordered_map>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
 #include <enh/ApplicationNodeBase.h>
@@ -61,8 +62,9 @@ namespace minuseins {
         viscom::enh::ApplicationNodeBase* app_;
         viscom::GPUProgram* gpuProgram_;
         std::vector<std::shared_ptr<viscom::Texture>> usedTextures;
-
+        std::vector<viscom::FrameBuffer> backBuffers_{};
         std::unique_ptr<ProgramInspector> gpi_;
+
 
         gui::ShaderLog log_{};
 

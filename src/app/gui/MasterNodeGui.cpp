@@ -38,7 +38,6 @@ namespace minuseins::gui {
         }
         //TODO use vector to draw menu and toggles.
         auto searchPaths = appNode->GetConfig().resourceSearchPaths_;
-        windows.push_back(std::make_unique<FileSelect>("Open Texture",searchPaths, [&](auto path){return textureCallback(path); }));
 
 
     }

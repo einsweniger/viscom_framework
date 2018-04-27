@@ -23,18 +23,12 @@ namespace minuseins::handlers {
     void ProgramOutputHandler::postInit(ProgramInspector &inspect, named_resource_container &outputs) {
         try {
             //create new offscreen buffers
-            if(outputs.size() != previous_size) {
-                auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
-                //this assumes all outputs are vec4!
-                backBuffers_ = appnode->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
+            if (post_init_fn) {
+                post_init_fn(outputs);
+                return;
+            } else {
+                std::cerr << "no handler attached on ProgramOutput!" << std::endl;
             }
-
-            auto& textureLocations= appnode->SelectOffscreenBuffer(backBuffers_)->GetTextures();
-            for(auto& output : outputs) {
-                auto& po = dynamic_cast<ProgramOutput&>(*output);
-                po.textureLocation = textureLocations.at(po.location);
-            }
-            previous_size = outputs.size();
         } catch (std::out_of_range&) {}
     }
 

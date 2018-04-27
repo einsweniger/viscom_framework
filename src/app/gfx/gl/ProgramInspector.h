@@ -6,6 +6,7 @@
 
 #include <glbinding/gl/gl.h>
 #include <cassert>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <memory>
@@ -79,6 +80,7 @@ namespace minuseins {
 
     struct resource_handler {
         using named_resource_container = ProgramInspector::named_resource_container;
+        virtual ~resource_handler(){}
 
         //consume the object and return a unique ptr to it.
         //inspect is there, so you can access previuos values as needed.

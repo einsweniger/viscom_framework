@@ -34,7 +34,7 @@ namespace minuseins {
             }
         });
         gpi_.addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>());
-        gpi_.addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>(app_));
+        gpi_.addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>());
         gpi_.addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(app_));
         gpi_.addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
         uniformhdl = dynamic_cast<UniformHandler*>(gpi_.GetHandler(gl::GL_UNIFORM));
@@ -121,12 +121,13 @@ namespace minuseins {
     }
 
     const viscom::FrameBuffer * IntrospectableFsq::GetBackbuffer() {
-        return app_->SelectOffscreenBuffer(outputhdl->backBuffers_);
+        return app_->SelectOffscreenBuffer(backBuffers_);
     }
 
     void IntrospectableFsq::init_callbacks() {
         using namespace std::placeholders;
         uniformhdl->set_callback_fn(std::bind(&IntrospectableFsq::uniform_callback, this, _1, _2));
+        outputhdl->post_init_fn = std::bind(&IntrospectableFsq::prog_out_hook, this, _1);
         uniformhdl->callback_strs = {
                 "iTime", "u_time","iResolution","iChannelResolution[0]",
                 "u_eye", "u_MVP", "iFrame", "iMouse"
@@ -149,7 +150,6 @@ namespace minuseins {
                         return;
                     }
                     else if(name == "iResolution" || name == "iChannelResolution[0]") {
-                        std::cout << "hit: " << name << std::endl;
                         //TODO here is init fn needed.
                         uni.updatefn = [&](auto& self) {
                             if(self.value[0] > 1.0) return;
@@ -213,5 +213,21 @@ namespace minuseins {
             std::cerr << err.what() << res->name << std::endl;
         }
 
+    }
+
+    void IntrospectableFsq::prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs) {
+        static size_t previous_size = 0;
+        if(outputs.size() != previous_size) {
+            auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
+            //this assumes all outputs are vec4!
+            backBuffers_ = app_->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
+        }
+
+        auto& textureLocations= app_->SelectOffscreenBuffer(backBuffers_)->GetTextures();
+        for(auto& output : outputs) {
+            auto& po = dynamic_cast<ProgramOutput&>(*output);
+            po.textureLocation = textureLocations.at(po.location);
+        }
+        previous_size = outputs.size();
     }
 }
