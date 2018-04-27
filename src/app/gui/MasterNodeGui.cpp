@@ -318,7 +318,8 @@ namespace minuseins::gui {
         for (auto it = fsqs.begin(); it != fsqs.end();) {
             ImGui::PushID((*it)->fragmentShader.c_str());
             ImGui::Begin("GPUProgram");
-            if(ImGui::SmallButton("x")) {
+            std::string buttonText = "x##"+(*it)->fragmentShader;
+            if(ImGui::SmallButton(buttonText.c_str())) {
                 it = fsqs.erase(it);
             } else {
                 ImGui::SameLine();

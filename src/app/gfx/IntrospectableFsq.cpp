@@ -216,8 +216,8 @@ namespace minuseins {
     }
 
     void IntrospectableFsq::prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs) {
-        static size_t previous_size = 0;
-        if(outputs.size() != previous_size) {
+
+        if(outputs.size() != prev_backbuf_size) {
             auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
             //this assumes all outputs are vec4!
             backBuffers_ = app_->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
@@ -228,6 +228,6 @@ namespace minuseins {
             auto& po = dynamic_cast<ProgramOutput&>(*output);
             po.textureLocation = textureLocations.at(po.location);
         }
-        previous_size = outputs.size();
+        prev_backbuf_size = outputs.size();
     }
 }

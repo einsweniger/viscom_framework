@@ -68,6 +68,7 @@ namespace minuseins {
         viscom::GPUProgram* gpuProgram_;
         std::shared_ptr<viscom::Texture> texture_;
         std::vector<viscom::FrameBuffer> backBuffers_{};
+        size_t prev_backbuf_size = 0;
 
         ProgramInspector gpi_;
 
