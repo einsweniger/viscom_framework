@@ -73,6 +73,7 @@ namespace minuseins::interfaces::types {
     struct named_resource : public resource {
         named_resource(std::string name, resource res);
         virtual void draw2D();
+        virtual ~named_resource() = default;
         std::string name;
     };
 
