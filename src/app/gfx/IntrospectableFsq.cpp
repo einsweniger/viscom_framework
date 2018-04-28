@@ -10,6 +10,7 @@
 #include <app/util.h>
 #include <app/gfx/gl/handlers.h>
 #include <core/glfw.h>
+#include <app/ApplicationNodeImplementation.h>
 #include "IntrospectableFsq.h"
 
 
@@ -18,6 +19,7 @@ namespace minuseins {
             fragmentShader{fragmentShader},
             fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
             appBase{appNode},
+            appImpl{static_cast<viscom::ApplicationNodeImplementation*>(appNode)},
             gpuProgram_{fsq_->GetGPUProgram()},
             gpi_{gpuProgram_->getProgramId(), gpuProgram_->GetProgramName()}
     {
@@ -43,6 +45,7 @@ namespace minuseins {
         subroutinehdl = dynamic_cast<SubroutineUniformHandler*>(gpi_.GetHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM));
 
         init_callbacks();
+        init_hooks();
         if(!wait) {
             gpi_.initialize();
         }
@@ -124,97 +127,71 @@ namespace minuseins {
 
     void IntrospectableFsq::init_callbacks() {
         using namespace std::placeholders;
-        uniformhdl->set_callback_fn(std::bind(&IntrospectableFsq::uniform_callback, this, _1, _2));
         outputhdl->post_init_fn = std::bind(&IntrospectableFsq::prog_out_hook, this, _1);
-        uniformhdl->callback_strs = {
-                "iTime", "u_time","iResolution","iChannelResolution[0]",
-                "u_eye", "u_MVP", "iFrame", "iMouse"
-        };
     }
 
-    void IntrospectableFsq::uniform_callback(std::string_view name, generic_uniform *res) {
-        try{
-            switch (res->type) {
-                case resource_type::glsl_float:
-                case resource_type::glsl_vec2:
-                case resource_type::glsl_vec3:
-                case resource_type::glsl_vec4:
-                {
-                    auto& uni = dynamic_cast<handlers::FloatUniform&>(*res);
-                    if(name == "iTime" || name == "u_time") {
-                        uni.updatefn = [&](auto& self) {
-                            self.value[0] = currentTime_;
-                        };
-                        return;
-                    }
-                    else if(name == "iResolution" || name == "iChannelResolution[0]") {
-                        //TODO here is init fn needed.
-                        uni.updatefn = [&](auto& self) {
-                            if(self.value[0] > 1.0) return;
-                            self.value[0] = 1920;
-                            self.value[1] = 1080;
-                            self.value[2] = 1;
-                        };
-                        return;
-                    }
-                    else if (name == "u_eye") {
-                        uni.updatefn = [&](auto& self) {
-                            auto position = appBase->GetCamera()->GetPosition();
-                            self.value[0] = position.x;
-                            self.value[1] = position.y;
-                            self.value[2] = position.z;
-                        };
-                        return;
-                    }
-                    else if (name == "iMouse") {
-                        uni.updatefn = [&](auto& self) {
-                            //left, right, middle + extras.
-                            if(ImGui::GetIO().MouseDown[1]) {
-                                self.value[0] = ImGui::GetIO().MousePos.x;
-                                self.value[1] = ImGui::GetIO().MousePos.y;
-                            } else {
-                                self.value[0] = 0;
-                                self.value[1] = 0;
-                            }
+    void IntrospectableFsq::init_hooks() {
+        uniformhdl->add_init_hook("iResolution", [&](std::string_view name, generic_uniform* gu){
+            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
+            uni.updatefn = [&](auto& self) {
+                if(self.value[0] > 1.0) return;
+                //TODO app_->GetConfig().virtualScreenSize_.x; don't hardcode
+                self.value[0] = appImpl->GetScreenSize().x;
+                self.value[1] = appImpl->GetScreenSize().y;
+                self.value[2] = 1;
+            };
+        });
+        uniformhdl->add_init_hook("u_MVP", [&](std::string_view name, generic_uniform* gu){
+            gu->uploadfn = [&](auto& self) {
+                auto MVP = appBase->GetCamera()->GetViewPerspectiveMatrix();
+                gl::glUniformMatrix4fv(self.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
+            };
+        });
+        uniformhdl->add_init_hook("u_eye", [&](std::string_view name, generic_uniform* gu){
+            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
+            uni.updatefn = [&](auto& self) {
+                auto position = appBase->GetCamera()->GetPosition();
+                self.value[0] = position.x;
+                self.value[1] = position.y;
+                self.value[2] = position.z;
+            };
+        });
 
-
-                        };
-                        return;
-                    }
-                    [[fallthrough]];
+        uniformhdl->add_init_hook("iFrame", [&](std::string_view name, generic_uniform* gu) {
+            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
+            uni.updatefn = [&](auto& self) { self.value[0] = iFrame; };
+        });
+        uniformhdl->add_init_hook("iTime", [&](std::string_view name, generic_uniform* gu) {
+            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
+            uni.updatefn = [&](auto& self) { self.value[0] = currentTime_; };
+        });
+        uniformhdl->add_init_hook("iDate", [&](std::string_view name, generic_uniform* gu) { // (year, month, day, time in seconds)
+            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
+            uni.updatefn = [&](auto& self) {
+                std::time_t time_ = std::time(nullptr);
+                auto tm = std::localtime(&time_);
+                self.value[0] = tm->tm_year;
+                self.value[1] = tm->tm_mon;
+                self.value[2] = tm->tm_mday;
+                self.value[3] = tm->tm_hour*3600.0f+tm->tm_min*60.0f+tm->tm_sec;
+            };
+        });
+        uniformhdl->add_init_hook("iMouse", [&](std::string_view name, generic_uniform* gu) {
+            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
+            uni.updatefn = [&](auto& self) {
+                //left, right, middle + extras.
+                if(ImGui::GetIO().MouseDown[1]) {
+                    self.value[0] = ImGui::GetIO().MousePos.x;
+                    self.value[1] = ImGui::GetIO().MousePos.y;
+                } else {
+                    self.value[0] = 0;
+                    self.value[1] = 0;
                 }
-                case resource_type::glsl_mat4:
-                {
-                    if(name == "u_MVP") {
-                        res->uploadfn = [&](auto& self) {
-                            auto MVP = appBase->GetCamera()->GetViewPerspectiveMatrix();
-                            gl::glUniformMatrix4fv(self.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
-                        };
-                        return;
-                    }
-                    [[fallthrough]];
-                }
-                case resource_type::glsl_int: {
-                    auto& uni = dynamic_cast<handlers::IntegerUniform&>(*res);
-                    if(name == "iFrame") {
-                        uni.updatefn = [&](auto& self) {
-                            self.value[0] = iFrame;
-                        };
-                        return;
-                    }
-                    [[fallthrough]];
-                }
-                default:
-                    std::cerr << "requested callback, forgot to handle " << name << toString(res->type) << std::endl;
-            }
-        } catch (std::bad_cast& err) {
-            std::cerr << err.what() << res->name << std::endl;
-        }
-
+            };
+        });
     }
 
     void IntrospectableFsq::prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs) {
-
         if(outputs.size() != prev_backbuf_size) {
             auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
             //this assumes all outputs are vec4!

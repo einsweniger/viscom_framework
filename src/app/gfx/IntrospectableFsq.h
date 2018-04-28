@@ -62,9 +62,9 @@ namespace minuseins {
         bool active = true;
 
     private:
-        void uniform_callback(std::string_view name, handlers::generic_uniform* res);
         void prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs);
         void init_callbacks();
+        void init_hooks();
         void miscinfo();
 
         std::unique_ptr<viscom::FullscreenQuad> fsq_;

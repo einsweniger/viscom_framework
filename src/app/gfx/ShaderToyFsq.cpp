@@ -25,11 +25,12 @@ namespace minuseins {
     }
 
     void ShaderToyFsq::init(viscom::enh::ApplicationNodeBase * appNode) {
-        app_ = appNode;
-        fsq_ = app_->CreateFullscreenQuad(fragmentShader);
+        appBase = appNode;
+        appImpl = static_cast<viscom::ApplicationNodeImplementation*>(appNode);
+        fsq_ = appBase->CreateFullscreenQuad(fragmentShader);
         gpuProgram_ = fsq_->GetGPUProgram();
         gpi_ = std::make_unique<ProgramInspector>(gpuProgram_->getProgramId(), gpuProgram_->GetProgramName());
-        gpi_->set_recompile_function([&](auto& unused) {
+        gpi_->set_recompile_function([&](auto& unused) -> gl::GLuint {
             auto currentProg = gpuProgram_->getProgramId();
             try {
                 gpuProgram_->recompileProgram();
@@ -44,7 +45,7 @@ namespace minuseins {
 
         gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>());
         gpi_->addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>());
-        gpi_->addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(app_));
+        gpi_->addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(appBase));
         gpi_->addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
         uniformhdl = dynamic_cast<UniformHandler*>(gpi_->GetHandler(gl::GL_UNIFORM));
         outputhdl = dynamic_cast<ProgramOutputHandler*>(gpi_->GetHandler(gl::GL_PROGRAM_OUTPUT));
@@ -59,6 +60,9 @@ namespace minuseins {
     void ShaderToyFsq::Draw2D(bool *p_open)
     {
         if(ImGui::Begin("ShaderToys", p_open)) {
+            auto header = "##active##" + fragmentShader;
+            ImGui::Checkbox(header.c_str(), &active);
+            ImGui::SameLine();
             gpi_->draw_gui(p_open, {gl::GL_UNIFORM, gl::GL_PROGRAM_OUTPUT, gl::GL_UNIFORM_BLOCK, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM});
 
             miscinfo();
@@ -76,11 +80,12 @@ namespace minuseins {
 
     void ShaderToyFsq::DrawToBackBuffer()
     {
-        DrawToBuffer(*GetBackbuffer());
+        DrawFrame(*GetBackbuffer());
     }
 
-    void ShaderToyFsq::DrawToBuffer(const viscom::FrameBuffer& fbo)
+    void ShaderToyFsq::DrawFrame(const viscom::FrameBuffer &fbo)
     {
+        if(!active) return;
         fbo.DrawToFBO([this,&fbo]{
             gpi_->prepareDraw();
             gl::glUniform2ui(gpuProgram_->getUniformLocation("u_resolution"), fbo.GetWidth(), fbo.GetHeight());
@@ -88,12 +93,6 @@ namespace minuseins {
             fsq_->Draw();
             gl::glUseProgram(0);
         });
-
-    }
-
-    void ShaderToyFsq::DrawFrame(const viscom::FrameBuffer &fbo)
-    {
-        DrawToBuffer(fbo);
     }
     void ShaderToyFsq::ClearBuffer(viscom::FrameBuffer &fbo)
     {
@@ -104,48 +103,37 @@ namespace minuseins {
     }
 
     void ShaderToyFsq::miscinfo() {
-//        if (ImGui::TreeNode(std::string("shaders##").append(gpuProgram_->getProgramName()).c_str())) {
-//            for (auto it = gpuProgram_->shaders_begin(); it != gpuProgram_->shaders_end(); ++it) {
-//                auto id = it->get()->getShaderId();
-//                ImGui::Text("shader %d", id);
-//                gl::GLint shaderlen;
-//                gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
-//                ImGui::Text("source len %d", shaderlen);
-//                if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
-//                    std::string text;
-//                    text.resize(shaderlen);
-//                    gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
-//                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-//                    ImGui::PopStyleVar();
-//                    ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
-//
-//                    ImGui::TreePop();
-//                }
-//            }
-//            ImGui::TreePop();
-//        }
+        if (!ImGui::TreeNode(std::string("source##").append(gpuProgram_->GetProgramName()).c_str()))
+            return;
+
+        for(const auto& shader : gpuProgram_->GetShaders()) {
+            if(shader->GetType() != gl::GLenum::GL_FRAGMENT_SHADER)
+                continue;
+            auto id = shader->getShaderId();
+            ImGui::SameLine();
+            ImGui::Text("shader %d", id);
+            gl::GLint shaderlen;
+            gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
+            ImGui::SameLine();
+            ImGui::Text("source len %d", shaderlen);
+            std::string text;
+            text.resize(shaderlen);
+            gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
+            //ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
+            ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, -1.0f), ImGuiInputTextFlags_AllowTabInput);
+            ImGui::PopStyleVar();
+        }
+        ImGui::TreePop();
     }
 
     const viscom::FrameBuffer * ShaderToyFsq::GetBackbuffer() {
-        return app_->SelectOffscreenBuffer(backBuffers_);
+        return appBase->SelectOffscreenBuffer(backBuffers_);
     }
 
     void ShaderToyFsq::init_callbacks() {
         using namespace std::placeholders;
-        uniformhdl->set_callback_fn(std::bind(&ShaderToyFsq::uniform_callback, this, _1, _2));
-        uniformhdl->callback_strs = {
-                "iTime", "u_time","iResolution","iChannelResolution[0]",
-                "u_eye", "u_MVP", "iFrame", "iMouse"
-        };
-    }
-
-    void ShaderToyFsq::uniform_callback(std::string_view name, generic_uniform *res) {
-        try{
-
-        } catch (std::bad_cast& err) {
-            std::cerr << err.what() << res->name << std::endl;
-        }
-
+        outputhdl->post_init_fn = std::bind(&ShaderToyFsq::prog_out_hook, this, _1);
     }
 
     void ShaderToyFsq::init_hooks() {
@@ -154,21 +142,22 @@ namespace minuseins {
             uni.updatefn = [&](auto& self) {
                 if(self.value[0] > 1.0) return;
                 //TODO app_->GetConfig().virtualScreenSize_.x; don't hardcode
-                self.value[0] = 1920;
-                self.value[1] = 1080;
+
+                self.value[0] = appImpl->GetScreenSize().x;
+                self.value[1] = appImpl->GetScreenSize().y;
                 self.value[2] = 1;
             };
         });
         uniformhdl->add_init_hook("u_MVP", [&](std::string_view name, generic_uniform* gu){
             gu->uploadfn = [&](auto& self) {
-                auto MVP = app_->GetCamera()->GetViewPerspectiveMatrix();
+                auto MVP = appBase->GetCamera()->GetViewPerspectiveMatrix();
                 gl::glUniformMatrix4fv(self.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
             };
         });
         uniformhdl->add_init_hook("u_eye", [&](std::string_view name, generic_uniform* gu){
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
             uni.updatefn = [&](auto& self) {
-                auto position = app_->GetCamera()->GetPosition();
+                auto position = appBase->GetCamera()->GetPosition();
                 self.value[0] = position.x;
                 self.value[1] = position.y;
                 self.value[2] = position.z;
@@ -181,7 +170,7 @@ namespace minuseins {
         });
         uniformhdl->add_init_hook("iTime", [&](std::string_view name, generic_uniform* gu) {
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) { self.value[0] = ((viscom::ApplicationNodeImplementation*) app_)->currentTime_; };
+            uni.updatefn = [&](auto& self) { self.value[0] = currentTime_; };
         });
         uniformhdl->add_init_hook("iDate", [&](std::string_view name, generic_uniform* gu) { // (year, month, day, time in seconds)
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
@@ -208,7 +197,7 @@ namespace minuseins {
             };
         });
 
-        auto& tm = app_->GetTextureManager();
+        auto& tm = appBase->GetTextureManager();
         for(auto& inp : params_.inputs) {
             if("texture" == inp.ctype) {
                 auto tex = tm.GetResource(inp.src);
@@ -241,5 +230,18 @@ namespace minuseins {
         }
     }
 
+    void ShaderToyFsq::prog_out_hook(std::vector<std::unique_ptr<named_resource>> &outputs) {
+        if(outputs.size() != prev_backbuf_size) {
+            auto value = viscom::FrameBufferTextureDescriptor(static_cast<GLenum>(gl::GLenum::GL_RGBA32F));
+            //this assumes all outputs are vec4!
+            backBuffers_ = appBase->CreateOffscreenBuffers({{outputs.size(), value}, {/* no renderbuffers*/} });
+        }
 
+        auto& textureLocations= appBase->SelectOffscreenBuffer(backBuffers_)->GetTextures();
+        for(auto& output : outputs) {
+            auto& po = dynamic_cast<ProgramOutput&>(*output);
+            po.textureLocation = textureLocations.at(po.location);
+        }
+        prev_backbuf_size = outputs.size();
+    }
 }

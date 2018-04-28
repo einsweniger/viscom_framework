@@ -37,6 +37,7 @@ namespace viscom {
         void DecodeData() override;
         bool AddTuioCursor(TUIO::TuioCursor *tcur) override;
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
+        glm::vec2 GetScreenSize();
 
         std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
         std::vector<std::unique_ptr<Texture>> textures;

@@ -77,6 +77,9 @@ namespace viscom {
         for(auto& fsq : fsqs) {
             fsq->UpdateFrame(currentTime_, elapsedTime_);
         }
+        for(auto& toy : toys) {
+            toy->UpdateFrame(currentTime_, elapsedTime_);
+        }
     }
 
 
@@ -155,6 +158,10 @@ namespace viscom {
     bool ApplicationNodeImplementation::AddTuioCursor(TUIO::TuioCursor *tcur)
     {
         return ApplicationNodeBase::AddTuioCursor(tcur);
+    }
+
+    glm::vec2 ApplicationNodeImplementation::GetScreenSize() {
+        return GetConfig().virtualScreenSize_;
     }
 
 }

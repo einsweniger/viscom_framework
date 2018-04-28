@@ -251,34 +251,6 @@ namespace minuseins::gui {
         }
     }
 
-    void MasterNodeGui::check_for_and_attach_texture(IntrospectableFsq* iq, std::vector<shadertoy::Input> &inputs) {
-        auto& tm = appNode->GetTextureManager();
-        for(auto& inp : inputs) {
-            if("texture" == inp.ctype) {
-                auto tex = tm.GetResource(inp.src);
-                iq->GetUniformHandler()->add_init_hook("iChannel" + std::to_string(inp.channel), [&](std::string_view name, generic_uniform* gu) {
-                    std::cout << "init hook hit! " << name << std::endl;
-                    auto& sampler = dynamic_cast<SamplerUniform&>(*gu);
-                    auto x = tm.GetResource(inp.src);
-                    sampler.boundTexture = x->getTextureId();
-                    std::cout << "bouund texture " << sampler.boundTexture << std::endl;
-
-                    sampler.textureUnit = static_cast<GLint>(inp.channel);
-                });
-                iq->GetUniformHandler()->add_init_hook("iChannelResolution[" + std::to_string(inp.channel) + "]", [&](std::string_view name, generic_uniform* gu) {
-                    std::cout << "init hook hit! " << name << std::endl;
-                    auto& floater = dynamic_cast<FloatUniform&>(*gu);
-                    auto x = tm.GetResource(inp.src);
-                    floater.value[0] = x->getDimensions().x;
-                    floater.value[1] = x->getDimensions().y;
-                    floater.value[1] = 0;
-
-                });
-                openTextures.push_back(tex);
-            }
-        }
-    }
-
 
     bool MasterNodeGui::ShaderToyCallback(fs::path path) {
         //TODO clean loading!
@@ -290,14 +262,14 @@ namespace minuseins::gui {
                 //appImpl->fsqs.clear();
                 for(auto& buf : loader->buffers) {
                     std::cout << buf.name << std::endl;
-                    auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id}/ fs::path{buf.name + ".frag"};
+                    auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id + buf.name + ".frag"};
                     auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile);
                     tq->loadParams(buf);
                     tq->init(appImpl);
 
                     appImpl->toys.push_back(std::move(tq));
                 }
-                auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id}/ fs::path{loader->image.name + ".frag"};
+                auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id +"/"+ loader->image.name + ".frag"};
                 auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile);
                 tq->loadParams(loader->image);
                 tq->init(appImpl);
@@ -317,13 +289,32 @@ namespace minuseins::gui {
     }
 
     void MasterNodeGui::drawGPUProgram(bool *p_open) {
-        auto& fsqs = appImpl->fsqs;
-        for (auto it = fsqs.begin(); it != fsqs.end();) {
+        {
+            auto& fsqs = appImpl->fsqs;
+            for (auto it = fsqs.begin(); it != fsqs.end();) {
+                ImGui::PushID((*it)->fragmentShader.c_str());
+                ImGui::Begin("GPUProgram");
+                std::string buttonText = "x##"+(*it)->fragmentShader;
+                if(ImGui::SmallButton(buttonText.c_str())) {
+                    it = fsqs.erase(it);
+                } else {
+                    ImGui::SameLine();
+                    (*it)->Draw2D(p_open);
+                    ++it;
+                }
+
+                ImGui::End();
+                ImGui::PopID();
+            }
+        }
+
+        auto& toys = appImpl->toys;
+        for (auto it = toys.begin(); it != toys.end();) {
             ImGui::PushID((*it)->fragmentShader.c_str());
-            ImGui::Begin("GPUProgram");
+            ImGui::Begin("ShaderToys");
             std::string buttonText = "x##"+(*it)->fragmentShader;
             if(ImGui::SmallButton(buttonText.c_str())) {
-                it = fsqs.erase(it);
+                it = toys.erase(it);
             } else {
                 ImGui::SameLine();
                 (*it)->Draw2D(p_open);
@@ -333,6 +324,7 @@ namespace minuseins::gui {
             ImGui::End();
             ImGui::PopID();
         }
+
     }
 
     void MasterNodeGui::drawTimeSlider(bool *b) {

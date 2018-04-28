@@ -17,6 +17,10 @@
 #include <cereal/cereal.hpp>
 #include <app/shadertoy/ShaderToy.h>
 
+namespace viscom {
+    class ApplicationNodeImplementation;
+}
+
 namespace minuseins {
     namespace handlers {
         struct ProgramOutputHandler;
@@ -44,7 +48,6 @@ namespace minuseins {
         void UpdateFrame(double currentTime, double elapsedTime);
         const viscom::FrameBuffer* GetBackbuffer();
         void DrawToBackBuffer();
-        void DrawToBuffer(const viscom::FrameBuffer& fbo);
 
         template<class Archive>
         void serialize(Archive &archive) {
@@ -54,15 +57,18 @@ namespace minuseins {
         shadertoy::Renderpass params_;
 
     private:
-        void uniform_callback(std::string_view name, handlers::generic_uniform* res);
         void init_callbacks();
+        void prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs);
         void miscinfo();
 
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
-        viscom::enh::ApplicationNodeBase* app_;
+        viscom::enh::ApplicationNodeBase* appBase;
+        viscom::ApplicationNodeImplementation* appImpl;
         viscom::GPUProgram* gpuProgram_;
         std::vector<std::shared_ptr<viscom::Texture>> usedTextures;
         std::vector<viscom::FrameBuffer> backBuffers_{};
+        size_t prev_backbuf_size = 0;
+
         std::unique_ptr<ProgramInspector> gpi_;
 
 
@@ -79,5 +85,7 @@ namespace minuseins {
         int iFrame = 0;
 
         void init_hooks();
+
+        bool active = true;
     };
 }
