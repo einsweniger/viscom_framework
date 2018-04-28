@@ -14,6 +14,7 @@
 namespace minuseins::gui {
     namespace fs = std::experimental::filesystem;
     struct FileSelect {
+        ImGuiTextFilter filter;
 
         std::string name;
         std::function<bool(fs::path)> callback;
@@ -25,10 +26,12 @@ namespace minuseins::gui {
         void draw(bool *p_open);
 
         FileSelect(const std::string &name, std::vector<std::string> pathstrs,
-                   const std::function<bool(fs::path)> &callback,
+                   const std::function<bool(fs::path)> callback,
                    std::string basepath_suffix = "");
 
         std::vector<fs::path> scan(fs::path folder);
+
+        void drawMenu(fs::path &base);
     };
 
 }
