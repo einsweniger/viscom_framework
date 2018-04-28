@@ -74,6 +74,7 @@ namespace minuseins {
         std::shared_ptr<viscom::Texture> texture_;
         std::vector<viscom::FrameBuffer> backBuffers_{};
         size_t prev_backbuf_size = 0;
+        std::string fragSource;
 
         ProgramInspector gpi_;
 

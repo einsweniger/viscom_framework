@@ -19,7 +19,7 @@ namespace minuseins {
             fsq_{appNode->CreateFullscreenQuad(fragmentShader)},
             appBase{appNode},
             gpuProgram_{fsq_->GetGPUProgram()},
-            gpi_{gpuProgram_->getProgramId(), gpuProgram_->getProgramName()}
+            gpi_{gpuProgram_->getProgramId(), gpuProgram_->GetProgramName()}
     {
         gpi_.set_recompile_function([&](auto& unused) {
             auto currentProg = gpuProgram_->getProgramId();
@@ -94,26 +94,28 @@ namespace minuseins {
     }
 
     void IntrospectableFsq::miscinfo() {
-//        if (ImGui::TreeNode(std::string("shaders##").append(gpuProgram_->getProgramName()).c_str())) {
-//            for (auto it = gpuProgram_->shaders_begin(); it != gpuProgram_->shaders_end(); ++it) {
-//                auto id = it->get()->getShaderId();
-//                ImGui::Text("shader %d", id);
-//                gl::GLint shaderlen;
-//                gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
-//                ImGui::Text("source len %d", shaderlen);
-//                if (ImGui::TreeNode(std::string("shaderSource##").append(std::to_string(id)).c_str())) {
-//                    std::string text;
-//                    text.resize(shaderlen);
-//                    gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
-//                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-//                    ImGui::PopStyleVar();
-//                    ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
-//
-//                    ImGui::TreePop();
-//                }
-//            }
-//            ImGui::TreePop();
-//        }
+        if (!ImGui::TreeNode(std::string("source##").append(gpuProgram_->GetProgramName()).c_str()))
+            return;
+
+        for(const auto& shader : gpuProgram_->GetShaders()) {
+            if(shader->GetType() != gl::GLenum::GL_FRAGMENT_SHADER)
+                continue;
+            auto id = shader->getShaderId();
+            ImGui::SameLine();
+            ImGui::Text("shader %d", id);
+            gl::GLint shaderlen;
+            gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
+            ImGui::SameLine();
+            ImGui::Text("source len %d", shaderlen);
+            std::string text;
+            text.resize(shaderlen);
+            gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
+            //ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
+            ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, -1.0f), ImGuiInputTextFlags_AllowTabInput);
+            ImGui::PopStyleVar();
+        }
+        ImGui::TreePop();
     }
 
     const viscom::FrameBuffer * IntrospectableFsq::GetBackbuffer() {
