@@ -16,8 +16,8 @@ namespace shadertoy {
 
         std::unique_ptr<shadertoy::Shader> toy_ = nullptr;
         std::vector<Renderpass> buffers{};
-        std::unique_ptr<Renderpass> common = nullptr;
-        std::unique_ptr<Renderpass> image = nullptr;
+        Renderpass common;
+        Renderpass image;
         fs::path outputfolder;
 
     };
