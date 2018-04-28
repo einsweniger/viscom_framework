@@ -10,6 +10,7 @@
 #include <app/util.h>
 #include <app/gfx/gl/handlers.h>
 #include <core/glfw.h>
+#include <app/ApplicationNodeImplementation.h>
 #include "ShaderToyFsq.h"
 
 
@@ -27,7 +28,7 @@ namespace minuseins {
         app_ = appNode;
         fsq_ = app_->CreateFullscreenQuad(fragmentShader);
         gpuProgram_ = fsq_->GetGPUProgram();
-        gpi_ = std::make_unique<ProgramInspector>(gpuProgram_->getProgramId(), gpuProgram_->getProgramName());
+        gpi_ = std::make_unique<ProgramInspector>(gpuProgram_->getProgramId(), gpuProgram_->GetProgramName());
         gpi_->set_recompile_function([&](auto& unused) {
             auto currentProg = gpuProgram_->getProgramId();
             try {
@@ -57,7 +58,7 @@ namespace minuseins {
     }
     void ShaderToyFsq::Draw2D(bool *p_open)
     {
-        if(ImGui::Begin("GPUProgram", p_open)) {
+        if(ImGui::Begin("ShaderToys", p_open)) {
             gpi_->draw_gui(p_open, {gl::GL_UNIFORM, gl::GL_PROGRAM_OUTPUT, gl::GL_UNIFORM_BLOCK, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM});
 
             miscinfo();
@@ -180,7 +181,7 @@ namespace minuseins {
         });
         uniformhdl->add_init_hook("iTime", [&](std::string_view name, generic_uniform* gu) {
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) { self.value[0] = currentTime_; };
+            uni.updatefn = [&](auto& self) { self.value[0] = ((viscom::ApplicationNodeImplementation*) app_)->currentTime_; };
         });
         uniformhdl->add_init_hook("iDate", [&](std::string_view name, generic_uniform* gu) { // (year, month, day, time in seconds)
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
@@ -215,16 +216,13 @@ namespace minuseins {
                 //TODO think about if input::sampler should be stored in other type than SamplerUniform
                 //TODO if using double buffering, this needs to be communicated to sampler.
                 uniformhdl->add_init_hook("iChannel" + std::to_string(inp.channel), [&](std::string_view name, generic_uniform* gu) {
-                    std::cout << "init hook hit! " << name << std::endl;
                     auto& sampler = dynamic_cast<SamplerUniform&>(*gu);
                     auto x = tm.GetResource(inp.src);
                     sampler.boundTexture = x->getTextureId();
-                    std::cout << "bouund texture " << sampler.boundTexture << std::endl;
 
                     sampler.textureUnit = static_cast<GLint>(inp.channel);
                 });
                 uniformhdl->add_init_hook("iChannelResolution[" + std::to_string(inp.channel) + "]", [&](std::string_view name, generic_uniform* gu) {
-                    std::cout << "init hook hit! " << name << std::endl;
                     auto& floater = dynamic_cast<FloatUniform&>(*gu);
                     auto x = tm.GetResource(inp.src);
                     floater.value[0] = x->getDimensions().x;
