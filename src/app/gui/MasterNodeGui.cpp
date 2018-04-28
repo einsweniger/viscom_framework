@@ -97,6 +97,7 @@ namespace minuseins::gui {
             if(ImGui::BeginMenu("Scene")) {
                 ImGui::MenuItem("NewScene", "", &activeWindows["NewScene"]);
                 ImGui::MenuItem("StopTime", "SPACE", &appImpl->stopTime_);
+                ImGui::MenuItem("DrawToy", "", &appImpl->drawToy);
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Shader")) {
@@ -154,8 +155,8 @@ namespace minuseins::gui {
             if(ImGui::Button("commit staged shaders")) {
                 if(!stagedShaders.empty()) {
                     try{
-                        auto prog = std::make_unique<viscom::GPUProgram>(stage_name, appNode, std::move(stagedShaders));
-                        pipeline.push_back(std::move(prog));
+                        //auto prog = std::make_unique<viscom::GPUProgram>(stage_name, appNode, std::move(stagedShaders));
+                        //pipeline.push_back(std::move(prog));
                     } catch (viscom::shader_compiler_error& err) {
                         std::cout <<err.what()<< std::endl;
                     }
@@ -173,47 +174,42 @@ namespace minuseins::gui {
         static std::string progname{};
         progname.reserve(50);
         static auto& gm = appNode->GetGPUProgramManager();
-        static FileSelect shader_select{"Open Shader",appNode->GetConfig().resourceSearchPaths_, [&](fs::path path) {
+        static FileSelect shader_select("Open Shader",appNode->GetConfig().resourceSearchPaths_, [&](fs::path path) {
             try {
-                if(appNode->IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-                    appImpl->fsqs.push_back(std::make_unique<IntrospectableFsq>(path, appImpl));
-                } else {
-                    staged_shaders.push_back(path);
-                    progname.append(path.filename());
-                }
-                return !appNode->IsKeyPressed(GLFW_KEY_LEFT_CONTROL);
+                appImpl->fsqs.push_back(std::make_unique<IntrospectableFsq>(path, appImpl));
+                return false;
             } catch (viscom::shader_compiler_error &err) {
                 std::cout << err.what() << std::endl;
                 return false;
             }
-        }, "shader/"};
+        }, "shader/");
         shader_select.draw(p_open);
-        ImGui::Begin("Open Shader");
-        ImGui::InputText("program name",&progname[0],50);
-        for(auto it = staged_shaders.begin(); it != staged_shaders.end(); it++) {
-            ImGui::TextUnformatted(it->c_str());
-            ImGui::SameLine();
-            std::string button = "x##" + *it;
-            if(ImGui::SmallButton(button.c_str())) {
-                staged_shaders.erase(it);
-                break;
-            }
-        }
-
-        if(ImGui::Button("make program")) {
-            try {
-                if(programCallback) {
-                    programCallback(gm.GetResource(progname, staged_shaders));
-                    staged_shaders.clear();
-                    progname.clear();
-                }
-            } catch (viscom::shader_compiler_error& err) {
-                std::cerr << err.what() << std::endl;
-            } catch (viscom::resource_loading_error& err) {
-                std::cerr << err.errorDescription_ << std::endl;
-            }
-        }
-        ImGui::End();
+//        ImGui::Begin("Open Shader");
+//        ImGui::InputText("program name",&progname[0],50);
+//        for(auto it = staged_shaders.begin(); it != staged_shaders.end(); it++) {
+//            ImGui::TextUnformatted(it->c_str());
+//            ImGui::SameLine();
+//            std::string button = "x##" + *it;
+//            if(ImGui::SmallButton(button.c_str())) {
+//                staged_shaders.erase(it);
+//                break;
+//            }
+//        }
+//
+//        if(ImGui::Button("make program")) {
+//            try {
+//                if(programCallback) {
+//                    programCallback(gm.GetResource(progname, staged_shaders));
+//                    staged_shaders.clear();
+//                    progname.clear();
+//                }
+//            } catch (viscom::shader_compiler_error& err) {
+//                std::cerr << err.what() << std::endl;
+//            } catch (viscom::resource_loading_error& err) {
+//                std::cerr << err.errorDescription_ << std::endl;
+//            }
+//        }
+//        ImGui::End();
     }
 
     void MasterNodeGui::drawTextureImportWindow(bool *p_open) {
@@ -291,20 +287,22 @@ namespace minuseins::gui {
                 && ".json" == path.extension().generic_string()) {
                 auto realpath = viscom::Resource::FindResourceLocation(path, appNode);
                 loader = std::make_unique<shadertoy::ShaderToyLoader>(realpath);
-                appImpl->fsqs.clear();
+                //appImpl->fsqs.clear();
                 for(auto& buf : loader->buffers) {
                     std::cout << buf.name << std::endl;
                     auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id}/ fs::path{buf.name + ".frag"};
-                    auto iq = std::make_unique<minuseins::IntrospectableFsq>(outfile, appImpl, true);
-                    check_for_and_attach_texture(iq.get(), buf.inputs);
-                    iq->init_after_wait();
-                    appImpl->fsqs.push_back(std::move(iq));
+                    auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile);
+                    tq->loadParams(buf);
+                    tq->init(appImpl);
+
+                    appImpl->toys.push_back(std::move(tq));
                 }
-                auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id}/ fs::path{loader->image->name + ".frag"};
-                auto iq = std::make_unique<minuseins::IntrospectableFsq>(outfile, appImpl, true);
-                check_for_and_attach_texture(iq.get(), loader->image->inputs);
-                iq->init_after_wait();
-                appImpl->fsqs.push_back(std::move(iq));
+                auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id}/ fs::path{loader->image.name + ".frag"};
+                auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile);
+                tq->loadParams(loader->image);
+                tq->init(appImpl);
+
+                appImpl->toys.push_back(std::move(tq));
                 return false;
             } else { return false; }
 

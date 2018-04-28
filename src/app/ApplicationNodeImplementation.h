@@ -9,6 +9,7 @@
 #pragma once
 
 #include <app/gfx/gl/ProgramInspector.h>
+#include <app/gfx/ShaderToyFsq.h>
 #include "enh/ApplicationNodeBase.h"
 #include "app/gfx/IntrospectableFsq.h"
 
@@ -40,12 +41,14 @@ namespace viscom {
         std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
         std::vector<std::unique_ptr<Texture>> textures;
         std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs{};
+        std::vector<std::unique_ptr<minuseins::ShaderToyFsq>> toys{};
         std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
 
         float globalTime_;
         float currentTime_;
         float elapsedTime_;
         bool stopTime_ = false;
+        bool drawToy;
     protected:
         void toggleMouseGrab();
 
@@ -53,5 +56,6 @@ namespace viscom {
         std::unique_ptr<MyFreeCamera> freeCam_;
 
     private:
+
     };
 }

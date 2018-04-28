@@ -69,6 +69,7 @@ namespace viscom {
     {
         globalTime_ = static_cast<float>(currentTime);
         elapsedTime_ = static_cast<float>(elapsedTime);
+
         if(!stopTime_) {
             currentTime_ += elapsedTime_;
         }
@@ -89,17 +90,32 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
-        if(fsqs.empty()) return;
-        auto it = fsqs.begin();
-        //draw into backbuffers until next to last.
-        while(it != fsqs.end()-1) {
+        if(drawToy) {
+            if(toys.empty()) return;
+            auto it = toys.begin();
+            //draw into backbuffers until next to last.
+            while(it != toys.end()-1) {
+                auto& toy = (*it);
+                toy->DrawToBackBuffer();
+                it++;
+            }
+            //then draw last to backbuffer
+            auto& toy = (*it);
+            toy->DrawFrame(fbo);
+
+        } else {
+            if(fsqs.empty()) return;
+            auto it = fsqs.begin();
+            //draw into backbuffers until next to last.
+            while(it != fsqs.end()-1) {
+                auto& fsq = (*it);
+                fsq->DrawToBackBuffer();
+                it++;
+            }
+            //then draw last to backbuffer
             auto& fsq = (*it);
-            fsq->DrawToBackBuffer();
-            it++;
+            fsq->DrawFrame(fbo);
         }
-        //then draw last to backbuffer
-        auto& fsq = (*it);
-        fsq->DrawFrame(fbo);
     }
 
     void ApplicationNodeImplementation::CleanUp()
