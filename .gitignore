@@ -1,4 +1,3 @@
-build/
 _SYNCAPP/
 shaderold/
 srcold/
@@ -10,3 +9,10 @@ resources/shader/**/*.gen
 resources/shader/shadertoy/*
 scripts/__pycache__
 !resources/**/*.obj
+build-*/
+cmake-build*/
+extern/SGCT-2.7.3-bin/
+resources.tgz
+.idea/
+resources/ShaderToy/
+resources/media/
