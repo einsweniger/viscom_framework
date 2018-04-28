@@ -43,7 +43,6 @@ def print_progress(iteration, total, prefix='', suffix='', bar_length=100):
   Argument('api_key', help='the API key for your account')
 )
 def sync_shaders(api_key):
-  #'Nd8Kwh'
   st = ShaderToySession(api_key)
   jsonfolder = Path('ShaderToy')
   if not jsonfolder.is_dir():
