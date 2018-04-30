@@ -1,6 +1,46 @@
 subroutine vec3 SceneShader(vec3 ray_origin, vec3 ray_direction, vec3 hit, float material );  // function signature type declaration
 subroutine uniform SceneShader shade_scene;  // uniform instance, can be called like a function
 
+vec4 checker_texture(vec3 pos) {
+    const float sample_size = 0.01;
+    pos = pos*8.0 + .5;
+    vec3 cell = step(1.0,mod(pos,2.0));
+    float checker = xnor(xnor(cell.x,cell.y),cell.z);
+    vec4 col = mix(vec4(.4),vec4(.5),checker);
+    float fade = 1.-min(1.,sample_size*24.); // very fake "AA"
+    col = mix(vec4(.5),col,fade);
+    pos = abs(fract(pos)-.5);
+    float d = max(max(pos.x,pos.y),pos.z);
+    d = smoothstep(.45,.5,d)*fade;
+    return mix(col,vec4(0.0),d);
+}
+vec3 sky_color(vec3 ray_dir, vec3 light_dir) {
+    float d = max(0.,dot(ray_dir,light_dir));
+    float d2 = light_dir.y*.7+.3;
+    vec3 base_col;
+    base_col = mix(vec3(.3),vec3((ray_dir.y<0.)?0.:1.),abs(ray_dir.y));
+    return base_col*d2;
+}
+uniform vec3 iResolution;
+void mainImage( out vec4 color, in vec2 coord ) {
+    vec2 uv = coord+coord - iResolution.xy;
+    //uv = coord;
+    float T = 6.2832;
+    float l = length(uv) / 30.;
+    float n = floor(l);
+    float a = fract( ( atan(uv.x,uv.y) - iTime *(n-5.1) ) /T ) *n*7.;
+    color = ( .6 + .4* cos( n + floor(a) + vec4(0,23,21,0) ) )  * min(1., 3.-6.*length(fract(vec2(l,a))-.5) );
+}
+
+vec4 dots(vec3 hit) {
+    vec2 U = hit.xy+hit.xy - iResolution.xy;
+    float T = 6.2832, l = length(U) / 30.,  n = floor(l),
+    a = fract( ( atan(U.x,U.y) - iTime *(n-5.1) ) /T ) *n*7.;
+    vec4 color = ( .6 + .4* cos( n + floor(a) + vec4(0,23,21,0) ) ) * min(1., 3.-6.*length(fract(vec2(l,a))-.5) );
+    return color;
+}
+
+
 vec4 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_len) {
      // Fancy lighty debug plane
      if (ray_start.y > cut_plane && ray_dir.y < 0.) {
@@ -128,15 +168,6 @@ subroutine(SceneShader) vec3 render(vec3 ray_origin, vec3 ray_direction, vec3 hi
     return vec3( saturate(base_color) );  //actually shade by material
 }
 
-uniform vec3 iResolution;
-vec3 dots(vec3 hit) {
-    vec2 U = hit.xy+hit.xy - iResolution.xy;
-    float T = 6.2832, l = length(U) / 30.,  n = floor(l),
-    a = fract( ( atan(U.x,U.y) - iTime *(n-5.1) ) /T ) *n*7.;
-    vec4 color = ( .6 + .4* cos( n + floor(a) + vec4(0,23,21,0) ) ) * min(1., 3.-6.*length(fract(vec2(l,a))-.5) );
-    return color.xyz;
-}
-
 uniform vec3 shade_light_dir = normalize(vec3(.5, 1.0, -.25));
 uniform bool shade_DRAW_DEBUG = false;
 subroutine(SceneShader) vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 hit, float material) {
@@ -173,7 +204,7 @@ subroutine(SceneShader) vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 hit, float
     }
 
     if (shade_DRAW_DEBUG) {
-        float cut_plane0 = sin(u_time)*.15 - .8;
+        float cut_plane0 = sin(iTime)*.15 - .8;
         for(int k=0; k<4; ++k) {
             vec4 dpcol = debug_plane(ray_start, ray_dir, cut_plane0+float(k)*.75, ray_len);
             if (dpcol.w == INF) continue;

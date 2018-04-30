@@ -67,27 +67,6 @@ float length8( vec2 p ){
 }
 float xnor(float x, float y) { return abs(x+y-1.0); } // abs(0+0-1)=1, abs(1+0-1)=0, abs(0+1-1)=0, abs(1+1-1)=1
 
-vec4 checker_texture(vec3 pos) {
-    const float sample_size = 0.01;
-    pos = pos*8.0 + .5;
-    vec3 cell = step(1.0,mod(pos,2.0));
-    float checker = xnor(xnor(cell.x,cell.y),cell.z);
-    vec4 col = mix(vec4(.4),vec4(.5),checker);
-    float fade = 1.-min(1.,sample_size*24.); // very fake "AA"
-    col = mix(vec4(.5),col,fade);
-    pos = abs(fract(pos)-.5);
-    float d = max(max(pos.x,pos.y),pos.z);
-    d = smoothstep(.45,.5,d)*fade;
-    return mix(col,vec4(0.0),d);
-}
-vec3 sky_color(vec3 ray_dir, vec3 light_dir) {
-    float d = max(0.,dot(ray_dir,light_dir));
-    float d2 = light_dir.y*.7+.3;
-    vec3 base_col;
-    base_col = mix(vec3(.3),vec3((ray_dir.y<0.)?0.:1.),abs(ray_dir.y));
-    return base_col*d2;
-}
-
 // Noise by iq
 float hash( float n ) { return fract(sin(n)*753.5453123); }
 vec2 hash2( vec2 p ) {return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);}
