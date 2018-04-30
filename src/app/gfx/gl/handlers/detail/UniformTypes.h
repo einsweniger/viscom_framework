@@ -21,10 +21,10 @@ namespace minuseins::handlers {
         explicit generic_uniform(named_resource res);
         virtual ~generic_uniform(){};
 
-        virtual void update_properties(const generic_uniform &res);
-        virtual void init(gl::GLuint program);
-        virtual size_t uploadSize();
-        virtual void* valuePtr();
+        void update_properties(const generic_uniform &res);
+        virtual void init(gl::GLuint program) = 0;
+        virtual size_t uploadSize() = 0;
+        virtual void* valuePtr() = 0;
 
         void draw2Dpre();
         void draw2D() override;
@@ -46,11 +46,58 @@ namespace minuseins::handlers {
         gl::GLuint array_size();
     };
 
+    struct empty_uniform : generic_uniform {
+        using generic_uniform::generic_uniform;
+
+        size_t uploadSize() override {return 0;};
+        void *valuePtr() override {return nullptr;};
+        void init(gl::GLuint) override {};
+
+        bool get_updated_value() override { return false; }
+
+        bool upload_value() override { return false; }
+    };
+
     template<typename T>
     struct UniformWithValue : public generic_uniform {
         explicit UniformWithValue(named_resource arg)  :
                 generic_uniform(std::move(arg)),
                 value{std::vector<T>(getSize(type()))}
+        {
+        }
+
+        std::function<void()> updatefn;
+
+        bool get_updated_value() override {
+            if(nullptr != updatefn && receive_updates) {
+                updatefn();
+                return true;
+            }
+            return false;
+        }
+        size_t uploadSize() override {
+            return value.size() * sizeof(T);
+        }
+        void *valuePtr() override {
+            return &value[0];
+        }
+
+        virtual void drawValue() = 0;
+
+        void draw2D() override {
+            generic_uniform::draw2Dpre();
+            drawValue();
+            generic_uniform::draw2Dpost();
+        }
+
+        std::vector<T> value;
+    };
+
+    template<typename T>
+    struct GlmUniform : public generic_uniform {
+        explicit GlmUniform(named_resource arg)  :
+                generic_uniform(std::move(arg)),
+                value{T()}
         {
         }
 
@@ -106,6 +153,10 @@ namespace minuseins::handlers {
     struct DoubleUniform : public UniformWithValue<gl::GLdouble> {
         using UniformWithValue::UniformWithValue;
 
+        void init(gl::GLuint program) override;
+
+        bool upload_value() override;
+
         void drawValue() override;
     };
 
@@ -130,12 +181,14 @@ namespace minuseins::handlers {
         bool upload_value() override;
     };
 
-    struct SamplerUniform : public generic_uniform {
-        using generic_uniform::generic_uniform;
+    struct SamplerUniform : public empty_uniform {
+        using empty_uniform::empty_uniform;
 
         void draw2D() override;
 
         bool upload_value() override;
+
+        bool get_updated_value() override;
 
         gl::GLint boundTexture = 0;
         gl::GLint textureUnit = 0;

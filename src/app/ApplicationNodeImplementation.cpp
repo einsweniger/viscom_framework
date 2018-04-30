@@ -121,6 +121,7 @@ namespace viscom {
             auto& fsq = (*it);
             fsq->DrawFrame(fbo);
         }
+        iFrame++;
     }
 
     void ApplicationNodeImplementation::CleanUp()

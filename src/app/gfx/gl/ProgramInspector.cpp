@@ -3,8 +3,8 @@
 //
 
 #include <imgui.h>
-#include <core/gfx/Shader.h>
 #include <iostream>
+#include <sstream>
 #include "ProgramInspector.h"
 
 #include "app/gfx/gl/BasicInterface.h"
@@ -20,26 +20,6 @@ namespace minuseins {
         gl::GLint prog =0;
         gl::glGetIntegerv(gl::GL_CURRENT_PROGRAM,&prog);
         return static_cast<gl::GLuint>(prog);
-    }
-    void resource_tooltip(const interfaces::types::property_t &props, const std::string& extra_text) {
-        ImGui::SameLine();
-        ImGui::TextDisabled("(?)");
-        if(ImGui::IsItemHovered()) {
-            std::ostringstream tooltip;
-            tooltip << "resource properties:\n";
-            for(auto prop : props) {
-                if(gl::GL_TYPE == prop.first) {
-                    tooltip << glbinding::aux::Meta::getString(prop.first) << ": "
-                            << interfaces::types::toString(prop.second).c_str() << "\n";
-                } else {
-                    tooltip << glbinding::aux::Meta::getString(prop.first) << ": "<< prop.second << "\n";
-                }
-            }
-            tooltip << extra_text;
-            ImGui::BeginTooltip();
-            ImGui::TextUnformatted(tooltip.str().c_str());
-            ImGui::EndTooltip();
-        }
     }
 
     void ProgramInspector::set_recompile_function(std::function<gl::GLuint()> fn) {
@@ -60,7 +40,6 @@ namespace minuseins {
                 programId_ = compile_fn();
                 initialize();
             }
-
         }
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
@@ -163,18 +142,10 @@ namespace minuseins {
     }
 
     void ProgramInspector::prepareDraw() {
-//        gl::GLuint activeProgram = getActiveProgram();
-
         gl::glUseProgram(programId_);
         for(auto& [interface, handler] : handlers) {
             handler->prepareDraw(*this, containers.at(interface));
         }
-//        for (auto& interface : all_interfaces) {
-//            if(auto handler = GetHandler(interface)) {
-//                handler->prepareDraw(*this, containers.at(interface));
-//            }
-//        }
-//        gl::glUseProgram(activeProgram);
     }
 
     gl::GLuint ProgramInspector::GetResourceIndex(gl::GLenum interface, const std::string &name) {

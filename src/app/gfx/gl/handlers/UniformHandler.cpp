@@ -14,9 +14,12 @@
 
 namespace minuseins::handlers {
 
+    UniformHandler::UniformHandler(UniformHandler::build_fn builder) : builder(builder) {}
+
+    UniformHandler::UniformHandler() : UniformHandler(UniformBuilder()) {}
 
     std::unique_ptr<named_resource> UniformHandler::initialize(ProgramInspector& inspect, named_resource res) {
-        auto new_uniform = make_uniform(res);
+        std::unique_ptr<generic_uniform> new_uniform = builder(res);
         try {
             //if neither throws, we had a previous run with that uniform.
             auto old_res_idx = inspect.GetResourceIndex(gl::GL_UNIFORM, new_uniform->name);//throws!
@@ -65,6 +68,4 @@ namespace minuseins::handlers {
     void UniformHandler::add_init_hook(const std::string &name, UniformHandler::callback_fn fn) {
         init_hooks.insert({name, fn});
     }
-
-
 }

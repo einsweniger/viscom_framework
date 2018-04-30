@@ -12,6 +12,7 @@
 #include <core/glfw.h>
 #include <app/ApplicationNodeImplementation.h>
 #include "IntrospectableFsq.h"
+#include "ExternalUniformBuilder.h"
 
 
 namespace minuseins {
@@ -44,11 +45,12 @@ namespace minuseins {
             }
         });
 
-        gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>());
+        gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(handlers::ExternalUniformBuilder(appBase)));
         gpi_->addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>());
         gpi_->addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(appBase));
         gpi_->addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
         uniformhdl = dynamic_cast<UniformHandler*>(gpi_->GetHandler(gl::GL_UNIFORM));
+        //uniformhdl->builder = handlers::ExternalUniformBuilder(appBase);
         outputhdl = dynamic_cast<ProgramOutputHandler*>(gpi_->GetHandler(gl::GL_PROGRAM_OUTPUT));
         ublockhdl = dynamic_cast<UniformBlockHandler*>(gpi_->GetHandler(gl::GL_UNIFORM_BLOCK));
         subroutinehdl = dynamic_cast<SubroutineUniformHandler*>(gpi_->GetHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM));
@@ -142,65 +144,6 @@ namespace minuseins {
     }
 
     void IntrospectableFsq::init_hooks() {
-        uniformhdl->add_init_hook("iResolution", [&](std::string_view name, generic_uniform* gu){
-            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&]() {
-                if(uni.value[0] > 1.0) return;
-                uni.value[0] = appImpl->GetScreenSize().x;
-                uni.value[1] = appImpl->GetScreenSize().y;
-                uni.value[2] = 1;
-            };
-        });
-        uniformhdl->add_init_hook("u_MVP", [&](std::string_view name, generic_uniform* gn){
-            //TODO this will break if u_MVP is moved to a block!
-            auto& gu = dynamic_cast<FloatUniform&>(*gn);
-            gu.uploadfn = [&]() {
-                auto MVP = appBase->GetCamera()->GetViewPerspectiveMatrix();
-                gl::glUniformMatrix4fv(gu.location(), 1, gl::GL_FALSE, glm::value_ptr(MVP));
-            };
-        });
-        uniformhdl->add_init_hook("u_eye", [&](std::string_view name, generic_uniform* gu){
-            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&]() {
-                auto position = appBase->GetCamera()->GetPosition();
-                uni.value[0] = position.x;
-                uni.value[1] = position.y;
-                uni.value[2] = position.z;
-            };
-        });
-
-        uniformhdl->add_init_hook("iFrame", [&](std::string_view name, generic_uniform* gu) {
-            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&]() { uni.value[0] = iFrame; };
-        });
-        uniformhdl->add_init_hook("iTime", [&](std::string_view name, generic_uniform* gu) {
-            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&]() { uni.value[0] = currentTime_; };
-        });
-        uniformhdl->add_init_hook("iDate", [&](std::string_view name, generic_uniform* gu) { // (year, month, day, time in seconds)
-            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&]() {
-                std::time_t time_ = std::time(nullptr);
-                auto tm = std::localtime(&time_);
-                uni.value[0] = tm->tm_year;
-                uni.value[1] = tm->tm_mon;
-                uni.value[2] = tm->tm_mday;
-                uni.value[3] = tm->tm_hour*3600.0f+tm->tm_min*60.0f+tm->tm_sec;
-            };
-        });
-        uniformhdl->add_init_hook("iMouse", [&](std::string_view name, generic_uniform* gu) {
-            auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&]() {
-                //left, right, middle + extras.
-                if(ImGui::GetIO().MouseDown[1]) {
-                    uni.value[0] = ImGui::GetIO().MousePos.x;
-                    uni.value[1] = ImGui::GetIO().MousePos.y;
-                } else {
-                    uni.value[0] = 0;
-                    uni.value[1] = 0;
-                }
-            };
-        });
     }
 
     void IntrospectableFsq::prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs) {

@@ -48,6 +48,7 @@ namespace viscom {
         float globalTime_  = 0.0f;
         float currentTime_ = 0.0f;
         float elapsedTime_ = 0.0f;
+        int iFrame = 0;
         bool stopTime_ = false;
         bool drawToy = false;
     protected:

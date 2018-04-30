@@ -89,8 +89,6 @@ namespace minuseins::handlers {
 
     size_t generic_uniform::uploadSize() {return 0;}
 
-    void generic_uniform::init(gl::GLuint program) {}
-
     gl::GLint generic_uniform::block_index() {return properties.at(gl::GL_BLOCK_INDEX);}
 
     gl::GLint generic_uniform::location() {return properties.at(gl::GL_LOCATION);}
@@ -165,30 +163,56 @@ namespace minuseins::handlers {
         uniform_tooltip(properties);
     }
 
+    bool SamplerUniform::get_updated_value() {
+        //TODO update uniform sampler value
+        return false;
+    }
+
     bool IntegerUniform::upload_value() {
         if(generic_uniform::upload_value()) return true;
-        if (resource_type::glsl_int == type()) gl::glUniform1iv(location(), array_size(), &value[0]);
+        if      (resource_type::glsl_int == type())   gl::glUniform1iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_ivec2 == type()) gl::glUniform2iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_ivec3 == type()) gl::glUniform3iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_ivec4 == type()) gl::glUniform4iv(location(), array_size(), &value[0]);
+        else {return false;}
         return true;
     }
 
     bool FloatUniform::upload_value() {
         if(generic_uniform::upload_value()) return true;
-        if (resource_type::glsl_float == type()) gl::glUniform1fv(location(), array_size(), &value[0]);
+        if      (resource_type::glsl_float == type()) gl::glUniform1fv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_vec2 == type())  gl::glUniform2fv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_vec3 == type())  gl::glUniform3fv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_vec4 == type())  gl::glUniform4fv(location(), array_size(), &value[0]);
+        else {return false;}
         return true;
     }
 
     bool BooleanUniform::upload_value() {
         if(generic_uniform::upload_value()) return true;
-        if (resource_type::glsl_bool  == type()) gl::glUniform1iv(location(), array_size(), &value[0]);
+        if      (resource_type::glsl_bool  == type()) gl::glUniform1iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_bvec2 == type()) gl::glUniform2iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_bvec3 == type()) gl::glUniform3iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_bvec4 == type()) gl::glUniform4iv(location(), array_size(), &value[0]);
+        else {return false;}
+        return true;
+    }
+
+    bool DoubleUniform::upload_value() {
+        if      (resource_type::glsl_double == type()) gl::glUniform1dv(location(), array_size(), &value[0]);
+        else if (resource_type::glsl_dvec2 == type())  gl::glUniform2dv(location(), array_size(), &value[0]);
+        else if (resource_type::glsl_dvec3 == type())  gl::glUniform3dv(location(), array_size(), &value[0]);
+        else if (resource_type::glsl_dvec4 == type())  gl::glUniform4dv(location(), array_size(), &value[0]);
+        else {return false;}
+        return true;
+    }
+
+    bool UnsignedUniform::upload_value() {
+        if(generic_uniform::upload_value()) return true;
+        if      (resource_type::glsl_uint  == type()) gl::glUniform1uiv(location(), array_size(), &value[0]);
+        else if (resource_type::glsl_uvec2 == type()) gl::glUniform2uiv(location(), array_size(), &value[0]);
+        else if (resource_type::glsl_uvec3 == type()) gl::glUniform3uiv(location(), array_size(), &value[0]);
+        else if (resource_type::glsl_uvec4 == type()) gl::glUniform4uiv(location(), array_size(), &value[0]);
         return true;
     }
 
@@ -197,15 +221,6 @@ namespace minuseins::handlers {
         gl::glActiveTexture(gl::GL_TEXTURE0 + textureUnit);
         gl::glBindTexture(gl::GL_TEXTURE_2D, boundTexture);
         gl::glUniform1i(location(), textureUnit);
-        return true;
-    }
-
-    bool UnsignedUniform::upload_value() {
-        if(generic_uniform::upload_value()) return true;
-        if (resource_type::glsl_uint  == type()) gl::glUniform1uiv(location(), array_size(), &value[0]);
-        else if (resource_type::glsl_uvec2 == type()) gl::glUniform2uiv(location(), array_size(), &value[0]);
-        else if (resource_type::glsl_uvec3 == type()) gl::glUniform3uiv(location(), array_size(), &value[0]);
-        else if (resource_type::glsl_uvec4 == type()) gl::glUniform4uiv(location(), array_size(), &value[0]);
         return true;
     }
 
@@ -223,6 +238,10 @@ namespace minuseins::handlers {
 
     void UnsignedUniform::init(gl::GLuint program) {
         if(location() > 0) gl::glGetUniformuiv(program, location(), &value[0]);
+    }
+
+    void DoubleUniform::init(gl::GLuint program) {
+        if(location() > 0) gl::glGetUniformdv(program, location(), &value[0]);
     }
 
 }

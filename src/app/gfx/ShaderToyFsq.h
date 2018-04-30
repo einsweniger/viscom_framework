@@ -22,6 +22,6 @@ namespace minuseins {
         const std::string& getWindowName() override {return windowname;}
 
         const std::string windowname = "ShaderToys";
-        void init_hooks();
+        void init_hooks() override;
     };
 }

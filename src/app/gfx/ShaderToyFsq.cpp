@@ -14,7 +14,7 @@ namespace minuseins {
     }
 
     void ShaderToyFsq::init_hooks() {
-        IntrospectableFsq::init_hooks();
+        //IntrospectableFsq::init_hooks();
 
         auto& tm = appBase->GetTextureManager();
         for(auto& inp : params_.inputs) {
