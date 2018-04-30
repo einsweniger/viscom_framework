@@ -69,6 +69,8 @@ namespace minuseins {
         std::vector<viscom::FrameBuffer> backBuffers_{};
         size_t prev_backbuf_size = 0;
 
+        std::unordered_map<std::string, viscom::enh::GLUniformBuffer> uniformBuffers_;
+
         std::unique_ptr<ProgramInspector> gpi_;
 
 

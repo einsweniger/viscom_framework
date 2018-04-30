@@ -30,11 +30,12 @@ namespace minuseins {
         fsq_ = appBase->CreateFullscreenQuad(fragmentShader);
         gpuProgram_ = fsq_->GetGPUProgram();
         gpi_ = std::make_unique<ProgramInspector>(gpuProgram_->getProgramId(), gpuProgram_->GetProgramName());
-        gpi_->set_recompile_function([&](auto& unused) -> gl::GLuint {
+        gpi_->set_recompile_function([&]() -> gl::GLuint {
             auto currentProg = gpuProgram_->getProgramId();
             try {
                 gpuProgram_->recompileProgram();
                 init_callbacks();
+                log_.visible = false;
                 return gpuProgram_->getProgramId();
             } catch (viscom::shader_compiler_error& compilerError) {
                 log_.AddLog("%s",compilerError.what());
@@ -52,23 +53,27 @@ namespace minuseins {
         ublockhdl = dynamic_cast<UniformBlockHandler*>(gpi_->GetHandler(gl::GL_UNIFORM_BLOCK));
         subroutinehdl = dynamic_cast<SubroutineUniformHandler*>(gpi_->GetHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM));
 
-        init_hooks();
         init_callbacks();
+        init_hooks();
 
         gpi_->initialize();
     }
+
     void ShaderToyFsq::Draw2D(bool *p_open)
     {
-        if(ImGui::Begin("ShaderToys", p_open)) {
-            auto header = "##active##" + fragmentShader;
-            ImGui::Checkbox(header.c_str(), &active);
-            ImGui::SameLine();
-            gpi_->draw_gui(p_open, {gl::GL_UNIFORM, gl::GL_PROGRAM_OUTPUT, gl::GL_UNIFORM_BLOCK, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM});
-
-            miscinfo();
-
+        if(!ImGui::Begin("ShaderToys", p_open)) {
+            ImGui::End();
+            return;
         }
+        auto header = "##active##" + fragmentShader;
+        ImGui::Checkbox(header.c_str(), &active);
+        ImGui::SameLine();
+        gpi_->draw_gui(p_open, {gl::GL_UNIFORM, gl::GL_PROGRAM_OUTPUT, gl::GL_UNIFORM_BLOCK, gl::GL_FRAGMENT_SUBROUTINE_UNIFORM});
+
+        miscinfo();
+
         ImGui::End();
+        log_.Draw(fragmentShader.c_str());
     }
 
     void ShaderToyFsq::UpdateFrame(double currentTime, double elapsedTime)
@@ -139,60 +144,60 @@ namespace minuseins {
     void ShaderToyFsq::init_hooks() {
         uniformhdl->add_init_hook("iResolution", [&](std::string_view name, generic_uniform* gu){
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) {
-                if(self.value[0] > 1.0) return;
-                //TODO app_->GetConfig().virtualScreenSize_.x; don't hardcode
-
-                self.value[0] = appImpl->GetScreenSize().x;
-                self.value[1] = appImpl->GetScreenSize().y;
-                self.value[2] = 1;
+            uni.updatefn = [&]() {
+                if(uni.value[0] > 1.0) return;
+                uni.value[0] = appImpl->GetScreenSize().x;
+                uni.value[1] = appImpl->GetScreenSize().y;
+                uni.value[2] = 1;
             };
         });
-        uniformhdl->add_init_hook("u_MVP", [&](std::string_view name, generic_uniform* gu){
-            gu->uploadfn = [&](auto& self) {
+        uniformhdl->add_init_hook("u_MVP", [&](std::string_view name, generic_uniform* gn){
+            //TODO this will break if u_MVP is moved to a block!
+            auto& gu = dynamic_cast<FloatUniform&>(*gn);
+            gu.uploadfn = [&]() {
                 auto MVP = appBase->GetCamera()->GetViewPerspectiveMatrix();
-                gl::glUniformMatrix4fv(self.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
+                gl::glUniformMatrix4fv(gu.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
             };
         });
         uniformhdl->add_init_hook("u_eye", [&](std::string_view name, generic_uniform* gu){
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) {
+            uni.updatefn = [&]() {
                 auto position = appBase->GetCamera()->GetPosition();
-                self.value[0] = position.x;
-                self.value[1] = position.y;
-                self.value[2] = position.z;
+                uni.value[0] = position.x;
+                uni.value[1] = position.y;
+                uni.value[2] = position.z;
             };
         });
 
         uniformhdl->add_init_hook("iFrame", [&](std::string_view name, generic_uniform* gu) {
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) { self.value[0] = iFrame; };
+            uni.updatefn = [&]() { uni.value[0] = iFrame; };
         });
         uniformhdl->add_init_hook("iTime", [&](std::string_view name, generic_uniform* gu) {
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) { self.value[0] = currentTime_; };
+            uni.updatefn = [&]() { uni.value[0] = currentTime_; };
         });
         uniformhdl->add_init_hook("iDate", [&](std::string_view name, generic_uniform* gu) { // (year, month, day, time in seconds)
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) {
+            uni.updatefn = [&]() {
                 std::time_t time_ = std::time(nullptr);
                 auto tm = std::localtime(&time_);
-                self.value[0] = tm->tm_year;
-                self.value[1] = tm->tm_mon;
-                self.value[2] = tm->tm_mday;
-                self.value[3] = tm->tm_hour*3600.0f+tm->tm_min*60.0f+tm->tm_sec;
+                uni.value[0] = tm->tm_year;
+                uni.value[1] = tm->tm_mon;
+                uni.value[2] = tm->tm_mday;
+                uni.value[3] = tm->tm_hour*3600.0f+tm->tm_min*60.0f+tm->tm_sec;
             };
         });
         uniformhdl->add_init_hook("iMouse", [&](std::string_view name, generic_uniform* gu) {
             auto& uni = dynamic_cast<handlers::FloatUniform&>(*gu);
-            uni.updatefn = [&](auto& self) {
+            uni.updatefn = [&]() {
                 //left, right, middle + extras.
                 if(ImGui::GetIO().MouseDown[1]) {
-                    self.value[0] = ImGui::GetIO().MousePos.x;
-                    self.value[1] = ImGui::GetIO().MousePos.y;
+                    uni.value[0] = ImGui::GetIO().MousePos.x;
+                    uni.value[1] = ImGui::GetIO().MousePos.y;
                 } else {
-                    self.value[0] = 0;
-                    self.value[1] = 0;
+                    uni.value[0] = 0;
+                    uni.value[1] = 0;
                 }
             };
         });
@@ -207,9 +212,23 @@ namespace minuseins {
                 uniformhdl->add_init_hook("iChannel" + std::to_string(inp.channel), [&](std::string_view name, generic_uniform* gu) {
                     auto& sampler = dynamic_cast<SamplerUniform&>(*gu);
                     auto x = tm.GetResource(inp.src);
-                    sampler.boundTexture = x->getTextureId();
-
+                    auto texid = x->getTextureId();
+                    sampler.boundTexture = texid;
+                    if(inp.sampler.wrap == "repeat") {
+                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_S, gl::GL_REPEAT);
+                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_T, gl::GL_REPEAT);
+                    } else if (inp.sampler.wrap == "mirror") { //GL_MIRRORED_REPEAT
+                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_S, gl::GL_MIRRORED_REPEAT);
+                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_T, gl::GL_MIRRORED_REPEAT);
+                    } // clamp_to_edge is default here.
                     sampler.textureUnit = static_cast<GLint>(inp.channel);
+                    if(inp.sampler.filter == "nearest") {
+                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_MIN_FILTER, gl::GL_NEAREST);
+                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_MAG_FILTER, gl::GL_NEAREST);
+
+                    } else if(inp.sampler.filter == "mipmap") {
+                        std::cerr << "mipmap texture filter, implement?" << std::endl;
+                    }
                 });
                 uniformhdl->add_init_hook("iChannelResolution[" + std::to_string(inp.channel) + "]", [&](std::string_view name, generic_uniform* gu) {
                     auto& floater = dynamic_cast<FloatUniform&>(*gu);
@@ -217,7 +236,6 @@ namespace minuseins {
                     floater.value[0] = x->getDimensions().x;
                     floater.value[1] = x->getDimensions().y;
                     floater.value[2] = 1;
-
                 });
             } else if ("buffer" == inp.ctype) {
                 //TODO handle sampler w/buffer input.

@@ -45,11 +45,11 @@ namespace viscom {
         std::vector<std::unique_ptr<minuseins::ShaderToyFsq>> toys{};
         std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
 
-        float globalTime_;
-        float currentTime_;
-        float elapsedTime_;
+        float globalTime_  = 0.0f;
+        float currentTime_ = 0.0f;
+        float elapsedTime_ = 0.0f;
         bool stopTime_ = false;
-        bool drawToy;
+        bool drawToy = false;
     protected:
         void toggleMouseGrab();
 

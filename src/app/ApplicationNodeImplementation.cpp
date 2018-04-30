@@ -61,7 +61,9 @@ namespace viscom {
         //init examples
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
         for(const std::string& frag : startupPrograms) {
-            fsqs.push_back(std::make_unique<minuseins::IntrospectableFsq>(frag, this));
+            auto fsq = std::make_unique<minuseins::IntrospectableFsq>(frag);
+            fsq->init(this);
+            fsqs.push_back(std::move(fsq));
         }
     }
 
