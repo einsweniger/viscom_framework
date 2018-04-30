@@ -42,7 +42,7 @@ namespace minuseins {
         }
     }
 
-    void ProgramInspector::set_recompile_function(std::function<gl::GLuint(ProgramInspector&)> fn) {
+    void ProgramInspector::set_recompile_function(std::function<gl::GLuint()> fn) {
         compile_fn = fn;
     }
 
@@ -57,7 +57,7 @@ namespace minuseins {
             ImGui::SameLine();
             if(ImGui::SmallButton(std::string("recompile##").append(name).c_str())){
                 ImGui::SameLine();
-                programId_ = compile_fn(*this);
+                programId_ = compile_fn();
                 initialize();
             }
 

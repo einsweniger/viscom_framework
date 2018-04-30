@@ -51,11 +51,11 @@ namespace minuseins {
         using named_resource_ptr = std::unique_ptr<named_resource>;
         using named_resource_container = std::vector<named_resource_ptr>;
         using handler_fn = std::function<named_resource_ptr(named_resource)>;
-        using recompile_fn = std::function<gl::GLuint(ProgramInspector&)>;
+        using recompile_fn = std::function<gl::GLuint()>;
 
         explicit ProgramInspector(gl::GLuint programId, const std::string& name = "_no_name_");
 
-        void set_recompile_function(recompile_fn fn);
+        void set_recompile_function(std::function<gl::GLuint()> fn);
         void draw_gui(bool *p_open, std::vector<gl::GLenum> draw_interfaces = all_interfaces);
         void addHandlerFunction(gl::GLenum interface, handler_fn hdl_fn);
         void addHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl);
