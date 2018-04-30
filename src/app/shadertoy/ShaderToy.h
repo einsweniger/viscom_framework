@@ -46,11 +46,11 @@ namespace shadertoy {
     };
 
     struct Sampler {
-        std::string filter;
-        std::string wrap;
-        std::string vflip;
-        std::string srgb;
-        std::string internal;
+        std::string filter; //mipmap, nearest, linear
+        std::string wrap;  // clamp, mirror, repeat
+        std::string vflip; //bool
+        std::string srgb;  //bool
+        std::string internal;  // "byte" or "none"
 
         template<class Archive>
         void serialize(Archive &archive) {
@@ -60,9 +60,9 @@ namespace shadertoy {
 
     struct Input {
         int64_t id;
-        std::string src;
-        std::string ctype;
-        int64_t channel;
+        std::string src;  //url or path
+        std::string ctype; //buffer cubemap keyboard mic music musicstream texture video volume webcam
+        int64_t channel; // channel number, [0,1,2,3]
         struct Sampler sampler;
         int64_t published;
 
@@ -86,10 +86,10 @@ namespace shadertoy {
     struct Renderpass {
         std::vector<struct Input> inputs;
         std::vector<struct Output> outputs;
-        std::string code;
-        std::string name;
+        std::string code;  //fragmentshader
+        std::string name;  // Image, Buf A, Buf B, Buf C Buf D, sometimes empty -.-
         std::string description;
-        std::string type;
+        std::string type;  //image, buffer, sound, common
 
         template<class Archive>
         void serialize(Archive &archive) {
