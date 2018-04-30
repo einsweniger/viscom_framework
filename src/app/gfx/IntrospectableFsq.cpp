@@ -156,7 +156,7 @@ namespace minuseins {
             auto& gu = dynamic_cast<FloatUniform&>(*gn);
             gu.uploadfn = [&]() {
                 auto MVP = appBase->GetCamera()->GetViewPerspectiveMatrix();
-                gl::glUniformMatrix4fv(gu.location, 1, gl::GL_FALSE, glm::value_ptr(MVP));
+                gl::glUniformMatrix4fv(gu.location(), 1, gl::GL_FALSE, glm::value_ptr(MVP));
             };
         });
         uniformhdl->add_init_hook("u_eye", [&](std::string_view name, generic_uniform* gu){

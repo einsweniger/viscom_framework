@@ -22,7 +22,7 @@ namespace minuseins::handlers {
         virtual ~generic_uniform(){};
 
         virtual void update_properties(const generic_uniform &res);
-        virtual void init(gl::GLuint program);  //TODO init fns generate errors for uniform block members (location -1)
+        virtual void init(gl::GLuint program);
         virtual size_t uploadSize();
         virtual void* valuePtr();
 
@@ -40,17 +40,17 @@ namespace minuseins::handlers {
         bool do_upload = true;
         bool receive_updates = true;
 
-        gl::GLint block_index;
-        gl::GLint location;
-        resource_type type;
-        gl::GLuint array_size;
+        gl::GLint block_index();
+        gl::GLint location();
+        resource_type type();
+        gl::GLuint array_size();
     };
 
     template<typename T>
     struct UniformWithValue : public generic_uniform {
         explicit UniformWithValue(named_resource arg)  :
                 generic_uniform(std::move(arg)),
-                value{std::vector<T>(getSize(type))}
+                value{std::vector<T>(getSize(type()))}
         {
         }
 

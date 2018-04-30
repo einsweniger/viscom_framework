@@ -24,7 +24,7 @@ namespace minuseins::handlers {
             {
                 auto& old_uniform = dynamic_cast<generic_uniform&>(*old_res);
                 //We can now try to restore values.
-                if(old_uniform.type == new_uniform->type) {
+                if(old_uniform.type() == new_uniform->type()) {
                     old_uniform.update_properties(*new_uniform);
                 }
             }
