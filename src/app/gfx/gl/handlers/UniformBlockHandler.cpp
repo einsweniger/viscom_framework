@@ -6,13 +6,14 @@
 #include "UniformBlockHandler.h"
 #include "UniformHandler.h"
 #include <enh/ApplicationNodeBase.h>
+#include <app/util.h>
 
 namespace minuseins::handlers {
 
     std::unique_ptr<named_resource>
     UniformBlockHandler::initialize(ProgramInspector &inspect, named_resource res) {
         auto block = std::make_unique<UniformBlock>(std::move(res));
-        block->buffer = std::make_unique<UniformBuffer>(block->name, block->buffer_data_size, appnode->GetUBOBindingPoints());
+        block->buffer = std::make_unique<UniformBuffer>(block->name, block->buffer_data_size(), appnode->GetUBOBindingPoints());
         appnode->GetUBOBindingPoints()->BindBufferBlock(inspect.programId_, block->name);
         return std::move(block);
     }
@@ -24,12 +25,12 @@ namespace minuseins::handlers {
             auto& uniforms = inspect.GetContainer(gl::GL_UNIFORM);
             for(auto& res : resources) {
                 auto& block = dynamic_cast<UniformBlock&>(*res);
-                auto active_vars = interface.GetActiveVariables(block.resourceIndex, block.num_active_variables);
+                auto active_vars = interface.GetActiveVariables(block.resourceIndex, block.num_active_variables());
                 for(auto& resIndex : active_vars) {
                     auto& uniform = dynamic_cast<generic_uniform&>(*uniforms.at(resIndex));
-                    uniform.uploadfn = [&](generic_uniform& self){
-                        auto offset = self.properties.at(gl::GL_OFFSET);
-                        block.buffer->UploadData(offset, self.uploadSize(), self.valuePtr());
+                    uniform.uploadfn = [&](){
+                        auto offset = uniform.properties.at(gl::GL_OFFSET);
+                        block.upload_data(offset, uniform.uploadSize(), uniform.valuePtr());
                     };
                 }
             }
@@ -48,10 +49,23 @@ namespace minuseins::handlers {
     }
 
     UniformBlock::UniformBlock(named_resource res) :
-            named_resource(std::move(res)),
-            buffer_binding{static_cast<gl::GLuint>(properties.at(gl::GL_BUFFER_BINDING))},
-            buffer_data_size{static_cast<gl::GLuint>(properties.at(gl::GL_BUFFER_DATA_SIZE))},
-            num_active_variables{static_cast<gl::GLuint>(properties.at(gl::GL_NUM_ACTIVE_VARIABLES))}
+            named_resource(std::move(res))
     {
+    }
+
+    gl::GLuint UniformBlock::num_active_variables() {
+        return util::ensure_positive(properties.at(gl::GL_NUM_ACTIVE_VARIABLES));
+    }
+
+    gl::GLuint UniformBlock::buffer_data_size() {
+        return util::ensure_positive(properties.at(gl::GL_BUFFER_DATA_SIZE));
+    }
+
+    gl::GLuint UniformBlock::buffer_binding() {
+        return util::ensure_positive(properties.at(gl::GL_BUFFER_BINDING));
+    }
+
+    void UniformBlock::upload_data(std::size_t offset, std::size_t size, const void *data) {
+        buffer->UploadData(offset, size, data);
     }
 }

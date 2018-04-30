@@ -19,9 +19,11 @@ namespace minuseins::handlers {
     struct UniformBlock : named_resource {
         UniformBlock(named_resource res);
 
-        gl::GLuint buffer_binding;
-        gl::GLuint buffer_data_size;
-        gl::GLuint num_active_variables;
+        gl::GLuint buffer_binding();
+        gl::GLuint buffer_data_size();
+        gl::GLuint num_active_variables();
+
+        void upload_data(std::size_t offset, std::size_t size, const void* data);
         std::unique_ptr<UniformBuffer> buffer= nullptr;
 
     };

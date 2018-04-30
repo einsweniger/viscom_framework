@@ -72,19 +72,26 @@ namespace minuseins::handlers {
         }
     }
 
-    void generic_uniform::upload_value() {
+    bool generic_uniform::upload_value() {
         if(nullptr != uploadfn && do_upload) {
-            uploadfn(*this);
+            uploadfn();
+            return true;
         }
+        if(!do_upload) {
+            return true;
+        }
+        return false;
     }
 
-    void generic_uniform::get_updated_value() {
+    bool generic_uniform::get_updated_value() {
         if(nullptr != updatefn && receive_updates) {
-            updatefn(*this);
+            updatefn();
+            return true;
         }
+        return false;
     }
 
-    void *generic_uniform::valuePtr() {return nullptr;}
+    void* generic_uniform::valuePtr() {return nullptr;}
 
     size_t generic_uniform::uploadSize() {return 0;}
 
@@ -156,43 +163,48 @@ namespace minuseins::handlers {
         uniform_tooltip(properties);
     }
 
-    void IntegerUniform::upload_value() {
-        generic_uniform::upload_value();
+    bool IntegerUniform::upload_value() {
+        if(generic_uniform::upload_value()) return true;
         if (resource_type::glsl_int == type) gl::glUniform1iv(location, array_size, &value[0]);
         else if (resource_type::glsl_ivec2 == type) gl::glUniform2iv(location, array_size, &value[0]);
         else if (resource_type::glsl_ivec3 == type) gl::glUniform3iv(location, array_size, &value[0]);
         else if (resource_type::glsl_ivec4 == type) gl::glUniform4iv(location, array_size, &value[0]);
+        return true;
     }
 
-    void FloatUniform::upload_value() {
-        generic_uniform::upload_value();
+    bool FloatUniform::upload_value() {
+        if(generic_uniform::upload_value()) return true;
         if (resource_type::glsl_float == type) gl::glUniform1fv(location, array_size, &value[0]);
         else if (resource_type::glsl_vec2 == type)  gl::glUniform2fv(location, array_size, &value[0]);
         else if (resource_type::glsl_vec3 == type)  gl::glUniform3fv(location, array_size, &value[0]);
         else if (resource_type::glsl_vec4 == type)  gl::glUniform4fv(location, array_size, &value[0]);
+        return true;
     }
 
-    void BooleanUniform::upload_value() {
-        generic_uniform::upload_value();
+    bool BooleanUniform::upload_value() {
+        if(generic_uniform::upload_value()) return true;
         if (resource_type::glsl_bool  == type) gl::glUniform1iv(location, array_size, &value[0]);
         else if (resource_type::glsl_bvec2 == type) gl::glUniform2iv(location, array_size, &value[0]);
         else if (resource_type::glsl_bvec3 == type) gl::glUniform3iv(location, array_size, &value[0]);
         else if (resource_type::glsl_bvec4 == type) gl::glUniform4iv(location, array_size, &value[0]);
+        return true;
     }
 
-    void SamplerUniform::upload_value() {
-        generic_uniform::upload_value();
+    bool SamplerUniform::upload_value() {
+        if(generic_uniform::upload_value()) return true;
         gl::glActiveTexture(gl::GL_TEXTURE0 + textureUnit);
         gl::glBindTexture(gl::GL_TEXTURE_2D, boundTexture);
         gl::glUniform1i(location, textureUnit);
+        return true;
     }
 
-    void UnsignedUniform::upload_value() {
-        generic_uniform::upload_value();
+    bool UnsignedUniform::upload_value() {
+        if(generic_uniform::upload_value()) return true;
         if (resource_type::glsl_uint  == type) gl::glUniform1uiv(location, array_size, &value[0]);
         else if (resource_type::glsl_uvec2 == type) gl::glUniform2uiv(location, array_size, &value[0]);
         else if (resource_type::glsl_uvec3 == type) gl::glUniform3uiv(location, array_size, &value[0]);
         else if (resource_type::glsl_uvec4 == type) gl::glUniform4uiv(location, array_size, &value[0]);
+        return true;
     }
 
     void BooleanUniform::init(gl::GLuint program) {
