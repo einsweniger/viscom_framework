@@ -14,6 +14,7 @@
 #include <experimental/filesystem>
 #include <app/gui/dialogs/ShaderLog.h>
 #include <cereal/cereal.hpp>
+#include <app/shadertoy/ShaderToy.h>
 
 namespace viscom {
     class ApplicationNodeImplementation;
@@ -38,8 +39,8 @@ namespace minuseins {
     {
     public:
         IntrospectableFsq(const std::string &fragmentProgram);
-        void loadParams(shadertoy::Renderpass params);
-        void init(viscom::enh::ApplicationNodeBase*);
+        virtual void loadParams(shadertoy::Renderpass params);
+        virtual void init(viscom::enh::ApplicationNodeBase*);
 
         void ClearBuffer(viscom::FrameBuffer& fbo);
         void   DrawFrame(const viscom::FrameBuffer &fbo);
@@ -58,20 +59,21 @@ namespace minuseins {
 
         bool active = true;
 
-    private:
+    protected:
+        const std::string windowname = "GPUProgram";
+        virtual const std::string& getWindowName() { return windowname;}
         void prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs);
         void init_callbacks();
-        void init_hooks();
+        virtual void init_hooks();
         void miscinfo();
 
         std::unique_ptr<viscom::FullscreenQuad> fsq_;
         viscom::enh::ApplicationNodeBase* appBase;
         viscom::ApplicationNodeImplementation* appImpl;
         viscom::GPUProgram* gpuProgram_;
-        std::shared_ptr<viscom::Texture> texture_;
+        std::vector<std::shared_ptr<viscom::Texture>> usedTextures;
         std::vector<viscom::FrameBuffer> backBuffers_{};
         size_t prev_backbuf_size = 0;
-        std::string fragSource;
 
         std::unique_ptr<ProgramInspector> gpi_;
 
@@ -84,7 +86,6 @@ namespace minuseins {
 
         gl::GLfloat currentTime_;
         gl::GLfloat elapsedTime_;
-        bool draw_gpi = true;
         int iFrame = 0;
     };
 }

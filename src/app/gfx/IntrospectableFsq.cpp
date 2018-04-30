@@ -61,7 +61,7 @@ namespace minuseins {
 
     void IntrospectableFsq::Draw2D(bool *p_open)
     {
-        if(!ImGui::Begin("GPUProgram", p_open)) {
+        if(!ImGui::Begin(getWindowName().c_str(), p_open)) {
             ImGui::End();
             return;
         }
@@ -101,10 +101,10 @@ namespace minuseins {
     }
     void IntrospectableFsq::ClearBuffer(viscom::FrameBuffer &fbo)
     {
-//            app_->SelectOffscreenBuffer(backBuffers_)->DrawToFBO([](){
-//                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-//                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
-//            });
+            appBase->SelectOffscreenBuffer(backBuffers_)->DrawToFBO([](){
+                gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+            });
     }
 
     void IntrospectableFsq::miscinfo() {
