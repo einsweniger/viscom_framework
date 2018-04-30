@@ -44,7 +44,7 @@ namespace minuseins::handlers {
             }
 
             bool upload_value() override {
-                gl::glUniformMatrix4fv(location(), 1, gl::GL_FALSE, glm::value_ptr(value));
+                gl::glUniformMatrix4fv(location(), array_size(), gl::GL_FALSE, glm::value_ptr(value));
                 return true;
             }
 
@@ -53,8 +53,7 @@ namespace minuseins::handlers {
             }
 
             size_t uploadSize() override {
-                //FIXME this is wrong!
-                return 0;
+                return sizeof(value);
             }
 
             void init(gl::GLuint program) override {
@@ -125,7 +124,7 @@ namespace minuseins::handlers {
 
             bool get_updated_value() override {
                 //left, right, middle + extras.
-                //TODO value[2], value[3]
+                //TODO value[2], value[3] ?
                 if(ImGui::GetIO().MouseDown[1]) {
                     value[0] = ImGui::GetIO().MousePos.x;
                     value[1] = ImGui::GetIO().MousePos.y;

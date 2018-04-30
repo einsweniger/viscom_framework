@@ -53,7 +53,8 @@ namespace minuseins::handlers {
     }
 
     void generic_uniform::draw2Dpost(std::string extra_text) {
-        uniform_tooltip(properties, extra_text);
+        std::string upload_size = "upload_size = " + std::to_string(uploadSize());
+        uniform_tooltip(properties, extra_text + upload_size);
         if (ImGui::BeginPopupContextItem(name.c_str()))
         {
             if(ImGui::Selectable("receive updates", receive_updates)) {

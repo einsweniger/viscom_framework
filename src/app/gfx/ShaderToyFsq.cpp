@@ -5,6 +5,7 @@
 #include <app/gfx/gl/handlers.h>
 #include <app/ApplicationNodeImplementation.h>
 #include "ShaderToyFsq.h"
+#include "ShaderToySamplerBuilder.h"
 
 
 namespace minuseins {
@@ -23,27 +24,6 @@ namespace minuseins {
                 usedTextures.push_back(tex);
                 //TODO think about if input::sampler should be stored in other type than SamplerUniform
                 //TODO if using double buffering, this needs to be communicated to sampler.
-                uniformhdl->add_init_hook("iChannel" + std::to_string(inp.channel), [&](std::string_view name, generic_uniform* gu) {
-                    auto& sampler = dynamic_cast<SamplerUniform&>(*gu);
-                    auto x = tm.GetResource(inp.src);
-                    auto texid = x->getTextureId();
-                    sampler.boundTexture = texid;
-                    if(inp.sampler.wrap == "repeat") {
-                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_S, gl::GL_REPEAT);
-                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_T, gl::GL_REPEAT);
-                    } else if (inp.sampler.wrap == "mirror") { //GL_MIRRORED_REPEAT
-                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_S, gl::GL_MIRRORED_REPEAT);
-                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_T, gl::GL_MIRRORED_REPEAT);
-                    } // clamp_to_edge is default here.
-                    sampler.textureUnit = static_cast<GLint>(inp.channel);
-                    if(inp.sampler.filter == "nearest") {
-                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_MIN_FILTER, gl::GL_NEAREST);
-                        gl::glTextureParameteri(texid, gl::GL_TEXTURE_MAG_FILTER, gl::GL_NEAREST);
-
-                    } else if(inp.sampler.filter == "mipmap") {
-                        std::cerr << "mipmap texture filter, implement?" << std::endl;
-                    }
-                });
                 uniformhdl->add_init_hook("iChannelResolution[" + std::to_string(inp.channel) + "]", [&](std::string_view name, generic_uniform* gu) {
                     auto& floater = dynamic_cast<FloatUniform&>(*gu);
                     auto x = tm.GetResource(inp.src);

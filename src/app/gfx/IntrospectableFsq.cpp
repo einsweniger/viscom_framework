@@ -13,6 +13,7 @@
 #include <app/ApplicationNodeImplementation.h>
 #include "IntrospectableFsq.h"
 #include "ExternalUniformBuilder.h"
+#include "ShaderToySamplerBuilder.h"
 
 
 namespace minuseins {
@@ -46,11 +47,11 @@ namespace minuseins {
         });
 
         gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(handlers::ExternalUniformBuilder(appBase)));
+        gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(handlers::ShaderToySamplerBuilder(appBase,params_)));
         gpi_->addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>());
         gpi_->addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(appBase));
         gpi_->addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<SubroutineUniformHandler>(gl::GL_FRAGMENT_SHADER));
         uniformhdl = dynamic_cast<UniformHandler*>(gpi_->GetHandler(gl::GL_UNIFORM));
-        //uniformhdl->builder = handlers::ExternalUniformBuilder(appBase);
         outputhdl = dynamic_cast<ProgramOutputHandler*>(gpi_->GetHandler(gl::GL_PROGRAM_OUTPUT));
         ublockhdl = dynamic_cast<UniformBlockHandler*>(gpi_->GetHandler(gl::GL_UNIFORM_BLOCK));
         subroutinehdl = dynamic_cast<SubroutineUniformHandler*>(gpi_->GetHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM));
