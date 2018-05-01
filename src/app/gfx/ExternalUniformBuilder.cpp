@@ -101,7 +101,16 @@ namespace minuseins::handlers {
 
             bool get_updated_value() override {
                 value[0] = appImpl->currentTime_;
-                return UniformWithValue::get_updated_value();
+                return true;
+            }
+        };
+
+        struct iTimeDelta : iTime {
+            using iTime::iTime;
+
+            bool get_updated_value() override {
+                value[0] = appImpl->elapsedTime_;
+                return true;
             }
         };
 
@@ -138,27 +147,43 @@ namespace minuseins::handlers {
     }
 
     std::unique_ptr<generic_uniform> ExternalUniformBuilder::operator()(named_resource res) {
-        if(res.name == "iResolution" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC3) {
-            return std::make_unique<detail::iResolution>(std::move(res), appImpl);
-        }
+//local uniforms
         if(res.name == "u_MVP" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_MAT4) {
             return std::make_unique<detail::u_MVP>(std::move(res), appBase);
         }
         if(res.name == "u_eye" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC3) {
             return std::make_unique<detail::u_eye>(std::move(res), appBase);
         }
+//shadertoy uniforms
+        // uniform vec3     iResolution;           viewport resolution (in pixels)
+        if(res.name == "iResolution" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC3) {
+            return std::make_unique<detail::iResolution>(std::move(res), appImpl);
+        }
+        // uniform int      iFrame;                shader playback frame
         if(res.name == "iFrame" && res.properties.at(gl::GL_TYPE) == gl::GL_INT) {
             return std::make_unique<detail::iFrame>(std::move(res), appImpl);
         }
+        // uniform float    iTime;                 shader playback time (in seconds)
         if(res.name == "iTime" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT) {
             return std::make_unique<detail::iTime>(std::move(res), appImpl);
         }
+        // uniform float    iTimeDelta;            render time (in seconds)
+        if(res.name == "iTimeDelta" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT) {
+            return std::make_unique<detail::iTimeDelta>(std::move(res), appImpl);
+        }
+        // uniform vec4     iDate;                 (year, month, day, time in seconds)
         if(res.name == "iDate" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC4) {
             return std::make_unique<detail::iDate>(std::move(res));
         }
+        // uniform vec4     iMouse;                mouse pixel coords. xy: current (if MLB down), zw: click
         if(res.name == "iMouse" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC4) {
             return std::make_unique<detail::iMouse>(std::move(res));
         }
+        //TODO implement these:
+        // uniform float    iChannelTime[4];       channel playback time (in seconds)
+        // uniform vec3     iChannelResolution[4]; channel resolution (in pixels)
+        // uniform samplerXXiChannel0..3;          input channel. XX = 2D/Cube
+        // uniform float    iSampleRate;           sound sample rate (i.e., 44100)
         std::cout << "warning, uncaught " << res.name << std::endl;
         return UniformBuilder::operator()(std::move(res));
     }
