@@ -38,6 +38,7 @@ namespace minuseins {
                 gpuProgram_->recompileProgram();
                 init_callbacks();
                 log_.visible = false;
+                log_.Clear();
                 return gpuProgram_->getProgramId();
             } catch (viscom::shader_compiler_error& compilerError) {
                 log_.AddLog("%s",compilerError.what());
