@@ -20,7 +20,7 @@ namespace minuseins::gui {
 
         void    AddLog(const char* fmt, ...) IM_FMTARGS(2);
 
-        void    Draw(const char* title, bool* p_open = nullptr);
+        virtual void    Draw(const char* title, bool* p_open = nullptr);
     };
 }
 

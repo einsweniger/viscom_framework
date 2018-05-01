@@ -13,32 +13,8 @@
 
 #include "core/glfw.h"
 #include "core/imgui/imgui_impl_glfw_gl3.h"
-#include <glbinding-aux/Meta.h>
-#include <glbinding/glbinding.h>
-
 
 #include "app/camera/MyFreeCamera.h"
-
-void errorcallback(const glbinding::FunctionCall & call) {
-    const auto error = gl::glGetError();
-
-    if (gl::GL_NO_ERROR != error) {
-        LOG(WARNING) << "Error: " << glbinding::aux::Meta::getString(error);
-        std::stringstream callOut;
-        callOut << call.function->name() << "(";
-        for (unsigned i = 0; i < call.parameters.size(); ++i) {
-            // callOut << call.parameters[i]->asString();
-            callOut << call.parameters[i].get();
-            if (i < call.parameters.size() - 1)
-                callOut << ", ";
-        }
-        callOut << ")";
-
-        if (call.returnValue)
-            callOut << " -> " << call.returnValue.get();
-        LOG(WARNING) << callOut.str();
-    }
-}
 
 namespace viscom {
 
@@ -53,11 +29,6 @@ namespace viscom {
     void ApplicationNodeImplementation::InitOpenGL()
     {
         enh::ApplicationNodeBase::InitOpenGL();
-        {  //set error callbacks
-            using namespace glbinding;
-            setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
-            setAfterCallback(errorcallback);
-        }
         //init examples
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
         for(const std::string& frag : startupPrograms) {

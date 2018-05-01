@@ -14,6 +14,8 @@
 #include <cereal/types/memory.hpp>
 #include <iostream>
 #include <fstream>
+#include <glbinding/glbinding.h>
+#include <glbinding-aux/Meta.h>
 
 #include "core/glfw.h"  // for registering key presses.
 #include "gfx/gl/handlers.h"
@@ -36,13 +38,7 @@ namespace viscom {
         ApplicationNodeImplementation{ appNode },
         gui_{std::make_unique<minuseins::gui::MasterNodeGui>(this, appNode)}
     {
-        auto cfgPath = findConfig(minuseins::gui::MasterNodeGui::config_name, appNode);
-        if(fs::exists(cfgPath)) {
-            auto instr = std::ifstream{cfgPath};
-            cereal::JSONInputArchive ar{instr};
-            ar(*gui_);
-        }
-        cfgPath = findConfig("StartupPrograms.json", appNode);
+        auto cfgPath = findConfig("StartupPrograms.json", appNode);
         if(fs::exists(cfgPath)) {
             auto instr = std::ifstream{cfgPath};
             cereal::JSONInputArchive ar{instr};
@@ -110,6 +106,17 @@ namespace viscom {
         cereal::JSONOutputArchive ar2{startup_stream};
         ar2(CEREAL_NVP(startupPrograms));
 
+    }
+
+    void MasterNode::InitOpenGL() {
+        ApplicationNodeImplementation::InitOpenGL();
+        auto cfgPath = findConfig(minuseins::gui::MasterNodeGui::config_name, GetApplication());
+        if(fs::exists(cfgPath)) {
+            auto instr = std::ifstream{cfgPath};
+            cereal::JSONInputArchive ar{instr};
+            ar(*gui_);
+            //gui_->init();
+        }
     }
 
 }

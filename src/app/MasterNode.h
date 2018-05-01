@@ -27,6 +27,8 @@ namespace viscom {
         void UpdateFrame(double currentTime, double elapsedTime) override;
         void Draw2D(FrameBuffer& fbo) override;
 
+        void InitOpenGL() override;
+
         void CleanUp() override;
 
     private:

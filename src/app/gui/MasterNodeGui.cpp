@@ -17,6 +17,7 @@
 #include <app/MasterNode.h>
 #include <app/gfx/IntrospectableFsq.h>
 #include <app/gfx/gl/handlers.h>
+#include <glbinding/glbinding.h>
 #include "MasterNodeGui.h"
 #include "app/gui/dialogs/FileSelect.h"
 #include "app/gui/dialogs/Overlay.h"
@@ -39,7 +40,14 @@ namespace minuseins::gui {
         //TODO use vector to draw menu and toggles.
         auto searchPaths = appNode->GetConfig().resourceSearchPaths_;
 
+    }
 
+    void MasterNodeGui::init() {
+        {  //set error callbacks
+            using namespace glbinding;
+            setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
+            setAfterCallback(std::bind(&OglLog::callback, &log, std::placeholders::_1));
+        }
     }
 
     void MasterNodeGui::UpdateFrame(double currentTime, double elapsedTime) {
@@ -53,30 +61,16 @@ namespace minuseins::gui {
             if(activeWindows["ImGuiDemo"]) {
                 ImGui::ShowDemoWindow(&activeWindows["ImGuiDemo"]);
             }
-            if(activeWindows["ShaderToyImport"]) {
                 drawShaderToySelectImport(&activeWindows["ShaderToyImport"]);
-            }
-            if(activeWindows["Shaders"]) {
                 drawShaderWindow(&activeWindows["Shaders"]);
-            }
-            if(activeWindows["Textures"]) {
                 drawTextureWindow(&activeWindows["Textures"]);
-            }
-            if(activeWindows["TextureImport"]) {
                 drawTextureImportWindow(&activeWindows["TextureImport"]);
-            }
-            if(activeWindows["ShaderImport"]) {
                 drawShaderImport(&activeWindows["ShaderImport"]);
-            }
-            if(activeWindows["NewScene"]) {
                 drawNewScene(&activeWindows["NewScene"]);
-            }
-            if(activeWindows["GPUProgram"]) {
                 drawGPUProgram(&activeWindows["GPUProgram"]);
-            }
-            if(activeWindows["TimeSlider"]) {
                 drawTimeSlider(&activeWindows["TimeSlider"]);
-            }
+                log.Draw("OGLerrors", &activeWindows["OGLerrors"]);
+                log.Clear();
         });
     }
 
@@ -111,6 +105,7 @@ namespace minuseins::gui {
                 ImGui::MenuItem("Shaders", "Ctrl+S", &activeWindows["Shaders"]);
                 ImGui::MenuItem("GPUProgram","G", &activeWindows["GPUProgram"]);
                 ImGui::MenuItem("TimeSlider", "H",&activeWindows["TimeSlider"]);
+                ImGui::MenuItem("OGLerrors", "",&activeWindows["OGLerrors"]);
                 ImGui::Separator();
                 ImGui::MenuItem("ImGuiDemo", "", &activeWindows["ImGuiDemo"]);
                 ImGui::EndMenu();
@@ -130,6 +125,7 @@ namespace minuseins::gui {
         select.draw(p_open);
     }
     void MasterNodeGui::drawShaderWindow(bool *p_open) {
+        if(!*p_open) return;
         if(ImGui::Begin("Shaders", p_open)){
 
             ImGui::End();
@@ -137,6 +133,7 @@ namespace minuseins::gui {
     }
 
     void MasterNodeGui::drawNewScene(bool *p_open) {
+        if(!*p_open) return;
         static std::vector<std::unique_ptr<viscom::GPUProgram>> pipeline{};
         static std::vector<std::unique_ptr<viscom::Shader>> stagedShaders{};
         static std::string stage_name = "";
@@ -170,6 +167,7 @@ namespace minuseins::gui {
     }
 
     void MasterNodeGui::drawShaderImport(bool *p_open) {
+        if(!*p_open) return;
         static auto staged_shaders = std::vector<std::string>{};
         static std::string progname{};
         progname.reserve(50);
@@ -189,6 +187,7 @@ namespace minuseins::gui {
     }
 
     void MasterNodeGui::drawTextureImportWindow(bool *p_open) {
+        if(!*p_open) return;
         static FileSelect texture_select{"Open Texture",appNode->GetConfig().resourceSearchPaths_, [&](fs::path path) {
             return textureCallback(path);
         }};
@@ -196,18 +195,23 @@ namespace minuseins::gui {
     }
 
     void MasterNodeGui::drawTextureWindow(bool *p_open) {
+        if(!*p_open) return;
         static viscom::ResourceManager<viscom::Texture>& tm = appNode->GetTextureManager();
 
         if(ImGui::Begin("Textures", p_open)) {
             std::for_each(tm.cbegin(), tm.cend(), [](const auto& tex) {
                 if(!tex.second.expired()) {
-                    auto texture = tex.second.lock();
+                    std::shared_ptr<viscom::Texture> texture = tex.second.lock();
                     ImGui::Text("texid: %d", texture->getTextureId());
                     ImGui::SameLine();
                     ImGui::TextUnformatted(tex.first.c_str());
                     ImVec2 uv0(0, 1);
                     ImVec2 uv1(1, 0);
-                    ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
+                    auto maxwidth = ImGui::GetContentRegionAvailWidth();
+                    auto texdim = texture->getDimensions();
+                    float aspect = texdim.x / texdim.y;
+                    if(aspect > 1.0) {aspect = 1.0f/aspect;};
+                    ImVec2 region(maxwidth, maxwidth * aspect);
                     ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture->getTextureId()), region, uv0, uv1);
                 }
             });
@@ -266,6 +270,7 @@ namespace minuseins::gui {
     }
 
     void MasterNodeGui::drawGPUProgram(bool *p_open) {
+        if(!*p_open) return;
         {
             auto& fsqs = appImpl->fsqs;
             for (auto it = fsqs.begin(); it != fsqs.end();) {
@@ -304,7 +309,8 @@ namespace minuseins::gui {
 
     }
 
-    void MasterNodeGui::drawTimeSlider(bool *b) {
+    void MasterNodeGui::drawTimeSlider(bool *p_open) {
+        if(!*p_open) return;
         auto height = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
         ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetIO().DisplaySize.y - height));
         ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, height));
@@ -313,7 +319,7 @@ namespace minuseins::gui {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
 
         auto flags = ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoSavedSettings;
-        if(ImGui::Begin("##TimeSlider", b, flags)) {
+        if(ImGui::Begin("##TimeSlider", p_open, flags)) {
             ImGui::PushItemWidth(-1);
             ImGui::SliderFloat("##Time", &appImpl->currentTime_,0.0f, 300.f);
             ImGui::PopItemWidth();

@@ -16,6 +16,8 @@
 #include <core/gfx/FullscreenQuad.h>
 #include <glbinding/gl/types.h>
 #include <app/gfx/IntrospectableFsq.h>
+#include <app/gui/dialogs/ShaderLog.h>
+#include <app/gui/dialogs/OglLog.h>
 #include "app/gui/dialogs/Window.h"
 
 namespace viscom {
@@ -69,12 +71,16 @@ namespace minuseins::gui {
         std::map<std::string, bool> activeWindows{};
         std::vector<gl::GLuint> scene{};
 
+        OglLog log{};
+
 //        main_menu menu;
 
         template<class Archive>
         void serialize(Archive &archive) {
             archive(CEREAL_NVP(activeWindows));
         }
+
+        void init();
 
         void drawMainMenu(bool *p_open);
 
