@@ -5,14 +5,14 @@ subroutine vec4 RayMarch(vec3 origin, vec3 direction);  // function signature ty
 subroutine uniform RayMarch raymarch;  // uniform instance, can be called like a function
 
 // tracers
-uniform float t_min =  0.0;
-uniform float t_max = 20.0;
-uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
-uniform int MAX_ITERATIONS = 160;
-uniform float fog_density = .2;
-uniform int USE_BV = 0;
-uniform float relaxation = 1.9;
-uniform float pixelRadius = 0.0001;
+const float t_min =  0.0;
+const float t_max = 20.0;
+const float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
+const int MAX_ITERATIONS = 160;
+const float fog_density = .2;
+const int USE_BV = 0;
+const float relaxation = 1.9;
+const float pixelRadius = 0.0001;
 vec4 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool forceHit) {
     float omega = relaxation; //relaxation parameter omega ∈ [1;2)
     float t = t_min;
@@ -55,13 +55,15 @@ vec4 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool
 }  // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
 
 // subroutine(RayMarch) vec4 enhancedTrace(vec3 origin,vec3 direction) {  <-- error, counts as static recursion
-subroutine(RayMarch) vec4 defaultEnhancedTrace(vec3 origin,vec3 direction) {
+subroutine(RayMarch)
+vec4 defaultEnhancedTrace(vec3 origin,vec3 direction) {
     const bool forceHit = false;
 
     return enhancedTrace(origin, direction, relaxation, pixelRadius, forceHit);
 }
 
-subroutine(RayMarch) vec4 simpleTrace(vec3 origin, vec3 direction) {
+subroutine(RayMarch)
+vec4 simpleTrace(vec3 origin, vec3 direction) {
     const float tau = .001; //threshold
 
     float t = t_min;
@@ -77,7 +79,37 @@ subroutine(RayMarch) vec4 simpleTrace(vec3 origin, vec3 direction) {
     return vec4(direction*t+origin, t);
 }  // simple sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 1)
 
-subroutine(RayMarch) vec4 castRay(vec3 origin,vec3 direction ) {
+subroutine(RayMarch)
+vec4 textTrace(vec3 origin, vec3 direction) {
+
+	vec2 distAndMat;  // Distance and material
+	float t = 0.05;
+	const float maxDepth = 16.0; // farthest distance rays will travel
+	vec3 pos = origin;
+    const float smallVal = 1.0 / 16384.0;
+    // ray marching time
+    for (int i = 0; i <160; i++)	// This is the count of the max times the ray actually marches.
+    {
+        // Step along the ray.
+        pos = (origin + direction * t);
+        // This is _the_ function that defines the "distance field".
+        // It's really what makes the scene geometry. The idea is that the
+        // distance field returns the distance to the closest object, and then
+        // we know we are safe to "march" along the ray by that much distance
+        // without hitting anything. We repeat this until we get really close
+        // and then break because we have effectively hit the object.
+        distAndMat = map(pos);
+
+        // move along the ray a safe amount
+        t += distAndMat.x;
+        // If we are very close to the object, let's call it a hit and exit this loop.
+        if ((t > maxDepth) || (abs(distAndMat.x) < smallVal)) break;
+    }
+    return vec4(pos, distAndMat.y);
+}
+
+subroutine(RayMarch)
+vec4 castRay(vec3 origin,vec3 direction ) {
     float tmin = t_min;
     float tmax = t_max;
 

@@ -2,6 +2,7 @@ subroutine vec4 PostProcess(sampler2D origin, vec2 uv);  // function signature t
 subroutine uniform PostProcess postprocess;  // uniform instance, can be called like a function
 
 #include "util.glsl"
+
 vec2 barrelDistortion(vec2 coord, float amt) {
 	vec2 cc = coord - 0.5;
 	float dist = dot(cc, cc);
@@ -35,22 +36,22 @@ float gamma( float value, float g ) {
 	return pow( value, 1.0 / g );
 }
 
-subroutine(PostProcess) vec4 none(sampler2D tex, vec2 uv) {
+subroutine(PostProcess)
+vec4 none(sampler2D tex, vec2 uv) {
   return texture2D(tex, uv);
 }
 
 float randf(){
-    float time = u_time*0.1;
+    float time = iTime*0.1;
     return mod(4.0,sin(time*time)+1.0)*0.75;
 }
 
-
-subroutine(PostProcess) vec4 glitch(sampler2D iChannel0, vec2 uv) {
+subroutine(PostProcess)
+vec4 glitch(sampler2D iChannel0, vec2 uv) {
+    //i forgot who made this, sorry :(
 
     //vec2 uv = fragCoord.xy / iResolution.xy;
 
-    vec2 iResolution = u_resolution;
-    float iTime = u_time;
     vec2 fragCoord;
     fragCoord.x= uv.x*iResolution.x;
     fragCoord.y= uv.y*iResolution.y;
@@ -62,51 +63,48 @@ subroutine(PostProcess) vec4 glitch(sampler2D iChannel0, vec2 uv) {
     float distortion_x = randf()*iResolution.x;
     float distortion_y = randf()*iResolution.y;
     float col_s = 0.3;
-        vec2 p = uv;
-        float xs = floor(fragCoord.x / 0.5);
-        float ys = floor(fragCoord.y / 0.5);
-        //based on staffantans glitch shader for unity https://github.com/staffantan/unityglitch
-        vec4 normal = texture(iChannel0, p*seed*seed);
-        if(p.y<distortion_x+col_s && p.y>distortion_x-col_s*seed) {
-            if(seed_x >0.0){
-                p.y = 1. - (p.y + distortion_y);
-            }
-            else {
-                p.y = distortion_y;
-            }
+
+    float xs = floor(fragCoord.x / 0.5);
+    float ys = floor(fragCoord.y / 0.5);
+    //based on staffantans glitch shader for unity https://github.com/staffantan/unityglitch
+    vec4 normal = texture(iChannel0, uv*seed*seed);
+    if(uv.y<distortion_x+col_s && uv.y>distortion_x-col_s*seed) {
+        if(seed_x >0.0){
+            uv.y = 1. - (uv.y + distortion_y);
         }
-        if(p.x<distortion_y+col_s && p.x>distortion_y-col_s*seed) {
-            if(seed_y>0.){
-                p.x=distortion_x;
-            }
-            else {
-                p.x = 1. - (p.x + distortion_x);
-            }
+        else {
+            uv.y = distortion_y;
         }
-        p.x+=normal.x*seed_x*(seed/5.);
-        p.y+=normal.y*seed_y*(seed/5.);
-        //base from RGB shift shader
-        vec2 offset = amount * vec2( cos(angle), sin(angle));
-        vec4 cr = texture(iChannel0, p + offset);
-        vec4 cga = texture(iChannel0, p);
-        vec4 cb = texture(iChannel0, p - offset);
-        vec4 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
-        //add noise
+    }
+    if(uv.x<distortion_y+col_s && uv.x>distortion_y-col_s*seed) {
+        if(seed_y>0.){
+            uv.x=distortion_x;
+        }
+        else {
+            uv.x = 1. - (uv.x + distortion_x);
+        }
+    }
+    uv.x+=normal.x*seed_x*(seed/5.);
+    uv.y+=normal.y*seed_y*(seed/5.);
+    //base from RGB shift shader (4t23Rc)
+    vec2 offset = amount * vec2( cos(angle), sin(angle));
+    vec4 cr = texture(iChannel0, uv + offset);
+    vec4 cga = texture(iChannel0, uv);
+    vec4 cb = texture(iChannel0, uv - offset);
+    vec4 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
 
-       vec4 snow = 200.*amount*vec4(hash2(vec2(xs * seed,ys * seed*50.)).x*0.2);
-        fragColor = fragColor+ snow;
+    //add noise
+    vec4 snow = 200.*amount*vec4(hash2(vec2(xs * seed,ys * seed*50.)).x*0.2);
+    fragColor = fragColor+ snow;
 
-         	//fragColor.rgb *= smoothstep(0.8, vigentOffset * 0.799, dist *( darkness + vigentOffset ));
-
-            //  fragColor.rgb = pow(fragColor.rgb, 1.0/vec3(2.2));
-
-          return fragColor;
+    return fragColor;
 }
 
 uniform float ca_max_distort = 0.5;
 uniform int ca_num_iter = 24;
 uniform float ca_reci_num_iter_f = 1.0 / 24.0;
-subroutine(PostProcess) vec4 chromaticAberrationV1(sampler2D tex, vec2 uv) {
+subroutine(PostProcess)
+vec4 chromaticAberrationV1(sampler2D tex, vec2 uv) {
 
 	vec4 sumcol = vec4(0.0);
 	vec4 sumw = vec4(0.0);
@@ -120,7 +118,8 @@ subroutine(PostProcess) vec4 chromaticAberrationV1(sampler2D tex, vec2 uv) {
 
 	return sumcol / sumw;
 }
-subroutine(PostProcess) vec4 chromaticAberrationV2(sampler2D t, vec2 UV){
+subroutine(PostProcess)
+vec4 chromaticAberrationV2(sampler2D t, vec2 UV){
 	vec2 uv = 1.0 - 2.0 * UV;
 	vec3 color = vec3(0);
 	float rf = 1.0;
@@ -318,19 +317,3 @@ subroutine(PostProcess) vec4 ferris(sampler2D tex, vec2 uv) {
 
 }
 
-subroutine(PostProcess) vec4 noise(sampler2D tex, vec2 uv) {
-  float noise_value = noise(texture(tex, uv).xyz * sin(u_time));
-  float fbm_value = fbm(vec3(sin(u_time), cos(u_time), sin(u_time)));
-  vec4 color = texture(tex, uv);
-  vec2 noise = hash2(uv);
-  return vec4(hash3(uv),1);
-  return vec4(0,fbm_value,0,1);
-  return texture(tex, uv) + noise_value;
-
-}
-subroutine(PostProcess) vec4 redBar(sampler2D tex, vec2 uv) {
-  vec3 col = vec3(0);
-    col = mix(vec3(1, 0.0, 0.0), col, smoothstep(.5, .495, uv.x) + smoothstep(.5, .505, uv.x));
-	return vec4(col, 1.0);
-
-}

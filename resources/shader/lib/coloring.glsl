@@ -21,25 +21,6 @@ vec3 sky_color(vec3 ray_dir, vec3 light_dir) {
     base_col = mix(vec3(.3),vec3((ray_dir.y<0.)?0.:1.),abs(ray_dir.y));
     return base_col*d2;
 }
-uniform vec3 iResolution;
-void mainImage( out vec4 color, in vec2 coord ) {
-    vec2 uv = coord+coord - iResolution.xy;
-    //uv = coord;
-    float T = 6.2832;
-    float l = length(uv) / 30.;
-    float n = floor(l);
-    float a = fract( ( atan(uv.x,uv.y) - iTime *(n-5.1) ) /T ) *n*7.;
-    color = ( .6 + .4* cos( n + floor(a) + vec4(0,23,21,0) ) )  * min(1., 3.-6.*length(fract(vec2(l,a))-.5) );
-}
-
-vec4 dots(vec3 hit) {
-    vec2 U = hit.xy+hit.xy - iResolution.xy;
-    float T = 6.2832, l = length(U) / 30.,  n = floor(l),
-    a = fract( ( atan(U.x,U.y) - iTime *(n-5.1) ) /T ) *n*7.;
-    vec4 color = ( .6 + .4* cos( n + floor(a) + vec4(0,23,21,0) ) ) * min(1., 3.-6.*length(fract(vec2(l,a))-.5) );
-    return color;
-}
-
 
 vec4 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_len) {
      // Fancy lighty debug plane
@@ -71,19 +52,34 @@ float softshadow(vec3 ro,vec3 rd,float mint,float tmax ) {
     return saturate( res );
 }
 
+
+//subroutine vec3 NormalCalc(vec3 pos );  // function signature type declaration
+//subroutine uniform NormalCalc calcNormal;  // uniform instance, can be called like a function
+
+//subroutine(NormalCalc)
 vec3 calcNormal(vec3 pos ) {
     vec2 e = vec2(1.0,-1.0)*(1/sqrt(3))*0.0005; //0.00028867
-    return normalize( e.xyy*map( pos + e.xyy ).x +
+    vec3 normal = normalize( e.xyy*map( pos + e.xyy ).x +
                       e.yyx*map( pos + e.yyx ).x +
                       e.yxy*map( pos + e.yxy ).x +
                       e.xxx*map( pos + e.xxx ).x );
-}
 
-vec3 calNormalFerris(vec3 pos) {
+    return normalize(normal);
+}
+//subroutine(NormalCalc)
+vec3 ferris(vec3 pos) {
     float normalEpsilon = 0.001;
     return normalize(vec3(map(pos + vec3(normalEpsilon, 0, 0)).x - map(pos - vec3(normalEpsilon, 0, 0)).x ,
                           map(pos + vec3(0, normalEpsilon, 0)).x - map(pos - vec3(0, normalEpsilon, 0)).x,
                           map(pos + vec3(0, 0, normalEpsilon)).x - map(pos - vec3(0, 0, normalEpsilon)).x));
+}
+//subroutine(NormalCalc)
+vec3 otavio(vec3 pos) {
+        vec3 smallVec = vec3(1.0/4096.0, 0, 0);
+        vec3 normalU = vec3(map(pos + smallVec.xyy).x - map(pos - smallVec.xyy).x,
+                            map(pos + smallVec.yxy).x - map(pos - smallVec.yxy).x,
+                            map(pos + smallVec.yyx).x - map(pos - smallVec.yyx).x)*0.5;
+        return normalize(normalU);
 }
 
 uniform int aoIterations = 5;
@@ -102,7 +98,8 @@ float calcAO(vec3 pos,vec3 normal ) {
 }
 
 uniform vec3 render_light_direction = normalize( vec3(-0.4, 0.7, -0.6) );
-subroutine(SceneShader) vec3 render(vec3 ray_origin, vec3 ray_direction, vec3 hit, float material ){
+subroutine(SceneShader)
+vec3 render(vec3 ray_origin, vec3 ray_direction, vec3 hit, float material ){
     vec3  light_direction = normalize( render_light_direction );
     vec3 base_color = vec3(0.7, 0.9, 1.0) +ray_direction.y*0.8;
     //float material = -1;
@@ -170,7 +167,8 @@ subroutine(SceneShader) vec3 render(vec3 ray_origin, vec3 ray_direction, vec3 hi
 
 uniform vec3 shade_light_dir = normalize(vec3(.5, 1.0, -.25));
 uniform bool shade_DRAW_DEBUG = false;
-subroutine(SceneShader) vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 hit, float material) {
+subroutine(SceneShader)
+vec3 shade(vec3 ray_start, vec3 ray_dir, vec3 hit, float material) {
     vec3 light_dir = normalize(shade_light_dir);
     vec3 fog_color = sky_color(ray_dir, light_dir);
 

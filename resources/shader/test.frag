@@ -7,24 +7,24 @@ uniform ColorBlock {
     vec3 arrg;
 } cb;
 
-uniform time {
-    float u_time;             // shader playback time (in seconds)
-    float u_delta;  // delta time between frames (in seconds)
-};
-
-//uniform float iTime;
+//uniform time {
+//};
 
 // shader inputs and uniforms
 in vec2 texCoord;
+uniform float iTime;             // shader playback time (in seconds)
+uniform float u_delta;  // delta time between frames (in seconds)
 uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform float timescale =1.0;
 uniform vec4 u_date;  // year, month, day and seconds
 uniform uvec2 u_resolution;  // viewport resolution (in pixels)
 uniform vec2 u_mouse;  // mouse pixel coords
 uniform mat4  u_MVP;
+uniform vec3 iResolution;
+uniform vec4 iMouse;
 
 // shadertoystuffs
-uniform float iTime;// = u_time;
+//uniform float iTime;// = iTime;
 
 subroutine vec2 SceneMap(vec3 position);  // function signature type declaration, returns distance and material id
 subroutine uniform SceneMap map;  // uniform instance, can be called like a function
@@ -40,23 +40,35 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 // Your custom SDF
 //------------------------------------------------------------------------
 
-subroutine(SceneMap) vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/view/ltd3W2
+#include "lib/XsVcDy/Image.frag"
+#include "lib/llcXRl/Image.frag"
+
+subroutine(SceneMap)
+vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/view/ltd3W2
 {
 
     vec2 res =  vec2(100.,0.);
-	  vec3 p = pos;
+	vec3 p = pos;
     pos.xyz = mod(pos.xyz-.5,1.)-.5;
 
    	//pos.xyz = opTwist(pos.xzy,3.,0.);
    	float s =    sdfSphere(pos+vec3(0.,0.,0.), .4);
-    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.5,0.1+sin((p.z-u_time*timescale)*5.)*.05,1.0)));
-    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.1+cos((p.z-u_time*timescale)*5.)*.05,0.5,1.0)) );
+    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.5,0.1+sin((p.z-iTime*timescale)*5.)*.05,1.0)));
+    s = opS(s,      sdfBox(pos+vec3(0.,0.,.5), vec3(0.1+cos((p.z-iTime*timescale)*5.)*.05,0.5,1.0)) );
     s = opS(s, sdfCylinder(pos.xzy,            vec2(.25,1.01)));
     res = opU( res, vec2( s, 50. ) );
+
+
     return res;
 }
 
-subroutine(SceneMap) vec2 positionOffsetting( vec3 pos ) {  // https://www.shadertoy.com/view/XdlcWf
+uniform float radius = 0.01;
+uniform ivec2 ch = ivec2(0,1);
+uniform vec3 chpos = vec3(3,0,3);
+uniform float angle = 1.0;
+
+subroutine(SceneMap)
+vec2 positionOffsetting( vec3 pos ) {  // https://www.shadertoy.com/view/XdlcWf
     vec3 offset = pos-vec3(-2,.25,2); //same position as in sdfDemo
 
 //row1
@@ -82,10 +94,19 @@ subroutine(SceneMap) vec2 positionOffsetting( vec3 pos ) {  // https://www.shade
 
     vec2 res =      vec2(fOctahedron(octahedronPos, roomWidth),     43.1);
     res = opU( res, vec2(fOctahedron(polar_repeat,  roomWidth*0.6), 55.0));
+
+    vec3 charpos = offset-chpos;
+    pR(charpos.xz, angle);
+
+//    float char_a = approx_font_dist(charpos.xy, 65+ch.x);
+//    float char_b = approx_font_dist(charpos.zy, 65+ch.y);
+//
+//    res = opU( res, vec2( fOpIntersectionChamfer(char_a, char_b, radius),            14.0));
     return res;
 }
-uniform Box box;
+
 uniform Capsule capsule;
+uniform Box box;
 uniform vec3 reflection_offset = vec3(0,1,0);
 subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
 {
@@ -104,8 +125,8 @@ subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/X
     res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2(-0.5,0.07), vec2(0.01,0.05)),          45.0));
     res = opU( res, vec2( sdfEndlessBox(pos.zy-vec2(-1.5,0.07), vec2(0.01,0.05)),          45.0));
 
-    res = opU(res, vec2(sdf(offset, box), 45.0));
-    res = opU(res, vec2(sdf(offset, capsule), 45.0));
+//    res = opU(res, vec2(sdf(offset, box), 45.0));
+//    res = opU(res, vec2(sdf(offset, capsule), 45.0));
 
 //row1
     res = opU( res, vec2( sdfBox(       offset-vec3(0,0,0), vec3(0.25)),             3.0));
@@ -114,6 +135,10 @@ subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/X
     res = opU( res, vec2( sdCone(       offset-vec3(3,0.35,0), 0.2, 0.8, 0.4 ),        55.0));
     res = opU( res, vec2( sdConeSection(offset-vec3(3,0,0),   0.15, 0.2, 0.1 ),       13.6));
 
+//    float da = approx_font_dist(fpos.xy, 65+0)*0.5;
+//    float dc = approx_font_dist(fpos.zy, 65+1)*0.5;
+//    da = max(da, dc);
+//    res = opU( res, vec2( da, 50. ));
 //row2
     offset.z += 1;
     res = opU( res, vec2( sdfRoundBox(  offset-vec3(0,0,0), vec3(0.15), 0.1),       41.0));
@@ -172,12 +197,13 @@ subroutine(SceneMap) vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/X
     return res;
 }
 
+
 // shader outputs
 out vec4 test_color;
 out vec4 test_shaded;
 out vec4 test_texCoord;
 out vec4 test_worldPos;
-out vec4 test_block;
+out vec4 test_text;
 
 void main()
 {
@@ -190,11 +216,15 @@ void main()
 
     //trace
     vec3 position = u_eye;
-    //position.z -= u_time*.5;
+    //position.z -= iTime*.5;
     vec4 hit = raymarch(position, ray_direction);
     vec3 color = shade_scene(position, ray_direction, hit.xyz, hit.w);
     test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     test_texCoord = vec4(texCoord,0.f, 1.f);
     test_worldPos = hit; // does not accomodate for repetitions
-    test_block = cb.ambient+cb.diffuse;
+    vec2 fragCoord;
+    fragCoord.x= texCoord.x*iResolution.x;
+    fragCoord.y= texCoord.y*iResolution.y;
+
+    mainImage(test_text, fragCoord);
 }

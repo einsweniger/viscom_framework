@@ -5,8 +5,8 @@ in vec2 texCoord;
 out vec4 color;
 
 uniform sampler2D tex;
-uniform uvec2 u_resolution;  // viewport resolution (in pixels)
-uniform float u_time;
+uniform float iTime;
+uniform vec3 iResolution;
 
 #include "lib/postproc.glsl"
 
@@ -23,5 +23,4 @@ void main()
 //    color = postPixelate(tex, texCoord);
 //    color = postFerris(tex, texCoord);
     color = postprocess(tex, texCoord);
-
 }

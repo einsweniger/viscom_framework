@@ -1,5 +1,7 @@
 {
     "startupPrograms": [
-        "shadertoy/XsVcDy/Image.frag"
+        "/genTexture.frag",
+        "/test.frag",
+        "/renderTexture.frag"
     ]
 }
