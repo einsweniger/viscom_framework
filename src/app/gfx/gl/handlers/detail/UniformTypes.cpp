@@ -162,6 +162,19 @@ namespace minuseins::handlers {
         ImGui::InputInt((name+"_texunit").c_str(), &textureUnit);
         //TODO use tooltip to set texture/buffer
         uniform_tooltip(properties);
+        std::string popupname = "wrap##" + name;
+        if (ImGui::BeginPopupContextItem(popupname.c_str()))
+        {
+            ImGui::PushID(name.c_str());
+            for(auto& wrapper : {"clamp", "repeat", "mirror"}) {
+                if(ImGui::Selectable(wrapper, wrapper == wrap)) {
+                    wrap = wrapper;
+                }
+            }
+            ImGui::PopID();
+            ImGui::EndPopup();
+        }
+
     }
 
     bool SamplerUniform::get_updated_value() {
@@ -219,6 +232,16 @@ namespace minuseins::handlers {
 
     bool SamplerUniform::upload_value() {
         if(generic_uniform::upload_value()) return true;
+        if(wrap == "repeat") {
+            gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_REPEAT);
+            gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_REPEAT);
+        } else if (wrap == "mirror") { //GL_MIRRORED_REPEAT
+            gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_MIRRORED_REPEAT);
+            gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_MIRRORED_REPEAT);
+        } else if (wrap == "clamp") {
+            gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_CLAMP_TO_EDGE);
+            gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_CLAMP_TO_EDGE);
+        }
         gl::glActiveTexture(gl::GL_TEXTURE0 + textureUnit);
         gl::glBindTexture(gl::GL_TEXTURE_2D, boundTexture);
         gl::glUniform1i(location(), textureUnit);

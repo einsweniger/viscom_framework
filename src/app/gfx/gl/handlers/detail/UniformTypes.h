@@ -192,6 +192,7 @@ namespace minuseins::handlers {
 
         gl::GLint boundTexture = 0;
         gl::GLint textureUnit = 0;
+        std::string wrap = "clamp";
     };
 }
 
