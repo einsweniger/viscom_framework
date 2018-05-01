@@ -44,7 +44,7 @@ namespace minuseins::handlers {
         auto active_subs = std::vector<gl::GLuint>(resources.size());
         for(auto& res : resources) {
             auto& uniform = dynamic_cast<SubroutineUniform&>(*res);
-            active_subs.at(uniform.resourceIndex) = uniform.active_subroutine;
+            active_subs.at(uniform.location) = uniform.active_subroutine;
         }
         gl::glUniformSubroutinesuiv(stage, static_cast<gl::GLsizei>(active_subs.size()), &active_subs[0]);
     }
