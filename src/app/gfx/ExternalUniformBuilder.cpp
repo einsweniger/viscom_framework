@@ -144,7 +144,7 @@ namespace minuseins::handlers {
         if(res.name == "u_MVP" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_MAT4) {
             return std::make_unique<detail::u_MVP>(std::move(res), appBase);
         }
-        if(res.name == "u_eye" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC4) {
+        if(res.name == "u_eye" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC3) {
             return std::make_unique<detail::u_eye>(std::move(res), appBase);
         }
         if(res.name == "iFrame" && res.properties.at(gl::GL_TYPE) == gl::GL_INT) {
