@@ -34,6 +34,7 @@ namespace minuseins {
         gpi_ = std::make_unique<ProgramInspector>(gpuProgram_->getProgramId(), gpuProgram_->GetProgramName());
         gpi_->set_recompile_function([&]() -> gl::GLuint {
             auto currentProg = gpuProgram_->getProgramId();
+            log_.Clear();
             try {
                 gpuProgram_->recompileProgram();
                 init_callbacks();
@@ -42,6 +43,10 @@ namespace minuseins {
                 return gpuProgram_->getProgramId();
             } catch (viscom::shader_compiler_error& compilerError) {
                 log_.AddLog("%s",compilerError.what());
+                log_.visible = true;
+                return currentProg;
+            } catch (std::runtime_error& err) {
+                log_.AddLog("%s", err.what());
                 log_.visible = true;
                 return currentProg;
             }
