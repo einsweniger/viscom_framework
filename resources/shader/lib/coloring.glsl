@@ -118,7 +118,7 @@ vec3 render(vec3 ray_origin, vec3 ray_direction, vec3 hit, float material ){
         base_color = 0.45 + 0.35*sin( vec3(0.05,0.08,0.10)*(material-1.0) );
         if( material<1.5 )
         {
-
+            //draw checker texture
             float f = mod( floor(5.0*position.z) + floor(5.0*position.x), 2.0);
             base_color = 0.3 + 0.1*f*vec3(1.0);
         }

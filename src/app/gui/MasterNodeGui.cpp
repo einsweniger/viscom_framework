@@ -119,6 +119,7 @@ namespace minuseins::gui {
     }
 
     void MasterNodeGui::drawShaderToySelectImport(bool *p_open) {
+        if(!*p_open) return;
         static FileSelect select{"Import ShaderToy",appNode->GetConfig().resourceSearchPaths_, [this](fs::path path) {
             return ShaderToyCallback(path);
         }};
