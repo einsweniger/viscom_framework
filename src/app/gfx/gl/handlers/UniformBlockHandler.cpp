@@ -26,6 +26,7 @@ namespace minuseins::handlers {
             for(auto& res : resources) {
                 auto& block = dynamic_cast<UniformBlock&>(*res);
                 auto active_vars = interface.GetActiveVariables(block.resourceIndex, block.num_active_variables());
+                //FIXME on recompile, uniforms that remain in program still have the update function set.
                 for(auto& resIndex : active_vars) {
                     auto& uniform = dynamic_cast<generic_uniform&>(*uniforms.at(resIndex));
                     uniform.uploadfn = [&](){
