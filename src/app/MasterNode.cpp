@@ -65,7 +65,7 @@ namespace viscom {
         }
 
         switch (key) {
-            case GLFW_KEY_TAB: toggleMouseGrab(); return true;
+            case GLFW_KEY_C: toggleMouseGrab(); return true;
             case GLFW_KEY_O: gui_->toggle("Overlay"); return true;
             case GLFW_KEY_M: gui_->toggle("MainMenu"); return true;
             case GLFW_KEY_B: gui_->toggle("Buffers"); return true;
@@ -109,13 +109,20 @@ namespace viscom {
     }
 
     void MasterNode::InitOpenGL() {
+        auto cfgPath = findConfig("Shader.json", GetApplication());
+        if(fs::exists(cfgPath)) {
+            auto instr = std::ifstream{cfgPath};
+            cereal::JSONInputArchive ar{instr};
+            ar(shaderParams_);
+            std::cout << "restored params" << std::endl;
+        }
         ApplicationNodeImplementation::InitOpenGL();
-        auto cfgPath = findConfig(minuseins::gui::MasterNodeGui::config_name, GetApplication());
+        cfgPath = findConfig(minuseins::gui::MasterNodeGui::config_name, GetApplication());
         if(fs::exists(cfgPath)) {
             auto instr = std::ifstream{cfgPath};
             cereal::JSONInputArchive ar{instr};
             ar(*gui_);
-            //gui_->init();
+            gui_->init();
         }
     }
 

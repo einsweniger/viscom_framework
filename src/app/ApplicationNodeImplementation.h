@@ -18,8 +18,7 @@ namespace viscom {
     class MeshRenderable;
     class MyFreeCamera;
 
-    class ApplicationNodeImplementation : public enh::ApplicationNodeBase
-    {
+    class ApplicationNodeImplementation : public enh::ApplicationNodeBase {
     public:
         explicit ApplicationNodeImplementation(ApplicationNodeInternal* appNode);
         ApplicationNodeImplementation(const ApplicationNodeImplementation&) = delete;
@@ -44,6 +43,7 @@ namespace viscom {
         std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs{};
         std::vector<std::unique_ptr<minuseins::ShaderToyFsq>> toys{};
         std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
+        std::vector<std::string> startupToys = {"4d23WG.json"};
 
         float globalTime_  = 0.0f;
         float currentTime_ = 0.0f;
@@ -51,6 +51,7 @@ namespace viscom {
         int iFrame = 0;
         bool stopTime_ = false;
         bool drawToy = false;
+        shadertoy::Shader shaderParams_;
     protected:
         void toggleMouseGrab();
 

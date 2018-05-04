@@ -55,7 +55,7 @@ namespace minuseins {
             ImGui::EndTooltip();
         }
         ImGui::SameLine();
-        if(ImGui::TreeNode("details")) {
+//        if(ImGui::TreeNode("details")) {
             for(auto& interface : draw_interfaces) {
                 if(containers.at(interface).empty()) continue;
                 std::string header = glbinding::aux::Meta::getString(interface);
@@ -66,8 +66,8 @@ namespace minuseins {
                     resource->draw2D();
                 }
             }
-            ImGui::TreePop();
-        }
+//            ImGui::TreePop();
+//        }
         ImGui::PopID();
     }
 

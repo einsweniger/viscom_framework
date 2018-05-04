@@ -36,7 +36,27 @@ namespace viscom {
             fsq->init(this);
             fsqs.push_back(std::move(fsq));
         }
+//        for(auto& pass : shaderParams_.renderpass) {
+//            auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile);
+//            tq->loadParams(pass);
+//            tq->init(*this);
+//
+//            appImpl->toys.push_back(std::move(tq));
+//        }
     }
+
+//    gl::GLuint GetBindingPoint(const std::string& name)
+//    {
+//        try {
+//            return bindingPoints_.at(name);
+//        }
+//        catch (std::out_of_range&) {
+//            bindingPoints_[name] = nextBindingPoint_;
+//            return nextBindingPoint_++;
+//        }
+//    }
+//    std::unordered_map<std::string, gl::GLuint> bindingPoints_;
+//    unsigned int nextBindingPoint_;
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {

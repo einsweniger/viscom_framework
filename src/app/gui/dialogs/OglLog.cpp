@@ -28,7 +28,7 @@ namespace minuseins::gui {
 
             if (call.returnValue)
                 callOut << " -> " << call.returnValue.get();
-            AddLog(callOut.str().c_str());
+            AddLog("%s",callOut.str().c_str());
         }
     }
 

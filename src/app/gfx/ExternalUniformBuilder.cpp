@@ -39,12 +39,16 @@ namespace minuseins::handlers {
                     appBase(appBase) {}
 
             bool get_updated_value() override {
-                value = appBase->GetCamera()->GetViewPerspectiveMatrix();
+                if(receive_updates) {
+                    value = appBase->GetCamera()->GetViewPerspectiveMatrix();
+                }
                 return true;
             }
 
             bool upload_value() override {
-                gl::glUniformMatrix4fv(location(), array_size(), gl::GL_FALSE, glm::value_ptr(value));
+                if(do_upload) {
+                    gl::glUniformMatrix4fv(location(), array_size(), gl::GL_FALSE, glm::value_ptr(value));
+                }
                 return true;
             }
 
@@ -70,10 +74,12 @@ namespace minuseins::handlers {
             {}
 
             bool get_updated_value() override {
-                auto position = appBase->GetCamera()->GetPosition();
-                value[0] = position.x;
-                value[1] = position.y;
-                value[2] = position.z;
+                if(receive_updates) {
+                    auto position = appBase->GetCamera()->GetPosition();
+                    value[0] = position.x;
+                    value[1] = position.y;
+                    value[2] = position.z;
+                }
                 return true;
             }
         };
@@ -87,7 +93,9 @@ namespace minuseins::handlers {
             {}
 
             bool get_updated_value() override {
-                value[0] = appImpl->iFrame;
+                if(receive_updates) {
+                    value[0] = appImpl->iFrame;
+                }
                 return true;
             }
         };
@@ -100,7 +108,9 @@ namespace minuseins::handlers {
                     appImpl(appImpl) {}
 
             bool get_updated_value() override {
-                value[0] = appImpl->currentTime_;
+                if(receive_updates) {
+                    value[0] = appImpl->currentTime_;
+                }
                 return true;
             }
         };
@@ -109,7 +119,9 @@ namespace minuseins::handlers {
             using iTime::iTime;
 
             bool get_updated_value() override {
-                value[0] = appImpl->elapsedTime_;
+                if(receive_updates) {
+                    value[0] = appImpl->elapsedTime_;
+                }
                 return true;
             }
         };
@@ -118,12 +130,14 @@ namespace minuseins::handlers {
             using FloatUniform::FloatUniform;
 
             bool get_updated_value() override {
-                std::time_t time_ = std::time(nullptr);
-                auto tm = std::localtime(&time_);
-                value[0] = tm->tm_year;
-                value[1] = tm->tm_mon;
-                value[2] = tm->tm_mday;
-                value[3] = tm->tm_hour*3600.0f+tm->tm_min*60.0f+tm->tm_sec;
+                if(receive_updates) {
+                    std::time_t time_ = std::time(nullptr);
+                    auto tm = std::localtime(&time_);
+                    value[0] = tm->tm_year;
+                    value[1] = tm->tm_mon;
+                    value[2] = tm->tm_mday;
+                    value[3] = tm->tm_hour*3600.0f+tm->tm_min*60.0f+tm->tm_sec;
+                }
                 return true;
             }
         };
@@ -134,12 +148,14 @@ namespace minuseins::handlers {
             bool get_updated_value() override {
                 //left, right, middle + extras.
                 //TODO value[2], value[3] ?
-                if(ImGui::GetIO().MouseDown[1]) {
-                    value[0] = ImGui::GetIO().MousePos.x;
-                    value[1] = ImGui::GetIO().MousePos.y;
-                } else {
-                    value[0] = 0;
-                    value[1] = 0;
+                if(receive_updates) {
+                    if(ImGui::GetIO().MouseDown[1]) {
+                        value[0] = ImGui::GetIO().MousePos.x;
+                        value[1] = ImGui::GetIO().MousePos.y;
+                    } else {
+                        value[0] = 0;
+                        value[1] = 0;
+                    }
                 }
                 return true;
             }

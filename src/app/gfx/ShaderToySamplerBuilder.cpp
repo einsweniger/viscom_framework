@@ -10,6 +10,12 @@ namespace minuseins::handlers {
 
     namespace detail {
 
+        iChannel::iChannel(named_resource res, const shadertoy::Input &input, viscom::enh::ApplicationNodeBase *appBase)
+                : generic_uniform(std::move(res)), input(input), appBase(appBase)
+        {
+            uname = "iChannel" + std::to_string(input.channel);
+        }
+
         void iChannel::init(gl::GLuint program) {
             tex = appBase->GetTextureManager().GetResource(input.src);
             auto texid = tex->getTextureId();
@@ -30,9 +36,11 @@ namespace minuseins::handlers {
         }
 
         bool iChannel::upload_value() {
-            gl::glActiveTexture(gl::GL_TEXTURE0 + input.channel);
-            gl::glBindTexture(gl::GL_TEXTURE_2D, tex->getTextureId());
-            gl::glUniform1i(location(), input.channel);
+            if(do_upload) {
+                gl::glActiveTexture(gl::GL_TEXTURE0 + input.channel);
+                gl::glBindTexture(gl::GL_TEXTURE_2D, tex->getTextureId());
+                gl::glUniform1i(location(), input.channel);
+            }
             return true;
         }
 
@@ -83,7 +91,7 @@ namespace minuseins::handlers {
         if(res.name.length() == 9)  { //ichannel0
             if(res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
                 auto subs = res.name.substr(0, 8);
-                std::cout << "sampler with substring:" << subs << std::endl;
+                std::cout << "sampler with substring:" << subs << "followed by " << res.name.substr(8, 1) << std::endl;
                 int channel = atoi(res.name.substr(8, 1).c_str());
                 std::cout << "on channel:" << std::to_string(channel) << std::endl;
                 if(subs == "iChannel") {

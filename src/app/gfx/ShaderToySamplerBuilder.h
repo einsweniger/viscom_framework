@@ -12,11 +12,7 @@
 namespace minuseins::handlers {
     namespace detail {
         struct iChannel : generic_uniform {
-            iChannel(named_resource res, const shadertoy::Input &input, viscom::enh::ApplicationNodeBase *appBase)
-                    : generic_uniform(std::move(res)), input(input), appBase(appBase)
-            {
-                uname = "iChannel" + std::to_string(input.channel);
-            }
+            iChannel(named_resource res, const shadertoy::Input &input, viscom::enh::ApplicationNodeBase *appBase);
 
             std::shared_ptr<viscom::Texture> tex;
             shadertoy::Input input;

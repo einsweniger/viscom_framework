@@ -34,6 +34,7 @@ namespace minuseins::handlers {
         std::unique_ptr<named_resource> initialize(ProgramInspector& inspect,named_resource res) override;
         void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override;
         void postInit(ProgramInspector &inspect, named_resource_container &resources) override {/* empty */};
+        void dumpState();
     };
 
     struct AbstractBuilder : UniformHandler::build_fn {

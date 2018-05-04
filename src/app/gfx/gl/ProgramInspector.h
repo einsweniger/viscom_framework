@@ -58,7 +58,7 @@ namespace minuseins {
         void set_recompile_function(std::function<gl::GLuint()> fn);
         void draw_gui(bool *p_open, std::vector<gl::GLenum> draw_interfaces = all_interfaces);
         void addHandlerFunction(gl::GLenum interface, handler_fn hdl_fn);
-        void addHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl);
+        void addHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl); //TODO this should be called setHandler
         void initialize();
         void prepareDraw();
         recompile_fn compile_fn = nullptr;
