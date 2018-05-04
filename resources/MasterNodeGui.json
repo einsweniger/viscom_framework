@@ -19,7 +19,7 @@
             },
             {
                 "key": "OGLerrors",
-                "value": false
+                "value": true
             },
             {
                 "key": "Overlay",
@@ -35,7 +35,7 @@
             },
             {
                 "key": "ShaderToyImport",
-                "value": false
+                "value": true
             },
             {
                 "key": "Shaders",
@@ -43,11 +43,11 @@
             },
             {
                 "key": "TextureImport",
-                "value": false
+                "value": true
             },
             {
                 "key": "Textures",
-                "value": true
+                "value": false
             },
             {
                 "key": "TimeSlider",

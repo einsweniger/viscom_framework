@@ -1,3 +1,4 @@
+//llcXRl
 /*--------------------------------------------------------------------------------------
 License CC0 - http://creativecommons.org/publicdomain/zero/1.0/
 To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
@@ -25,41 +26,12 @@ the ray marching would have to pause at the boundary between each letter since t
 not continuous between letters. That would complicate this code a bit, so it was left out.
 */
 
-// ---------------- Config ----------------
-//#define MANUAL_CAMERA
-
-//const float PI=3.14159265;
-//#define saturate(a) clamp(a, 0.0, 1.0)
-
 vec3 GetReflection(vec3 rayDir)
 {
 	vec3 t = texture(tex_noise, -vec2(rayDir)).xyz;
 	return vec3(t*t);
 }
 
-// min and max function that supports materials in the y component
-vec2 matmin(vec2 a, vec2 b)
-{
-    if (a.x < b.x) return a;
-    else return b;
-}
-vec2 matmax(vec2 a, vec2 b)
-{
-    if (a.x > b.x) return a;
-    else return b;
-}
-
-// ---- shapes defined by distance fields ----
-// See this site for a reference to more distance functions...
-// http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
-
-// signed box distance field
-float sdBox(vec3 p, vec3 radius)
-{
-  vec3 dist = abs(p) - radius;
-  return min(max(dist.x, max(dist.y, dist.z)), 0.0) + length(max(dist, 0.0));
-}
-// -------------------------------------------
 
 vec4 SampleFontTex(vec2 uv)
 {
@@ -90,7 +62,7 @@ vec2 DistanceToObject(vec3 p)
 	// Load the font texture's distance field.
     float letterDistField = (SampleFontTex(p.xy).w - 0.5+1.0/256.0);
     // intersect it with a box.
-    float cropBox = sdBox(p, vec3(0.5 + 5.0, 3.5, 0.25));
+    float cropBox = sdfBox(p, vec3(0.5 + 5.0, 3.5, 0.25));
     vec2 letters = matmax(vec2(letterDistField, 0.0), vec2(cropBox, 1.0));
     return letters;
 }

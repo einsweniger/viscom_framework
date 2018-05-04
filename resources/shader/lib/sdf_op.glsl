@@ -18,12 +18,15 @@ void pR45(inout vec2 p) {
 
 
 //repeaters
+
+// Repeat space along one axis.
+//Use like this to repeat along the x axis: <float cell = pMod1(p.x,5);> - using the return value is optional.
 float pMod1(inout float p, float size) {
 	float halfsize = size*0.5;
 	float c = floor((p + halfsize)/size);
 	p = mod(p + halfsize, size) - halfsize;
 	return c;
-}  // Repeat space along one axis. Use like this to repeat along the x axis: <float cell = pMod1(p.x,5);> - using the return value is optional.
+}
 float pModMirror1(inout float p, float size) {
 	float halfsize = size*0.5;
 	float c = floor((p + halfsize)/size);
@@ -117,6 +120,17 @@ vec3 opRep( vec3 p, vec3 c ){
 
 
 //combiners
+// min and max function that supports materials in the y component
+vec2 matmin(vec2 a, vec2 b)
+{
+    if (a.x < b.x) return a;
+    else return b;
+}
+vec2 matmax(vec2 a, vec2 b)
+{
+    if (a.x > b.x) return a;
+    else return b;
+}
 vec2 opU( vec2 d1, vec2 d2 ){
     return (d1.x<d2.x) ? d1 : d2;
 }  // union

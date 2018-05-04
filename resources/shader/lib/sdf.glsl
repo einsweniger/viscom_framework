@@ -24,11 +24,11 @@ const vec3 GDFVectors[19] = vec3[](
 );
 float precise_sdf(vec3 d) {
     return length(max(d,0.0)) + min(vmax(d),0.0);
-    return vmax(d);
+//    return vmax(d);
 }
 float precise_sdf(vec2 d) {
     return length(max(d,0.0)) + min(vmax(d),0.0);
-    return vmax(d);
+//    return vmax(d);
 }
 
 struct Box {

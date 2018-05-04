@@ -1,6 +1,5 @@
 {
     "startupPrograms": [
-        "/genTexture.frag",
         "/test.frag",
         "/renderTexture.frag"
     ]
