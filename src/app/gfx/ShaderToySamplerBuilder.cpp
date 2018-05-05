@@ -88,17 +88,26 @@ namespace minuseins::handlers {
     }
 
     std::unique_ptr<generic_uniform> ShaderToySamplerBuilder::operator()(named_resource res) {
+        if("tex_text" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
+            auto inp = shadertoy::Input{};
+            inp.src = "/media/a/text.png";
+            inp.sampler.wrap = "repeat";
+            inp.channel = 0;
+            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
+        }
+
         if(res.name.length() == 9)  { //ichannel0
             if(res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
-                auto subs = res.name.substr(0, 8);
-                std::cout << "sampler with substring:" << subs << "followed by " << res.name.substr(8, 1) << std::endl;
+                auto substr = res.name.substr(0, 8);
+                std::cout << "sampler with substring:" << substr << "followed by " << res.name.substr(8, 1) << std::endl;
                 int channel = atoi(res.name.substr(8, 1).c_str());
                 std::cout << "on channel:" << std::to_string(channel) << std::endl;
-                if(subs == "iChannel") {
-                    auto it = std::find_if(std::begin(pass.inputs), std::end(pass.inputs), [&](shadertoy::Input& input) {
-                        return input.channel == channel;
-                    });
-                    if(std::end(pass.inputs) != it) {
+                if(substr == "iChannel") {
+                    auto it = std::find_if(std::begin(pass.inputs), std::end(pass.inputs),
+                                           [&](shadertoy::Input &input) {
+                                               return input.channel == channel;
+                                           });
+                    if (std::end(pass.inputs) != it) {
                         return std::make_unique<detail::iChannel>(std::move(res), (*it), appBase);
                     }
 
