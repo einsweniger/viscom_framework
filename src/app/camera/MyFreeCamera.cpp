@@ -102,4 +102,8 @@ namespace viscom {
         return moveSpeed_;
     }
 
+    void MyFreeCamera::resetMouse() {
+        firstRun_ = true;
+    }
+
 }

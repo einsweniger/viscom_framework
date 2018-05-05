@@ -135,6 +135,7 @@ namespace viscom {
         if (!grabMouse_) {
             SetCursorInputMode(GLFW_CURSOR_DISABLED);
             grabMouse_ = true;
+            freeCam_->resetMouse();
         } else {
             SetCursorInputMode(GLFW_CURSOR_NORMAL);
             grabMouse_ = false;

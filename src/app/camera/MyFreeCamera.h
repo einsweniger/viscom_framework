@@ -26,6 +26,7 @@ namespace viscom {
         void UpdateCamera(double elapsedTime, const ApplicationNodeBase* sender) override;
         void SetMoveSpeed(double speed);
         double GetMoveSpeed();
+        void resetMouse();
 
     private:
         /** Holds the current pitch and yaw state. */
