@@ -52,6 +52,28 @@ float vmin(vec3 v) {
 float vmin(vec4 v) {
 	return min(min(v.x, v.y), min(v.z, v.w));
 }
+
+// exponential smooth min (k = 32);
+float exp_smooth_min( float a, float b, float k )
+{
+    float res = exp( -k*a ) + exp( -k*b );
+    return -log( res )/k;
+}
+
+// polynomial smooth min (k = 0.1);
+float poly_smooth_min( float a, float b, float k )
+{
+    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
+    return mix( b, a, h ) - k*h*(1.0-h);
+}
+
+// power smooth min (k = 8);
+float power_smooth_min( float a, float b, float k )
+{
+    a = pow( a, k ); b = pow( b, k );
+    return pow( (a*b)/(a+b), 1.0/k );
+}
+
 float bend(float x, float y, float z) { return max(0.5*(x*sqrt(3) + y),z);}
 float bend(float x, float y) { return bend(x, y, y);}
 float length2( vec2 p ){

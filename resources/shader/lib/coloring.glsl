@@ -1,14 +1,15 @@
+out vec4 trace_normals;
+out vec4 trace_inverted_normals;
+
 subroutine vec3 SceneShader(vec3 ray_origin, vec3 ray_direction, out float distance );  // function signature type declaration
 subroutine uniform SceneShader shade_scene;  // uniform instance, can be called like a function
 
-//subroutine vec3 NormalCalc(vec3 pos );  // function signature type declaration
-//subroutine uniform NormalCalc calcNormal;  // uniform instance, can be called like a function
-
-vec3 iq_checkers(vec3 pos) {
+vec3 checker_texture(vec3 pos) {
   float f = mod( floor(5.0*pos.z) + floor(5.0*pos.y) + floor(5.0*pos.x), 2.0);
   return 0.3 + 0.1*f*vec3(1.0);
 }
-vec3 checker_texture(vec3 pos) {
+
+vec3 cancy_checkers(vec3 pos) {
     const float sample_size = 0.01;
     pos = pos*8.0 + .5;
     vec3 cell = step(1.0,mod(pos,2.0));
@@ -30,30 +31,12 @@ float specular_color(vec3 reflected, vec3 light_direction) {
     return pow(saturate(dot(reflected, light_direction)),16.0); // * 0.5;
 }
 
-//subroutine(NormalCalc)
 vec3 calcNormal(vec3 pos ) {
     vec2 e = vec2(1.0,-1.0)*(1/sqrt(3))*0.0005; //0.00028867
-    vec3 normal = normalize( e.xyy*map( pos + e.xyy ).x +
+    return normalize( e.xyy*map( pos + e.xyy ).x +
                       e.yyx*map( pos + e.yyx ).x +
                       e.yxy*map( pos + e.yxy ).x +
                       e.xxx*map( pos + e.xxx ).x );
-
-    return normalize(normal);
-}
-//subroutine(NormalCalc)
-vec3 ferris(vec3 pos) {
-    float normalEpsilon = 0.001;
-    return normalize(vec3(map(pos + vec3(normalEpsilon, 0, 0)).x - map(pos - vec3(normalEpsilon, 0, 0)).x ,
-                          map(pos + vec3(0, normalEpsilon, 0)).x - map(pos - vec3(0, normalEpsilon, 0)).x,
-                          map(pos + vec3(0, 0, normalEpsilon)).x - map(pos - vec3(0, 0, normalEpsilon)).x));
-}
-//subroutine(NormalCalc)
-vec3 otavio(vec3 pos) {
-        vec3 smallVec = vec3(1.0/4096.0, 0, 0);
-        vec3 normalU = vec3(map(pos + smallVec.xyy).x - map(pos - smallVec.xyy).x,
-                            map(pos + smallVec.yxy).x - map(pos - smallVec.yxy).x,
-                            map(pos + smallVec.yyx).x - map(pos - smallVec.yyx).x)*0.5;
-        return normalize(normalU);
 }
 
 uniform int aoIterations = 5;
@@ -78,23 +61,24 @@ vec3 sky_color(vec3 ray_dir, vec3 light_dir) {
     base_col = mix(vec3(.3),vec3((ray_dir.y<0.)?0.:1.),abs(ray_dir.y));
     return base_col*d2;
 }
-vec3 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_len) {
-     // Fancy lighty debug plane
-     if (ray_start.y > cut_plane && ray_dir.y < 0.) {
-         float d = (ray_start.y - cut_plane) / -ray_dir.y;
-         if (d < ray_len) {
-             vec3 hit = ray_start + ray_dir*d;
-             float hit_dist = map(hit).x;
-             float iso = fract(hit_dist*5.0);
-             vec3 dist_color = mix(vec3(.2,.4,.6),vec3(.2,.2,.4),iso);
-             dist_color *= 1.0/(max(0.0,hit_dist)+.001);
-             ray_len = d;
-             return dist_color;
-         }
-     }
-    return vec3(0);
-}
 
+//vec3 debug_plane(vec3 ray_start, vec3 ray_dir, float cut_plane, inout float ray_len) {
+//     // Fancy lighty debug plane
+//     if (ray_start.y > cut_plane && ray_dir.y < 0.) {
+//         float d = (ray_start.y - cut_plane) / -ray_dir.y;
+//         if (d < ray_len) {
+//             vec3 hit = ray_start + ray_dir*d;
+//             float hit_dist = map(hit).x;
+//             float iso = fract(hit_dist*5.0);
+//             vec3 dist_color = mix(vec3(.2,.4,.6),vec3(.2,.2,.4),iso);
+//             dist_color *= 1.0/(max(0.0,hit_dist)+.001);
+//             ray_len = d;
+//             return dist_color;
+//         }
+//     }
+//    return vec3(0);
+//}
+//
 
 // http://iquilezles.org/www/articles/fog/fog.htm
 // ground fog

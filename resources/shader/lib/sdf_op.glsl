@@ -131,16 +131,29 @@ vec2 matmax(vec2 a, vec2 b)
     if (a.x > b.x) return a;
     else return b;
 }
+// union
 vec2 opU( vec2 d1, vec2 d2 ){
     return (d1.x<d2.x) ? d1 : d2;
-}  // union
-float opS( float d1, float d2 ){
-    return max(-d2,d1);
-}  // subtract
-float opUnion(float d1, float d2) {
+}
+float opU(float d1, float d2) {
     return min(d1,d2);
 }
-
+// subtract
+float opS( float d1, float d2 ){
+    return max(-d2,d1);
+}
+vec2 opS( vec2 d1, vec2 d2) {
+//    if(d2.x > -d1.x) return d2;
+//    else return d1;
+    d2.x = -d2.x;
+    return matmax(d2,d1);
+}
+vec2 opIntersect(vec2 d1, vec2 d2) {
+    return matmax(d1, d2);
+}
+float opIntersect(float d1, float d2) {
+    return max(d1, d2);
+}
 
 // The "Chamfer" flavour makes a 45-degree chamfered edge (the diagonal of a square of size <r>):
 float fOpUnionChamfer(float a, float b, float r) {
@@ -164,6 +177,12 @@ float fOpUnionRound(float a, float b, float r) {
 float fOpIntersectionRound(float a, float b, float r) {
 	vec2 u = max(vec2(r + a,r + b), vec2(0));
 	return min(-r, max (a, b)) + length(u);
+}
+vec2 fOpIntersectionRound(vec2 a, vec2 b, float r) {
+	vec2 u = max(vec2(r + a.x,r + b.x), vec2(0));
+	vec2 res = matmin(vec2(-r,0.0), matmax(a, b));
+	res.x += length(u);
+	return  res;
 }
 float fOpDifferenceRound (float a, float b, float r) {
 	return fOpIntersectionRound(a, -b, r);
@@ -233,22 +252,30 @@ float fOpIntersectionStairs(float a, float b, float r, float n) {
 float fOpDifferenceStairs(float a, float b, float r, float n) {
 	return -fOpUnionStairs(-a, b, r, n);
 }
-
+// Similar to fOpUnionRound, but more lipschitz-y at acute angles (and less so at 90 degrees).
+// Useful when fudging around too much. by MediaMolecule, from Alex Evans' siggraph slides
 float fOpUnionSoft(float a, float b, float r) {
 	float e = max(r - abs(a - b), 0);
 	return min(a, b) - e*e*0.25/r;
-}  // Similar to fOpUnionRound, but more lipschitz-y at acute angles (and less so at 90 degrees). Useful when fudging around too much. by MediaMolecule, from Alex Evans' siggraph slides
+}
+
+// produces a cylindical pipe that runs along the intersection.
+// No objects remain, only the pipe. This is not a boolean operator.
 float fOpPipe(float a, float b, float r) {
 	return length(vec2(a, b)) - r;
-}  // produces a cylindical pipe that runs along the intersection.  No objects remain, only the pipe. This is not a boolean operator.
+}
+
+// first object gets a v-shaped engraving where it intersect the second
 float fOpEngrave(float a, float b, float r) {
 	return max(a, (a + r - abs(b))*sqrt(0.5));
-}  // first object gets a v-shaped engraving where it intersect the second
+}
+// first object gets a capenter-style groove cut out
 float fOpGroove(float a, float b, float ra, float rb) {
 	return max(a, min(a + ra, rb - abs(b)));
-}  // first object gets a capenter-style groove cut out
+}
+// first object gets a capenter-style tongue attached
 float fOpTongue(float a, float b, float ra, float rb) {
 	return min(a, max(a - ra, abs(b) - rb));
-}  // first object gets a capenter-style tongue attached
+}
 
 

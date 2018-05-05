@@ -1,6 +1,3 @@
-out vec4 trace_normals;
-out vec4 trace_inverted_normals;
-
 #define USE_SUBROUTINES
 
 #ifdef USE_SUBROUTINES
@@ -13,7 +10,8 @@ subroutine uniform RayMarch raymarch;  // uniform instance, can be called like a
 // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
 uniform float t_min =  0.0;
 uniform float t_max = 20.0;
-uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
+//uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
+uniform float INF = pow(2.,8.);
 uniform int MAX_ITERATIONS = 160;
 uniform int USE_BV = 0;
 uniform float relaxation = 1.9;

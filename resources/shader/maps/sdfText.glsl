@@ -35,6 +35,7 @@ vec3 GetReflection(vec3 rayDir)
 
 vec4 SampleFontTex(vec2 uv)
 {
+    const float GLYPHS_PER_UV = 16.;
     // Do some tricks with the UVs to spell out "TexFont" in the middle.
     vec2 fl = floor(uv + 0.5);
     if (fl.y == 0.0) {
@@ -46,24 +47,24 @@ vec4 SampleFontTex(vec2 uv)
         else if (fl.x == 2.0) fl = vec2(14.0, 9.0);
         else if (fl.x == 3.0) fl = vec2(4.0, 8.0);
     }
-    uv = fl + fract(uv+0.5)-0.5;
+//    uv = fl + fract(uv+0.5)-0.5;
 
     // Sample the font texture. Make sure to not use mipmaps.
     // Add a small amount to the distance field to prevent a strange bug on some gpus. Slightly mysterious. :(
-    return texture(tex_text, (uv+0.5)*(1.0/16.0), -100.0) + vec4(0.0, 0.0, 0.0, 0.000000001);
+    return texture(tex_text, (uv+0.5)*(1.0/GLYPHS_PER_UV), -100.0) + vec4(0.0, 0.0, 0.0, 0.000000001);
 }
 
 // This is the distance function that defines all the scene's geometry.
 // The input is a position in space.
 // The output is the distance to the nearest surface and a material index.
 subroutine(SceneMap)
-vec2 DistanceToObject(vec3 p)
+vec2 sdfTextDemo(vec3 p)
 {
 	// Load the font texture's distance field.
     float letterDistField = (SampleFontTex(p.xy).w - 0.5+1.0/256.0);
     // intersect it with a box.
     float cropBox = sdfBox(p, vec3(0.5 + 5.0, 3.5, 0.25));
-    vec2 letters = matmax(vec2(letterDistField, 0.0), vec2(cropBox, 1.0));
+    vec2 letters = matmax(vec2(letterDistField, 42.0), vec2(cropBox, 0.3));
     return letters;
 }
 
@@ -76,7 +77,7 @@ vec3 RayTrace(in vec2 fragCoord )
     // Map uv to [-1.0..1.0]
 	vec2 uv = fragCoord.xy/iResolution.xy * 2.0 - 1.0;
     uv /= 2.0;  // zoom in
-
+#define MANUAL_CAMERA
 #ifdef MANUAL_CAMERA
     // Camera up vector.
 	camUp=vec3(0,1,0);
@@ -126,7 +127,7 @@ vec3 RayTrace(in vec2 fragCoord )
         // we know we are safe to "march" along the ray by that much distance
         // without hitting anything. We repeat this until we get really close
         // and then break because we have effectively hit the object.
-        distAndMat = DistanceToObject(pos);
+        distAndMat = sdfTextDemo(pos);
 
         // move along the ray a safe amount
         t += distAndMat.x;
@@ -145,9 +146,9 @@ vec3 RayTrace(in vec2 fragCoord )
         // sample the current point and neighboring points, you can use the difference to get
         // the normal. This is called a gradient.
         vec3 smallVec = vec3(1.0/4096.0, 0, 0);
-        vec3 normalU = vec3(DistanceToObject(pos + smallVec.xyy).x - DistanceToObject(pos - smallVec.xyy).x,
-                           DistanceToObject(pos + smallVec.yxy).x - DistanceToObject(pos - smallVec.yxy).x,
-                           DistanceToObject(pos + smallVec.yyx).x - DistanceToObject(pos - smallVec.yyx).x)*0.5;
+        vec3 normalU = vec3(sdfTextDemo(pos + smallVec.xyy).x - sdfTextDemo(pos - smallVec.xyy).x,
+                           sdfTextDemo(pos + smallVec.yxy).x - sdfTextDemo(pos - smallVec.yxy).x,
+                           sdfTextDemo(pos + smallVec.yyx).x - sdfTextDemo(pos - smallVec.yyx).x)*0.5;
         // If the material says we are on the edge of the font, override the normal with the
         // font texture's gradient. This will give us smoother surfaces on the sides of the font's letters.
         if (distAndMat.y == 0.0) {
@@ -194,7 +195,7 @@ vec3 RayTrace(in vec2 fragCoord )
 	return vec3(clamp(finalColor, 0.0, 1.0));
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void sdfTextMain( out vec4 fragColor, in vec2 fragCoord )
 {
     vec3 finalColor = RayTrace(fragCoord);
 

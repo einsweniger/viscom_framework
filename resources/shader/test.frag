@@ -48,7 +48,7 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 #include "maps/sdfText.glsl"
 #include "maps/rotatingSphere.glsl"
 #include "maps/blockyGround.glsl"
-
+#include "maps/text.glsl"
 out vec4 test_color;
 //out vec4 test_texCoord;
 out vec4 test_worldPos;
@@ -82,6 +82,7 @@ void main()
 
     // Tone mapping
     color = Tonemap_ACES(color);
+//    color = Uncharted2ToneMapping(color);
 
     // Exponential distance fog
     if(shade_fog) {
@@ -95,7 +96,7 @@ void main()
 //    test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     test_color = vec4(color, 1.0);
 
-
+    //sdfTextMain(test_text, fragCoord);
     if(show_debug_plane) {
         float rayLen = length(hit.xyz-u_eye);
 
@@ -111,10 +112,11 @@ void main()
 
         float dist = map(p).x;
 
-        vec3 col = distanceMeter(dist, t, ray_direction, u_eye.y);
+        vec3 col = distanceMeter(dist, t, ray_direction, u_eye.y-planeT);
 
         //col = Uncharted2ToneMapping(col);
         vec4 distancemeter = vec4(pow(col, vec3(1./2.2)), 1.0 );
         test_color = mix(distancemeter, test_color, 0.5);
+
     }
 }
