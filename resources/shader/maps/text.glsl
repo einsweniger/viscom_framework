@@ -3,7 +3,6 @@ vec2 uv_from_char_idx(vec2 tpos, int cidx) {
     vec2 cpos = vec2(float(cidx%16), float(15-cidx/16));
     return (tpos + cpos + 0.5)/GLYPHS_PER_UV;
 }
-
 const float TEX_BIAS = 127./255.; // since the texture is uint8 it has a bias to represent 0
 float compound_letter(vec3 position, int char1, int char2) {
     const vec3 cropBounds = vec3(0.25, 0.50, 0.25);
@@ -12,13 +11,35 @@ float compound_letter(vec3 position, int char1, int char2) {
     vec2 uv2 = uv_from_char_idx(position.zy, char2);
     float field1 = texture(tex_text, uv1, -100.0).w - TEX_BIAS;
     float field2 = texture(tex_text, uv2, -100.0).w - TEX_BIAS;
-
     float r1 = opIntersect(cropBox, field1);
     float r2 = opIntersect(cropBox, field2);
     return opIntersect(r1, r2);
 }
 
+// --- access to the image of ascii code c. from https://www.shadertoy.com/view/ltcXzs
+float charS(vec2 p, float c) {
+    if (p.x<0.|| p.x>1. || p.y<0.|| p.y>1.) return 0;
+    vec2 charpos = fract( floor(vec2(c, 15.999-c/16.)) / 16.);
+
+    vec2 uv = p/16. + charpos;
+    vec4 t = texture( tex_text, uv );
+	return t.a;
+}
+
+// --- improved distance field to  ascii code c.
+float charD(vec2 p, float c) {
+    if (p.x<0.|| p.x>1. || p.y<0.|| p.y>1.) return 1e5;
+    vec2 charpos = fract( floor(vec2(c, 15.999-c/16.)) / 16.);
+    p *= 64.;
+    vec2 uv = (.5+floor(p))/1024. + charpos;
+	vec4 t = texture( tex_text, uv);
+	return t.a + dot( (fract(vec2(p.x,.999-p.y))-.5)/64., 2.*t.yz-1. );
+}
+
+
 const vec3 letterBoxPos = vec3(0,2,0);
+uniform vec3 cropBounds = vec3(0.25, 0.50, 0.25);
+uniform vec3 lbp2 = vec3(0,2,0);
 subroutine(SceneMap)
 vec2 text( vec3 pos ) {
     vec2 res =      vec2( sdfPlaneXZ(   pos-plane_position), 1.0 );
@@ -28,6 +49,7 @@ vec2 text( vec3 pos ) {
     //rotate 45deg between seconds 2 and 3
     float rotation = iTime -2;
     rotation = saturate(rotation);
+    //TODO place text in arc around camera, rotate faces toward ray direction.
     vec3 charPos1 = p-vec3(1,0,0); pR(charPos1.xz, -rotation*PI_2);
     vec3 charPos2 = p-vec3(2,0,0); pR(charPos2.xz, -rotation*PI_2);
     vec3 charPos3 = p-vec3(3,0,0); pR(charPos3.xz, -rotation*PI_2);
@@ -57,6 +79,30 @@ vec2 text( vec3 pos ) {
     res = opU(res, vec2(IT, 67));
     res = opU(res, vec2(NS, 67));
     res = opU(res, vec2(S1, 67));
+
+//    vec3 np = pos;
+//    float cropBox = sdfBox(np-lbp2, cropBounds);
+//    float f1 = charS(fract(np.xy), 65.)-0.5;
+//    float f2 = charS(fract(np.xz), 65.)-0.5;
+//    float f3 = charD(fract(np.xz), 65.)-0.5;
+//    float f4 = charS(fract(np.yz), 65.)-0.5;
+//    float r1 = opIntersect(cropBox, f1);
+//    float r2 = opIntersect(cropBox, f2);
+//    float r3 = opIntersect(cropBox, f3);
+//    float r4 = opIntersect(cropBox, f4);
+//    float u = opIntersect(r1,r2);
+    //res = opU(res, vec2(f3, 67));
+    //res = opU(res, vec2(cropBox, 67));
+//    res = opU(res, vec2(f3, 67));
+   // res.x = sdfEndlessBox(np.xz, vec2(0.51,0.55));
+//    res.y = 67;
+//    res = opU(res,vec2(f3,67));
+//    res.x = opU(res.x,r2);
+
+    //res.x = opU(res.x, -f3);
+//    vec2 uv2 = uv_from_char_idx(np.xz, 65);
+//    float field1 = texture(tex_text, uv2, -100.0).w - TEX_BIAS;
+    //res.x = field1;
 
 //    float CHAR_M = approx_font_dist(charPos1.xy, 0x4D);
 //    float CHAR_P = approx_font_dist(charPos1.zy, 0x50);

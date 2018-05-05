@@ -1,4 +1,4 @@
-//
+// ldK3zD
 // scale-invariante distance meter
 //
 // be less confused by your distances!
@@ -40,13 +40,13 @@ vec3 Uncharted2ToneMapping(vec3 color) {
 //
 
 vec3 fusion(float x) {
-	float t = clamp(x,0.0,1.0);
-	return clamp(vec3(sqrt(t), t*t*t, max(sin(PI*1.75*t), pow(t, 12.0))), 0.0, 1.0);
+	float t = saturate(x);
+	return saturate(vec3(sqrt(t), t*t*t, max(sin(PI*1.75*t), pow(t, 12.0))));
 }
 
 // HDR version
 vec3 fusionHDR(float x) {
-	float t = clamp(x,0.0,1.0);
+	float t = saturate(x);
 	return fusion(sqrt(t))*(0.5+2.*t);
 }
 

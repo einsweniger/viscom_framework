@@ -99,14 +99,13 @@ void main()
     //sdfTextMain(test_text, fragCoord);
     if(show_debug_plane) {
         float rayLen = length(hit.xyz-u_eye);
-
+        //todo, make plane not only move on y, but a real plane :D
         float t = INFINITY;
         if (ray_direction.y < 0.) {
-            t = (u_eye.y)/-ray_direction.y;
+            t = (u_eye.y-planeT)/-ray_direction.y;
         }
 
-        //todo, make plane not only move on y, but a real plane :D
-        t = t-planeT;
+        //t = t-planeT;
 
         vec3 p = ray_direction*t + u_eye;
 

@@ -4,7 +4,7 @@ const vec3 color_specular= vec3(1.00,0.90,0.70);
 const vec3 color_ambient=  vec3(0.40,0.60,1.00);
 const vec3 color_dom=      vec3(0.40,0.60,1.00);
 const vec3 color_fresnel=  vec3(1.00,1.00,1.00);
-const vec3 last_color =vec3(0.80,0.90,1.00);
+const vec3 distance_fog =vec3(0.80,0.90,1.00);
 
 uniform sampler2D sampleTest;
 vec4 fontSampler(vec2 uv) {
@@ -88,7 +88,7 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
         color = color*lin;
 
         //draw more white when distant
-        color = mix( color, last_color, 1.0-exp( -0.0002*distance*distance*distance ) );
+        //color = mix( color, distance_fog, 1.0-exp( -0.0002*distance*distance*distance ) );
 
         trace_normals = vec4(vec3(surface_normal),1); //debug output
     }
