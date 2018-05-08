@@ -1,4 +1,5 @@
 //
+//
 // Created by bone on 15.04.18.
 //
 
@@ -18,6 +19,7 @@
 #include <app/gfx/IntrospectableFsq.h>
 #include <app/gfx/gl/handlers.h>
 #include <glbinding/glbinding.h>
+#include <app/gui/dialogs/Animation.h>
 #include "MasterNodeGui.h"
 #include "app/gui/dialogs/FileSelect.h"
 #include "app/gui/dialogs/Overlay.h"
@@ -61,16 +63,21 @@ namespace minuseins::gui {
             if(activeWindows["ImGuiDemo"]) {
                 ImGui::ShowDemoWindow(&activeWindows["ImGuiDemo"]);
             }
-                drawShaderToySelectImport(&activeWindows["ShaderToyImport"]);
-                drawShaderWindow(&activeWindows["Shaders"]);
-                drawTextureWindow(&activeWindows["Textures"]);
-                drawTextureImportWindow(&activeWindows["TextureImport"]);
-                drawShaderImport(&activeWindows["ShaderImport"]);
-                drawNewScene(&activeWindows["NewScene"]);
-                drawGPUProgram(&activeWindows["GPUProgram"]);
-                drawTimeSlider(&activeWindows["TimeSlider"]);
-                log.Draw("OGLerrors", &activeWindows["OGLerrors"]);
-                log.Clear();
+            drawShaderToySelectImport(&activeWindows["ShaderToyImport"]);
+            drawShaderWindow(&activeWindows["Shaders"]);
+            drawTextureWindow(&activeWindows["Textures"]);
+            drawTextureImportWindow(&activeWindows["TextureImport"]);
+            drawShaderImport(&activeWindows["ShaderImport"]);
+            drawNewScene(&activeWindows["NewScene"]);
+            drawGPUProgram(&activeWindows["GPUProgram"]);
+            drawTimeSlider(&activeWindows["TimeSlider"]);
+            drawAnimation(&activeWindows["AnimationManager"]);
+//            if(activeWindows["AnimationManager"]) {
+//                animManager.ShowAnimationMenu("AnimationManager", activeWindows["AnimationManager"]);
+//            }
+
+            log.Draw("OGLerrors", &activeWindows["OGLerrors"]);
+            log.Clear();
         });
     }
 
@@ -90,6 +97,7 @@ namespace minuseins::gui {
             }
             if(ImGui::BeginMenu("Scene")) {
                 ImGui::MenuItem("NewScene", "", &activeWindows["NewScene"]);
+                ImGui::MenuItem("Animations","", &activeWindows["AnimationManager"]);
                 ImGui::MenuItem("StopTime", "SPACE", &appImpl->stopTime_);
                 ImGui::MenuItem("DrawToy", "", &appImpl->drawToy);
                 ImGui::EndMenu();
@@ -110,6 +118,7 @@ namespace minuseins::gui {
                 ImGui::MenuItem("ImGuiDemo", "", &activeWindows["ImGuiDemo"]);
                 ImGui::EndMenu();
             }
+
             ImGui::EndMainMenuBar();
         }
     }
@@ -127,10 +136,12 @@ namespace minuseins::gui {
     }
     void MasterNodeGui::drawShaderWindow(bool *p_open) {
         if(!*p_open) return;
-        if(ImGui::Begin("Shaders", p_open)){
-
+        if(!ImGui::Begin("Shaders", p_open)){
             ImGui::End();
+            return;
         }
+
+        ImGui::End();
     }
 
     void MasterNodeGui::drawNewScene(bool *p_open) {
@@ -138,33 +149,36 @@ namespace minuseins::gui {
         static std::vector<std::unique_ptr<viscom::GPUProgram>> pipeline{};
         static std::vector<std::unique_ptr<viscom::Shader>> stagedShaders{};
         static std::string stage_name = "";
-        if(ImGui::Begin("Scene", p_open)) {
-            ImGui::Text("New Program");
-            if(ImGui::SmallButton("add frag shader")) {
-                ImGui::OpenPopup("fragment_select");
-            }
-            if(ImGui::BeginPopup("fragment_select")) {
-
-            }
-            ImGui::Separator();
-            for (auto& stagedShader : stagedShaders) {
-                ImGui::Text("staged: %d", stagedShader->getShaderId());
-            }
-            if(ImGui::Button("commit staged shaders")) {
-                if(!stagedShaders.empty()) {
-                    try{
-                        //auto prog = std::make_unique<viscom::GPUProgram>(stage_name, appNode, std::move(stagedShaders));
-                        //pipeline.push_back(std::move(prog));
-                    } catch (viscom::shader_compiler_error& err) {
-                        std::cout <<err.what()<< std::endl;
-                    }
-                    stagedShaders.clear();
-                    stage_name="";
-
-                }
-            }
+        if(!ImGui::Begin("Scene", p_open)) {
             ImGui::End();
+            return;
         }
+
+        ImGui::Text("New Program");
+        if(ImGui::SmallButton("add frag shader")) {
+            ImGui::OpenPopup("fragment_select");
+        }
+        if(ImGui::BeginPopup("fragment_select")) {
+
+        }
+        ImGui::Separator();
+        for (auto& stagedShader : stagedShaders) {
+            ImGui::Text("staged: %d", stagedShader->getShaderId());
+        }
+        if(ImGui::Button("commit staged shaders")) {
+            if(!stagedShaders.empty()) {
+                try{
+                    //auto prog = std::make_unique<viscom::GPUProgram>(stage_name, appNode, std::move(stagedShaders));
+                    //pipeline.push_back(std::move(prog));
+                } catch (viscom::shader_compiler_error& err) {
+                    std::cout <<err.what()<< std::endl;
+                }
+                stagedShaders.clear();
+                stage_name="";
+
+            }
+        }
+        ImGui::End();
     }
 
     void MasterNodeGui::drawShaderImport(bool *p_open) {
@@ -198,27 +212,29 @@ namespace minuseins::gui {
     void MasterNodeGui::drawTextureWindow(bool *p_open) {
         if(!*p_open) return;
         static viscom::ResourceManager<viscom::Texture>& tm = appNode->GetTextureManager();
-
-        if(ImGui::Begin("Textures", p_open)) {
-            std::for_each(tm.cbegin(), tm.cend(), [](const auto& tex) {
-                if(!tex.second.expired()) {
-                    std::shared_ptr<viscom::Texture> texture = tex.second.lock();
-                    ImGui::Text("texid: %d", texture->getTextureId());
-                    ImGui::SameLine();
-                    ImGui::TextUnformatted(tex.first.c_str());
-                    ImVec2 uv0(0, 1);
-                    ImVec2 uv1(1, 0);
-                    auto maxwidth = ImGui::GetContentRegionAvailWidth();
-                    auto texdim = texture->getDimensions();
-                    float aspect = texdim.x / texdim.y;
-                    if(aspect > 1.0) {aspect = 1.0f/aspect;};
-                    ImVec2 region(maxwidth, maxwidth * aspect);
-                    ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture->getTextureId()), region, uv0, uv1);
-                }
-            });
-
+        if(!ImGui::Begin("Textures", p_open)) {
             ImGui::End();
+            return;
         }
+
+        std::for_each(tm.cbegin(), tm.cend(), [](const auto& tex) {
+            if(!tex.second.expired()) {
+                std::shared_ptr<viscom::Texture> texture = tex.second.lock();
+                ImGui::Text("texid: %d", texture->getTextureId());
+                ImGui::SameLine();
+                ImGui::TextUnformatted(tex.first.c_str());
+                ImVec2 uv0(0, 1);
+                ImVec2 uv1(1, 0);
+                auto maxwidth = ImGui::GetContentRegionAvailWidth();
+                auto texdim = texture->getDimensions();
+                float aspect = texdim.x / texdim.y;
+                if(aspect > 1.0) {aspect = 1.0f/aspect;};
+                ImVec2 region(maxwidth, maxwidth * aspect);
+                ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) texture->getTextureId()), region, uv0, uv1);
+            }
+        });
+
+        ImGui::End();
     }
 
     bool MasterNodeGui::textureCallback(fs::path path) {
@@ -328,6 +344,12 @@ namespace minuseins::gui {
 
         ImGui::End();
         ImGui::PopStyleVar(3);
+    }
+
+    void MasterNodeGui::drawAnimation(bool *p_open) {
+        if(!*p_open) return;
+        static gui::Animation anim(appNode->GetConfig().resourceSearchPaths_.at(0), appNode->GetCamera());
+        anim.draw(p_open);
     }
 
 

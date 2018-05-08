@@ -18,6 +18,7 @@
 #include <app/gfx/IntrospectableFsq.h>
 #include <app/gui/dialogs/ShaderLog.h>
 #include <app/gui/dialogs/OglLog.h>
+#include <enh/gfx/animation/AnimationManager.h>
 #include "app/gui/dialogs/Window.h"
 
 namespace viscom {
@@ -103,6 +104,8 @@ namespace minuseins::gui {
         void drawGPUProgram(bool *p_open);
 
         void drawTimeSlider(bool* b);
+
+        void drawAnimation(bool *p_open);
     };
 }
 
