@@ -50,13 +50,6 @@ subroutine(PostProcess)
 vec4 glitch(sampler2D iChannel0, vec2 uv) {
     //i forgot who made this, sorry :(
 
-    //vec2 uv = fragCoord.xy / iResolution.xy;
-
-    vec2 fragCoord;
-    fragCoord.x= uv.x*iResolution.x;
-    fragCoord.y= uv.y*iResolution.y;
-    float amount = randf()*0.005;
-    float angle = (PI*randf())/(2.0*PI)-PI;
     float seed = randf();
     float seed_x = 0.5*randf()-0.5;
     float seed_y = (0.3*randf()/0.6)-0.3;
@@ -64,10 +57,7 @@ vec4 glitch(sampler2D iChannel0, vec2 uv) {
     float distortion_y = randf()*iResolution.y;
     float col_s = 0.3;
 
-    float xs = floor(fragCoord.x / 0.5);
-    float ys = floor(fragCoord.y / 0.5);
     //based on staffantans glitch shader for unity https://github.com/staffantan/unityglitch
-    vec4 normal = texture(iChannel0, uv*seed*seed);
     if(uv.y<distortion_x+col_s && uv.y>distortion_x-col_s*seed) {
         if(seed_x >0.0){
             uv.y = 1. - (uv.y + distortion_y);
@@ -84,9 +74,14 @@ vec4 glitch(sampler2D iChannel0, vec2 uv) {
             uv.x = 1. - (uv.x + distortion_x);
         }
     }
+
+    vec2 normal = texture(iChannel0, uv*seed*seed).xy;
     uv.x+=normal.x*seed_x*(seed/5.);
     uv.y+=normal.y*seed_y*(seed/5.);
+
     //base from RGB shift shader (4t23Rc)
+    float amount = randf()*0.005;
+    float angle = (PI*randf())/(TAU)-PI;
     vec2 offset = amount * vec2( cos(angle), sin(angle));
     vec4 cr = texture(iChannel0, uv + offset);
     vec4 cga = texture(iChannel0, uv);
@@ -94,6 +89,8 @@ vec4 glitch(sampler2D iChannel0, vec2 uv) {
     vec4 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
 
     //add noise
+    float xs = floor(uv.x*iResolution.x / 0.5);
+    float ys = floor(uv.y*iResolution.y / 0.5);
     vec4 snow = 200.*amount*vec4(hash2(vec2(xs * seed,ys * seed*50.)).x*0.2);
     fragColor = fragColor+ snow;
 

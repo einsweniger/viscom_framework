@@ -1,6 +1,6 @@
 
 subroutine(SceneMap)
-vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/view/ltd3W2
+vec3 sphereZone(vec3 pos)  // https://www.shadertoy.com/view/ltd3W2
 {
 
     vec2 res =  vec2(100.,0.);
@@ -15,6 +15,6 @@ vec2 sphereZone(vec3 pos)  // https://www.shadertoy.com/view/ltd3W2
     res = opU( res, vec2( s, 50. ) );
 
 
-    return res;
+    return vec3(res, 0);
 }
 

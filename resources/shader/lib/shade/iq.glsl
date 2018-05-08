@@ -6,7 +6,7 @@ const vec3 color_dom=      vec3(0.40,0.60,1.00);
 const vec3 color_fresnel=  vec3(1.00,1.00,1.00);
 const vec3 distance_fog =vec3(0.80,0.90,1.00);
 
-uniform sampler2D sampleTest;
+uniform sampler2D bufferTexture;
 vec4 fontSampler(vec2 uv) {
     // Sample the font texture. Make sure to not use mipmaps.
     // Add a small amount to the distance field to prevent a strange bug on some gpus. Slightly mysterious. :(
@@ -29,7 +29,8 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
     vec2 distAndMat = raymarch(ray_origin, ray_direction);
     float material = distAndMat.y;
     vec3 hit = ray_direction*distAndMat.x+ray_origin;
-    distance = length(hit-ray_origin);
+    //distance = length(hit-ray_origin);
+    distance = distAndMat.x;
 
     if (material == INF) {
       color = sky_color(ray_direction, light_direction);
@@ -52,7 +53,7 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
             // Put a small number in Z so it can't go to zero.
             //surface_normal = -vec3(-tx.g, tx.b, 0.0001)*2.0*smallVec.x;
             //surface_normal = normalize(surface_normal+0.000000001);
-            color = texturize(sampleTest, hit, surface_normal);
+            color = texturize(bufferTexture, hit, surface_normal);
         }
         vec3 reflected = reflect( ray_direction, surface_normal );
 

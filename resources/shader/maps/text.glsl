@@ -41,7 +41,7 @@ const vec3 letterBoxPos = vec3(0,2,0);
 uniform vec3 cropBounds = vec3(0.25, 0.50, 0.25);
 uniform vec3 lbp2 = vec3(0,2,0);
 subroutine(SceneMap)
-vec2 text( vec3 pos ) {
+vec3 text( vec3 pos ) {
     vec2 res =      vec2( sdfPlaneXZ(   pos-plane_position), 1.0 );
     vec3 offset = pos-vec3(-2,.25,2);
 
@@ -128,5 +128,5 @@ vec2 text( vec3 pos ) {
 //    res = opU( res, vec2(max(da, db), 49.0));
     //res = opU(res, charDist(offset));
 
-    return res;
+    return vec3(res,0);
 }

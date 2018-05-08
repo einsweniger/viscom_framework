@@ -5,8 +5,9 @@ subroutine vec3 SceneShader(vec3 ray_origin, vec3 ray_direction, out float dista
 subroutine uniform SceneShader shade_scene;  // uniform instance, can be called like a function
 
 vec3 checker_texture(vec3 pos) {
-  float f = mod( floor(5.0*pos.z) + floor(5.0*pos.y) + floor(5.0*pos.x), 2.0);
-  return 0.3 + 0.1*f*vec3(1.0);
+    //10 divisions per "unit"
+    float f = mod( floor(5.0*pos.z) + floor(5.0*pos.y) + floor(5.0*pos.x), 2.0);
+    return 0.3 + 0.1*f*vec3(1.0);
 }
 
 vec3 cancy_checkers(vec3 pos) {

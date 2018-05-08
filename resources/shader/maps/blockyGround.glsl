@@ -1,5 +1,5 @@
 subroutine(SceneMap)
-vec2 blockyGround( vec3 p )
+vec3 blockyGround( vec3 p )
 {
     vec2 res =      vec2( sdfPlaneXZ(   p-plane_position), 1.0 );
     vec3 offset = p-vec3(-2,.25,2);
@@ -17,5 +17,5 @@ vec2 blockyGround( vec3 p )
 
 
 
-    return res;
+    return vec3(res, 0);
 }

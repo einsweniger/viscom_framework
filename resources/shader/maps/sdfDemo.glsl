@@ -4,7 +4,7 @@ uniform vec3 reflection_offset = vec3(0,1,0);
 uniform vec3 plane_position = vec3(0,-2,0);
 uniform vec3 blob_position = vec3(0,0.1,0);
 subroutine(SceneMap)
-vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
+vec3 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
 {
     vec3 offset = pos-vec3(-2,.25,2);
     //pReflect(offset, vec3(0,1,0),1);
@@ -89,6 +89,6 @@ vec2 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN
     offset.z += 1;
 //    res = opU( res, vec2( fBlob( offset-blob_position), 43.17 ) );
     //res.x = pMod1(res.x, 20.0);
-    return res;
+    return vec3(res,0);
 }
 

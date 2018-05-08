@@ -27,7 +27,7 @@ vec2 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool
     //float functionSign = map(pos).x < 0. ? -1. : +1.;
     for (int i = 0; i < MAX_ITERATIONS; ++i) {
 
-        vec2 result = map(dir * t + pos);
+        vec3 result = map(dir * t + pos);
         material = result.y;
         //float signedRadius = functionSign * result.x;
         float signedRadius = result.x;
@@ -82,7 +82,7 @@ vec2 simpleTrace(vec3 origin, vec3 direction) {
     int i = 0;
     while(i < MAX_ITERATIONS && t < t_max) {
         vec3 position = direction*t+origin;
-        vec2 result = map(position);
+        vec3 result = map(position);
         if (result.x < tau) break;
         if (t > t_min) return vec2(INF); //return INFINITY;
         t += result.x;
@@ -112,7 +112,7 @@ vec2 textTrace(vec3 origin, vec3 direction) {
         // we know we are safe to "march" along the ray by that much distance
         // without hitting anything. We repeat this until we get really close
         // and then break because we have effectively hit the object.
-        distAndMat = map(pos);
+        distAndMat = map(pos).xy;
 
         // move along the ray a safe amount
         t += distAndMat.x;
@@ -150,7 +150,7 @@ vec2 castRay(vec3 origin,vec3 direction ) {
     for( int i=0; i<MAX_ITERATIONS; i++ )
     {
         float precis = 0.0005*t;
-        vec2 result = map( direction*t+origin );
+        vec3 result = map( direction*t+origin );
         if( result.x<precis || t>tmax ) break;
         t += result.x;
         material = result.y;

@@ -1,44 +1,60 @@
 uniform float radius = 0.01;
 uniform ivec2 ch = ivec2(0,1);
-uniform vec3 chpos = vec3(3,0,3);
 uniform float angle = 1.0;
 
-subroutine(SceneMap)
-vec2 positionOffsetting( vec3 pos ) {  // https://www.shadertoy.com/view/XdlcWf
-    vec3 offset = pos-vec3(-2,.25,2); //same position as in sdfDemo
+const float roomWidth = .5*.6;
+const float rep = 4.;
+uniform float distort_grid_size = 0.2;
 
+const float position_offset = 0.5; // does not affect anything if multiple of tau.
+uniform float distort_add = 0.31;
+uniform float distort_mul = 0.1;
+
+
+subroutine(SceneMap)
+vec3 positionOffsetting( vec3 pos ) {  // https://www.shadertoy.com/view/XdlcWf
+    vec3 offset = pos-vec3(-2,.0,2); //same position as in sdfDemo
+    vec2 res =      vec2( sdfPlaneXZ(   pos-vec3(0,0,0)), 1.0 );
+
+    vec3 boxpos = offset-vec3(0,1,0);
 //row1
+
+    //boxpos.y = floor(boxpos.y);
+    vec3 noise = texturize(bufferTexture, vec3(0,2,0), vec3(0,1,0));
+    //noise = normalize(noise);
+    boxpos.y += sin(iTime);
+    //boxpos.y = floor(boxpos.y);
+    res = opU( res, vec2( sdfBox(boxpos, vec3(1.0)),             1.0));
+
 //row2
     offset.z += 1;
 //row3
     offset.z += 1;
 
-    vec3 octahedronPos = offset-vec3(5,0,0);
-    float roomWidth = .5*.6;
-    float rep = 4.;
 
-    vec2 idx = floor((abs(octahedronPos.xz)) / 0.2)*0.5;
+    vec3 octahedronPos = offset-vec3(5,0,0);
+
+    // distort space
+    vec3 idx = floor((abs(octahedronPos.xyz)) / distort_grid_size)*position_offset;
+    float phase = (idx.x+idx.z);
 
     float clock = iTime*4.;
-    float phase = (idx.y+idx.x);
-
     float anim = sin(phase + clock);
 
+    //repeat 4 times in xz plane
     vec3 polar_repeat = octahedronPos;
     float i = pModPolar(polar_repeat.xz, rep);
-    polar_repeat.x -= 0.31 + anim*0.1;
+    polar_repeat.x -= distort_add + anim*distort_mul;
 
-    vec2 res =      vec2(fOctahedron(octahedronPos, roomWidth),     43.1);
-    res = opU( res, vec2(fOctahedron(polar_repeat,  roomWidth*0.6), 55.0));
-//    vec2 res =      vec2(fOctahedron(octahedronPos, roomWidth),     1);
-//    res = opU( res, vec2(fOctahedron(polar_repeat,  roomWidth*0.6), 1));
 
-    vec3 charpos = offset-chpos;
-    pR(charpos.xz, angle);
 
-//    float char_a = approx_font_dist(charpos.xy, 65+ch.x);
-//    float char_b = approx_font_dist(charpos.zy, 65+ch.y);
-//
-//    res = opU( res, vec2( fOpIntersectionChamfer(char_a, char_b, radius),            14.0));
-    return res;
+    vec3 otherpos = octahedronPos;
+    vec3 distort_grid = floor(abs(otherpos)/distort_grid_size);
+    //otherpos *= distort_add*(1-progress) + idx*(distort_mul*(1-progress));
+
+    res = opU(res, vec2(fOctahedron(octahedronPos, roomWidth),     45.0));
+
+    //res = opU( res, vec2(fOctahedron(polar_repeat,  roomWidth*0.6), 55.0));
+
+    return vec3(res,0);
 }

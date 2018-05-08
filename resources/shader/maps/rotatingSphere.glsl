@@ -34,7 +34,7 @@ float Union( float a, float b )
 //}
 
 subroutine(SceneMap)
-vec2 rotatingShpere( vec3 p )
+vec3 rotatingShpere( vec3 p )
 {
     const float boxNum  = 12.0;
     float a = p.x;
@@ -95,7 +95,7 @@ vec2 rotatingShpere( vec3 p )
 //	pR( t.xy, -0.25 );
 //    ret = Union( ret, sdfRoundBox( t, vec3( 0.01 ), 0.005 ) );
 
-	return vec2(ret, 13.9);
+	return vec3(ret, 13.9,0);
 }
 
 //float CastRay( in vec3 ro, in vec3 rd )

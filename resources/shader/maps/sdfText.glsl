@@ -58,14 +58,14 @@ vec4 SampleFontTex(vec2 uv)
 // The input is a position in space.
 // The output is the distance to the nearest surface and a material index.
 subroutine(SceneMap)
-vec2 sdfTextDemo(vec3 p)
+vec3 sdfTextDemo(vec3 p)
 {
 	// Load the font texture's distance field.
     float letterDistField = (SampleFontTex(p.xy).w - 0.5+1.0/256.0);
     // intersect it with a box.
     float cropBox = sdfBox(p, vec3(0.5 + 5.0, 3.5, 0.25));
     vec2 letters = matmax(vec2(letterDistField, 42.0), vec2(cropBox, 0.3));
-    return letters;
+    return vec3(letters,0);
 }
 
 // Input is UV coordinate of pixel to render.
@@ -127,7 +127,7 @@ vec3 RayTrace(in vec2 fragCoord )
         // we know we are safe to "march" along the ray by that much distance
         // without hitting anything. We repeat this until we get really close
         // and then break because we have effectively hit the object.
-        distAndMat = sdfTextDemo(pos);
+        distAndMat = sdfTextDemo(pos).xy;
 
         // move along the ray a safe amount
         t += distAndMat.x;
