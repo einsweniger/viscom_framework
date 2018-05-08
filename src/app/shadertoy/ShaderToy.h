@@ -59,7 +59,7 @@ namespace shadertoy {
     };
 
     struct Input {
-        int64_t id;
+        int id;
         std::string src;  //url or path
         std::string ctype; //buffer cubemap keyboard mic music musicstream texture video volume webcam
         int64_t channel; // channel number, [0,1,2,3]
