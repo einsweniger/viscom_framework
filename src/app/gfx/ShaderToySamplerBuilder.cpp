@@ -5,6 +5,8 @@
 #include "ShaderToySamplerBuilder.h"
 #include <enh/ApplicationNodeBase.h>
 #include <app/shadertoy/ShaderToy.h>
+#include <imgui.h>
+#include <app/ApplicationNodeImplementation.h>
 
 namespace minuseins::handlers {
 
@@ -19,14 +21,6 @@ namespace minuseins::handlers {
         void iChannel::init(gl::GLuint program) {
             tex = appBase->GetTextureManager().GetResource(input.src);
             auto texid = tex->getTextureId();
-            if(input.sampler.wrap == "repeat") {
-                gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_S, gl::GL_REPEAT);
-                gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_T, gl::GL_REPEAT);
-            } else if (input.sampler.wrap == "mirror") { //GL_MIRRORED_REPEAT
-                gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_S, gl::GL_MIRRORED_REPEAT);
-                gl::glTextureParameteri(texid, gl::GL_TEXTURE_WRAP_T, gl::GL_MIRRORED_REPEAT);
-            } // clamp_to_edge is default here.
-
             if(input.sampler.filter == "nearest") {
                 gl::glTextureParameteri(texid, gl::GL_TEXTURE_MIN_FILTER, gl::GL_NEAREST);
                 gl::glTextureParameteri(texid, gl::GL_TEXTURE_MAG_FILTER, gl::GL_NEAREST);
@@ -37,12 +31,51 @@ namespace minuseins::handlers {
 
         bool iChannel::upload_value() {
             if(do_upload) {
+                gl::GLuint boundTexture = 0;
+                if(input.ctype == "texture") {
+                    boundTexture = tex->getTextureId();
+                } else if (input.ctype == "buffer") {
+                    boundTexture = input.id;
+                }
+                if(wrap == "repeat") {
+                    gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_REPEAT);
+                    gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_REPEAT);
+                } else if (wrap == "mirror") { //GL_MIRRORED_REPEAT
+                    gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_MIRRORED_REPEAT);
+                    gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_MIRRORED_REPEAT);
+                } else if (wrap == "clamp") {
+                    gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_CLAMP_TO_EDGE);
+                    gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_CLAMP_TO_EDGE);
+                }
                 gl::glActiveTexture(gl::GL_TEXTURE0 + input.channel);
-                gl::glBindTexture(gl::GL_TEXTURE_2D, tex->getTextureId());
+                gl::glBindTexture(gl::GL_TEXTURE_2D, boundTexture);
                 gl::glUniform1i(location(), input.channel);
+
             }
             return true;
         }
+
+
+        void iChannel::draw2D() {
+            generic_uniform::draw2D();
+            if("buffer" == input.ctype) {
+                ImGui::InputInt(name.c_str(), &input.id);
+            }
+            std::string popupname = "wrap##" + name;
+            if (ImGui::BeginPopupContextItem(popupname.c_str()))
+            {
+                ImGui::PushID(name.c_str());
+                for(auto& wrapper : {"clamp", "repeat", "mirror"}) {
+                    if(ImGui::Selectable(wrapper, wrapper == wrap)) {
+                        wrap = wrapper;
+                    }
+                }
+                ImGui::PopID();
+                ImGui::EndPopup();
+            }
+
+        }
+
 
         struct iChannelResolution : FloatUniform {
             iChannelResolution(named_resource res, viscom::enh::ApplicationNodeBase *appBase, const shadertoy::Input &input) :
@@ -63,6 +96,52 @@ namespace minuseins::handlers {
                 value[0] = tex->getDimensions().x;
                 value[1] = tex->getDimensions().y;
                 value[2] = 1;
+            }
+        };
+
+        struct fftSampler : empty_uniform {
+            fftSampler(named_resource res, viscom::ApplicationNodeImplementation *appImpl) :
+                    empty_uniform(std::move(res)),
+                    appImpl(appImpl){}
+
+            viscom::ApplicationNodeImplementation* appImpl;
+            gl::GLuint sampler = 0;
+        };
+
+        struct texFFT : fftSampler {
+            using fftSampler::fftSampler;
+
+            bool upload_value() override {
+                if(do_upload) {
+                    appImpl->fftTex->SetData(&appImpl->fftData[0]);
+                    appImpl->fftTex->ActivateTexture(gl::GL_TEXTURE0+sampler);
+                    gl::glUniform1i(location(), sampler);
+                }
+                return true;
+            }
+        };
+        struct texFFTSmoothed : fftSampler {
+            using fftSampler::fftSampler;
+
+            bool upload_value() override {
+                if(do_upload) {
+                    appImpl->fftTexSmoothed->SetData(&appImpl->fftDataSmoothed[0]);
+                    appImpl->fftTexSmoothed->ActivateTexture(gl::GL_TEXTURE0+sampler);
+                    gl::glUniform1i(location(), sampler);
+                }
+                return true;
+            }
+        };
+        struct texFFTIntegrated : fftSampler {
+            using fftSampler::fftSampler;
+
+            bool upload_value() override {
+                if(do_upload) {
+                    appImpl->fftTexIntegrated->SetData(&appImpl->fftDataIntegrated[0]);
+                    appImpl->fftTexIntegrated->ActivateTexture(gl::GL_TEXTURE0+sampler);
+                    gl::glUniform1i(location(), sampler);
+                }
+                return true;
             }
         };
     }
@@ -91,9 +170,43 @@ namespace minuseins::handlers {
         if("tex_text" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
             auto inp = shadertoy::Input{};
             inp.src = "/media/a/text.png";
+            inp.ctype = "texture";
             inp.sampler.wrap = "repeat";
-            inp.channel = 0;
+            inp.channel = samplerCounter;
+            samplerCounter++;
             return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
+        }
+
+        if("bufferTexture" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
+            auto inp = shadertoy::Input{};
+            inp.src = "/media/previz/buffer00.png";
+            inp.ctype = "buffer";
+            inp.sampler.wrap = "repeat";
+            inp.channel = samplerCounter;
+            samplerCounter++;
+            inp.id = 4;
+            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
+        }
+
+        if("texFFT" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_1D) {
+            auto tex = detail::texFFT(std::move(res),appImpl);
+            tex.sampler = samplerCounter;
+            samplerCounter++;
+            return std::make_unique<detail::texFFT>(std::move(tex));
+        }
+
+        if("texFFTSmoothed" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_1D) {
+            auto tex = detail::texFFTSmoothed(std::move(res),appImpl);
+            tex.sampler = samplerCounter;
+            samplerCounter++;
+            return std::make_unique<detail::texFFTSmoothed>(std::move(tex));
+        }
+
+        if("texFFTIntegrated" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_1D) {
+            auto tex = detail::texFFTIntegrated(std::move(res),appImpl);
+            tex.sampler = samplerCounter;
+            samplerCounter++;
+            return std::make_unique<detail::texFFTIntegrated>(std::move(tex));
         }
 
         if(res.name.length() == 9)  { //ichannel0

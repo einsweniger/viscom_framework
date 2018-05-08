@@ -10,6 +10,8 @@
 
 #include <app/gfx/gl/ProgramInspector.h>
 #include <app/gfx/ShaderToyFsq.h>
+#include <app/sound/FFT.h>
+#include <enh/gfx/gl/GLTexture.h>
 #include "enh/ApplicationNodeBase.h"
 #include "app/gfx/IntrospectableFsq.h"
 
@@ -44,6 +46,16 @@ namespace viscom {
         std::vector<std::unique_ptr<minuseins::ShaderToyFsq>> toys{};
         std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
         std::vector<std::string> startupToys = {"4d23WG.json"};
+
+        std::unique_ptr<viscom::enh::GLTexture> fftTex;
+        std::unique_ptr<viscom::enh::GLTexture> fftTexSmoothed;
+        std::unique_ptr<viscom::enh::GLTexture> fftTexIntegrated;
+        std::array<gl::GLfloat, FFT_SIZE> fftData;
+        std::array<gl::GLfloat, FFT_SIZE> fftDataSmoothed;
+        std::array<gl::GLfloat, FFT_SIZE> fftDataIntegrated;
+        std::array<gl::GLfloat, FFT_SIZE> fftDataSlightlySmoothed;
+        float fFFTSmoothingFactor = 0.9f;
+        float fFFTSlightSmoothingFactor = 0.6f;
 
         float globalTime_  = 0.0f;
         float currentTime_ = 0.0f;

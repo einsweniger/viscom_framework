@@ -18,8 +18,10 @@ namespace minuseins::handlers {
             shadertoy::Input input;
             viscom::enh::ApplicationNodeBase* appBase;
             std::string uname;
+            std::string wrap = "repeat";
 
             void init(gl::GLuint program) override;
+            void draw2D() override;
 
             bool upload_value() override;
 
@@ -32,6 +34,8 @@ namespace minuseins::handlers {
         ShaderToySamplerBuilder(viscom::enh::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass);
 
         shadertoy::Renderpass pass;
+
+        gl::GLuint samplerCounter = 0;
 
         std::unique_ptr<generic_uniform> operator()(named_resource res) override;
     };
