@@ -73,6 +73,11 @@ namespace viscom {
             case GLFW_KEY_SPACE:
                 if(!grabMouse_) {
                     stopTime_ = !stopTime_;
+                    if(stopTime_) {
+                        bass->pause();
+                    } else {
+                        bass->play();
+                    }
                     return true;
                 } else {
                     return false;

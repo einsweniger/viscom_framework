@@ -19,7 +19,8 @@
 namespace viscom {
 
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
-        ApplicationNodeBase{ appNode }
+        ApplicationNodeBase{ appNode },
+        bass{std::make_unique<minuseins::audio::BassHandler>()}
     {
         freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
     }
@@ -36,10 +37,14 @@ namespace viscom {
             fsq->init(this);
             fsqs.push_back(std::move(fsq));
         }
-        FFT::Open();
-        fftTex = std::make_unique<viscom::enh::GLTexture>(FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
-        fftTexSmoothed = std::make_unique<viscom::enh::GLTexture>(FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
-        fftTexIntegrated = std::make_unique<viscom::enh::GLTexture>(FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
+        //FFT::Open();
+        fftTex = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
+        fftTexSmoothed = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
+        fftTexIntegrated = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
+
+        bass->openFile({"../resources/media/song.ogg"});
+        auto [bytes, time] = bass->get_length();
+        std::cout << "bass length in bytes: " << bytes << " and in seconds: " << time << std::endl;
     }
 
 //    gl::GLuint GetBindingPoint(const std::string& name)
@@ -70,9 +75,10 @@ namespace viscom {
         for(auto& toy : toys) {
             toy->UpdateFrame(currentTime_, elapsedTime_);
         }
-        if (FFT::GetFFT(&fftData[0])) {
+//        if (FFT::GetFFT(&fftData[0])) {
+        if (bass->get_fft(&fftData[0])) {
             const static float maxIntegralValue = 1024.0f;
-            for ( int i = 0; i < FFT_SIZE; i++ )
+            for ( int i = 0; i < minuseins::audio::FFT_SIZE; i++ )
             {
                 fftDataSmoothed[i] = fftDataSmoothed[i] * fFFTSmoothingFactor + (1 - fFFTSmoothingFactor) * fftData[i];
 
@@ -85,6 +91,10 @@ namespace viscom {
         }
     }
 
+    void ApplicationNodeImplementation::PostDraw() {
+        bass->update();
+        ApplicationNodeBase::PostDraw();
+    }
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
     {
@@ -131,7 +141,7 @@ namespace viscom {
         for(auto& fsq : fsqs) {
             startupPrograms.push_back(fsq->fragmentShader);
         }
-        FFT::Close();
+        //FFT::Close();
         ApplicationNodeBase::CleanUp();
     }
 

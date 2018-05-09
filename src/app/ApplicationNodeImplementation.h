@@ -10,8 +10,8 @@
 
 #include <app/gfx/gl/ProgramInspector.h>
 #include <app/gfx/ShaderToyFsq.h>
-#include <app/sound/FFT.h>
 #include <enh/gfx/gl/GLTexture.h>
+#include <app/sound/BassHandler.h>
 #include "enh/ApplicationNodeBase.h"
 #include "app/gfx/IntrospectableFsq.h"
 
@@ -40,28 +40,31 @@ namespace viscom {
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
         glm::vec2 GetScreenSize();
 
+        void PostDraw() override;
+
         std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
         std::vector<std::unique_ptr<Texture>> textures;
         std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs{};
         std::vector<std::unique_ptr<minuseins::ShaderToyFsq>> toys{};
+        std::unique_ptr<minuseins::audio::BassHandler> bass;
         std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
         std::vector<std::string> startupToys = {"4d23WG.json"};
 
         std::unique_ptr<viscom::enh::GLTexture> fftTex;
         std::unique_ptr<viscom::enh::GLTexture> fftTexSmoothed;
         std::unique_ptr<viscom::enh::GLTexture> fftTexIntegrated;
-        std::array<gl::GLfloat, FFT_SIZE> fftData;
-        std::array<gl::GLfloat, FFT_SIZE> fftDataSmoothed;
-        std::array<gl::GLfloat, FFT_SIZE> fftDataIntegrated;
-        std::array<gl::GLfloat, FFT_SIZE> fftDataSlightlySmoothed;
-        float fFFTSmoothingFactor = 0.9f;
+        std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftData;
+        std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSmoothed;
+        std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataIntegrated;
+        std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSlightlySmoothed;
+        float fFFTSmoothingFactor = 0.6f;
         float fFFTSlightSmoothingFactor = 0.6f;
 
         float globalTime_  = 0.0f;
         float currentTime_ = 0.0f;
         float elapsedTime_ = 0.0f;
         int iFrame = 0;
-        bool stopTime_ = false;
+        bool stopTime_ = true;
         bool drawToy = false;
         shadertoy::Shader shaderParams_;
     protected:

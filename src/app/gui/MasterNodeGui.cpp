@@ -339,6 +339,9 @@ namespace minuseins::gui {
         if(ImGui::Begin("##TimeSlider", p_open, flags)) {
             ImGui::PushItemWidth(-1);
             ImGui::SliderFloat("##Time", &appImpl->currentTime_,0.0f, 300.f);
+            if(ImGui::IsItemActive()) {
+                appImpl->bass->set_position(appImpl->currentTime_);
+            }
             ImGui::PopItemWidth();
         }
 
