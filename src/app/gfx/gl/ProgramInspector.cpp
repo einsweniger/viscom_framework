@@ -33,13 +33,13 @@ namespace minuseins {
         auto window_name = "GPUProgram " + name;
         ImGui::PushID(window_name.c_str());
         if(nullptr != compile_fn) {
-            ImGui::TextUnformatted(name.c_str());
-            ImGui::SameLine();
             if(ImGui::SmallButton(std::string("recompile##").append(name).c_str())){
                 ImGui::SameLine();
                 programId_ = compile_fn();
                 initialize();
             }
+            ImGui::SameLine();
+            ImGui::TextUnformatted(name.c_str());
         }
         ImGui::SameLine();
         ImGui::TextDisabled("(?)");
@@ -58,13 +58,17 @@ namespace minuseins {
 //        if(ImGui::TreeNode("details")) {
             for(auto& interface : draw_interfaces) {
                 if(containers.at(interface).empty()) continue;
-                std::string header = glbinding::aux::Meta::getString(interface);
-                ImGui::TextUnformatted(header.c_str());
-                ImGui::SameLine();
+
+                std::string interface_str = glbinding::aux::Meta::getString(interface);
+                ImGui::Begin(interface_str.c_str());
+                ImGui::PushID(name.c_str());
                 ImGui::Separator();
+                ImGui::TextUnformatted(name.c_str());
                 for(auto& resource: containers.at(interface)) {
                     resource->draw2D();
                 }
+                ImGui::PopID();
+                ImGui::End();
             }
 //            ImGui::TreePop();
 //        }

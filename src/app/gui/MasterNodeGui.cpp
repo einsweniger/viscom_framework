@@ -72,6 +72,7 @@ namespace minuseins::gui {
             drawGPUProgram(&activeWindows["GPUProgram"]);
             drawTimeSlider(&activeWindows["TimeSlider"]);
             drawAnimation(&activeWindows["AnimationManager"]);
+            drawGlobalVars(&activeWindows["Globals"]);
 //            if(activeWindows["AnimationManager"]) {
 //                animManager.ShowAnimationMenu("AnimationManager", activeWindows["AnimationManager"]);
 //            }
@@ -97,6 +98,7 @@ namespace minuseins::gui {
             }
             if(ImGui::BeginMenu("Scene")) {
                 ImGui::MenuItem("NewScene", "", &activeWindows["NewScene"]);
+                ImGui::MenuItem("Global Vars","", &activeWindows["Globals"]);
                 ImGui::MenuItem("Animations","", &activeWindows["AnimationManager"]);
                 ImGui::MenuItem("StopTime", "SPACE", &appImpl->stopTime_);
                 ImGui::MenuItem("DrawToy", "", &appImpl->drawToy);
@@ -353,6 +355,26 @@ namespace minuseins::gui {
         if(!*p_open) return;
         static gui::Animation anim(appNode->GetConfig().resourceSearchPaths_.at(0), appNode->GetCamera());
         anim.draw(p_open);
+    }
+
+    void MasterNodeGui::drawGlobalVars(bool *p_open) {
+        static float histogram_scale = 0.07;
+        if(!*p_open) return;
+        if(!ImGui::Begin("Global Variables")) {
+            ImGui::End();
+            return;
+        }
+        ImGui::DragFloat("fftSmoothing",&appImpl->fftSmootingFactor, 0.01f,0.0f,0.98f);
+        ImGui::DragFloat("fftMaxIntegral", &appImpl->fftMaxIntegralValue);
+        ImGui::Separator();
+        ImGui::DragFloat("hist scale", &histogram_scale, 0.001,0,0.1);
+        auto width = ImGui::GetContentRegionAvailWidth();
+        ImGui::PlotHistogram("", appImpl->fftDataIntegrated.data(), 750, 0, nullptr, 0.0f, 4*1024.0f,       ImVec2(width,300));
+        ImGui::PlotHistogram("", appImpl->fftData.data()          , 750, 0, nullptr, 0.0f, histogram_scale, ImVec2(width,300));
+        ImGui::PlotHistogram("", appImpl->fftDataSmoothed.data()  , 750, 0, nullptr, 0.0f, histogram_scale, ImVec2(width,300));
+        ImGui::Separator();
+
+        ImGui::End();
     }
 
 

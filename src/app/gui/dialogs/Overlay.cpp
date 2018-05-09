@@ -13,8 +13,8 @@ namespace minuseins::gui {
                                       |ImGuiWindowFlags_NoFocusOnAppearing |ImGuiWindowFlags_NoNav;
 
     void Overlay::UpdateFrame(double currentTime, double elapsedTime) {
-        histData[histIdx] = static_cast<float>(elapsedTime*1000);
         histIdx = (1 + histIdx) % 90;
+        histData[histIdx] = static_cast<float>(elapsedTime*1000);
     }
 
     void Overlay::drawOverlay(bool *p_open) {

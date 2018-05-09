@@ -25,7 +25,7 @@ namespace minuseins::handlers {
 
             bool upload_value() override;
 
-            size_t uploadSize() override { return 0; }
+            size_t uploadSize() override { return input.channel; }
 
             void *valuePtr() override { return nullptr; }
         };

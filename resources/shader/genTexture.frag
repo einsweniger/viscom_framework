@@ -14,10 +14,10 @@ vec4 noise(vec2 uv) {
   return vec4(hash3(uv),1);
 }
 
-subroutine(GenerateTexture)
-vec4 passthrough(vec2 uv) {
-  return texture(tex, uv);
-}
+//subroutine(GenerateTexture)
+//vec4 passthrough(vec2 uv) {
+//  return texture(tex, uv);
+//}
 
 subroutine(GenerateTexture)
 vec4 redBar(vec2 uv) {

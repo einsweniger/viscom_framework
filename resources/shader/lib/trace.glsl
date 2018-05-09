@@ -8,24 +8,24 @@ subroutine uniform RayMarch raymarch;  // uniform instance, can be called like a
 #endif
 
 // over-relaxation sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 2)
-uniform float t_min =  0.0;
-uniform float t_max = 20.0;
 //uniform float INF = -1.0f/0.0f; //needs at least gl4.1 i think, earlier versions leave this undefined. https://stackoverflow.com/questions/10435253/glsl-infinity-constant
-uniform float INF = pow(2.,8.);
-uniform int MAX_ITERATIONS = 160;
-uniform int USE_BV = 0;
-uniform float relaxation = 1.9;
-uniform float pixelRadius = 0.0001;
+const float trace_t_min =  0.0;
+const float trace_t_max = 40.0;
+const float trace_INF = pow(2.,8.);
+const float trace_relaxation = 1.9;
+const float trace_pixelRadius = 0.0001;
+const int   trace_MAX_ITERATIONS = 160;
+const bool  trace_USE_BV = false;
 vec2 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool forceHit) {
     float omega = relaxation; //relaxation parameter omega ∈ [1;2)
-    float t = t_min;
+    float t = trace_t_min;
     float material = -1.0;
-    float candidate_error = INF;
-    float candidate_t = t_min;
+    float candidate_error = trace_INF;
+    float candidate_t = trace_t_min;
     float previousRadius = 0.;
     float stepLength = 0.;
     //float functionSign = map(pos).x < 0. ? -1. : +1.;
-    for (int i = 0; i < MAX_ITERATIONS; ++i) {
+    for (int i = 0; i < trace_MAX_ITERATIONS; ++i) {
 
         vec3 result = map(dir * t + pos);
         material = result.y;
@@ -48,12 +48,12 @@ vec2 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool
             candidate_error = error;
         }
 
-        if (!sorFail && error < pixelRadius || t > t_max)
+        if (!sorFail && error < pixelRadius || t > trace_t_max)
             break;
         t += stepLength;
     }
 
-    if ((t > t_max || candidate_error > pixelRadius) && !forceHit) return vec2(INF);
+    if ((t > trace_t_max || candidate_error > trace_pixelRadius) && !forceHit) return vec2(trace_INF);
     return vec2(t, material);
 }
 
@@ -62,7 +62,7 @@ subroutine(RayMarch)
 vec2 defaultEnhancedTrace(vec3 origin,vec3 direction) {
     const bool forceHit = false;
 
-    return enhancedTrace(origin, direction, relaxation, pixelRadius, forceHit);
+    return enhancedTrace(origin, direction, trace_relaxation, trace_pixelRadius, forceHit);
 }
 #else
 vec2 raymarch(vec3 origin,vec3 direction) {
@@ -78,13 +78,13 @@ subroutine(RayMarch)
 vec2 simpleTrace(vec3 origin, vec3 direction) {
     const float tau = .001; //threshold
 
-    float t = t_min;
+    float t = trace_t_min;
     int i = 0;
-    while(i < MAX_ITERATIONS && t < t_max) {
+    while(i < trace_MAX_ITERATIONS && t < trace_t_max) {
         vec3 position = direction*t+origin;
         vec3 result = map(position);
         if (result.x < tau) break;
-        if (t > t_min) return vec2(INF); //return INFINITY;
+        if (t > trace_t_min) return vec2(trace_INF); //return INFINITY;
         t += result.x;
         i++;
     }
@@ -126,10 +126,10 @@ vec2 textTrace(vec3 origin, vec3 direction) {
 subroutine(RayMarch)
 #endif
 vec2 castRay(vec3 origin,vec3 direction ) {
-    float tmin = t_min;
-    float tmax = t_max;
+    float tmin = trace_t_min;
+    float tmax = trace_t_max;
 
-    if(USE_BV == 1) {
+    if(trace_USE_BV) {
         // bounding volume
         float tp1 = (0.0-origin.y)/direction.y;
         float tp2 = (1.6-origin.y)/direction.y;
@@ -147,7 +147,7 @@ vec2 castRay(vec3 origin,vec3 direction ) {
 
     float t = tmin;
     float material = -1;
-    for( int i=0; i<MAX_ITERATIONS; i++ )
+    for( int i=0; i<trace_MAX_ITERATIONS; i++ )
     {
         float precis = 0.0005*t;
         vec3 result = map( direction*t+origin );

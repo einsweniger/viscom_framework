@@ -76,7 +76,7 @@ vec3 trace( vec3 ro, in vec3 rd, in float tmin, in float tmax )
 	{
         vec3 cub = mapH( pos );
 
-        #if 1
+        #if 0
             vec2 pr = pos+0.5-ro.xz;
 			vec2 mini = (pr-0.5*rds)*rdi.xz;
 	        float s = max( mini.x, mini.y );

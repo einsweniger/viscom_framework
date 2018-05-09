@@ -31,7 +31,7 @@ namespace minuseins {
         appImpl = static_cast<viscom::ApplicationNodeImplementation*>(appNode);
         fsq_ = appBase->CreateFullscreenQuad(fragmentShader);
         gpuProgram_ = fsq_->GetGPUProgram();
-        gpi_ = std::make_unique<ProgramInspector>(gpuProgram_->getProgramId(), gpuProgram_->GetProgramName());
+        gpi_ = std::make_unique<ProgramInspector>(gpuProgram_->getProgramId(), fragmentShader);
         gpi_->set_recompile_function([&]() -> gl::GLuint {
             auto currentProg = gpuProgram_->getProgramId();
             log_.Clear();

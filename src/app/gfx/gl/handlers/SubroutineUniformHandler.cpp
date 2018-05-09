@@ -58,10 +58,14 @@ namespace minuseins::handlers {
     }
 
     void SubroutineUniform::draw2D() {
-        named_resource::draw2D();
+        //named_resource::draw2D();
         std::string popupname = "select subroutine##" + name;
-        if (ImGui::BeginPopupContextItem(popupname.c_str()))
-        {
+        if(ImGui::SmallButton(name.c_str())) {
+            ImGui::OpenPopup(popupname.c_str());
+        }
+        ImGui::SameLine();
+        ImGui::TextUnformatted(subroutines.at(active_subroutine).c_str());
+        if (ImGui::BeginPopup(popupname.c_str())) {
             for(const auto& [subroutine_index, name] : subroutines) {
                 std::string header = name + "##" + std::to_string(subroutine_index);
                 if(ImGui::Selectable(header.c_str(), subroutine_index == active_subroutine)) {

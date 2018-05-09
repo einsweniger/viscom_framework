@@ -37,7 +37,6 @@ namespace viscom {
             fsq->init(this);
             fsqs.push_back(std::move(fsq));
         }
-        //FFT::Open();
         fftTex = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
         fftTexSmoothed = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
         fftTexIntegrated = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT});
@@ -46,19 +45,6 @@ namespace viscom {
         auto [bytes, time] = bass->get_length();
         std::cout << "bass length in bytes: " << bytes << " and in seconds: " << time << std::endl;
     }
-
-//    gl::GLuint GetBindingPoint(const std::string& name)
-//    {
-//        try {
-//            return bindingPoints_.at(name);
-//        }
-//        catch (std::out_of_range&) {
-//            bindingPoints_[name] = nextBindingPoint_;
-//            return nextBindingPoint_++;
-//        }
-//    }
-//    std::unordered_map<std::string, gl::GLuint> bindingPoints_;
-//    unsigned int nextBindingPoint_;
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
@@ -75,17 +61,16 @@ namespace viscom {
         for(auto& toy : toys) {
             toy->UpdateFrame(currentTime_, elapsedTime_);
         }
-//        if (FFT::GetFFT(&fftData[0])) {
         if (bass->get_fft(&fftData[0])) {
-            const static float maxIntegralValue = 1024.0f;
+
             for ( int i = 0; i < minuseins::audio::FFT_SIZE; i++ )
             {
-                fftDataSmoothed[i] = fftDataSmoothed[i] * fFFTSmoothingFactor + (1 - fFFTSmoothingFactor) * fftData[i];
+                fftDataSmoothed[i] = fftDataSmoothed[i] * fftSmootingFactor + (1 - fftSmootingFactor) * fftData[i];
 
-                fftDataSlightlySmoothed[i] = fftDataSlightlySmoothed[i] * fFFTSlightSmoothingFactor + (1 - fFFTSlightSmoothingFactor) * fftData[i];
+                fftDataSlightlySmoothed[i] = fftDataSlightlySmoothed[i] * fftSlightSmootingFactor + (1 - fftSlightSmootingFactor) * fftData[i];
                 fftDataIntegrated[i] = fftDataIntegrated[i] + fftDataSlightlySmoothed[i];
-                if (fftDataIntegrated[i] > maxIntegralValue) {
-                    fftDataIntegrated[i] -= maxIntegralValue;
+                if (fftDataIntegrated[i] > fftMaxIntegralValue) {
+                    fftDataIntegrated[i] -= fftMaxIntegralValue;
                 }
             }
         }
@@ -141,7 +126,6 @@ namespace viscom {
         for(auto& fsq : fsqs) {
             startupPrograms.push_back(fsq->fragmentShader);
         }
-        //FFT::Close();
         ApplicationNodeBase::CleanUp();
     }
 

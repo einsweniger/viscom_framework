@@ -104,6 +104,10 @@ namespace minuseins::handlers {
                     empty_uniform(std::move(res)),
                     appImpl(appImpl){}
 
+            size_t uploadSize() override {
+                return sampler;
+            }
+
             viscom::ApplicationNodeImplementation* appImpl;
             gl::GLuint sampler = 0;
         };
@@ -172,8 +176,7 @@ namespace minuseins::handlers {
             inp.src = "/media/a/text.png";
             inp.ctype = "texture";
             inp.sampler.wrap = "repeat";
-            inp.channel = samplerCounter;
-            samplerCounter++;
+            inp.channel = samplerCounter++;
             return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
         }
 
@@ -182,30 +185,26 @@ namespace minuseins::handlers {
             inp.src = "/media/previz/buffer00.png";
             inp.ctype = "buffer";
             inp.sampler.wrap = "repeat";
-            inp.channel = samplerCounter;
-            samplerCounter++;
+            inp.channel = samplerCounter++;
             inp.id = 4;
             return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
         }
 
         if("texFFT" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_1D) {
             auto tex = detail::texFFT(std::move(res),appImpl);
-            tex.sampler = samplerCounter;
-            samplerCounter++;
+            tex.sampler = samplerCounter++;
             return std::make_unique<detail::texFFT>(std::move(tex));
         }
 
         if("texFFTSmoothed" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_1D) {
             auto tex = detail::texFFTSmoothed(std::move(res),appImpl);
-            tex.sampler = samplerCounter;
-            samplerCounter++;
+            tex.sampler = samplerCounter++;
             return std::make_unique<detail::texFFTSmoothed>(std::move(tex));
         }
 
         if("texFFTIntegrated" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_1D) {
             auto tex = detail::texFFTIntegrated(std::move(res),appImpl);
-            tex.sampler = samplerCounter;
-            samplerCounter++;
+            tex.sampler = samplerCounter++;
             return std::make_unique<detail::texFFTIntegrated>(std::move(tex));
         }
 

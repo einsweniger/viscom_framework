@@ -20,19 +20,18 @@ uniform float timescale =1.0;
 uniform vec4 u_date;  // year, month, day and seconds
 uniform uvec2 u_resolution;  // viewport resolution (in pixels)
 uniform vec2 u_mouse;  // mouse pixel coords
-uniform mat4  u_MVP;
+uniform mat4 u_MVP;
 uniform vec3 iResolution;
 uniform vec4 iMouse;
 uniform sampler2D tex_text;
 uniform sampler2D tex_noise;
-uniform sampler1D texFFTSmoothed;
-uniform sampler1D texFFT;
 
 vec3 ray_direction;
 
 subroutine vec3 SceneMap(vec3 position);  // function signature type declaration, returns distance and material id
 subroutine uniform SceneMap map;  // uniform instance, can be called like a function
 
+#include "lib/sound.glsl"
 #include "lib/util.glsl"
 #include "lib/sdf.glsl"
 #include "lib/trace.glsl"  //
@@ -44,7 +43,7 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 //------------------------------------------------------------------------
 
 //#include "lib/XsVcDy/Image.frag"
-#include "maps/distanceMeter.glsl"
+#include "lib/distanceMeter.glsl"
 
 #include "maps/sphereZone.glsl"
 #include "maps/positionOffsetting.glsl"
@@ -54,54 +53,58 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 #include "maps/blockyGround.glsl"
 #include "maps/text.glsl"
 #include "maps/hexagons.glsl"
-//#include "maps/cubes.glsl"
+#include "maps/cubes.glsl"
 
 out vec4 test_color;
 out vec4 test_worldPos;
 out vec4 test_text;
 out vec4 test_sound;
 
-uniform bool show_debug_plane = false;
-uniform float xzPlane = 0;
+uniform bool test_show_debug_plane = false;
+uniform float test_xzPlane = 0;
 
-uniform vec3 dbg_plane_normal = vec3(0,1,0);
-uniform vec3 dbg_plane_position = vec3(0,0,0);
+uniform vec3 test_dbg_plane_normal = vec3(0,1,0);
+uniform vec3 test_dbg_plane_position = vec3(0,0,0);
 
-vec4 plas( vec2 v, float time )
-{
-  float c = 0.5 + sin( v.x * 10.0 ) + cos( sin( time + v.y ) * 20.0 );
-  return vec4( sin(c * 0.2 + cos(time)), c * 0.15, cos( c * 0.1 + time / .4 ) * .25, 1.0 );
+float toLog(float value, float min, float max){
+	float exp = (value-min) / (max-min);
+	return min * pow(max/min, exp);
 }
 
-vec4 sound_test_color() {
-  vec4 out_color;
-  vec2 uv = texCoord;
-  uv -= 0.5;
-  uv /= vec2(iResolution.y / iResolution.x, 1);
 
-  vec2 m;
-  m.x = atan(uv.x / uv.y) / 3.14;
-  m.y = 1 / length(uv) * .2;
-  float d = m.y;
+uniform float test_debug_plane_mix = 0.5f;
+void draw_debug_plane() {
+    float dbg_ray_len = INFINITY;
+    float denom = dot(normalize(test_dbg_plane_normal), ray_direction);
+    if (abs(denom) > 0.0001f)
+    {
+        dbg_ray_len = dot((test_dbg_plane_position - u_eye), normalize(test_dbg_plane_normal)) / denom;
+        if (dbg_ray_len >= 0){} //hit // you might want to allow an epsilon here too
+        else {}//no hit
+    } else {} //no hit
+    vec3 hit_on_plane = ray_direction*dbg_ray_len + u_eye;
 
-  float f = texture( texFFT, d ).r * 50;
-  float fft = texture( texFFT, d ).r * 50;
-  m.x += sin( iTime ) * 0.1;
-  m.y += iTime * 0.25;
-  vec3 col = vec3( fft, 4.0*fft*(1.0-fft), 1.0-fft ) * fft;
-  vec4 t = plas( m * 3.14, iTime ) / d;
-  t = clamp( t, 0.0, 1.0 );
-  out_color = vec4(f);
-  //out_color = vec4(col,1);
-  return out_color;
+    //what's the distance field at plane hit like?
+    float dist_field = map(hit_on_plane).x;
+
+    vec3 col = distanceMeter(dist_field, dbg_ray_len, ray_direction, length(u_eye-hit_on_plane));
+
+    //col = Uncharted2ToneMapping(col);
+    vec4 distancemeter = vec4(pow(saturate(col), vec3(1./2.2)), 1.0 );
+    test_color = mix(distancemeter, test_color, test_debug_plane_mix);
 }
+
 void main()
 {
-//    freqs[0] = texture( texFFTSmoothed, 0.04 ).x*80;
-//    freqs[1] = texture( texFFTSmoothed, 0.08 ).x*80;
-//    freqs[2] = texture( texFFTSmoothed, 0.30 ).x*80;
-//    freqs[3] = texture( texFFTSmoothed, 0.60 ).x*80;
+    freqs[0] = saturate(texelFetch( texFFTSmoothed, 28,0 ).x*25);
+    freqs[1] = saturate(texelFetch( texFFTSmoothed, 56,0 ).x*12);
+    freqs[2] = saturate(texelFetch( texFFTSmoothed, 63,0 ).x*12);
+    freqs[3] = saturate(texelFetch( texFFTSmoothed, 150,0 ).x*12);
 
+    freqs[0] = saturate(get_average(texFFTSmoothed, 28, 3));
+    freqs[1] = saturate(get_average(texFFTSmoothed, 56, 3));
+    freqs[2] = saturate(get_average(texFFTSmoothed, 63, 3));
+    freqs[3] = saturate(get_average(texFFTSmoothed, 150, 3));
     vec2 fragCoord;
     fragCoord.x= texCoord.x*iResolution.x;
     fragCoord.y= texCoord.y*iResolution.y;
@@ -136,33 +139,17 @@ void main()
     test_color = vec4(color, 1.0);
 
     //sdfTextMain(test_text, fragCoord);
-    int tx = int(texCoord.x*1024.0);
-    float fft  = texelFetch( texFFT, tx, 0 ).x;
-    vec3 soundtest = vec3( fft, 4.0*fft*(1.0-fft), 1.0-fft ) * fft;
-    test_sound = vec4(soundtest, 1.0);
-    test_sound = sound_test_color();
+    int tx = int(texCoord.x*750.0);
+
+    float avg = get_average(texFFTSmoothed, tx, 3);
+    if( avg >= texCoord.y) {
+        vec3 soundtest = vec3( avg, 4.0*avg*(1.0-avg), 1.0-avg ) * avg;
+        test_sound = vec4(soundtest,1);
+    }
+
 //    test_sound = vec4(cubesRender(u_eye, ray_direction),1.0);
     //cubesMain(test_sound, fragCoord);
-    if(show_debug_plane) {
-        float dbg_ray_len = INFINITY;
-        float denom = dot(normalize(dbg_plane_normal), ray_direction);
-        if (abs(denom) > 0.0001f)
-        {
-            dbg_ray_len = dot((dbg_plane_position - u_eye), normalize(dbg_plane_normal)) / denom;
-            if (dbg_ray_len >= 0){} //hit // you might want to allow an epsilon here too
-            else {}//no hit
-        } else {} //no hit
-        vec3 hit_on_plane = ray_direction*dbg_ray_len + u_eye;
-
-        //what's the distance field at plane hit like?
-        float dist_field = map(hit_on_plane).x;
-
-        vec3 col = distanceMeter(dist_field, dbg_ray_len, ray_direction, length(u_eye-hit_on_plane));
-
-        //col = Uncharted2ToneMapping(col);
-        vec4 distancemeter = vec4(pow(saturate(col), vec3(1./2.2)), 1.0 );
-        //odistancemeter.xyz = saturate(distancemeter.xzy);
-        test_color = mix(distancemeter, test_color, 0.0);
-
+    if(test_show_debug_plane) {
+        draw_debug_plane();
     }
 }

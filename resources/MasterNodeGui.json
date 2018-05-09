@@ -10,6 +10,10 @@
                 "value": true
             },
             {
+                "key": "Globals",
+                "value": true
+            },
+            {
                 "key": "ImGuiDemo",
                 "value": false
             },
@@ -23,11 +27,11 @@
             },
             {
                 "key": "OGLerrors",
-                "value": true
+                "value": false
             },
             {
                 "key": "Overlay",
-                "value": false
+                "value": true
             },
             {
                 "key": "Shader",

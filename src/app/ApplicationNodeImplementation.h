@@ -57,8 +57,9 @@ namespace viscom {
         std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSmoothed;
         std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataIntegrated;
         std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSlightlySmoothed;
-        float fFFTSmoothingFactor = 0.6f;
-        float fFFTSlightSmoothingFactor = 0.6f;
+        float fftSmootingFactor = 0.6f;
+        float fftSlightSmootingFactor = 0.6f;
+        float fftMaxIntegralValue = 1024.0f*4;
 
         float globalTime_  = 0.0f;
         float currentTime_ = 0.0f;

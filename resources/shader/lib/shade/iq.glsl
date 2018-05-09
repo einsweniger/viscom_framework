@@ -32,7 +32,7 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
     //distance = length(hit-ray_origin);
     distance = distAndMat.x;
 
-    if (material == INF) {
+    if (material == trace_INF) {
       color = sky_color(ray_direction, light_direction);
     } else if(material>-0.5 ) {
 

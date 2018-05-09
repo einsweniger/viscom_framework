@@ -106,6 +106,8 @@ namespace minuseins::gui {
         void drawTimeSlider(bool* b);
 
         void drawAnimation(bool *p_open);
+
+        void drawGlobalVars(bool *p_open);
     };
 }
 

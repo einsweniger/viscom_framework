@@ -2,6 +2,7 @@ subroutine vec4 PostProcess(sampler2D origin, vec2 uv);  // function signature t
 subroutine uniform PostProcess postprocess;  // uniform instance, can be called like a function
 
 #include "util.glsl"
+#include "sound.glsl"
 
 vec2 barrelDistortion(vec2 coord, float amt) {
 	vec2 cc = coord - 0.5;
@@ -47,9 +48,10 @@ float randf(){
 }
 
 subroutine(PostProcess)
-vec4 glitch(sampler2D iChannel0, vec2 uv) {
+vec4 glitch(sampler2D iChannel0, vec2 coords) {
+    float sound_distort = get_average(texFFTSmoothed, 56, 3);
     //i forgot who made this, sorry :(
-
+    vec2 uv = coords;
     float seed = randf();
     float seed_x = 0.5*randf()-0.5;
     float seed_y = (0.3*randf()/0.6)-0.3;
@@ -81,13 +83,14 @@ vec4 glitch(sampler2D iChannel0, vec2 uv) {
 
     //base from RGB shift shader (4t23Rc)
     float amount = randf()*0.005;
+    amount = sound_distort*0.01;
     float angle = (PI*randf())/(TAU)-PI;
     vec2 offset = amount * vec2( cos(angle), sin(angle));
-    vec4 cr = texture(iChannel0, uv + offset);
-    vec4 cga = texture(iChannel0, uv);
-    vec4 cb = texture(iChannel0, uv - offset);
+    vec4 cr = texture(iChannel0, coords + offset);
+    vec4 cga = texture(iChannel0, coords);
+    vec4 cb = texture(iChannel0, coords - offset);
     vec4 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
-
+    return fragColor;
     //add noise
     float xs = floor(uv.x*iResolution.x / 0.5);
     float ys = floor(uv.y*iResolution.y / 0.5);
@@ -99,18 +102,18 @@ vec4 glitch(sampler2D iChannel0, vec2 uv) {
 
 uniform float ca_max_distort = 0.5;
 uniform int ca_num_iter = 24;
-uniform float ca_reci_num_iter_f = 1.0 / 24.0;
 subroutine(PostProcess)
 vec4 chromaticAberrationV1(sampler2D tex, vec2 uv) {
-
+    float sound_distort = get_average(texFFTSmoothed, 56, 3);
+    float distort = sound_distort;
 	vec4 sumcol = vec4(0.0);
 	vec4 sumw = vec4(0.0);
 	for ( int i=0; i<ca_num_iter;++i )
 	{
-		float t = float(i) * ca_reci_num_iter_f;
+		float t = float(i) * 1.0/float(ca_num_iter);
 		vec4 w = spectrum_offset( t );
 		sumw += w;
-		sumcol += w * texture2D( tex, barrelDistortion(uv, .6 * ca_max_distort*t ) );
+		sumcol += w * texture2D( tex, barrelDistortion(uv, .6 * distort*t ) );
 	}
 
 	return sumcol / sumw;
@@ -314,3 +317,48 @@ subroutine(PostProcess) vec4 ferris(sampler2D tex, vec2 uv) {
 
 }
 
+uniform float filmic_sStrength = 0.15f;
+uniform float filmic_linStrength = 0.5f;
+uniform float filmic_linAngle = 0.1f;
+uniform float filmic_toeStrength = 0.2f;
+uniform float filmic_toeNumerator = 0.02f;
+uniform float filmic_toeDenominator = 0.3f;
+uniform float filmic_white = 11.2f;
+uniform float filmic_exposure = 2.0f;
+
+vec3 rgb2Yuv(vec3 c)
+{
+    vec3 result;
+    result.r = 0.299f * c.r + 0.587f * c.g + 0.114f * c.b;
+    result.g = (c.b - result.r) * 0.565f;
+    result.b = (c.r - result.r)*0.713f;
+    return result;
+}
+
+vec3 yuv2Rgb(vec3 c)
+{
+    vec3 result;
+    result.r = c.r + 1.403f * c.b;
+    result.g = c.r - 0.344f * c.g - 0.714f * c.b;
+    result.b = c.r + 1.770f * c.g;
+    return result;
+}
+
+vec3 Uncharted2Tonemap(vec3 x)
+{
+    vec3 Ax = filmic_sStrength*x;
+    float toeAngle = filmic_toeNumerator / filmic_toeDenominator;
+    return ((x*(Ax + filmic_linAngle*filmic_linStrength) + filmic_toeStrength*filmic_toeNumerator)
+        / (x*(Ax + filmic_linStrength) + filmic_toeStrength*filmic_toeDenominator)) - toeAngle;
+}
+
+subroutine(PostProcess)
+vec4 filmic(sampler2D sourceTex, vec2 uv){
+    vec4 rgbaVal = texture(sourceTex, texCoord);
+
+    vec3 curr = 2.0f * Uncharted2Tonemap(filmic_exposure*rgbaVal.rgb);
+    vec3 whiteScale = 1.0f / Uncharted2Tonemap(vec3(filmic_white));
+    vec3 color = curr*whiteScale;
+
+    return vec4(color, rgbaVal.a);
+}
