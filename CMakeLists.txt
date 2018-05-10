@@ -4,6 +4,7 @@ SET(APP_NAME ViscomFramework)
 PROJECT(${APP_NAME})
 
 include(cmake/assimp_config.cmake)
+include(cmake/BuildConfig.cmake)
 include(cmake/minuseins.cmake)
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
