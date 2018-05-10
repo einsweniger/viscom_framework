@@ -49,6 +49,7 @@ namespace viscom {
         std::unique_ptr<minuseins::audio::BassHandler> bass;
         std::vector<std::string> startupPrograms = {"test.frag", "renderTexture.frag"};
         std::vector<std::string> startupToys = {"4d23WG.json"};
+        gl::GLuint postproc_tex = 0;
 
         std::unique_ptr<viscom::enh::GLTexture> fftTex;
         std::unique_ptr<viscom::enh::GLTexture> fftTexSmoothed;

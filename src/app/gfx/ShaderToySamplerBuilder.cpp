@@ -148,6 +148,28 @@ namespace minuseins::handlers {
                 return true;
             }
         };
+        struct tex_postproc : empty_uniform {
+            tex_postproc(named_resource res, viscom::ApplicationNodeImplementation *appImpl) :
+                    empty_uniform(std::move(res)),
+                    appImpl(appImpl){}
+
+            size_t uploadSize() override {
+                return sampler;
+            }
+
+            bool upload_value() override {
+                if(do_upload) {
+                    gl::glActiveTexture(gl::GL_TEXTURE0 + sampler);
+                    gl::glBindTexture(gl::GL_TEXTURE_2D, appImpl->postproc_tex);
+                    gl::glUniform1i(location(), sampler);
+                }
+                return true;
+            }
+
+            viscom::ApplicationNodeImplementation* appImpl;
+            gl::GLuint sampler = 0;
+        };
+
     }
 
 
@@ -174,6 +196,22 @@ namespace minuseins::handlers {
         if("tex_text" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
             auto inp = shadertoy::Input{};
             inp.src = "/media/a/text.png";
+            inp.ctype = "texture";
+            inp.sampler.wrap = "repeat";
+            inp.channel = samplerCounter++;
+            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
+        }
+        if("tex_noise" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
+            auto inp = shadertoy::Input{};
+            inp.src = "/media/a/noise.png";
+            inp.ctype = "texture";
+            inp.sampler.wrap = "repeat";
+            inp.channel = samplerCounter++;
+            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
+        }
+        if("tex_wood" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
+            auto inp = shadertoy::Input{};
+            inp.src = "/media/a/wood.jpg";
             inp.ctype = "texture";
             inp.sampler.wrap = "repeat";
             inp.channel = samplerCounter++;
@@ -208,6 +246,11 @@ namespace minuseins::handlers {
             return std::make_unique<detail::texFFTIntegrated>(std::move(tex));
         }
 
+        if("tex_postproc" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
+            auto tex = detail::tex_postproc(std::move(res),appImpl);
+            tex.sampler = samplerCounter++;
+            return std::make_unique<detail::tex_postproc>(std::move(tex));
+        }
         if(res.name.length() == 9)  { //ichannel0
             if(res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
                 auto substr = res.name.substr(0, 8);

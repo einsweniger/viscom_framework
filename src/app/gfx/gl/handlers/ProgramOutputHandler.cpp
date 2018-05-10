@@ -33,15 +33,16 @@ namespace minuseins::handlers {
     }
 
     void ProgramOutput::draw2D() {
-        named_resource::draw2D();
-        ImGui::SameLine();
+//        named_resource::draw2D();
+//        ImGui::SameLine();
         std::string headerName = name + " tex idx: " + std::to_string(textureLocation);
-        if (ImGui::TreeNode(headerName.c_str())) {
+        ImGui::TextUnformatted(name.c_str());
+//        if (ImGui::TreeNode(headerName.c_str())) {
             ImVec2 uv0(0, 1);
             ImVec2 uv1(1, 0);
             ImVec2 region(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth() / 1.7f);
             ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t) textureLocation), region, uv0, uv1);
-            ImGui::TreePop();
-        };
+//            ImGui::TreePop();
+//        }
     }
 }

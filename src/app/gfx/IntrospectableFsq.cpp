@@ -164,6 +164,9 @@ namespace minuseins {
         for(auto& output : outputs) {
             auto& po = dynamic_cast<ProgramOutput&>(*output);
             po.textureLocation = textureLocations.at(po.location);
+            if(po.name == "test_color") {
+                appImpl->postproc_tex = textureLocations.at(po.location);
+            }
         }
         prev_backbuf_size = outputs.size();
     }
