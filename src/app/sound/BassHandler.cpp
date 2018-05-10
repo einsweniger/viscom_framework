@@ -4,51 +4,51 @@
 
 #include "BassHandler.h"
 namespace minuseins::audio {
-    BassHandler::BassHandler(int device, bass::DWORD freq,
-                                               bass::DWORD flags) {
-        if(!bass::BASS_Init(device, freq, flags, 0,0)) {
+    BassHandler::BassHandler(int device, DWORD freq,
+                                               DWORD flags) {
+        if(!BASS_Init(device, freq, flags, 0,0)) {
             print_problem("BASS_Init");
         }
-        outputDevice_ = bass::BASS_GetDevice();
+        outputDevice_ = BASS_GetDevice();
         if(-1 == outputDevice_) {
             print_problem("BASS_GetDevice");
         }
-        if( !bass::BASS_RecordInit( device ) )
+        if( !BASS_RecordInit( device ) )
         {
             print_problem("BASS_RecordInit");
         }
-        inputDevice_ = bass::BASS_RecordGetDevice();
+        inputDevice_ = BASS_RecordGetDevice();
         if(-1 == inputDevice_) {
             print_problem("BASS_RecordGetDevice");
         }
     }
 
     void BassHandler::pause() {
-        bass::BASS_ChannelPause(output_);
+        BASS_ChannelPause(output_);
     }
 
     void BassHandler::play() {
-        bass::BASS_ChannelPlay(output_, false);
+        BASS_ChannelPlay(output_, false);
     }
 
     void BassHandler::set_row(int row) {
-        bass::QWORD position = bass::BASS_ChannelSeconds2Bytes(output_, row / row_rate);
-        bass::BASS_ChannelSetPosition(output_, position, BASS_POS_BYTE);
+        QWORD position = BASS_ChannelSeconds2Bytes(output_, row / row_rate);
+        BASS_ChannelSetPosition(output_, position, BASS_POS_BYTE);
     }
 
     double BassHandler::get_row() {
-        bass::QWORD pos = bass::BASS_ChannelGetPosition(output_, BASS_POS_BYTE);
-        double time = bass::BASS_ChannelBytes2Seconds(output_, pos);
+        QWORD pos = BASS_ChannelGetPosition(output_, BASS_POS_BYTE);
+        double time = BASS_ChannelBytes2Seconds(output_, pos);
         return time * row_rate;
     }
 
-    std::tuple<bass::QWORD, double> BassHandler::get_length() {
-        bass::QWORD len=bass::BASS_ChannelGetLength(output_, BASS_POS_BYTE); // the length in bytes
-        double time=bass::BASS_ChannelBytes2Seconds(output_, len); // the length in seconds
+    std::tuple<QWORD, double> BassHandler::get_length() {
+        QWORD len=BASS_ChannelGetLength(output_, BASS_POS_BYTE); // the length in bytes
+        double time=BASS_ChannelBytes2Seconds(output_, len); // the length in seconds
         return {len, time};
     }
-    void BassHandler::update(bass::DWORD length) {
-        bass::BASS_Update(length);
+    void BassHandler::update(DWORD length) {
+        BASS_Update(length);
     }
 
     bool BassHandler::get_fft(float *samples) {
@@ -85,17 +85,17 @@ namespace minuseins::audio {
                 break;
         }
         //first parameter can be a HCHANNEL, HMUSIC, HSTREAM, or HRECORD
-        const int numBytes = bass::BASS_ChannelGetData( output_, samples, len | BASS_DATA_FFT_REMOVEDC );
+        const int numBytes = BASS_ChannelGetData( output_, samples, len | BASS_DATA_FFT_REMOVEDC );
         if( numBytes <= 0 )
             return false;
 
         return true;
     }
 
-    bass::HRECORD BassHandler::startRecording(bass::DWORD freq,
-                                                                                  bass::DWORD channels,
-                                                                                  bass::DWORD flags) {
-        recorder_ = bass::BASS_RecordStart( freq, channels, flags, nullptr, nullptr );
+    HRECORD BassHandler::startRecording(DWORD freq,
+                                                                                  DWORD channels,
+                                                                                  DWORD flags) {
+        recorder_ = BASS_RecordStart( freq, channels, flags, nullptr, nullptr );
         if (!recorder_) {
             print_problem("BASS_RecordStart");
             return 0;
@@ -103,9 +103,9 @@ namespace minuseins::audio {
         return recorder_;
     }
 
-    bass::HSTREAM BassHandler::openFile(const std::experimental::filesystem::path &path,
-                                                                            bass::DWORD flags) {
-        output_ = bass::BASS_StreamCreateFile(false, path.c_str(), 0, 0, flags);
+    HSTREAM BassHandler::openFile(const std::experimental::filesystem::path &path,
+                                                                            DWORD flags) {
+        output_ = BASS_StreamCreateFile(false, path.c_str(), 0, 0, flags);
         if (!output_) {
             print_problem("BASS_StreamCreateFile");
             return 0;
@@ -118,17 +118,17 @@ namespace minuseins::audio {
     BassHandler::~BassHandler() {
         if(outputDevice_) {
             if(output_) {
-                bass::BASS_StreamFree(output_);
+                BASS_StreamFree(output_);
                 output_ = 0;
             }
         }
 
         if(inputDevice_) {
             if(recorder_) {
-                bass::BASS_ChannelStop(recorder_);
+                BASS_ChannelStop(recorder_);
                 recorder_ = 0;
             }
-            bass::BASS_RecordFree();
+            BASS_RecordFree();
         }
     }
     

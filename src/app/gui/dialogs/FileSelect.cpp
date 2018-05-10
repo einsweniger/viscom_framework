@@ -23,8 +23,8 @@ namespace minuseins::gui {
         for(auto pathstr : pathstrs) {
             auto base = fs::path{pathstr + basepath_suffix};
             basepaths_.push_back(base);
-            currentPath[base] = fs::path{"/"};
-            pathContents[base] = scan(base);
+            currentPath[base.string()] = fs::path{"/"};
+            pathContents[base.string()] = scan(base);
         }
     }
 
@@ -40,19 +40,19 @@ namespace minuseins::gui {
         for (auto it = basepaths_.begin(); it != basepaths_.end(); ++it) {
             auto& base = (*it);
             ImGui::PushID(base.c_str());
-            ImGui::BeginChild(base.c_str(),childsize, true, ImGuiWindowFlags_MenuBar);
+            ImGui::BeginChild(base.string().c_str(),childsize, true, ImGuiWindowFlags_MenuBar);
             drawMenu(base);
 
 
-            ImGui::TextUnformatted(currentPath[base].c_str());
-            for(auto& path : pathContents[base]) {
-                if (filter.PassFilter(path.c_str())){
-                    if(ImGui::SmallButton(path.filename().c_str())) {
+            ImGui::TextUnformatted(currentPath[base.string()].string().c_str());
+            for(auto& path : pathContents[base.string()]) {
+                if (filter.PassFilter(path.string().c_str())){
+                    if(ImGui::SmallButton(path.filename().string().c_str())) {
                         if(fs::is_directory(path)) {
-                            currentPath[base] = currentPath[base] / path.filename() ;
-                            pathContents[base] = scan(base / currentPath[base]);
+                            currentPath[base.string()] = currentPath[base.string()] / path.filename() ;
+                            pathContents[base.string()] = scan(base / currentPath[base.string()]);
                             break;
-                        } else if(callback(currentPath[base] / path.filename())) {
+                        } else if(callback(currentPath[base.string()] / path.filename())) {
                             *p_open = false;
                             break;
                         }
@@ -73,11 +73,11 @@ namespace minuseins::gui {
     void FileSelect::drawMenu(fs::path &base) {
         if (ImGui::BeginMenuBar()) {
             if(ImGui::MenuItem("rescan")) {
-                pathContents[base] = scan(base / currentPath[base]);
+                pathContents[base.string()] = scan(base / currentPath[base.string()]);
             }
-            if(ImGui::MenuItem("up") && currentPath[base].has_parent_path()) {
-                currentPath[base] = currentPath[base].parent_path();
-                pathContents[base] = scan(base / currentPath[base]);
+            if(ImGui::MenuItem("up") && currentPath[base.string()].has_parent_path()) {
+                currentPath[base.string()] = currentPath[base.string()].parent_path();
+                pathContents[base.string()] = scan(base / currentPath[base.string()]);
             }
             ImGui::EndMenuBar();
         }

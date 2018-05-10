@@ -47,8 +47,8 @@ namespace minuseins::gui {
     void MasterNodeGui::init() {
         {  //set error callbacks
             using namespace glbinding;
-            setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
-            setAfterCallback(std::bind(&OglLog::callback, &log, std::placeholders::_1));
+            //setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
+            //setAfterCallback(std::bind(&OglLog::callback, &log, std::placeholders::_1));
         }
     }
 
@@ -77,8 +77,8 @@ namespace minuseins::gui {
 //                animManager.ShowAnimationMenu("AnimationManager", activeWindows["AnimationManager"]);
 //            }
 
-            log.Draw("OGLerrors", &activeWindows["OGLerrors"]);
-            log.Clear();
+            //log.Draw("OGLerrors", &activeWindows["OGLerrors"]);
+            //log.Clear();
         });
     }
 
@@ -191,7 +191,7 @@ namespace minuseins::gui {
         //static auto& gm = appNode->GetGPUProgramManager();
         static FileSelect shader_select("Open Shader",appNode->GetConfig().resourceSearchPaths_, [&](fs::path path) {
             try {
-                auto fsq = std::make_unique<IntrospectableFsq>(path);
+                auto fsq = std::make_unique<IntrospectableFsq>(path.string());
                 fsq->init(appImpl);
                 appImpl->fsqs.push_back(std::move(fsq));
                 return false;
@@ -242,7 +242,7 @@ namespace minuseins::gui {
     bool MasterNodeGui::textureCallback(fs::path path) {
         static auto& tm = appNode->GetTextureManager();
         try {
-            openTextures.push_back(tm.GetResource(path));
+            openTextures.push_back(tm.GetResource(path.string()));
             return !appNode->IsKeyPressed(GLFW_KEY_LEFT_CONTROL);
         } catch (viscom::resource_loading_error &err) {
             std::cout << err.errorDescription_ << std::endl;
@@ -256,21 +256,21 @@ namespace minuseins::gui {
         try {
             if (path.has_extension()
                 && ".json" == path.extension().generic_string()) {
-                auto realpath = viscom::Resource::FindResourceLocation(path, appNode);
+                auto realpath = viscom::Resource::FindResourceLocation(path.string(), appNode);
                 loader = std::make_unique<shadertoy::ShaderToyLoader>(realpath);
                 //appImpl->fsqs.clear();
                 //TODO Renderpass.name is sometimes empty
                 for(auto& buf : loader->buffers) {
                     std::cout << buf.name << std::endl;
                     auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id +"/"+ buf.name + ".frag"};
-                    auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile);
+                    auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile.string());
                     tq->loadParams(buf);
                     tq->init(appImpl);
 
                     appImpl->toys.push_back(std::move(tq));
                 }
                 auto outfile = fs::path{"shadertoy/"+loader->toy_->info.id +"/"+ loader->image.name + ".frag"};
-                auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile);
+                auto tq = std::make_unique<minuseins::ShaderToyFsq>(outfile.string());
                 tq->loadParams(loader->image);
                 tq->init(appImpl);
 
