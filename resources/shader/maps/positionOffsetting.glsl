@@ -20,7 +20,7 @@ vec3 positionOffsetting( vec3 pos ) {  // https://www.shadertoy.com/view/XdlcWf
 //row1
 
     //boxpos.y = floor(boxpos.y);
-    vec3 noise = texturize(bufferTexture, vec3(0,2,0), vec3(0,1,0));
+    vec3 noise = texturize(tex_noise, vec3(0,2,0), vec3(0,1,0));
     //noise = normalize(noise);
     boxpos.y += sin(iTime);
     //boxpos.y = floor(boxpos.y);

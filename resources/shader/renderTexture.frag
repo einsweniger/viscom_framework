@@ -4,7 +4,7 @@
 in vec2 texCoord;
 out vec4 color;
 
-uniform sampler2D tex;
+uniform sampler2D tex_postproc;
 uniform float iTime;
 uniform vec3 iResolution;
 
@@ -12,7 +12,7 @@ uniform vec3 iResolution;
 
 void main()
 {
-    color = texture(tex, texCoord);
+    color = texture(tex_postproc, texCoord);
 //    color = postChromaticAberration(tex, texCoord);
 //      color = postArtFs(tex, texCoord);
 //    color = postBarrelBlur(tex, texCoord);
@@ -22,5 +22,5 @@ void main()
 //    color = (color1 + color2) / 2;
 //    color = postPixelate(tex, texCoord);
 //    color = postFerris(tex, texCoord);
-    color = postprocess(tex, texCoord);
+    color = postprocess(tex_postproc, texCoord);
 }

@@ -317,14 +317,14 @@ subroutine(PostProcess) vec4 ferris(sampler2D tex, vec2 uv) {
 
 }
 
-uniform float filmic_sStrength = 0.15f;
-uniform float filmic_linStrength = 0.5f;
-uniform float filmic_linAngle = 0.1f;
-uniform float filmic_toeStrength = 0.2f;
-uniform float filmic_toeNumerator = 0.02f;
-uniform float filmic_toeDenominator = 0.3f;
-uniform float filmic_white = 11.2f;
-uniform float filmic_exposure = 2.0f;
+const float filmic_sStrength = 0.15f;
+const float filmic_linStrength = 0.5f;
+const float filmic_linAngle = 0.1f;
+const float filmic_toeStrength = 0.2f;
+const float filmic_toeNumerator = 0.02f;
+const float filmic_toeDenominator = 0.3f;
+const float filmic_white = 11.2f;
+const float filmic_exposure = 2.0f;
 
 vec3 rgb2Yuv(vec3 c)
 {

@@ -25,6 +25,7 @@ uniform vec3 iResolution;
 uniform vec4 iMouse;
 uniform sampler2D tex_text;
 uniform sampler2D tex_noise;
+uniform sampler2D tex_wood;
 
 vec3 ray_direction;
 

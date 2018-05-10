@@ -1,4 +1,4 @@
-#define USE_SUBROUTINES
+//#define USE_SUBROUTINES
 
 #ifdef USE_SUBROUTINES
 subroutine vec2 RayMarch(vec3 origin, vec3 direction);  // function signature type declaration
@@ -68,7 +68,7 @@ vec2 defaultEnhancedTrace(vec3 origin,vec3 direction) {
 vec2 raymarch(vec3 origin,vec3 direction) {
     const bool forceHit = false;
 
-    return enhancedTrace(origin, direction, relaxation, pixelRadius, forceHit);
+    return enhancedTrace(origin, direction, trace_relaxation, trace_pixelRadius, forceHit);
 }
 #endif
 

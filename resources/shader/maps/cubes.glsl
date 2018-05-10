@@ -239,7 +239,7 @@ vec3 cubesRender( in vec3 ro, in vec3 rd )
 
         // material	
         col = 0.5 + 0.5*cos( 6.2831*res.y + vec3(0.0, 0.4, 0.8) );
-        vec3 ff = texcube( bufferTexture, 0.1*vec3(pos.x,4.0*res.z-pos.y,pos.z), nor ).xyz;
+        vec3 ff = texcube( tex_wood, 0.1*vec3(pos.x,4.0*res.z-pos.y,pos.z), nor ).xyz;
         col *= ff.x;
 
         // lighting
@@ -253,10 +253,10 @@ vec3 cubesRender( in vec3 ro, in vec3 rd )
 
 void cubesMain( out vec4 fragColor, in vec2 fragCoord )
 {
-	freqs[0] = texture( bufferTexture, vec2(0.01) ).x*100;
-	freqs[1] = texture( bufferTexture, vec2(0.07) ).x*100;
-	freqs[2] = texture( bufferTexture, vec2(0.15) ).x*100;
-	freqs[3] = texture( bufferTexture, vec2(0.30) ).x*100;
+	freqs[0] = texture( texFFTSmoothed, 0.01 ).x*100;
+	freqs[1] = texture( texFFTSmoothed, 0.07 ).x*100;
+	freqs[2] = texture( texFFTSmoothed, 0.15 ).x*100;
+	freqs[3] = texture( texFFTSmoothed, 0.30 ).x*100;
     //-----------
     float time = 5.0 + 0.2*iTime + 20.0*iMouse.x/iResolution.x;
     
