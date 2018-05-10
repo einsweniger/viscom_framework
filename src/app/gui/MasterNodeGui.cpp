@@ -47,8 +47,8 @@ namespace minuseins::gui {
     void MasterNodeGui::init() {
         {  //set error callbacks
             using namespace glbinding;
-            //setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
-            //setAfterCallback(std::bind(&OglLog::callback, &log, std::placeholders::_1));
+            setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
+            setAfterCallback(std::bind(&OglLog::callback, &log, std::placeholders::_1));
         }
     }
 
@@ -68,7 +68,6 @@ namespace minuseins::gui {
             drawTextureWindow(&activeWindows["Textures"]);
             drawTextureImportWindow(&activeWindows["TextureImport"]);
             drawShaderImport(&activeWindows["ShaderImport"]);
-            drawNewScene(&activeWindows["NewScene"]);
             drawGPUProgram(&activeWindows["GPUProgram"]);
             drawTimeSlider(&activeWindows["TimeSlider"]);
             drawAnimation(&activeWindows["AnimationManager"]);
@@ -77,8 +76,8 @@ namespace minuseins::gui {
 //                animManager.ShowAnimationMenu("AnimationManager", activeWindows["AnimationManager"]);
 //            }
 
-            //log.Draw("OGLerrors", &activeWindows["OGLerrors"]);
-            //log.Clear();
+            log.Draw("OGLerrors", &activeWindows["OGLerrors"]);
+            log.Clear();
         });
     }
 
@@ -143,43 +142,6 @@ namespace minuseins::gui {
             return;
         }
 
-        ImGui::End();
-    }
-
-    void MasterNodeGui::drawNewScene(bool *p_open) {
-        if(!*p_open) return;
-        static std::vector<std::unique_ptr<viscom::GPUProgram>> pipeline{};
-        static std::vector<std::unique_ptr<viscom::Shader>> stagedShaders{};
-        static std::string stage_name = "";
-        if(!ImGui::Begin("Scene", p_open)) {
-            ImGui::End();
-            return;
-        }
-
-        ImGui::Text("New Program");
-        if(ImGui::SmallButton("add frag shader")) {
-            ImGui::OpenPopup("fragment_select");
-        }
-        if(ImGui::BeginPopup("fragment_select")) {
-
-        }
-        ImGui::Separator();
-        for (auto& stagedShader : stagedShaders) {
-            ImGui::Text("staged: %d", stagedShader->getShaderId());
-        }
-        if(ImGui::Button("commit staged shaders")) {
-            if(!stagedShaders.empty()) {
-                try{
-                    //auto prog = std::make_unique<viscom::GPUProgram>(stage_name, appNode, std::move(stagedShaders));
-                    //pipeline.push_back(std::move(prog));
-                } catch (viscom::shader_compiler_error& err) {
-                    std::cout <<err.what()<< std::endl;
-                }
-                stagedShaders.clear();
-                stage_name="";
-
-            }
-        }
         ImGui::End();
     }
 
