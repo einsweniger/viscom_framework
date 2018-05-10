@@ -12,11 +12,14 @@
 #include <app/gfx/ShaderToyFsq.h>
 #include <enh/gfx/gl/GLTexture.h>
 #include <app/sound/BassHandler.h>
+#include <app/tracker/Track.h>
 #include "enh/ApplicationNodeBase.h"
 #include "app/gfx/IntrospectableFsq.h"
+#include <experimental/filesystem>
+#include <fstream>
 
 namespace viscom {
-
+    namespace fs = std::experimental::filesystem;
     class MeshRenderable;
     class MyFreeCamera;
 
@@ -69,13 +72,27 @@ namespace viscom {
         bool stopTime_ = true;
         bool drawToy = false;
         shadertoy::Shader shaderParams_;
+
+        std::string activeMap = "text";
+        std::string activeShading = "iq";
+        std::string activePostproc = "none";
+
+        std::unordered_map<std::string, minuseins::tracker::Track> tracks;
+
+        float get_track_value(const std::string &name);
+
     protected:
         void toggleMouseGrab();
 
         bool grabMouse_ = false;
         std::unique_ptr<MyFreeCamera> freeCam_;
+        fs::path findConfig(const std::string &name, ApplicationNodeInternal *appNode);
 
     private:
+
+        void update_scene();
+
+        void do_if_time_greater(float time, std::function<void()> fn);
 
     };
 }

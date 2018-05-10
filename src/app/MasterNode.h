@@ -16,7 +16,6 @@
 #endif
 
 namespace viscom {
-    namespace fs = std::experimental::filesystem;
     class MasterNode final : public ApplicationNodeImplementation
     {
     public:
