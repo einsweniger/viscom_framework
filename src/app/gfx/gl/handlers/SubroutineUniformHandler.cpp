@@ -44,6 +44,7 @@ namespace minuseins::handlers {
         auto active_subs = std::vector<gl::GLuint>(resources.size());
         for(auto& res : resources) {
             auto& uniform = dynamic_cast<SubroutineUniform&>(*res);
+            uniform.get_update();
             active_subs.at(uniform.location) = uniform.active_subroutine;
         }
         gl::glUniformSubroutinesuiv(stage, static_cast<gl::GLsizei>(active_subs.size()), &active_subs[0]);
@@ -66,13 +67,16 @@ namespace minuseins::handlers {
         ImGui::SameLine();
         ImGui::TextUnformatted(subroutines.at(active_subroutine).c_str());
         if (ImGui::BeginPopup(popupname.c_str())) {
-            for(const auto& [subroutine_index, name] : subroutines) {
-                std::string header = name + "##" + std::to_string(subroutine_index);
+            for(const auto& [subroutine_index, rname] : subroutines) {
+                std::string header = rname + "##" + std::to_string(subroutine_index);
                 if(ImGui::Selectable(header.c_str(), subroutine_index == active_subroutine)) {
                     active_subroutine = subroutine_index;
+                    previous_active = rname;
                 }
             }
             ImGui::EndPopup();
         }
     }
+
+    SubroutineUniform::~SubroutineUniform() = default;
 }

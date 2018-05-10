@@ -49,8 +49,10 @@ namespace minuseins::handlers {
     struct SubroutineUniform : named_resource {
         SubroutineUniform(gl::GLenum stage, named_resource res);
 
-        void draw2D() override;
+        virtual ~SubroutineUniform();
 
+        void draw2D() override;
+        virtual void get_update(){};
         gl::GLenum stage;
         gl::GLuint location;
         gl::GLuint num_compatible_subroutines;
