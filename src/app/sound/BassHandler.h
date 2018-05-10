@@ -10,7 +10,8 @@
 #include <iostream>
 
 namespace minuseins::audio {
-    constexpr float bpm = 150.0f; /* beats per minute */
+    //constexpr float bpm = 150.0f; /* beats per minute */
+    constexpr float bpm = 172.0f; /* beats per minute */
     constexpr int rpb = 8; /* rows per beat */
     constexpr double row_rate = (double(bpm) / 60) * rpb;
 
@@ -45,9 +46,9 @@ namespace minuseins::audio {
             BASS_ChannelSetPosition(output_, position, BASS_POS_BYTE);
         }
 
-        double get_position() {
+        double get_time() {
             auto position = BASS_ChannelGetPosition(output_, BASS_POS_BYTE);
-            return BASS_ChannelSeconds2Bytes(output_, position);
+            return BASS_ChannelBytes2Seconds(output_, position);
         }
 
         std::tuple<QWORD, double> get_length();
