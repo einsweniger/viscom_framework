@@ -11,7 +11,7 @@
             },
             {
                 "key": "Globals",
-                "value": true
+                "value": false
             },
             {
                 "key": "ImGuiDemo",
@@ -27,7 +27,7 @@
             },
             {
                 "key": "OGLerrors",
-                "value": false
+                "value": true
             },
             {
                 "key": "Overlay",
