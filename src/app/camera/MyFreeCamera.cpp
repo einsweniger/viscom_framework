@@ -6,7 +6,7 @@
  * @brief  Implementation of the free flight camera, except an additional key for speedup (shift) and changed descending (ctrl).
  */
 
-#define GLM_SWIZZLE
+#define GLM_FORCE_SWIZZLE
 
 #include "MyFreeCamera.h"
 
