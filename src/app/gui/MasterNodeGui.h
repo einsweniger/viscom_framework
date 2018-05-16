@@ -108,6 +108,8 @@ namespace minuseins::gui {
         void drawAnimation(bool *p_open);
 
         void drawGlobalVars(bool *p_open);
+
+        void drawTracker(bool *p_open);
     };
 }
 

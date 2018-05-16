@@ -13,7 +13,7 @@
 #include <cereal/archives/json.hpp>
 
 #include "core/glfw.h"
-#include "core/imgui/imgui_impl_glfw_gl3.h"
+//#include "core/imgui/imgui_impl_glfw.h"
 
 #include "app/camera/MyFreeCamera.h"
 
@@ -70,11 +70,12 @@ namespace viscom {
     {
         globalTime_ = static_cast<float>(currentTime);
         elapsedTime_ = static_cast<float>(elapsedTime);
+        currentRow = static_cast<unsigned int>(bass->get_row());
 
         if(!stopTime_) {
 
             currentTime_ += elapsedTime_;
-            currentTime_ = bass->get_time();
+            currentTime_ = static_cast<float>(bass->get_time());
         }
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
         update_scene();
@@ -162,16 +163,28 @@ namespace viscom {
         if(GLFW_KEY_SPACE == key) {
             if(!grabMouse_) {
                 stopTime_ = !stopTime_;
+                lastActiveRow = currentRow;
                 if(stopTime_) {
                     bass->pause();
                 } else {
                     bass->play();
                 }
                 return true;
-            } else {
-                return false;
             }
         }
+        if(GLFW_KEY_ESCAPE == key) {
+            if(!grabMouse_) {
+                stopTime_ = !stopTime_;
+                if(stopTime_) {
+                    bass->pause();
+                    bass->set_row(lastActiveRow);
+                } else {
+                    bass->play();
+                }
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -320,7 +333,7 @@ namespace viscom {
     }
 
     float ApplicationNodeImplementation::get_track_value(const std::string &name) {
-        return tracks[name].get_value(currentTime_);
+        return tracks[name].get_value(bass->get_row());
     }
 
 }

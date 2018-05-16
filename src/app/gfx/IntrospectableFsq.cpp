@@ -11,10 +11,11 @@
 #include <app/gfx/gl/handlers.h>
 #include <core/glfw.h>
 #include <app/ApplicationNodeImplementation.h>
+#include <app/gfx/builders/TrackedUniformBuilder.h>
 #include "IntrospectableFsq.h"
-#include "ExternalUniformBuilder.h"
-#include "ShaderToySamplerBuilder.h"
-#include "SceneSubroutineHandler.h"
+#include "app/gfx/builders/ExternalUniformBuilder.h"
+#include "app/gfx/builders/ShaderToySamplerBuilder.h"
+#include "app/gfx/builders/SceneSubroutineHandler.h"
 
 
 namespace minuseins {
@@ -54,7 +55,7 @@ namespace minuseins {
         });
 
         //gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(handlers::ExternalUniformBuilder(appBase)));
-        gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(handlers::ShaderToySamplerBuilder(appBase,params_)));
+        gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(handlers::TrackedUniformBuilder(appBase,params_)));
         gpi_->addHandler(gl::GL_PROGRAM_OUTPUT, std::make_unique<ProgramOutputHandler>());
         gpi_->addHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(appBase));
         gpi_->addHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<handlers::SceneSubroutineHandler>(gl::GL_FRAGMENT_SHADER, appImpl));

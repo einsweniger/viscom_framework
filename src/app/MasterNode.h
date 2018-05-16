@@ -35,5 +35,7 @@ namespace viscom {
 
 
         std::unique_ptr<minuseins::gui::MasterNodeGui> gui_ = nullptr;
+
+        void saveTracks();
     };
 }

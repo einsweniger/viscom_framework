@@ -68,6 +68,8 @@ namespace viscom {
         float globalTime_  = 0.0f;
         float currentTime_ = 0.0f;
         float elapsedTime_ = 0.0f;
+        unsigned int currentRow = 0;
+        unsigned int lastActiveRow = 0;
         int iFrame = 0;
         bool stopTime_ = true;
         bool drawToy = false;

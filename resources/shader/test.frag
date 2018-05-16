@@ -74,7 +74,7 @@ float toLog(float value, float min, float max){
 
 
 uniform float test_debug_plane_mix = 0.5f;
-void draw_debug_plane() {
+void draw_debug_plane(inout vec4 color_output) {
     float dbg_ray_len = INFINITY;
     float denom = dot(normalize(test_dbg_plane_normal), ray_direction);
     if (abs(denom) > 0.0001f)
@@ -92,7 +92,7 @@ void draw_debug_plane() {
 
     //col = Uncharted2ToneMapping(col);
     vec4 distancemeter = vec4(pow(saturate(col), vec3(1./2.2)), 1.0 );
-    test_color = mix(distancemeter, test_color, test_debug_plane_mix);
+    color_output = mix(distancemeter, color_output, test_debug_plane_mix);
 }
 
 void main()
@@ -138,7 +138,7 @@ void main()
     color = OECF_sRGBFast(color);
 //    test_color = pow(vec4(color,1.0),vec4(.44)); //"gamma" correction
     test_color = vec4(color, 1.0);
-
+    test_worldPos = vec4(u_MVP[0].xyz, 1);
     //sdfTextMain(test_text, fragCoord);
     int tx = int(texCoord.x*750.0);
 
@@ -151,6 +151,6 @@ void main()
 //    test_sound = vec4(cubesRender(u_eye, ray_direction),1.0);
     //cubesMain(test_sound, fragCoord);
     if(test_show_debug_plane) {
-        draw_debug_plane();
+        draw_debug_plane(test_color);
     }
 }

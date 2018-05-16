@@ -41,6 +41,7 @@ const vec3 letterBoxPos = vec3(0,2,0);
 uniform vec3 cropBounds = vec3(0.25, 0.50, 0.25);
 uniform vec3 lbp2 = vec3(0,2,0);
 const vec3 char_offset = vec3(-5,0,-3);
+uniform float text_rotation = 0;
 subroutine(SceneMap)
 vec3 text( vec3 pos ) {
     vec2 res =      vec2( sdfPlaneXZ(   pos-plane_position), 1.0 );
@@ -49,7 +50,7 @@ vec3 text( vec3 pos ) {
     vec3 p = offset - letterBoxPos;
     //rotate 45deg between seconds 2 and 3
     float rotation = iTime -11;
-    rotation = saturate(rotation);
+    rotation = saturate(text_rotation);
     //TODO place text in arc around camera, rotate faces toward ray direction.
     vec3 charPos1 = p-vec3(1,0,0); pR(charPos1.xz, -rotation*PI_2);
     vec3 charPos2 = p-vec3(2,0,0); pR(charPos2.xz, -rotation*PI_2);

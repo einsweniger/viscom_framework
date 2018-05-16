@@ -5,7 +5,7 @@
 #include <app/gfx/gl/handlers.h>
 #include <app/ApplicationNodeImplementation.h>
 #include "ShaderToyFsq.h"
-#include "ShaderToySamplerBuilder.h"
+#include "app/gfx/builders/ShaderToySamplerBuilder.h"
 
 
 namespace minuseins {

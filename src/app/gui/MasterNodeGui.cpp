@@ -72,6 +72,7 @@ namespace minuseins::gui {
             drawTimeSlider(&activeWindows["TimeSlider"]);
             drawAnimation(&activeWindows["AnimationManager"]);
             drawGlobalVars(&activeWindows["Globals"]);
+            drawTracker(&activeWindows["Tracker"]);
 //            if(activeWindows["AnimationManager"]) {
 //                animManager.ShowAnimationMenu("AnimationManager", activeWindows["AnimationManager"]);
 //            }
@@ -96,7 +97,8 @@ namespace minuseins::gui {
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Scene")) {
-                ImGui::MenuItem("NewScene", "", &activeWindows["NewScene"]);
+                //ImGui::MenuItem("NewScene", "", &activeWindows["NewScene"]);
+                ImGui::MenuItem("Tracker","", &activeWindows["Tracker"]);
                 ImGui::MenuItem("Global Vars","", &activeWindows["Globals"]);
                 ImGui::MenuItem("Animations","", &activeWindows["AnimationManager"]);
                 ImGui::MenuItem("StopTime", "SPACE", &appImpl->stopTime_);
@@ -302,9 +304,10 @@ namespace minuseins::gui {
         auto flags = ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoSavedSettings;
         if(ImGui::Begin("##TimeSlider", p_open, flags)) {
             ImGui::PushItemWidth(-1);
-            ImGui::SliderFloat("##Time", &appImpl->currentTime_,0.0f, 300.f);
+            //ImGui::DragFloat("##Time", &appImpl->currentTime_,0.0f, 7000.f);
+            ImGui::DragInt("##Time", reinterpret_cast<int *>(&appImpl->currentRow), 1, 0,7000);
             if(ImGui::IsItemActive()) {
-                appImpl->bass->set_position(appImpl->currentTime_);
+                appImpl->bass->set_row(appImpl->currentRow);
             }
             ImGui::PopItemWidth();
         }
@@ -337,6 +340,117 @@ namespace minuseins::gui {
         ImGui::Separator();
 
         ImGui::End();
+    }
+
+    void MasterNodeGui::drawTracker(bool *p_open) {
+        if(!*p_open) return;
+        if(!ImGui::Begin("Tracker", p_open)) {
+            ImGui::End();
+            return;
+        }
+        constexpr unsigned int LINE_COUNT = 7000;
+
+        unsigned int active_row = static_cast<unsigned int>(appImpl->currentRow);
+        int column_count = static_cast<int>(appImpl->tracks.size() + 1);
+
+        static bool track_active_row = true;
+        ImGui::Checkbox("Track", &track_active_row);
+        ImGui::BeginGroup();
+        ImGui::Columns(column_count, "tracker_head");
+        ImGui::Separator();
+        ImGui::Text("Row"); ImGui::NextColumn();
+        for(auto& track : appImpl->tracks) {
+            ImGui::Text(track.first.c_str()); ImGui::NextColumn();
+        }
+        ImGui::Columns(1);
+        ImGui::Separator();
+        ImGui::BeginChild("TrackerTable");
+        ImGui::Columns(column_count, "tracker_content");
+        ImGuiListClipper clipper(LINE_COUNT);  // Also demonstrate using the clipper for large list
+        while (clipper.Step())
+        {
+            for (unsigned int line = static_cast<unsigned int>(clipper.DisplayStart); line < clipper.DisplayEnd; line++) {
+                char label[32];
+                sprintf(label, "%04d", line);
+                ImGui::Selectable(label, line == active_row);//, ImGuiSelectableFlags_SpanAllColumns);
+
+                if (track_active_row && line == active_row) {
+                    ImGui::SetScrollHere(0.5f); // 0.0f:top, 0.5f:center, 1.0f:bottom
+                }
+                ImGui::NextColumn();
+                for (auto &track : appImpl->tracks) {
+                    auto header = (track.first + "##" + std::to_string(line));
+                    if(auto pos = track.second.get_exact_position(line)) {
+                        ImGui::PushItemWidth(-1);
+                        auto& key = track.second.keys.at(*pos);
+                        ImGui::InputFloat(header.c_str(), &key.value);
+                        ImGui::PopItemWidth();
+                        if(ImGui::BeginPopupContextItem((header+"##edit").c_str())) {
+                            if (ImGui::BeginMenu("interpolation")) {
+                                if (ImGui::MenuItem("step")) {
+                                    key.interp.type = tracker::interpolation_type::Step;
+                                }
+                                if (ImGui::MenuItem("linear")) {
+                                    key.interp.type = tracker::interpolation_type::Linear;
+                                }
+                                if (ImGui::MenuItem("smooth")) {
+                                    key.interp.type = tracker::interpolation_type::Smooth;
+                                }
+                                if (ImGui::MenuItem("ramp")) {
+                                    key.interp.type = tracker::interpolation_type::Ramp;
+                                }
+
+                                ImGui::EndMenu();
+                            }
+                            if(ImGui::SmallButton(("delete##" + header).c_str())){
+                                track.second.delete_key(line);
+                            }
+                            ImGui::EndPopup();
+                        }
+                    } else {
+                        ImGui::TextDisabled("%f", track.second.get_value(line));
+                        if (ImGui::BeginPopupContextItem((header+"##new").c_str())) {
+                            if (ImGui::BeginMenu("new key")) {
+                                auto key = tracker::Key{};
+                                key.value = 0;
+                                key.row = line;
+                                if (ImGui::MenuItem("step")) {
+                                    key.interp.type = tracker::interpolation_type::Step;
+                                    track.second.set_key(key);
+                                }
+                                if (ImGui::MenuItem("linear")) {
+                                    key.interp.type = tracker::interpolation_type::Linear;
+                                    track.second.set_key(key);
+                                }
+                                if (ImGui::MenuItem("smooth")) {
+                                    key.interp.type = tracker::interpolation_type::Smooth;
+                                    track.second.set_key(key);
+                                }
+                                if (ImGui::MenuItem("ramp")) {
+                                    key.interp.type = tracker::interpolation_type::Ramp;
+                                    track.second.set_key(key);
+                                }
+
+                                ImGui::EndMenu();
+                            }
+                            ImGui::EndPopup();
+                        }
+                    }
+                    ImGui::NextColumn();
+
+                }
+            }
+        }
+
+        ImGui::Columns(1);
+        ImGui::Separator();
+//        float scroll_y = ImGui::GetScrollY(), scroll_max_y = ImGui::GetScrollMaxY();
+        ImGui::EndChild();
+        //ImGui::Text("%.0f/%0.f", scroll_y, scroll_max_y);
+        ImGui::EndGroup();
+
+        ImGui::End();
+
     }
 
 

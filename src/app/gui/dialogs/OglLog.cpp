@@ -38,7 +38,6 @@ namespace minuseins::gui {
         } else {
             auto name = std::string(call.function->name());
             if(name == "glActiveTexture") {
-                auto param = call.parameters[0].get();
                 AddLog("%s",build_string(call).c_str());
             }
 

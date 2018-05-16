@@ -45,20 +45,23 @@ namespace viscom {
             return false;  //fast exit if not pressed or repeated
         }
 
+        if(mods == GLFW_MOD_CONTROL) {
+            switch (key) {
+                case GLFW_KEY_S: {  //Ctl+s
+                    saveTracks();
+                    return true;
+                    default:
+                        break;
+                }
+            }
+        }
+
         switch (key) {
             case GLFW_KEY_C: toggleMouseGrab(); return true;
             case GLFW_KEY_O: gui_->toggle("Overlay"); return true;
             case GLFW_KEY_M: gui_->toggle("MainMenu"); return true;
             case GLFW_KEY_B: gui_->toggle("Buffers"); return true;
             case GLFW_KEY_G: gui_->toggle("GPUProgram"); return true;
-            case GLFW_KEY_S: {  //Ctl+s
-                if(mods == GLFW_MOD_CONTROL) {
-                    gui_->toggle("Shader");
-                    return true;
-                } else {
-                    return false;
-                }
-            }
             default: return false;
         }
     }
@@ -77,10 +80,7 @@ namespace viscom {
         auto startup_stream = std::ofstream{findConfig("StartupPrograms.json", GetApplication())};
         cereal::JSONOutputArchive ar2{startup_stream};
         ar2(CEREAL_NVP(startupPrograms));
-        auto track_stream = std::ofstream{findConfig("Tracks.json", GetApplication())};
-        cereal::JSONOutputArchive ar3{track_stream};
-        ar3(CEREAL_NVP(tracks));
-
+        saveTracks();
     }
 
     void MasterNode::InitOpenGL() {
@@ -99,6 +99,12 @@ namespace viscom {
             ar(*gui_);
             gui_->init();
         }
+    }
+
+    void MasterNode::saveTracks() {
+        auto track_stream = std::ofstream{findConfig("Tracks.json", GetApplication())};
+        cereal::JSONOutputArchive ar3{track_stream};
+        ar3(CEREAL_NVP(tracks));
     }
 
 }

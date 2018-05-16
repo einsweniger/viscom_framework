@@ -25,7 +25,7 @@ namespace minuseins::tracker {
 
     Row Track::get_lower_bound_position(Row row) {
         for(Row i=0; i<keys.size(); i++) {
-            if(keys.at(i).row > row) return i;
+            if(keys.at(i).row > row) return i-1;
         }
         return static_cast<Row>(keys.size() - 1);
     }
@@ -58,11 +58,12 @@ namespace minuseins::tracker {
             return keys.at(0).value;
         }
         if(lower_row >= keys.at(keys.size()-1).row) {
-            return keys.at(keys.size()-1).value;
+             return keys.at(keys.size()-1).value;
         }
 
         auto pos = get_lower_bound_position(lower_row);
         auto lower = keys.at(pos);
+
         auto higher = keys.at(pos+1);
 
         auto t = (row - lower.row) / (higher.row - lower.row);

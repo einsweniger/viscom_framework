@@ -4,7 +4,6 @@ SET(APP_NAME ViscomFramework)
 PROJECT(${APP_NAME})
 
 include(cmake/assimp_config.cmake)
-include(cmake/BuildConfig.cmake)
 include(cmake/minuseins.cmake)
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -27,6 +26,7 @@ endif()
 
 include(${PROJECT_SOURCE_DIR}/extern/fwcore/CMake_core.cmake)
 include(${PROJECT_SOURCE_DIR}/extern/fwenh/CMake_enh.cmake)
+include(cmake/BuildConfig.cmake)
 
 # enable drop-down in cmake-gui, taken from https://blog.bethcodes.com/cmake-tips-tricks-drop-down-list
 # possible to populate from data/*
@@ -62,6 +62,7 @@ set_target_properties(${APP_NAME} PROPERTIES OUTPUT_NAME ${VISCOM_APP_NAME})
 set_property(TARGET ${APP_NAME} PROPERTY CXX_STANDARD 17)
 target_include_directories(${APP_NAME} PRIVATE ${CORE_INCLUDE_DIRS} ${ENH_INCLUDE_DIRS})
 target_link_libraries(${APP_NAME} ${CORE_LIBS} ${ENH_LIBS})
+message(STATUS ${CORE_LIBS})
 target_compile_definitions(${APP_NAME} PRIVATE ${COMPILE_TIME_DEFS})
 
 set(VISCOM_CONFIG_BASE_DIR "../")

@@ -21,10 +21,7 @@ namespace minuseins::audio {
     constexpr int FFT_SIZE = 1024;
 
     namespace fs = std::experimental::filesystem;
-    namespace bass {
 
-
-    }
     class BassHandler {
         static void print_problem(const std::string& calledFn) {
             fprintf(stderr, "%s failed: %08X\n",calledFn.c_str(), BASS_ErrorGetCode());
