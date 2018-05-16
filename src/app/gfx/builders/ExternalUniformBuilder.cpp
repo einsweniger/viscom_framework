@@ -24,6 +24,7 @@ namespace minuseins::handlers {
             }
 
             void init(gl::GLuint program) override {
+                std::cout << "resolution set to:" << appImpl->GetScreenSize().x << "," << appImpl->GetScreenSize().y << std::endl;
                 value[0] = appImpl->GetScreenSize().x;
                 value[1] = appImpl->GetScreenSize().y;
                 value[2] = 1;

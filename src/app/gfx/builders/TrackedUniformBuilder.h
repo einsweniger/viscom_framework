@@ -18,7 +18,13 @@ namespace minuseins::handlers {
 
         bool get_updated_value() override;
 
+        bool upload_value() override;
+
         viscom::ApplicationNodeImplementation* appImpl;
+    };
+
+    struct TrackNamedUniform : TrackedUniform {
+        using TrackedUniform::TrackedUniform;
     };
 
     struct TrackedUniformBuilder : ShaderToySamplerBuilder {

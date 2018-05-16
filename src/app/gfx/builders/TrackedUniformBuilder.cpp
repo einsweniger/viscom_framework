@@ -15,6 +15,11 @@ namespace minuseins::handlers {
         if(res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
             return ShaderToySamplerBuilder::operator()(std::move(res));
         }
+        if(res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT) {
+            if("text_rotation" == res.name) {
+                return std::make_unique<TrackedUniform>(std::move(res), appImpl);
+            }
+        }
 
         return ShaderToySamplerBuilder::operator()(res);
     }
@@ -25,6 +30,12 @@ namespace minuseins::handlers {
 
     bool TrackedUniform::get_updated_value() {
         auto value = appImpl->get_track_value(name);
+        return true;
+    }
+
+    bool TrackedUniform::upload_value() {
+        auto value = appImpl->get_track_value(name);
+        gl::glUniform1f(location(),value);
         return true;
     }
 
