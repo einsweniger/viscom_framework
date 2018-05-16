@@ -1,17 +1,24 @@
 # Build-flags.
+
+target_compile_options(glbinding INTERFACE "-Wno-deprecated-declarations")
+target_compile_options(cereal INTERFACE "-Wno-class-memaccess")
+
+
 if(UNIX)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wno-unused-function -Wno-unused-parameter -Wextra -Wpedantic -pg")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wno-unused-function -Wno-unused-parameter -Wno-ignored-qualifiers -Wextra -Wpedantic -pg")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
   list(APPEND CORE_LIBS
     stdc++fs
-    ${X11_X11_LIB}
-		${X11_Xrandr_LIB}
-		${X11_Xinerama_LIB}
-		${X11_Xinput_LIB}
-		${X11_Xxf86vm_LIB}
-		${X11_Xcursor_LIB}
-		${CMAKE_THREAD_LIBS_INIT}
+    Xext
+    X11
+    Xrandr
+    Xinerama
+    Xxf86vm
+    Xcursor
+    ${CMAKE_THREAD_LIBS_INIT}
+    dl
+
     )
 
   # add compiler-options for AppleClang to ignore linker warnings from assimp on macOS
