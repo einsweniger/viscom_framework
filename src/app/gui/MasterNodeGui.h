@@ -91,8 +91,6 @@ namespace minuseins::gui {
 
         void drawShaderImport(bool *p_open);
 
-        void drawNewScene(bool *p_open);
-
         void drawTextureImportWindow(bool *p_open);
 
         void drawTextureWindow(bool *p_open);

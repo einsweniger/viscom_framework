@@ -11,6 +11,7 @@
 #include <variant>
 #include <memory>
 #include "types.h"
+#include <cereal/cereal.hpp>
 
 namespace minuseins {
     using named_resource = interfaces::types::named_resource;
@@ -57,8 +58,8 @@ namespace minuseins {
 
         void set_recompile_function(std::function<gl::GLuint()> fn);
         void draw_gui(bool *p_open, std::vector<gl::GLenum> draw_interfaces = all_interfaces);
-        void addHandlerFunction(gl::GLenum interface, handler_fn hdl_fn);
-        void addHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl); //TODO this should be called setHandler
+        void setHandlerFunction(gl::GLenum interface, handler_fn hdl_fn);
+        void setHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl);
         void initialize();
         void prepareDraw();
         recompile_fn compile_fn = nullptr;
@@ -76,6 +77,13 @@ namespace minuseins {
         named_resource* GetByName(gl::GLenum interface, const std::string &name);
         handler_fn GetHandlerFunction(gl::GLenum interface);
         resource_handler* GetHandler(gl::GLenum interface);
+
+        template<class Archive>
+        void serialize(Archive ar) {
+            for(auto& [interf, handler] : handlers) {
+                ar(glbinding::aux::Meta::getString(interf), handler);
+            }
+        }
     };
 
     struct resource_handler {

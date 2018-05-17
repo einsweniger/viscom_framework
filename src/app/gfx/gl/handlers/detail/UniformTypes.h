@@ -33,12 +33,12 @@ namespace minuseins::handlers {
         bool get_updated_value() override;
         bool upload_value() override;
 
-        std::function<void()> updatefn;
-        std::function<void()> uploadfn;
+        std::function<void()> value_update_fn;
+        std::function<void()> value_upload_fn;
 
 
-        bool do_upload = true;
-        bool receive_updates = true;
+        bool do_value_upload = true;
+        bool do_value_update = true;
 
         gl::GLint block_index();
         gl::GLint location();
@@ -59,18 +59,20 @@ namespace minuseins::handlers {
     };
 
     template<typename T>
-    struct UniformWithValue : public generic_uniform {
-        explicit UniformWithValue(named_resource arg)  :
+    struct UniformWithValueVector : public generic_uniform {
+        explicit UniformWithValueVector(named_resource arg)  :
                 generic_uniform(std::move(arg)),
                 value{std::vector<T>(getSize(type()))}
         {
         }
 
-        std::function<void()> updatefn;
+
+        std::function<void(UniformWithValueVector<T>&)> draw_value_fn;
+        std::function<void(UniformWithValueVector<T>&)> value_upload_fn;
 
         bool get_updated_value() override {
-            if(nullptr != updatefn && receive_updates) {
-                updatefn();
+            if(nullptr != value_update_fn && do_value_update) {
+                value_update_fn();
                 return true;
             }
             return false;
@@ -86,42 +88,11 @@ namespace minuseins::handlers {
 
         void draw2D() override {
             generic_uniform::draw2Dpre();
-            drawValue();
-            generic_uniform::draw2Dpost();
-        }
-
-        std::vector<T> value;
-    };
-
-    template<typename T>
-    struct GlmUniform : public generic_uniform {
-        explicit GlmUniform(named_resource arg)  :
-                generic_uniform(std::move(arg)),
-                value{T()}
-        {
-        }
-
-        std::function<void()> updatefn;
-
-        bool get_updated_value() override {
-            if(nullptr != updatefn && receive_updates) {
-                updatefn();
-                return true;
+            if(draw_value_fn) {
+                draw_value_fn(*this);
+            } else {
+                drawValue();
             }
-            return false;
-        }
-        size_t uploadSize() override {
-            return value.size() * sizeof(T);
-        }
-        void *valuePtr() override {
-            return &value[0];
-        }
-
-        virtual void drawValue() = 0;
-
-        void draw2D() override {
-            generic_uniform::draw2Dpre();
-            drawValue();
             generic_uniform::draw2Dpost();
         }
 
@@ -130,8 +101,8 @@ namespace minuseins::handlers {
 
     static void uniform_tooltip(const property_t &props, const std::string &extra_text = "");
 
-    struct IntegerUniform : public UniformWithValue<gl::GLint> {
-        using UniformWithValue::UniformWithValue;
+    struct IntegerUniform : public UniformWithValueVector<gl::GLint> {
+        using UniformWithValueVector::UniformWithValueVector;
 
         bool upload_value() override;
 
@@ -140,8 +111,8 @@ namespace minuseins::handlers {
         void drawValue() override;
     };
 
-    struct FloatUniform : public UniformWithValue<gl::GLfloat> {
-        using UniformWithValue::UniformWithValue;
+    struct FloatUniform : public UniformWithValueVector<gl::GLfloat> {
+        using UniformWithValueVector::UniformWithValueVector;
 
         void init(gl::GLuint program) override;
 
@@ -150,8 +121,8 @@ namespace minuseins::handlers {
         void drawValue() override;
     };
 
-    struct DoubleUniform : public UniformWithValue<gl::GLdouble> {
-        using UniformWithValue::UniformWithValue;
+    struct DoubleUniform : public UniformWithValueVector<gl::GLdouble> {
+        using UniformWithValueVector::UniformWithValueVector;
 
         void init(gl::GLuint program) override;
 
@@ -160,8 +131,8 @@ namespace minuseins::handlers {
         void drawValue() override;
     };
 
-    struct UnsignedUniform : public UniformWithValue<gl::GLuint> {
-        using UniformWithValue::UniformWithValue;
+    struct UnsignedUniform : public UniformWithValueVector<gl::GLuint> {
+        using UniformWithValueVector::UniformWithValueVector;
 
         bool upload_value() override;
 
@@ -171,8 +142,8 @@ namespace minuseins::handlers {
     };
 
     //cannot use typedef, otherwise variant won't work, since it can't distinguish types.
-    struct BooleanUniform : public UniformWithValue<gl::GLint> {
-        using UniformWithValue::UniformWithValue;
+    struct BooleanUniform : public UniformWithValueVector<gl::GLint> {
+        using UniformWithValueVector::UniformWithValueVector;
 
         void drawValue() override;
 

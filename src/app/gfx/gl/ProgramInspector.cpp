@@ -110,7 +110,7 @@ namespace minuseins {
         gl::glUseProgram(activeProgram);
     }
 
-    void ProgramInspector::addHandlerFunction(gl::GLenum interface, handler_fn hdl_fn) {
+    void ProgramInspector::setHandlerFunction(gl::GLenum interface, handler_fn hdl_fn) {
         std::cout << "add handler" << std::endl;
         handler_fns[interface] = hdl_fn;
     }
@@ -119,7 +119,7 @@ namespace minuseins {
         try {
             return handler_fns.at(interface);
         } catch (std::out_of_range&) {
-            return [](named_resource res) -> named_resource_ptr { return std::make_unique<named_resource>(res);};
+            return [](named_resource res) -> named_resource_ptr { return std::make_unique<named_resource>(std::move(res));};
         }
 
     }
@@ -128,7 +128,7 @@ namespace minuseins {
         return containers.at(interface);
     }
 
-    void ProgramInspector::addHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl) {
+    void ProgramInspector::setHandler(gl::GLenum interface, std::unique_ptr<resource_handler> hdl) {
         handlers[interface] = std::move(hdl);
     }
 

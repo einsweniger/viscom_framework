@@ -29,7 +29,7 @@ namespace minuseins::handlers {
                 //FIXME on recompile, uniforms that remain in program still have the update function set.
                 for(auto& resIndex : active_vars) {
                     auto& uniform = dynamic_cast<generic_uniform&>(*uniforms.at(resIndex));
-                    uniform.uploadfn = [&](){
+                    uniform.value_upload_fn = [&](){
                         auto offset = uniform.properties.at(gl::GL_OFFSET);
                         block.upload_data(offset, uniform.uploadSize(), uniform.valuePtr());
                     };

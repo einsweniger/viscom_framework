@@ -40,14 +40,14 @@ namespace minuseins::handlers {
                     appBase(appBase) {}
 
             bool get_updated_value() override {
-                if(receive_updates) {
+                if(do_value_update) {
                     value = appBase->GetCamera()->GetViewPerspectiveMatrix();
                 }
                 return true;
             }
 
             bool upload_value() override {
-                if(do_upload) {
+                if(do_value_upload) {
                     gl::glUniformMatrix4fv(location(), array_size(), gl::GL_FALSE, glm::value_ptr(value));
                 }
                 return true;
@@ -75,7 +75,7 @@ namespace minuseins::handlers {
             {}
 
             bool get_updated_value() override {
-                if(receive_updates) {
+                if(do_value_update) {
                     auto position = appBase->GetCamera()->GetPosition();
                     value[0] = position.x;
                     value[1] = position.y;
@@ -94,7 +94,7 @@ namespace minuseins::handlers {
             {}
 
             bool get_updated_value() override {
-                if(receive_updates) {
+                if(do_value_update) {
                     value[0] = appImpl->iFrame;
                 }
                 return true;
@@ -109,7 +109,7 @@ namespace minuseins::handlers {
                     appImpl(appImpl) {}
 
             bool get_updated_value() override {
-                if(receive_updates) {
+                if(do_value_update) {
                     value[0] = appImpl->currentTime_;
                 }
                 return true;
@@ -120,7 +120,7 @@ namespace minuseins::handlers {
             using iTime::iTime;
 
             bool get_updated_value() override {
-                if(receive_updates) {
+                if(do_value_update) {
                     value[0] = appImpl->elapsedTime_;
                 }
                 return true;
@@ -131,7 +131,7 @@ namespace minuseins::handlers {
             using FloatUniform::FloatUniform;
 
             bool get_updated_value() override {
-                if(receive_updates) {
+                if(do_value_update) {
                     std::time_t time_ = std::time(nullptr);
                     auto tm = std::localtime(&time_);
                     value[0] = tm->tm_year;
@@ -149,7 +149,7 @@ namespace minuseins::handlers {
             bool get_updated_value() override {
                 //left, right, middle + extras.
                 //TODO value[2], value[3] ?
-                if(receive_updates) {
+                if(do_value_update) {
                     if(ImGui::GetIO().MouseDown[1]) {
                         value[0] = ImGui::GetIO().MousePos.x;
                         value[1] = ImGui::GetIO().MousePos.y;

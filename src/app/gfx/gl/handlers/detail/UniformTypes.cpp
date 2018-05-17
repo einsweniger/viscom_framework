@@ -7,6 +7,8 @@
 #include "UniformTypes.h"
 #include <app/util.h>
 #include <glbinding/Binding.h>
+#include <iostream>
+#include <glbinding/glbinding.h>
 
 namespace minuseins::handlers {
     using util::ensure_positive;
@@ -57,30 +59,30 @@ namespace minuseins::handlers {
         uniform_tooltip(properties, extra_text + upload_size);
         if (ImGui::BeginPopupContextItem(name.c_str()))
         {
-            if(ImGui::Selectable("receive updates", receive_updates)) {
-                receive_updates = !receive_updates;
+            if(ImGui::Selectable("receive updates", do_value_update)) {
+                do_value_update = !do_value_update;
             }
-            if(ImGui::Selectable("do upload", do_upload)) {
-                do_upload = !do_upload;
+            if(ImGui::Selectable("do upload", do_value_upload)) {
+                do_value_upload = !do_value_upload;
             }
             ImGui::EndPopup();
         }
     }
 
     bool generic_uniform::upload_value() {
-        if(nullptr != uploadfn && do_upload) {
-            uploadfn();
+        if(nullptr != value_upload_fn && do_value_upload) {
+            value_upload_fn();
             return true;
         }
-        if(!do_upload) {
+        if(!do_value_upload) {
             return true;
         }
         return false;
     }
 
     bool generic_uniform::get_updated_value() {
-        if(nullptr != updatefn && receive_updates) {
-            updatefn();
+        if(nullptr != value_update_fn && do_value_update) {
+            value_update_fn();
             return true;
         }
         return false;

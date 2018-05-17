@@ -30,7 +30,7 @@ namespace minuseins::handlers {
         }
 
         bool iChannel::upload_value() {
-            if(do_upload) {
+            if(do_value_upload) {
                 gl::GLuint boundTexture = 0;
                 if(input.ctype == "texture") {
                     boundTexture = tex->getTextureId();
@@ -116,7 +116,7 @@ namespace minuseins::handlers {
             using fftSampler::fftSampler;
 
             bool upload_value() override {
-                if(do_upload) {
+                if(do_value_upload) {
                     appImpl->fftTex->SetData(&appImpl->fftData[0]);
                     appImpl->fftTex->ActivateTexture(gl::GL_TEXTURE0+sampler);
                     gl::glUniform1i(location(), sampler);
@@ -128,7 +128,7 @@ namespace minuseins::handlers {
             using fftSampler::fftSampler;
 
             bool upload_value() override {
-                if(do_upload) {
+                if(do_value_upload) {
                     appImpl->fftTexSmoothed->SetData(&appImpl->fftDataSmoothed[0]);
                     appImpl->fftTexSmoothed->ActivateTexture(gl::GL_TEXTURE0+sampler);
                     gl::glUniform1i(location(), sampler);
@@ -140,7 +140,7 @@ namespace minuseins::handlers {
             using fftSampler::fftSampler;
 
             bool upload_value() override {
-                if(do_upload) {
+                if(do_value_upload) {
                     appImpl->fftTexIntegrated->SetData(&appImpl->fftDataIntegrated[0]);
                     appImpl->fftTexIntegrated->ActivateTexture(gl::GL_TEXTURE0+sampler);
                     gl::glUniform1i(location(), sampler);
@@ -158,7 +158,7 @@ namespace minuseins::handlers {
             }
 
             bool upload_value() override {
-                if(do_upload) {
+                if(do_value_upload) {
                     gl::glActiveTexture(gl::GL_TEXTURE0 + sampler);
                     gl::glBindTexture(gl::GL_TEXTURE_2D, appImpl->postproc_tex);
                     gl::glUniform1i(location(), sampler);
