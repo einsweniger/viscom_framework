@@ -19,6 +19,9 @@ namespace minuseins::handlers {
             if("text_rotation" == res.name) {
                 return std::make_unique<TrackedUniform>(std::move(res), appImpl);
             }
+            if("fade_black" == res.name) {
+                return std::make_unique<TrackedUniform>(std::move(res), appImpl);
+            }
         }
 
         return ShaderToySamplerBuilder::operator()(res);

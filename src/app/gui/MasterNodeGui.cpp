@@ -41,7 +41,6 @@ namespace minuseins::gui {
         }
         //TODO use vector to draw menu and toggles.
         auto searchPaths = appNode->GetConfig().resourceSearchPaths_;
-
     }
 
     void MasterNodeGui::init() {
@@ -50,6 +49,7 @@ namespace minuseins::gui {
             setCallbackMaskExcept(CallbackMask::After | CallbackMask::ParametersAndReturnValue, { "glGetError" });
             setAfterCallback(std::bind(&OglLog::callback, &log, std::placeholders::_1));
         }
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     }
 
     void MasterNodeGui::UpdateFrame(double currentTime, double elapsedTime) {
@@ -334,12 +334,34 @@ namespace minuseins::gui {
         ImGui::Separator();
         ImGui::DragFloat("hist scale", &histogram_scale, 0.001,0,0.1);
         auto width = ImGui::GetContentRegionAvailWidth();
-        ImGui::PlotHistogram("", appImpl->fftDataIntegrated.data(), 750, 0, nullptr, 0.0f, 4*1024.0f,       ImVec2(width,300));
+        ImGui::PlotHistogram("", appImpl->fftDataIntegrated.data(), 750, 0, nullptr, 0.0f, appImpl->fftMaxIntegralValue, ImVec2(width,300));
         ImGui::PlotHistogram("", appImpl->fftData.data()          , 750, 0, nullptr, 0.0f, histogram_scale, ImVec2(width,300));
         ImGui::PlotHistogram("", appImpl->fftDataSmoothed.data()  , 750, 0, nullptr, 0.0f, histogram_scale, ImVec2(width,300));
         ImGui::Separator();
 
         ImGui::End();
+    }
+
+    bool selectInterpolation(tracker::Key& key) {
+        bool selected = false;
+        if (ImGui::BeginMenu("interpolation")) {
+            if (ImGui::MenuItem("step")) {
+                selected = true;
+                key.interp.type = tracker::interpolation_type::Step;
+            }
+            if (ImGui::MenuItem("linear")) {
+                key.interp.type = tracker::interpolation_type::Linear;
+            }
+            if (ImGui::MenuItem("smooth")) {
+                key.interp.type = tracker::interpolation_type::Smooth;
+            }
+            if (ImGui::MenuItem("ramp")) {
+                key.interp.type = tracker::interpolation_type::Ramp;
+            }
+
+            ImGui::EndMenu();
+        }
+        return selected;
     }
 
     void MasterNodeGui::drawTracker(bool *p_open) {
@@ -350,104 +372,168 @@ namespace minuseins::gui {
         }
         constexpr unsigned int LINE_COUNT = 7000;
 
-        unsigned int active_row = static_cast<unsigned int>(appImpl->currentRow);
-        int column_count = static_cast<int>(appImpl->tracks.size() + 1);
-
         static bool track_active_row = true;
         ImGui::Checkbox("Track", &track_active_row);
-        ImGui::BeginGroup();
-        ImGui::Columns(column_count, "tracker_head");
-        ImGui::Separator();
-        ImGui::Text("Row"); ImGui::NextColumn();
+
+        ImGui::PushItemWidth(100);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,ImVec2(0,0));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing,ImVec2(0,0));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg,ImGuiCol_TitleBg);
+        ImVec2 size_select(100, ImGui::GetTextLineHeight());
+        ImGui::Text("row  ");
         for(auto& track : appImpl->tracks) {
-            ImGui::Text(track.first.c_str()); ImGui::NextColumn();
+            ImGui::SameLine();
+            //TODO mute, fold?
+            ImGui::Selectable(track.first.c_str(),false,0,size_select);
         }
-        ImGui::Columns(1);
-        ImGui::Separator();
         ImGui::BeginChild("TrackerTable");
-        ImGui::Columns(column_count, "tracker_content");
-        ImGuiListClipper clipper(LINE_COUNT);  // Also demonstrate using the clipper for large list
-        while (clipper.Step())
         {
-            for (unsigned int line = static_cast<unsigned int>(clipper.DisplayStart); line < clipper.DisplayEnd; line++) {
-                char label[32];
-                sprintf(label, "%04d", line);
-                ImGui::Selectable(label, line == active_row);//, ImGuiSelectableFlags_SpanAllColumns);
-
-                if (track_active_row && line == active_row) {
-                    ImGui::SetScrollHere(0.5f); // 0.0f:top, 0.5f:center, 1.0f:bottom
-                }
-                ImGui::NextColumn();
-                for (auto &track : appImpl->tracks) {
-                    auto header = (track.first + "##" + std::to_string(line));
-                    if(auto pos = track.second.get_exact_position(line)) {
-                        ImGui::PushItemWidth(-1);
-                        auto& key = track.second.keys.at(*pos);
-                        ImGui::InputFloat(header.c_str(), &key.value);
-                        ImGui::PopItemWidth();
-                        if(ImGui::BeginPopupContextItem((header+"##edit").c_str())) {
-                            if (ImGui::BeginMenu("interpolation")) {
-                                if (ImGui::MenuItem("step")) {
-                                    key.interp.type = tracker::interpolation_type::Step;
-                                }
-                                if (ImGui::MenuItem("linear")) {
-                                    key.interp.type = tracker::interpolation_type::Linear;
-                                }
-                                if (ImGui::MenuItem("smooth")) {
-                                    key.interp.type = tracker::interpolation_type::Smooth;
-                                }
-                                if (ImGui::MenuItem("ramp")) {
-                                    key.interp.type = tracker::interpolation_type::Ramp;
-                                }
-
-                                ImGui::EndMenu();
-                            }
-                            if(ImGui::SmallButton(("delete##" + header).c_str())){
-                                track.second.delete_key(line);
-                            }
-                            ImGui::EndPopup();
-                        }
-                    } else {
-                        ImGui::TextDisabled("%f", track.second.get_value(line));
-                        if (ImGui::BeginPopupContextItem((header+"##new").c_str())) {
-                            if (ImGui::BeginMenu("new key")) {
-                                auto key = tracker::Key{};
-                                key.value = 0;
-                                key.row = line;
-                                if (ImGui::MenuItem("step")) {
-                                    key.interp.type = tracker::interpolation_type::Step;
-                                    track.second.set_key(key);
-                                }
-                                if (ImGui::MenuItem("linear")) {
-                                    key.interp.type = tracker::interpolation_type::Linear;
-                                    track.second.set_key(key);
-                                }
-                                if (ImGui::MenuItem("smooth")) {
-                                    key.interp.type = tracker::interpolation_type::Smooth;
-                                    track.second.set_key(key);
-                                }
-                                if (ImGui::MenuItem("ramp")) {
-                                    key.interp.type = tracker::interpolation_type::Ramp;
-                                    track.second.set_key(key);
-                                }
-
-                                ImGui::EndMenu();
-                            }
-                            ImGui::EndPopup();
-                        }
-                    }
-                    ImGui::NextColumn();
-
+            ImGuiListClipper clip(LINE_COUNT);
+            ImGui::BeginGroup();
+            while(clip.Step()) {
+                for(auto line = clip.DisplayStart; line < clip.DisplayEnd; line ++) {
+                    ImGui::Text("%04d ", line);
                 }
             }
+            ImGui::EndGroup();
         }
 
-        ImGui::Columns(1);
-        ImGui::Separator();
-//        float scroll_y = ImGui::GetScrollY(), scroll_max_y = ImGui::GetScrollMaxY();
-        ImGui::EndChild();
-        //ImGui::Text("%.0f/%0.f", scroll_y, scroll_max_y);
-        ImGui::EndGroup();
+        for(auto& [name, track] : appImpl->tracks) {
+            ImGui::SameLine();
+            ImGui::BeginGroup();
+            //ImGui::Text(name.c_str());
+            ImGuiListClipper clip(LINE_COUNT);
+            ImGui::PushID(name.c_str());
+            ImGui::PushStyleColor(ImGuiCol_Text,ImVec4(1,1,1,1));
+            auto active_key = tracker::Key{};
+            while(clip.Step()) {
+                if(!track.keys.empty()) {
+                    active_key = track.keys.at(track.get_lower_bound_position(clip.DisplayStart));
+                }
+                for(auto line = clip.DisplayStart; line < clip.DisplayEnd; line++) {
+                    ImGui::PushID(line);
+                    if(auto pos = track.get_exact_position(line)) {
+                        auto& key = track.keys.at(*pos);
+                        std::string label = std::to_string(key.value);
+                        ImGui::PopStyleColor(1);
+                        switch (key.interp.type) {
+                            case tracker::interpolation_type::Step:
+                                ImGui::PushStyleColor(ImGuiCol_Text,ImVec4(1,1,1,1));
+                                break;
+                            case tracker::interpolation_type::Linear:
+                                ImGui::PushStyleColor(ImGuiCol_Text,ImVec4(1.000f, 0.430f, 0.350f, 1.000f));
+                                break;
+                            case tracker::interpolation_type::Smooth:
+                                ImGui::PushStyleColor(ImGuiCol_Text,ImVec4(0.000f, 1.000f, 0.000f, 1.000f));
+                                break;
+                            case tracker::interpolation_type::Ramp:
+                                ImGui::PushStyleColor(ImGuiCol_Text,ImVec4(0.000f, 0.618f, 1.000f, 1.000f));
+                                break;
+                        }
+
+                        if(ImGui::Selectable(label.c_str(),false,0,size_select)) {
+                            ImGui::OpenPopup("value_edit");
+                        }
+                        if(ImGui::IsItemHovered()) {
+                            if(ImGui::IsKeyPressed(GLFW_KEY_I, false)) {
+                                using tit = tracker::interpolation_type;
+                                switch (key.interp.type) {
+                                    case tit::Step: key.interp.type = tit::Linear;break;
+                                    case tit::Linear: key.interp.type = tit::Smooth;break;
+                                    case tit::Smooth: key.interp.type = tit::Ramp;break;
+                                    case tit::Ramp: key.interp.type = tit::Step;break;
+                                }
+                            }
+                            if(ImGui::IsKeyPressed(GLFW_KEY_DELETE, false)) {
+                                track.delete_key(key.row);
+                            }
+                        }
+                        if(ImGui::BeginPopup("value_edit")) {
+                            ImGui::InputFloat(name.c_str(), &key.value);
+                            selectInterpolation(track.keys.at(*pos));
+                            ImGui::EndPopup();
+                        }
+//                        ImGui::InputFloat(label.c_str(), &track.keys.at(*pos).value);
+                    } else {
+                        if(ImGui::Selectable("---",false,0,size_select)) {
+                            auto key = tracker::Key{};
+                            key.row = line;
+                            key.value = track.get_value(key.row);
+                            track.set_key(std::move(key));
+                        }
+                    }
+                    ImGui::PopID();
+                }
+            }
+            ImGui::PopStyleColor(1);
+            ImGui::PopID();
+            ImGui::EndGroup();
+        }
+        ImGui::EndChild(); //TrackerTable
+        ImGui::PopStyleColor(1);
+        ImGui::PopStyleVar(2);
+        ImGui::PopItemWidth();
+//        ImGui::BeginChild("TrackerTable");
+//        ImGui::Columns(column_count, "tracker_content");
+//        ImGuiListClipper clipper(LINE_COUNT);  // Also demonstrate using the clipper for large list
+//        while (clipper.Step())
+//        {
+//            for (unsigned int line = static_cast<unsigned int>(clipper.DisplayStart); line < clipper.DisplayEnd; line++) {
+//                ImGui::Text("%d", line);
+////                char label[32];
+////                sprintf(label, "%04d", line);
+//                //ImGui::Selectable(label, line == active_row);//, ImGuiSelectableFlags_SpanAllColumns);
+//
+//                if (track_active_row && line == active_row) {
+//                    ImGui::SetScrollHere(0.5f); // 0.0f:top, 0.5f:center, 1.0f:bottom
+//                }
+//                ImGui::NextColumn();
+//                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,ImVec2(0,0));
+//                ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing,ImVec2(0,0));
+//                ImGui::PushStyleColor(ImGuiCol_FrameBg,ImGuiCol_TitleBg);
+//                for (auto &track : appImpl->tracks) {
+//                    auto header = (track.first + "##" + std::to_string(line));
+//                    if(auto pos = track.second.get_exact_position(line)) {
+//                        ImGui::PushItemWidth(-1);
+//                        auto& key = track.second.keys.at(*pos);
+//                        ImGui::InputFloat(header.c_str(), &key.value);
+//                        ImGui::PopItemWidth();
+//                        if(ImGui::BeginPopupContextItem((header+"##edit").c_str())) {
+//                            selectInterpolation(key);
+//                            if(ImGui::SmallButton(("delete##" + header).c_str())){
+//                                track.second.delete_key(line);
+//                            }
+//                            ImGui::EndPopup();
+//                        }
+//                    } else {
+//                        float value = track.second.get_value(line);
+//                        ImGui::PushItemWidth(-1);
+//                        ImGui::InputFloat(header.c_str(), &value,0.0f,0.0f,-1,ImGuiInputTextFlags_ReadOnly);
+//                        ImGui::PopItemWidth();
+//                        //ImGui::TextDisabled("%f", track.second.get_value(line));
+//                        if (ImGui::BeginPopupContextItem((header+"##new").c_str())) {
+//                            auto key = tracker::Key{};
+//                            key.value = 0;
+//                            key.row = line;
+//                            if(selectInterpolation(key)) {
+//                                track.second.set_key(key);
+//                            }
+//                            ImGui::EndPopup();
+//                        }
+//                    }
+//                    ImGui::NextColumn();
+//
+//                }
+//                ImGui::PopStyleColor(1);
+//                ImGui::PopStyleVar(2);
+//            }
+//        }
+//
+//        ImGui::Columns(1);
+//        ImGui::Separator();
+////        float scroll_y = ImGui::GetScrollY(), scroll_max_y = ImGui::GetScrollMaxY();
+//        ImGui::EndChild();
+//        //ImGui::Text("%.0f/%0.f", scroll_y, scroll_max_y);
 
         ImGui::End();
 

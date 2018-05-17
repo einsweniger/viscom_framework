@@ -7,6 +7,7 @@ out vec4 color;
 uniform sampler2D tex_postproc;
 uniform float iTime;
 uniform vec3 iResolution;
+uniform float fade_black = 0.0;
 
 #include "lib/postproc.glsl"
 
@@ -23,4 +24,5 @@ void main()
 //    color = postPixelate(tex, texCoord);
 //    color = postFerris(tex, texCoord);
     color = postprocess(tex_postproc, texCoord);
+    color = mix(color, vec4(0), fade_black);
 }
