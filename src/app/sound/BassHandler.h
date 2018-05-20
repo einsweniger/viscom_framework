@@ -15,16 +15,38 @@ namespace minuseins::audio {
     constexpr int rpb = 8; /* rows per beat */
     constexpr double row_rate = (double(bpm) / 60) * rpb;
 
-    constexpr int freq = 44100;
     constexpr int default_device = -1;
     constexpr int channels = 1;
     constexpr int FFT_SIZE = 1024;
 
     namespace fs = std::experimental::filesystem;
 
+    constexpr size_t img_height=128;
+    constexpr float samples_per_second = 100.f;
+    struct BassDecoder {
+        BassDecoder(unsigned int stream);
+        const unsigned int stream;
+        const unsigned long sample_len;
+        const size_t sample_count;
+        const std::array<unsigned int, 256*3> palette;
+        const std::array<int, img_height+2> logLookup;
+
+        const float maxIntensity = 500 * 2;
+        const float intensity_step = (palette.size() - 1) / std::log(maxIntensity + 1);
+        size_t current_idx = 0;
+        size_t img_y=0;
+
+        std::vector<uint32_t> result = std::vector<uint32_t>(img_height*sample_count);
+        std::vector<uint32_t>::iterator fftOutput = result.begin();
+        std::array<float, FFT_SIZE> fftData = std::array<float, FFT_SIZE>{};
+
+        void step();
+        size_t total_rows();
+    };
+
     class BassHandler {
         static void print_problem(const std::string& calledFn) {
-            fprintf(stderr, "%s failed: %08X\n",calledFn.c_str(), BASS_ErrorGetCode());
+            fprintf(stderr, "%s failed: %02d\n",calledFn.c_str(), BASS_ErrorGetCode());
         }
     public:
         //last two parameters are for directSound

@@ -84,4 +84,12 @@ namespace minuseins::tracker {
         }
     }
 
+    void Key::nextInterpolation() {
+        switch (interp.type) {
+            case interpolation_type::Step:   interp.type = interpolation_type::Linear;break;
+            case interpolation_type::Linear: interp.type = interpolation_type::Smooth;break;
+            case interpolation_type::Smooth: interp.type = interpolation_type::Ramp;break;
+            case interpolation_type::Ramp:   interp.type = interpolation_type::Step;break;
+        }
+    }
 }

@@ -47,6 +47,7 @@ namespace viscom {
     void ApplicationNodeImplementation::InitOpenGL()
     {
         enh::ApplicationNodeBase::InitOpenGL();
+
         //init examples
         freeCam_->SetCameraPosition(glm::vec3(0,1,8));
         for(const std::string& frag : startupPrograms) {
@@ -101,7 +102,7 @@ namespace viscom {
     }
 
     void ApplicationNodeImplementation::PostDraw() {
-        bass->update();
+        bass->update();  // supposedly helps with vsync.
         ApplicationNodeBase::PostDraw();
     }
 

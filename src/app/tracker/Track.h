@@ -37,6 +37,7 @@ namespace minuseins::tracker {
         interpolation interp;
         Row row;
         float value;
+        void nextInterpolation();
         template<class Archive>
         void serialize(Archive &archive) {
             archive(CEREAL_NVP(interp), CEREAL_NVP(row), CEREAL_NVP(value));
