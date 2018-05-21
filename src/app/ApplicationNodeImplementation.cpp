@@ -77,6 +77,19 @@ namespace viscom {
 
             currentTime_ += elapsedTime_;
             currentTime_ = static_cast<float>(bass->get_time());
+            if (bass->get_fft(&fftData[0])) {
+
+                for ( int i = 0; i < minuseins::audio::FFT_SIZE; i++ )
+                {
+                    fftDataSmoothed[i] = fftDataSmoothed[i] * fftSmootingFactor + (1 - fftSmootingFactor) * fftData[i];
+
+                    fftDataSlightlySmoothed[i] = fftDataSlightlySmoothed[i] * fftSlightSmootingFactor + (1 - fftSlightSmootingFactor) * fftData[i];
+                    fftDataIntegrated[i] = fftDataIntegrated[i] + fftDataSlightlySmoothed[i];
+                    if (fftDataIntegrated[i] > fftMaxIntegralValue) {
+                        fftDataIntegrated[i] -= fftMaxIntegralValue;
+                    }
+                }
+            }
         }
         if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
         update_scene();
@@ -85,19 +98,6 @@ namespace viscom {
         }
         for(auto& toy : toys) {
             toy->UpdateFrame(currentTime_, elapsedTime_);
-        }
-        if (bass->get_fft(&fftData[0])) {
-
-            for ( int i = 0; i < minuseins::audio::FFT_SIZE; i++ )
-            {
-                fftDataSmoothed[i] = fftDataSmoothed[i] * fftSmootingFactor + (1 - fftSmootingFactor) * fftData[i];
-
-                fftDataSlightlySmoothed[i] = fftDataSlightlySmoothed[i] * fftSlightSmootingFactor + (1 - fftSlightSmootingFactor) * fftData[i];
-                fftDataIntegrated[i] = fftDataIntegrated[i] + fftDataSlightlySmoothed[i];
-                if (fftDataIntegrated[i] > fftMaxIntegralValue) {
-                    fftDataIntegrated[i] -= fftMaxIntegralValue;
-                }
-            }
         }
     }
 
@@ -335,6 +335,10 @@ namespace viscom {
 
     float ApplicationNodeImplementation::get_track_value(const std::string &name) {
         return tracks[name].get_value(bass->get_row());
+    }
+
+    std::string ApplicationNodeImplementation::get_named_track_value(const std::string &name) {
+        return namedTracks[name].get_value(bass->get_row());
     }
 
 }

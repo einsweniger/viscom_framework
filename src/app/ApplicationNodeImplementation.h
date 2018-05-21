@@ -80,8 +80,10 @@ namespace viscom {
         std::string activePostproc = "none";
 
         std::unordered_map<std::string, minuseins::tracker::Track> tracks;
+        std::unordered_map<std::string, minuseins::tracker::strTrack> namedTracks;
 
         float get_track_value(const std::string &name);
+        std::string get_named_track_value(const std::string &name);
 
     protected:
         void toggleMouseGrab();
