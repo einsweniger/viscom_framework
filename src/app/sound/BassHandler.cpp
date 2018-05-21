@@ -178,6 +178,8 @@ namespace minuseins::audio {
                 for(size_t i =0; i<texCount+2; i++) {
                     textures.push_back(std::make_unique<viscom::enh::GLTexture>(img_height,FFT_SIZE, texDescr, nullptr));
                 }
+                result = std::vector<uint32_t>(img_height*FFT_SIZE*textures.size());
+                fftOutput = result.begin();
             }
 
 
@@ -187,12 +189,12 @@ namespace minuseins::audio {
             if(wrote_textures) return;
             wrote_textures = true;
 
-            int idx = 0;
-            for(auto& tex : textures) {
-                auto name = "tex" + std::to_string(idx) + ".png";
-                tex->SaveTextureToFile(name);
-                idx++;
-            }
+//            int idx = 0;
+//            for(auto& tex : textures) {
+//                auto name = "tex" + std::to_string(idx) + ".png";
+//                tex->SaveTextureToFile(name);
+//                idx++;
+//            }
         }
 
         float intensity = 500.f * (

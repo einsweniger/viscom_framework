@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <cereal/archives/json.hpp>
 #include "gui/MasterNodeGui.h"
 #include "ApplicationNodeImplementation.h"
 
@@ -16,6 +17,13 @@
 #endif
 
 namespace viscom {
+    template<class T>
+    void store(fs::path cfgPath, T* entity) {
+        auto outstream = std::ofstream{cfgPath};
+        cereal::JSONOutputArchive ar{outstream};
+        ar(*entity);
+    }
+
     class MasterNode final : public ApplicationNodeImplementation
     {
     public:
@@ -37,5 +45,9 @@ namespace viscom {
         std::unique_ptr<minuseins::gui::MasterNodeGui> gui_ = nullptr;
 
         void saveTracks();
+
+        void storeCamPosition();
+
+        void storeCamRotation();
     };
 }

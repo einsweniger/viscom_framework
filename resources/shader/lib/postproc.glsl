@@ -86,11 +86,11 @@ vec4 glitch(sampler2D iChannel0, vec2 coords) {
     amount = sound_distort*0.01;
     float angle = (PI*randf())/(TAU)-PI;
     vec2 offset = amount * vec2( cos(angle), sin(angle));
-    vec4 cr = texture(iChannel0, coords + offset);
-    vec4 cga = texture(iChannel0, coords);
-    vec4 cb = texture(iChannel0, coords - offset);
+    vec4 cr =  texture(iChannel0, uv + offset);
+    vec4 cga = texture(iChannel0, uv);
+    vec4 cb =  texture(iChannel0, uv - offset);
     vec4 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
-    return fragColor;
+    //return fragColor;
     //add noise
     float xs = floor(uv.x*iResolution.x / 0.5);
     float ys = floor(uv.y*iResolution.y / 0.5);
@@ -101,7 +101,7 @@ vec4 glitch(sampler2D iChannel0, vec2 coords) {
 }
 
 uniform float ca_max_distort = 0.5;
-uniform int ca_num_iter = 24;
+uniform float ca_num_iter = 24;
 subroutine(PostProcess)
 vec4 chromaticAberrationV1(sampler2D tex, vec2 uv) {
     float sound_distort = get_average(texFFTSmoothed, 56, 3);

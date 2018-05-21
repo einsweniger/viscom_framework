@@ -13,7 +13,7 @@ const float trace_t_min =  0.0;
 const float trace_t_max = 40.0;
 const float trace_INF = pow(2.,8.);
 const float trace_relaxation = 1.9;
-const float trace_pixelRadius = 0.0001;
+uniform float trace_pixelRadius = 0.0001;
 const int   trace_MAX_ITERATIONS = 160;
 const bool  trace_USE_BV = false;
 vec2 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool forceHit) {

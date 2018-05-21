@@ -29,8 +29,6 @@ namespace minuseins::gui {
         }
 
         ImGui::Checkbox("Track", &track_active_row);
-        ImGui::SameLine();
-        ImGui::DragFloat("tex_height", &texture_height);
 
         ImGui::PushItemWidth(100);
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,ImVec2(0,0));
@@ -48,7 +46,6 @@ namespace minuseins::gui {
     void Tracker::draw_table() {
         // table header
         ImGui::Selectable("",false,0,ImVec2(128,ImGui::GetTextLineHeight()));
-        auto rowsize = ImGui::GetItemRectSize();
         ImGui::SameLine();
         ImGui::Text("row  ");
         for(auto& track : appImpl->tracks) {
@@ -56,6 +53,17 @@ namespace minuseins::gui {
             //TODO mute, fold?
             ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
         }
+        for(auto& track : appImpl->namedTracks) {
+            ImGui::SameLine();
+            //TODO mute, fold?
+            ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
+        }
+        for(auto& track : appImpl->vec3Tracks) {
+            ImGui::SameLine();
+            //TODO mute, fold?
+            ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
+        }
+
         // table content
         // draw row index
         ImGui::BeginChild("TrackerTable");
@@ -106,6 +114,21 @@ namespace minuseins::gui {
             ImGui::EndGroup();
         }
         for(auto& [name, track] : appImpl->namedTracks) {
+            ImGui::SameLine();
+            ImGui::BeginGroup();
+            ImGui::PushID(name.c_str());
+            ImGuiListClipper clip(row_count, tracker::element_size().y);
+            if(track_active_row) {
+                auto offset = appImpl->currentRow * tracker::element_size().y;
+                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
+            }
+
+            track.drawTrack(clip);
+
+            ImGui::PopID();
+            ImGui::EndGroup();
+        }
+        for(auto& [name, track] : appImpl->vec3Tracks) {
             ImGui::SameLine();
             ImGui::BeginGroup();
             ImGui::PushID(name.c_str());

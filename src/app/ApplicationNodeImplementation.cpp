@@ -21,25 +21,18 @@ namespace viscom {
 
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
         ApplicationNodeBase{ appNode },
-        bass{std::make_unique<minuseins::audio::BassHandler>()},
-        activeMap{"text"},
-        activeShading{"iq"},
-        activePostproc{"none"}
+        bass{std::make_unique<minuseins::audio::BassHandler>()}
     {
         freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
-        auto cfgPath = findConfig("StartupPrograms.json", appNode);
-        if(fs::exists(cfgPath)) {
-            auto instr = std::ifstream{cfgPath};
-            cereal::JSONInputArchive ar{instr};
-            ar(startupPrograms);
-        }
+        scriptCam_ = std::make_unique<ScriptedCamera>(GetCamera()->GetPosition(), *GetCamera(), this);
+        restore(findConfig("StartupPrograms.json"), &startupPrograms);
+        restoreTracks();
+    }
 
-        cfgPath = findConfig("Tracks.json", appNode);
-        if(fs::exists(cfgPath)) {
-            auto instr = std::ifstream{cfgPath};
-            cereal::JSONInputArchive ar{instr};
-            ar(tracks);
-        }
+    void ApplicationNodeImplementation::restoreTracks() {
+        restore(findConfig("Tracks.json"), &tracks);
+        restore(findConfig("NamedTracks.json"), &namedTracks);
+        restore(findConfig("VectorTracks.json"), &vec3Tracks);
     }
 
     ApplicationNodeImplementation::~ApplicationNodeImplementation() = default;
@@ -91,7 +84,11 @@ namespace viscom {
                 }
             }
         }
-        if(grabMouse_) freeCam_->UpdateCamera(elapsedTime, this);
+        if(grabMouse_) {
+            freeCam_->UpdateCamera(elapsedTime, this);
+        } else {
+            scriptCam_->UpdateCamera(elapsedTime, this);
+        }
         update_scene();
         for(auto& fsq : fsqs) {
             fsq->UpdateFrame(currentTime_, elapsedTime_);
@@ -242,27 +239,6 @@ namespace viscom {
         //MUSIC: 19.5 small string
         //MUSIC: 21 strings almost gone, fade in cymbal
         //MUSIC: 22.3 beat picking up, echoing drum, brass in background
-        {
-            const float start = 22.3f;
-            const float end = 42;
-            const float parts = 8;
-            const float interval = (end-start)/parts-1;
-
-            do_if_time_greater(start+0*interval, [&](){ activeMap = "sphereZone"; });
-            do_if_time_greater(start+1*interval, [&](){ activeMap = "positionOffsetting"; });
-            do_if_time_greater(start+2*interval, [&](){ activeMap = "sdfDemo"; });
-            do_if_time_greater(start+3*interval, [&](){ activeMap = "hexagons"; });
-            do_if_time_greater(start+4*interval, [&](){ activeMap = "cubes"; });
-            do_if_time_greater(start+5*interval, [&](){ activeMap = "text"; });
-            do_if_time_greater(start+6*interval, [&](){ activeMap = "blockyGround"; });
-            do_if_time_greater(start+7*interval, [&](){ activeMap = "rotatingShpere"; });
-            do_if_time_greater(start+8*interval, [&](){ activeMap = "sdfTextDemo"; });
-
-        }
-
-
-
-
 
 
 
@@ -316,19 +292,12 @@ namespace viscom {
         //MUSIC: 279 done.
     }
 
-    void ApplicationNodeImplementation::do_if_time_greater(float time, std::function<void()> fn) {
-        if(currentTime_ >= time) {
-            fn();
-        }
-
-    }
-
-    fs::path ApplicationNodeImplementation::findConfig(const std::string &config_name, ApplicationNodeInternal *app) {
+    fs::path ApplicationNodeImplementation::findConfig(const std::string &config_name) {
         try {
-            auto filename = Resource::FindResourceLocation(config_name, app);
+            auto filename = Resource::FindResourceLocation(config_name, GetApplication());
             return {filename};
         } catch (resource_loading_error&) {
-            auto resdir = fs::path{app->GetConfig().resourceSearchPaths_.at(0)};
+            auto resdir = fs::path{GetApplication()->GetConfig().resourceSearchPaths_.at(0)};
             return resdir/ fs::path{config_name};
         }
     }
@@ -339,6 +308,10 @@ namespace viscom {
 
     std::string ApplicationNodeImplementation::get_named_track_value(const std::string &name) {
         return namedTracks[name].get_value(bass->get_row());
+    }
+
+    std::vector<float> ApplicationNodeImplementation::get_track_vec(const std::string &name) {
+        return vec3Tracks[name].get_value(bass->get_row());
     }
 
 }

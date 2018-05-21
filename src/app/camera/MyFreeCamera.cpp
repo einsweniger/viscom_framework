@@ -77,10 +77,12 @@ namespace viscom {
 
         auto pitch_delta = -static_cast<float>(mouseDiff.y * rotSpeed * elapsedTime);
         auto yaw_delta = static_cast<float>(mouseDiff.x * rotSpeed * elapsedTime);
-
-        currentPY_ += glm::vec2(pitch_delta, yaw_delta);
-        currentPY_.x = glm::clamp(currentPY_.x, -glm::half_pi<float>() * 0.99f, glm::half_pi<float>() * 0.99f);
-        auto newOrientation = glm::quat(glm::vec3(currentPY_.x, 0.0f, 0.0f)) * glm::quat(glm::vec3(0.0f, currentPY_.y, 0.0f));
+        pitch += pitch_delta;
+        yaw += yaw_delta;
+//        currentPY_ += glm::vec2(pitch_delta, yaw_delta);
+        pitch = glm::clamp(pitch, -glm::half_pi<float>() * 0.99f, glm::half_pi<float>() * 0.99f);
+//        currentPY_.x = glm::clamp(currentPY_.x, -glm::half_pi<float>() * 0.99f, glm::half_pi<float>() * 0.99f);
+        auto newOrientation = glm::quat(glm::vec3(pitch, 0.0f, 0.0f)) * glm::quat(glm::vec3(0.0f, yaw, 0.0f))* glm::quat(glm::vec3(0.0f, 0.0f, roll));
 
         SetCameraOrientation(newOrientation);
     }
@@ -104,6 +106,10 @@ namespace viscom {
 
     void MyFreeCamera::resetMouse() {
         firstRun_ = true;
+    }
+
+    void MyFreeCamera::Draw2D(bool *p_open) {
+        if(!*p_open) return;
     }
 
 }

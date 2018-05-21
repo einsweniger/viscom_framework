@@ -19,6 +19,7 @@
 #include "gfx/gl/handlers.h"
 
 
+
 namespace viscom {
 
     MasterNode::MasterNode(ApplicationNodeInternal* appNode) :
@@ -50,9 +51,12 @@ namespace viscom {
                 case GLFW_KEY_S: {  //Ctl+s
                     saveTracks();
                     return true;
-                    default:
-                        break;
                 }
+                case GLFW_KEY_R: {
+                    restoreTracks();
+                    return true;
+                }
+                default: return false;
             }
         }
 
@@ -62,6 +66,8 @@ namespace viscom {
             case GLFW_KEY_M: gui_->toggle("MainMenu"); return true;
             case GLFW_KEY_B: gui_->toggle("Buffers"); return true;
             case GLFW_KEY_G: gui_->toggle("GPUProgram"); return true;
+            case GLFW_KEY_F1: storeCamPosition();return true;
+            case GLFW_KEY_F2: storeCamRotation(); return true;
             default: return false;
         }
     }
@@ -74,37 +80,51 @@ namespace viscom {
 
     void MasterNode::CleanUp() {
         ApplicationNodeImplementation::CleanUp();
-        auto gui_stream = std::ofstream{findConfig(minuseins::gui::MasterNodeGui::config_name, GetApplication())};
-        cereal::JSONOutputArchive ar{gui_stream};
-        ar(*gui_);
-        auto startup_stream = std::ofstream{findConfig("StartupPrograms.json", GetApplication())};
-        cereal::JSONOutputArchive ar2{startup_stream};
-        ar2(CEREAL_NVP(startupPrograms));
+        store(findConfig(minuseins::gui::MasterNodeGui::config_name), gui_.get());
+        store(findConfig("StartupPrograms.json"), &startupPrograms);
+
         saveTracks();
     }
 
     void MasterNode::InitOpenGL() {
-        auto cfgPath = findConfig("Shader.json", GetApplication());
-        if(fs::exists(cfgPath)) {
-            auto instr = std::ifstream{cfgPath};
-            cereal::JSONInputArchive ar{instr};
-            ar(shaderParams_);
-            std::cout << "restored params" << std::endl;
-        }
         ApplicationNodeImplementation::InitOpenGL();
-        cfgPath = findConfig(minuseins::gui::MasterNodeGui::config_name, GetApplication());
-        if(fs::exists(cfgPath)) {
-            auto instr = std::ifstream{cfgPath};
-            cereal::JSONInputArchive ar{instr};
-            ar(*gui_);
+        if(restore(findConfig(minuseins::gui::MasterNodeGui::config_name), gui_.get())) {
             gui_->init();
         }
     }
 
     void MasterNode::saveTracks() {
-        auto track_stream = std::ofstream{findConfig("Tracks.json", GetApplication())};
-        cereal::JSONOutputArchive ar3{track_stream};
-        ar3(CEREAL_NVP(tracks));
+        store(findConfig("Tracks.json"), &tracks);
+        store(findConfig("NamedTracks.json"), &namedTracks);
+        store(findConfig("VectorTracks.json"), &vec3Tracks);
+    }
+
+    void MasterNode::storeCamPosition() {
+        if(grabMouse_) {
+            // FreeCam active
+            try {
+                auto track = vec3Tracks.at("CamPosition");
+                minuseins::tracker::FloatVecTrack::key_type key{};
+                glm::vec3 pos = GetCamera()->GetPosition();
+                key.value = {pos.x, pos.y, pos.z};
+                key.row = currentRow;
+                track.set_key(key);
+            } catch (std::out_of_range&) {}
+        }
+    }
+
+    void MasterNode::storeCamRotation() {
+        if(grabMouse_) {
+            // FreeCam active
+            try {
+                auto track = vec3Tracks.at("CamOrientation");
+                minuseins::tracker::FloatVecTrack::key_type key{};
+                glm::quat pos = GetCamera()->GetOrientation();
+                key.value = {pos.x, pos.y, pos.z};
+                key.row = currentRow;
+                track.set_key(key);
+            } catch (std::out_of_range&) {}
+        }
     }
 
 }

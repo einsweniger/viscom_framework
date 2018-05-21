@@ -28,6 +28,34 @@ namespace minuseins::tracker {
         Smooth,
         Ramp
     };
+
+    constexpr interpolation_type rotateInterpolation(interpolation_type type) {
+        switch (type) {
+            case interpolation_type::Step:   return interpolation_type::Linear;
+            case interpolation_type::Linear: return interpolation_type::Smooth;
+            case interpolation_type::Smooth: return interpolation_type::Ramp;
+            case interpolation_type::Ramp:   return interpolation_type::Step;
+        }
+        return interpolation_type::Step;
+    }
+
+    static ImVec4 get_text_color(tracker::interpolation_type type) {
+        switch (type) {
+            case tracker::interpolation_type::Step:return ImVec4(1,1,1,1);
+            case tracker::interpolation_type::Linear:return ImVec4(1.000f, 0.430f, 0.350f, 1.000f);
+            case tracker::interpolation_type::Smooth:return ImVec4(0.000f, 1.000f, 0.000f, 1.000f);
+            case tracker::interpolation_type::Ramp:return ImVec4(0.000f, 0.618f, 1.000f, 1.000f);
+        }
+        return ImVec4(1,1,1,1);
+    }
+
+    constexpr Row min(Row a, Row b) {
+        if(a < b) {
+            return a;
+        }
+        return b;
+    }
+
     struct interpolation {
         interpolation_type type;
         float interpolate(float value);
@@ -102,6 +130,7 @@ namespace minuseins::tracker {
         virtual void draw_value_edit(KeyType& key)=0;
         void draw_empty_selectable(Row row, interpolation_type type);
         void draw_value_selectable(Row active_row, KeyType &key);
+        void drawTrack(ImGuiListClipper& clip);
         std::vector<KeyType> keys;
     };
 
@@ -143,9 +172,60 @@ namespace minuseins::tracker {
         ImGui::PopID();
     }
 
+    template<class KeyType>
+    void AbstractTrack<KeyType>::drawTrack(ImGuiListClipper &clip) {
+        while(clip.Step()) {
+            //once here, there's at least one key.
+            const Row clip_end = static_cast<const Row>(clip.DisplayEnd);
+            Row active_row = static_cast<const Row>(clip.DisplayStart);
+            Row upper = clip_end;
+            if(!keys.empty()) {
+                upper = min(keys.at(0).row, clip_end);
+            }
+            //draw everything before first key;
+            while (active_row < upper) {
+                draw_empty_selectable(active_row, interpolation_type::Step);
+                active_row++;
+            }
+
+            for (size_t i = 0; i < keys.size(); ++i) {
+                auto& key = keys.at(i);
+                ImGui::PushStyleColor(ImGuiCol_Text, get_text_color(key.interp.type));
+                //draw the value.
+                if(active_row != clip_end && active_row == key.row) {
+                    draw_value_selectable(active_row, key);
+                    active_row++;
+                }
+
+                //draw until next key or end
+                if(i+1 < keys.size()) {
+                    upper = min(keys.at(i+1).row, clip_end);
+                } else {
+                    auto color = get_text_color(key.interp.type);
+                    color.x /=2;
+                    color.y /=2;
+                    color.z /=2;
+                    ImGui::PopStyleColor(1);
+                    ImGui::PushStyleColor(ImGuiCol_Text, color);
+                    upper = clip_end;
+                }
+
+                while(active_row < upper) {
+                    draw_empty_selectable(active_row, key.interp.type);
+                    if(ImGui::IsItemHovered()) {
+                        if (ImGui::IsKeyPressed(GLFW_KEY_I, false)) {
+                            key.nextInterpolation();
+                        }
+                    }
+                    active_row++;
+                }
+                ImGui::PopStyleColor(1);
+            }
+        }
+    }
+
     struct Track : AbstractTrack<FloatKey> {
         float get_value(float row) override;
-        void drawTrack(ImGuiListClipper &clip);
 
         std::string value_str(float value) override;
 
@@ -175,14 +255,50 @@ namespace minuseins::tracker {
         void draw_value_edit(strKey &key) override;
 
         std::string name;
-        std::string default_value;
+        std::vector<std::string> possible_values;
         template<class Archive>
         void serialize(Archive &archive) {
             archive(CEREAL_NVP(name), CEREAL_NVP(keys));
         }
 
-        void drawTrack(ImGuiListClipper &clipper);
+    };
+    template <typename T>
+    struct draw_fn : std::function<void(T&)>  {
+        virtual std::string as_string(){return "";};
+        virtual void operator()(T& value){};
+    };
 
+    struct draw_InputFloat3 : draw_fn<std::vector<float>> {
+        void operator()(std::vector<float> &value) override;
+        std::string as_string() override;
+    };
+
+    struct draw_ColorEdit3 : draw_fn<std::vector<float>> {
+        std::string as_string() override;
+
+        void operator()(std::vector<float> &value) override;
+    };
+
+    struct FloatVecKey : Key<std::vector<float>> {
+        void nextInterpolation() override;
+
+        template<class Archive>
+        void serialize(Archive &archive) {
+            archive(CEREAL_NVP(interp),CEREAL_NVP(row), CEREAL_NVP(value));
+        }
+    };
+
+    struct FloatVecTrack : AbstractTrack<FloatVecKey> {
+        size_t vec_size = 3;
+        std::vector<float> get_value(float row) override;
+
+        std::string value_str(std::vector<float> value) override;
+
+        void draw_value_edit(FloatVecKey &key) override;
+        template<class Archive>
+        void serialize(Archive &archive) {
+            archive(CEREAL_NVP(vec_size), CEREAL_NVP(keys));
+        }
     };
 }
 

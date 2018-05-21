@@ -17,6 +17,8 @@ namespace minuseins::handlers {
 
         std::unique_ptr<named_resource> initialize(ProgramInspector &inspect, named_resource res) override;
 
+        void postInit(ProgramInspector &inspect, named_resource_container &res) override;
+
         viscom::ApplicationNodeImplementation* appImpl;
     };
 

@@ -202,11 +202,6 @@ namespace minuseins::handlers {
         // uniform samplerXXiChannel0..3;          input channel. XX = 2D/Cube
         // uniform float    iSampleRate;           sound sample rate (i.e., 44100)
         std::cout << "warning, uncaught " << res.name << std::endl;
-        return UniformBuilder::operator()(std::move(res));
+        return TrackedUniformBuilder::operator()(std::move(res));
     }
-
-    ExternalUniformBuilder::ExternalUniformBuilder(viscom::enh::ApplicationNodeBase *appBase) :
-            appBase(appBase),
-            appImpl(static_cast<viscom::ApplicationNodeImplementation*>(appBase))
-    {}
 }

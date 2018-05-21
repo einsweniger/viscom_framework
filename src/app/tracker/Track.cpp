@@ -7,22 +7,6 @@
 #include <cmath>
 #include "Track.h"
 namespace minuseins::tracker {
-    constexpr Row min(Row a, Row b) {
-        if(a < b) {
-            return a;
-        }
-        return b;
-    }
-
-    ImVec4 get_text_color(tracker::interpolation_type type) {
-        switch (type) {
-            case tracker::interpolation_type::Step:return ImVec4(1,1,1,1);
-            case tracker::interpolation_type::Linear:return ImVec4(1.000f, 0.430f, 0.350f, 1.000f);
-            case tracker::interpolation_type::Smooth:return ImVec4(0.000f, 1.000f, 0.000f, 1.000f);
-            case tracker::interpolation_type::Ramp:return ImVec4(0.000f, 0.618f, 1.000f, 1.000f);
-        }
-        return ImVec4(1,1,1,1);
-    }
 
     float Track::get_value(float row) {
         if(keys.empty()) {
@@ -46,108 +30,6 @@ namespace minuseins::tracker {
         return lower.value + (higher.value - lower.value)*inte;
     }
 
-    void Track::drawTrack(ImGuiListClipper &clip) {
-        while(clip.Step()) {
-            //once here, there's at least one key.
-            const Row clip_end = static_cast<const Row>(clip.DisplayEnd);
-            Row active_row = static_cast<const Row>(clip.DisplayStart);
-            Row upper = clip_end;
-            if(!keys.empty()) {
-                upper = min(keys.at(0).row, clip_end);
-            }
-            //draw everything before first key;
-            while (active_row < upper) {
-                draw_empty_selectable(active_row, interpolation_type::Step);
-                active_row++;
-            }
-
-            for (size_t i = 0; i < keys.size(); ++i) {
-                auto& key = keys.at(i);
-                ImGui::PushStyleColor(ImGuiCol_Text, get_text_color(key.interp.type));
-                //draw the value.
-                if(active_row != clip_end && active_row == key.row) {
-                    draw_value_selectable(active_row, key);
-                    active_row++;
-                }
-
-                //draw until next key or end
-                if(i+1 < keys.size()) {
-                    upper = min(keys.at(i+1).row, clip_end);
-                } else {
-                    auto color = get_text_color(key.interp.type);
-                    color.x /=2;
-                    color.y /=2;
-                    color.z /=2;
-                    ImGui::PopStyleColor(1);
-                    ImGui::PushStyleColor(ImGuiCol_Text, color);
-                    upper = clip_end;
-                }
-
-                while(active_row < upper) {
-                    draw_empty_selectable(active_row, key.interp.type);
-                    if(ImGui::IsItemHovered()) {
-                        if (ImGui::IsKeyPressed(GLFW_KEY_I, false)) {
-                            key.nextInterpolation();
-                        }
-                    }
-                    active_row++;
-                }
-                ImGui::PopStyleColor(1);
-            }
-        }
-    }
-    void strTrack::drawTrack(ImGuiListClipper &clip) {
-        while(clip.Step()) {
-            //once here, there's at least one key.
-            const Row clip_end = static_cast<const Row>(clip.DisplayEnd);
-            Row active_row = static_cast<const Row>(clip.DisplayStart);
-            Row upper = clip_end;
-            if(!keys.empty()) {
-                upper = min(keys.at(0).row, clip_end);
-            }
-            //draw everything before first key;
-            while (active_row < upper) {
-                draw_empty_selectable(active_row, interpolation_type::Step);
-                active_row++;
-            }
-
-            for (size_t i = 0; i < keys.size(); ++i) {
-                auto& key = keys.at(i);
-                ImGui::PushStyleColor(ImGuiCol_Text, get_text_color(key.interp.type));
-                //draw the value.
-                if(active_row != clip_end && active_row == key.row) {
-                    draw_value_selectable(active_row, key);
-                    active_row++;
-                }
-
-                //draw until next key or end
-                if(i+1 < keys.size()) {
-                    upper = min(keys.at(i+1).row, clip_end);
-                } else {
-                    auto color = get_text_color(key.interp.type);
-                    color.x /=2;
-                    color.y /=2;
-                    color.z /=2;
-                    ImGui::PopStyleColor(1);
-                    ImGui::PushStyleColor(ImGuiCol_Text, color);
-                    upper = clip_end;
-                }
-
-                while(active_row < upper) {
-                    draw_empty_selectable(active_row, key.interp.type);
-                    if(ImGui::IsItemHovered()) {
-                        if (ImGui::IsKeyPressed(GLFW_KEY_I, false)) {
-                            key.nextInterpolation();
-                        }
-                    }
-                    active_row++;
-                }
-                ImGui::PopStyleColor(1);
-            }
-        }
-    }
-
-
     std::string Track::value_str(float value) {
         return std::to_string(value);
     }
@@ -158,7 +40,7 @@ namespace minuseins::tracker {
 
     std::string strTrack::get_value(float row) {
         if(keys.empty()) {
-            return default_value;
+            return "";
         }
         Row lower_row = static_cast<Row>(floor(row));
         if(lower_row <= keys.at(0).row) {
@@ -178,9 +60,12 @@ namespace minuseins::tracker {
     }
 
     void strTrack::draw_value_edit(strKey &key) {
-        key.value.reserve(key.value.size()+2);
-        ImGui::InputText("value",&key.value[0],key.value.size());
-        key.value.shrink_to_fit();
+        for(const auto& name : possible_values) {
+            if(ImGui::Selectable(name.c_str(), name == key.value)) {
+                key.value = name;
+            }
+        }
+
     }
 
 
@@ -199,15 +84,73 @@ namespace minuseins::tracker {
     }
 
     void FloatKey::nextInterpolation() {
-        switch (interp.type) {
-            case interpolation_type::Step:   interp.type = interpolation_type::Linear;break;
-            case interpolation_type::Linear: interp.type = interpolation_type::Smooth;break;
-            case interpolation_type::Smooth: interp.type = interpolation_type::Ramp;break;
-            case interpolation_type::Ramp:   interp.type = interpolation_type::Step;break;
-        }
+        interp.type = rotateInterpolation(interp.type);
     }
 
     void strKey::nextInterpolation() {
         interp.type = interpolation_type::Step;
+    }
+
+    void FloatVecKey::nextInterpolation() {
+        interp.type = rotateInterpolation(interp.type);
+    }
+
+    std::vector<float> FloatVecTrack::get_value(float row) {
+        if(keys.empty()) {
+            return std::vector<float>(vec_size);
+        }
+        Row lower_row = static_cast<Row>(floor(row));
+        if(lower_row <= keys.at(0).row) {
+            return keys.at(0).value;
+        }
+        if(lower_row >= keys.at(keys.size()-1).row) {
+            return keys.at(keys.size()-1).value;
+        }
+
+        auto pos = get_lower_bound_position(lower_row);
+        auto lower = keys.at(pos);
+
+        auto higher = keys.at(pos+1);
+
+        auto t = (row - lower.row) / (higher.row - lower.row);
+        auto inte = lower.interp.interpolate(t);
+        std::vector<float> result = lower.value;
+        for (size_t i = 0; i < result.size(); ++i) {
+            result[i] += (higher.value[i] - lower.value[i])*inte;
+        }
+        return result;
+
+    }
+
+    std::string FloatVecTrack::value_str(std::vector<float> value) {
+        std::string result;
+        for (size_t i = 0; i < value.size(); ++i) {
+            if(i>0) {
+                result.append(",");
+            }
+            result.append(std::to_string(value.at(i)));
+        }
+        return result;
+    }
+
+    void FloatVecTrack::draw_value_edit(FloatVecKey &key) {
+//        ImGui::ColorEdit3("value",&key.value[0]);
+        ImGui::InputFloat3("##valeu", &key.value[0]);
+    }
+
+    void draw_InputFloat3::operator()(std::vector<float> &value) {
+        ImGui::InputFloat3("##value", &value[0]);
+    }
+
+    std::string draw_InputFloat3::as_string() {
+        return "InputFloat3";
+    }
+
+    std::string draw_ColorEdit3::as_string() {
+        return "ColorEdit3";
+    }
+
+    void draw_ColorEdit3::operator()(std::vector<float> &value) {
+        ImGui::ColorEdit3("##value", &value[0]);
     }
 }

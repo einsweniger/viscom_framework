@@ -37,8 +37,8 @@ namespace minuseins::audio {
         size_t current_idx = 0;
         size_t img_y=0;
 
-        std::vector<uint32_t> result = std::vector<uint32_t>(img_height*sample_count);
-        std::vector<uint32_t>::iterator fftOutput = result.begin();
+        std::vector<uint32_t> result;
+        std::vector<uint32_t>::iterator fftOutput;
         std::array<float, FFT_SIZE> fftData = std::array<float, FFT_SIZE>{};
         std::vector<std::unique_ptr<viscom::enh::GLTexture>> textures;
         void step();

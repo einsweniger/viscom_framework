@@ -17,9 +17,23 @@
 #include "app/gfx/IntrospectableFsq.h"
 #include <experimental/filesystem>
 #include <fstream>
+#include <cereal/archives/json.hpp>
+#include <app/camera/ScriptedCamera.h>
+
+namespace fs = std::experimental::filesystem;
+template<class T>
+bool restore(fs::path cfgPath, T* entitiy) {
+    if(fs::exists(cfgPath)) {
+        auto instr = std::ifstream{cfgPath};
+        cereal::JSONInputArchive ar{instr};
+        ar(*entitiy);
+        return true;
+    }
+    return false;
+}
+
 
 namespace viscom {
-    namespace fs = std::experimental::filesystem;
     class MeshRenderable;
     class MyFreeCamera;
 
@@ -61,7 +75,7 @@ namespace viscom {
         std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSmoothed;
         std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataIntegrated;
         std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSlightlySmoothed;
-        float fftSmootingFactor = 0.6f;
+        float fftSmootingFactor = 0.840f;
         float fftSlightSmootingFactor = 0.6f;
         float fftMaxIntegralValue = 1024.0f*4;
 
@@ -75,28 +89,28 @@ namespace viscom {
         bool drawToy = false;
         shadertoy::Shader shaderParams_;
 
-        std::string activeMap = "text";
-        std::string activeShading = "iq";
-        std::string activePostproc = "none";
-
         std::unordered_map<std::string, minuseins::tracker::Track> tracks;
         std::unordered_map<std::string, minuseins::tracker::strTrack> namedTracks;
+        std::unordered_map<std::string, minuseins::tracker::FloatVecTrack> vec3Tracks;
 
         float get_track_value(const std::string &name);
+        std::vector<float> get_track_vec(const std::string& name);
         std::string get_named_track_value(const std::string &name);
+
+        std::unique_ptr<MyFreeCamera> freeCam_;
+        std::unique_ptr<ScriptedCamera> scriptCam_;
 
     protected:
         void toggleMouseGrab();
 
         bool grabMouse_ = false;
-        std::unique_ptr<MyFreeCamera> freeCam_;
-        fs::path findConfig(const std::string &name, ApplicationNodeInternal *appNode);
+        fs::path findConfig(const std::string &name);
+
+        void restoreTracks();
 
     private:
 
         void update_scene();
-
-        void do_if_time_greater(float time, std::function<void()> fn);
 
     };
 }

@@ -1,42 +1,39 @@
-/**
- * @file   FreeCamera.h
- * @author Sebastian Maisch <sebastian.maisch@uni-ulm.de>
- * @date   2017.06.07
- *
- * @brief  Declaration of a free flight camera.
- */
+//
+// Created by bone on 21.05.18.
+//
 
-#pragma once
+#ifndef VISCOMFRAMEWORK_SCRIPTEDCAMERA_H
+#define VISCOMFRAMEWORK_SCRIPTEDCAMERA_H
 
 #include "core/camera/CameraBase.h"
 #include "core/CameraHelper.h"
 #include <glm/gtc/quaternion.hpp>
 
 namespace viscom {
-
+    class ApplicationNodeImplementation;
     /**
     * Represents a free moving camera.
     */
-    class MyFreeCamera final : public CameraBase
+    class ScriptedCamera final : public CameraBase
     {
     public:
-        MyFreeCamera(const glm::vec3& camPos, viscom::CameraHelper& cameraHelper, double moveSpeed = 30.0) noexcept;
+        ScriptedCamera(const glm::vec3& camPos, viscom::CameraHelper& cameraHelper, ApplicationNodeImplementation* appImpl) noexcept;
 
         bool HandleMouse(int button, int action, float mouseWheelDelta, const ApplicationNodeBase* sender) override;
         void UpdateCamera(double elapsedTime, const ApplicationNodeBase* sender) override;
-        void SetMoveSpeed(double speed);
-        double GetMoveSpeed();
-        void resetMouse();
-        void Draw2D(bool* p_open);
-
+        glm::quat GetOrientation() {return CameraBase::GetOrientation();};
+        glm::vec3 GetPosition() {return CameraBase::GetPosition();};
+        glm::vec3 position{0,1,8};
+        glm::quat rotation{0,0,0,1};
     private:
+        ApplicationNodeImplementation* appImpl;
         /** Holds the current pitch and yaw state. */
         glm::vec2 currentPY_;
-        float pitch =0, yaw=0, roll=0;
         /** Holds the current mouse position. */
         glm::vec2 currentMousePosition_;
-        double moveSpeed_;
         /** Holds the flag for setting the previous mouse position. */
         bool firstRun_;
     };
 }
+
+#endif //VISCOMFRAMEWORK_SCRIPTEDCAMERA_H

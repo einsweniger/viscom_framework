@@ -23,9 +23,17 @@ namespace minuseins::handlers {
         viscom::ApplicationNodeImplementation* appImpl;
     };
 
-    struct TrackNamedUniform : TrackedUniform {
-        using TrackedUniform::TrackedUniform;
+    struct TrackVecFloat : FloatUniform {
+        TrackVecFloat(named_resource res, viscom::ApplicationNodeImplementation *appImpl);
+
+        bool get_updated_value() override;
+
+        void init(gl::GLuint program) override;
+
+        viscom::ApplicationNodeImplementation* appImpl;
     };
+
+
 
     struct TrackedUniformBuilder : ShaderToySamplerBuilder {
         using ShaderToySamplerBuilder::ShaderToySamplerBuilder;

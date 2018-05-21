@@ -24,6 +24,22 @@ namespace minuseins::handlers {
         return SubroutineUniformHandler::initialize(inspect, std::move(res));
     }
 
+    void SceneSubroutineHandler::postInit(ProgramInspector &inspect, resource_handler::named_resource_container &res) {
+        SubroutineUniformHandler::postInit(inspect, res);
+        for(auto& r : res) {
+            try {
+                auto& hdl = dynamic_cast<SubroutineChanger&>(*r);
+                appImpl->namedTracks[hdl.name].possible_values.clear();
+                for(auto& x : hdl.subroutines) {
+                    appImpl->namedTracks[hdl.name].possible_values.push_back(x.second);
+                }
+            } catch(std::bad_cast&) {
+                //don't care
+            }
+
+        }
+    }
+
     SubroutineChanger::SubroutineChanger(gl::GLenum stage, const named_resource &res, viscom::ApplicationNodeImplementation *appImpl)
             : SubroutineUniform(stage, res), appImpl(appImpl) {}
 
@@ -59,14 +75,15 @@ namespace minuseins::handlers {
     }
 
     void MapChanger::get_update() {
-        use_subroutine(appImpl->activeMap);
+        use_subroutine(appImpl->get_named_track_value(name));
+        //use_subroutine(appImpl->activeMap);
     }
 
     void ShadeChanger::get_update() {
-        use_subroutine(appImpl->activeShading);
+        use_subroutine(appImpl->get_named_track_value(name));
     }
 
     void PostProcChanger::get_update() {
-        use_subroutine(appImpl->activePostproc);
+        use_subroutine(appImpl->get_named_track_value(name));
     }
 }

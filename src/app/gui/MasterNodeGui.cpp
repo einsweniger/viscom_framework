@@ -21,10 +21,12 @@
 #include <glbinding/glbinding.h>
 #include <app/gui/dialogs/Animation.h>
 #include <app/gui/dialogs/Tracker.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "MasterNodeGui.h"
 #include "app/gui/dialogs/FileSelect.h"
 #include "app/gui/dialogs/Overlay.h"
-
+#include "app/camera/ScriptedCamera.h"
+#include "app/camera/MyFreeCamera.h"
 
 namespace minuseins::gui {
 
@@ -330,6 +332,10 @@ namespace minuseins::gui {
             ImGui::End();
             return;
         }
+        auto o = appImpl->GetCamera()->GetOrientation();
+
+        ImGui::InputFloat4("cam orientation", glm::value_ptr(o));
+
         ImGui::DragFloat("fftSmoothing",&appImpl->fftSmootingFactor, 0.01f,0.0f,0.98f);
         ImGui::DragFloat("fftMaxIntegral", &appImpl->fftMaxIntegralValue);
         ImGui::Separator();

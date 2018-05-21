@@ -174,7 +174,8 @@ namespace minuseins::handlers {
 
 
     ShaderToySamplerBuilder::ShaderToySamplerBuilder(viscom::enh::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass)
-            : ExternalUniformBuilder(appBase), pass(pass)
+            : appBase(appBase),
+              appImpl(static_cast<viscom::ApplicationNodeImplementation*>(appBase)), pass(pass)
     {
         for(auto& inp : pass.inputs) {
             if("texture" == inp.ctype) {
@@ -270,7 +271,7 @@ namespace minuseins::handlers {
             }
         }
 
-        return ExternalUniformBuilder::operator()(std::move(res));
+        return UniformBuilder::operator()(std::move(res));
     }
 
 }

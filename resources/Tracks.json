@@ -1,0 +1,359 @@
+{
+    "value0": [
+        {
+            "key": "trace_pixelRadius",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 0.00009999999747378752
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 976,
+                        "value": 0.00009999999747378752
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1023,
+                        "value": 0.30000001192092898
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1024,
+                        "value": 0.00009999999747378752
+                    }
+                ]
+            }
+        },
+        {
+            "key": "text_rotation",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 255,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 320,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 383,
+                        "value": 1.0
+                    }
+                ]
+            }
+        },
+        {
+            "key": "ca_num_iter",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 976,
+                        "value": 4.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1023,
+                        "value": 24.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1024,
+                        "value": 4.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1641,
+                        "value": 4.0
+                    }
+                ]
+            }
+        },
+        {
+            "key": "fade_black",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 128,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 255,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 383,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 449,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 511,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 533,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 564,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 576,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 596,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 628,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 640,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 660,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 692,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 704,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 724,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 756,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 768,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 788,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 820,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 832,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 852,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 884,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 896,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 948,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 986,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 1023,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 1024,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 3072,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 3275,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 3585,
+                        "value": 0.0
+                    }
+                ]
+            }
+        },
+        {
+            "key": "test_debug_plane_mix",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 3585,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4097,
+                        "value": 1.0
+                    }
+                ]
+            }
+        }
+    ]
+}

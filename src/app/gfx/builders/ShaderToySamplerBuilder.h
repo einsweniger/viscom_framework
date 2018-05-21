@@ -7,7 +7,14 @@
 
 #include <app/shadertoy/ShaderToy.h>
 #include <core/gfx/Texture.h>
-#include "ExternalUniformBuilder.h"
+#include <app/gfx/gl/handlers/detail/UniformBuilder.h>
+
+namespace viscom {
+    namespace enh {
+        class ApplicationNodeBase;
+    }
+    class ApplicationNodeImplementation;
+}
 
 namespace minuseins::handlers {
     namespace detail {
@@ -30,9 +37,11 @@ namespace minuseins::handlers {
             void *valuePtr() override { return nullptr; }
         };
     }
-    struct ShaderToySamplerBuilder : ExternalUniformBuilder {
+    struct ShaderToySamplerBuilder : UniformBuilder {
         ShaderToySamplerBuilder(viscom::enh::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass);
 
+        viscom::enh::ApplicationNodeBase* appBase;
+        viscom::ApplicationNodeImplementation* appImpl;
         shadertoy::Renderpass pass;
 
         gl::GLuint samplerCounter = 0;
