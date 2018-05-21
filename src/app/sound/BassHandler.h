@@ -8,6 +8,7 @@
 #include <experimental/filesystem>
 #include <bass.h>
 #include <iostream>
+#include <enh/gfx/gl/GLTexture.h>
 
 namespace minuseins::audio {
     //constexpr float bpm = 150.0f; /* beats per minute */
@@ -39,9 +40,10 @@ namespace minuseins::audio {
         std::vector<uint32_t> result = std::vector<uint32_t>(img_height*sample_count);
         std::vector<uint32_t>::iterator fftOutput = result.begin();
         std::array<float, FFT_SIZE> fftData = std::array<float, FFT_SIZE>{};
-
+        std::vector<std::unique_ptr<viscom::enh::GLTexture>> textures;
         void step();
         size_t total_rows();
+        bool wrote_textures=false;
     };
 
     class BassHandler {

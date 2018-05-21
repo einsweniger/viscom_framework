@@ -3,6 +3,7 @@
 //
 
 #include <cmath>
+#include <app/util.h>
 #include "BassHandler.h"
 
 namespace minuseins::audio {
@@ -162,56 +163,6 @@ namespace minuseins::audio {
         return logTab;
     }
 
-    int decodeFunc(HSTREAM chan)
-    {
-        const auto sample_len = BASS_ChannelSeconds2Bytes(chan, 1.0/100.0); //10ms
-        const size_t sample_count = (size_t)((double)BASS_ChannelGetLength(chan, BASS_POS_BYTE) / (double)sample_len);
-
-        printf("Num samples %d\n", (int)sample_len);
-        printf("Num samples %lu\n", sample_count);
-
-        //BASS_ChannelPlay(chan, false);
-
-        auto fftData = std::array<float, FFT_SIZE>();
-        const float maxIntensity = 500 * 2;
-        const auto colors = createPalette();
-        const auto logLookup = createLogLookup();
-        const float intensity_step = (colors.size() - 1) / std::log(maxIntensity + 1);
-        auto fftResult = std::vector<uint32_t>(img_height*sample_count);
-        auto fftOutput = fftResult.begin();
-        for (size_t sample_idx = 0; sample_idx < sample_count; sample_idx++)
-        {
-            BASS_ChannelSetPosition(chan, sample_idx * sample_len, BASS_POS_BYTE);
-            BASS_ChannelGetData(chan, &fftData[0], BASS_DATA_FFT2048);
-
-            for (size_t img_y = 0; img_y < img_height; ++img_y)
-            {
-                float intensity = 500.f * (
-                        1.f * fftData[FFT_SIZE - logLookup[img_y+0] - 1] +
-                        6.f * fftData[FFT_SIZE - logLookup[img_y+1] - 1] +
-                        1.f * fftData[FFT_SIZE - logLookup[img_y+2] - 1]);
-                if (intensity > maxIntensity) {
-                    *fftOutput++ = colors[colors.size()-1];
-                    continue;
-                }
-                if (intensity < 0.0f) {
-                    *fftOutput++ = colors[0];
-                    continue;
-                }
-
-                int palettePos = static_cast<int>(intensity_step * log(intensity + 1)); // f2* ~[0,6.91]
-
-                *fftOutput++ = colors[palettePos];
-            }
-        }
-
-        //BASS_StreamFree(chan);
-
-        printf("thread done\n");
-
-        return 1;
-    }
-
     BassDecoder::BassDecoder(unsigned int stream) :
             stream(stream),
             sample_len{BASS_ChannelSeconds2Bytes(stream, 1.0/samples_per_second)},
@@ -222,12 +173,27 @@ namespace minuseins::audio {
                 BASS_ChannelPlay(stream, false);
                 BASS_ChannelSetPosition(stream, current_idx * sample_len, BASS_POS_BYTE);
                 BASS_ChannelGetData(stream, &fftData[0], BASS_DATA_FFT2048);
+                auto texDescr = viscom::enh::TextureDescriptor{sizeof(uint32_t), gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE};
+                auto texCount = sample_count/FFT_SIZE;
+                for(size_t i =0; i<texCount+2; i++) {
+                    textures.push_back(std::make_unique<viscom::enh::GLTexture>(img_height,FFT_SIZE, texDescr, nullptr));
+                }
             }
 
 
 
     void BassDecoder::step() {
-        if(current_idx >= sample_count) return;
+        if(current_idx >= sample_count) {
+            if(wrote_textures) return;
+            wrote_textures = true;
+
+            int idx = 0;
+            for(auto& tex : textures) {
+                auto name = "tex" + std::to_string(idx) + ".png";
+                tex->SaveTextureToFile(name);
+                idx++;
+            }
+        }
 
         float intensity = 500.f * (
                 1.f * fftData[FFT_SIZE - logLookup[img_y+0] - 1] +
@@ -239,6 +205,8 @@ namespace minuseins::audio {
             current_idx++;
             BASS_ChannelSetPosition(stream, current_idx * sample_len, BASS_POS_BYTE);
             BASS_ChannelGetData(stream, &fftData[0], BASS_DATA_FFT2048);
+            auto texIdx = std::distance(result.begin(),fftOutput) / (img_height*FFT_SIZE);
+            textures.at(texIdx)->SetData(&result[(img_height*FFT_SIZE)*texIdx]);
         }
         if (intensity > maxIntensity) {
             *fftOutput++ = palette[palette.size()-1];
