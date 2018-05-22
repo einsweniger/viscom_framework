@@ -26,7 +26,7 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
     vec3 light_direction = normalize( render_light_direction );
     vec3 color = light_color +ray_direction.y*0.8;
     //float material = -1;
-    vec2 distAndMat = raymarch(ray_origin, ray_direction);
+    vec3 distAndMat = raymarch(ray_origin, ray_direction);
     float material = distAndMat.y;
     vec3 hit = ray_direction*distAndMat.x+ray_origin;
     //distance = length(hit-ray_origin);
@@ -45,6 +45,10 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
             //draw checker texture
             color = checker_texture(hit);
         }
+        if(distAndMat.z != 0) {
+            color = material_color(distAndMat.z*100);
+        }
+
 
         if(material == 0.3) {
             vec3 smallVec = vec3(1.0/4096.0, 0, 0);

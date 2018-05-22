@@ -35,7 +35,7 @@ namespace minuseins::tracker {
     }
 
     void Track::draw_value_edit(FloatKey &key) {
-        ImGui::InputFloat("value", &key.value);
+        ImGui::DragFloat("value", &key.value);
     }
 
     std::string strTrack::get_value(float row) {
@@ -134,8 +134,15 @@ namespace minuseins::tracker {
     }
 
     void FloatVecTrack::draw_value_edit(FloatVecKey &key) {
+        switch (key.value.size()) {
+            case 1: ImGui::DragFloat("##value",&key.value[0]); break;
+            case 2: ImGui::DragFloat2("##value",&key.value[0]); break;
+            case 3: ImGui::DragFloat3("##value",&key.value[0]); break;
+            case 4: ImGui::DragFloat4("##value",&key.value[0]); break;
+            default:ImGui::DragFloat("##value",&key.value[0]); break;
+        }
 //        ImGui::ColorEdit3("value",&key.value[0]);
-        ImGui::InputFloat3("##valeu", &key.value[0]);
+//        ImGui::InputFloat3("##valeu", &key.value[0]);
     }
 
     void draw_InputFloat3::operator()(std::vector<float> &value) {

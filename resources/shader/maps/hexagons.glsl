@@ -118,8 +118,8 @@ vec3 hexagons(in vec3 p){
     if(n.y == distance) material = 46;
     if(n.z == distance) material = 66;
     if(n.w == distance) material = 86;
-    if(hex_use_material) {
-        return vec3(distance*.75, material,0);
+    if(text_rotation > 1.0) { //use material
+        return vec3(distance*.75, material*text_rotation,0);
     } else {
         return vec3(distance*.75, 0,0);
     }

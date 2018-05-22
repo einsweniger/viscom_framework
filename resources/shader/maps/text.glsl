@@ -41,7 +41,7 @@ const vec3 letterBoxPos = vec3(0,2,0);
 uniform vec3 cropBounds = vec3(0.25, 0.50, 0.25);
 uniform vec3 lbp2 = vec3(0,2,0);
 const vec3 char_offset = vec3(-5,0,-3);
-uniform float text_rotation = 0;
+
 subroutine(SceneMap)
 vec3 text( vec3 pos ) {
     vec2 res =      vec2( sdfPlaneXZ(   pos-plane_position), 1.0 );
@@ -72,16 +72,27 @@ vec3 text( vec3 pos ) {
     float NS = compound_letter(charPos8, 0x4E, 0x53);
     float S1 = compound_letter(charPos9, 0x53, 0x21);
 
-    res = opU(res, vec2(MP, 67));
-    res = opU(res, vec2(IR, 67));
-    res = opU(res, vec2(NE, 67));
-    res = opU(res, vec2(US, 67));
-    res = opU(res, vec2(SE, 67));
-    res = opU(res, vec2(EN, 67));
-    res = opU(res, vec2(IT, 67));
-    res = opU(res, vec2(NS, 67));
-    res = opU(res, vec2(S1, 67));
-
+    if(text_rotation > -5) {
+        res = opU(res, vec2(MP, 67));
+    }
+    if(text_rotation > -4) {
+        res = opU(res, vec2(IR, 67));
+        res = opU(res, vec2(NE, 67));
+    }
+    if(text_rotation > -3) {
+        res = opU(res, vec2(US, 67));
+    }
+    if(text_rotation > -2) {
+        res = opU(res, vec2(SE, 67));
+        res = opU(res, vec2(EN, 67));
+    }
+    if(text_rotation > -1) {
+        res = opU(res, vec2(IT, 67));
+    }
+    if(text_rotation > -0) {
+        res = opU(res, vec2(NS, 67));
+        res = opU(res, vec2(S1, 67));
+    }
 //    vec3 np = pos;
 //    float cropBox = sdfBox(np-lbp2, cropBounds);
 //    float f1 = charS(fract(np.xy), 65.)-0.5;

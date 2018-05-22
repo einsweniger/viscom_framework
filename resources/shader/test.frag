@@ -46,6 +46,8 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 //#include "lib/XsVcDy/Image.frag"
 #include "lib/distanceMeter.glsl"
 
+uniform vec3 plane_position = vec3(0,-2,0);
+uniform float text_rotation = 0;
 #include "maps/sphereZone.glsl"
 #include "maps/positionOffsetting.glsl"
 #include "maps/sdfDemo.glsl"
@@ -61,7 +63,7 @@ out vec4 test_worldPos;
 out vec4 test_text;
 out vec4 test_sound;
 
-uniform bool test_show_debug_plane = false;
+const bool test_show_debug_plane = true;
 uniform float test_xzPlane = 0;
 
 uniform vec3 test_dbg_plane_normal = vec3(0,1,0);

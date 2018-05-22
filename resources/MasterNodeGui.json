@@ -31,7 +31,7 @@
             },
             {
                 "key": "Overlay",
-                "value": true
+                "value": false
             },
             {
                 "key": "Shader",

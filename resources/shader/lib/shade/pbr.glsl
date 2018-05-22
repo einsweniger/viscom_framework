@@ -99,7 +99,7 @@ vec3 pbr(in vec3 origin, in vec3 direction, out float distance) {
     vec3 color = vec3(0.65, 0.85, 1.0) + direction.y * 0.72;
 
     // (distance, material)
-    vec2 hit = raymarch(origin, direction);
+    vec3 hit = raymarch(origin, direction);
     distance = hit.x;
     float material = hit.y;
 
@@ -163,7 +163,7 @@ vec3 pbr(in vec3 origin, in vec3 direction, out float distance) {
         // diffuse indirect
         vec3 indirectDiffuse = Irradiance_SphericalHarmonics(n) * Fd_Lambert();
 
-        vec2 indirectHit = raymarch(position, r);
+        vec3 indirectHit = raymarch(position, r);
         vec3 indirectSpecular = vec3(0.65, 0.85, 1.0) + r.y * 0.72;
         if (indirectHit.y > 0.0) {
             if (indirectHit.y < 4.0)  {

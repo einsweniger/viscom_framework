@@ -51,9 +51,9 @@ vec3 cubes( in vec3 pos )
 	vec3 height_id_freq = mapH(pos.xz);
 	float height= height_id_freq.x;
 
-    vec3  m = mapH( pos.xz );
+    //vec3  m = mapH( pos.xz );
 	float d = dbox( vec3(p.x-0.5,pos.y-0.5*height,p.y-0.5), vec3(0.3,height*0.5,0.3), 0.1 );
-    return vec3( d, m.yz );
+    return vec3( d, height_id_freq.yz );
 }
 
 const float surface = 0.001;

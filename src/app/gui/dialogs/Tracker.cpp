@@ -52,16 +52,31 @@ namespace minuseins::gui {
             ImGui::SameLine();
             //TODO mute, fold?
             ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
+            if(ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::TextUnformatted(track.first.c_str());
+                ImGui::EndTooltip();
+            }
         }
         for(auto& track : appImpl->namedTracks) {
             ImGui::SameLine();
             //TODO mute, fold?
             ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
+            if(ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::TextUnformatted(track.first.c_str());
+                ImGui::EndTooltip();
+            }
         }
         for(auto& track : appImpl->vec3Tracks) {
             ImGui::SameLine();
             //TODO mute, fold?
             ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
+            if(ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::TextUnformatted(track.first.c_str());
+                ImGui::EndTooltip();
+            }
         }
 
         // table content

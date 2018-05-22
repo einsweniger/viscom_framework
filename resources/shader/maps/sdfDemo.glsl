@@ -1,7 +1,6 @@
 uniform Capsule capsule;
 uniform Box box;
 uniform vec3 reflection_offset = vec3(0,1,0);
-uniform vec3 plane_position = vec3(0,-2,0);
 uniform vec3 blob_position = vec3(0,0.1,0);
 subroutine(SceneMap)
 vec3 sdfDemo(vec3 pos)  // https://www.shadertoy.com/view/Xds3zN

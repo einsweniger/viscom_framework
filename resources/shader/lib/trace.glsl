@@ -1,7 +1,7 @@
 //#define USE_SUBROUTINES
 
 #ifdef USE_SUBROUTINES
-subroutine vec2 RayMarch(vec3 origin, vec3 direction);  // function signature type declaration
+subroutine vec3 RayMarch(vec3 origin, vec3 direction);  // function signature type declaration
 subroutine uniform RayMarch raymarch;  // uniform instance, can be called like a function
 #else
 
@@ -16,10 +16,10 @@ const float trace_relaxation = 1.9;
 uniform float trace_pixelRadius = 0.0001;
 const int   trace_MAX_ITERATIONS = 160;
 const bool  trace_USE_BV = false;
-vec2 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool forceHit) {
+vec3 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool forceHit) {
     float omega = relaxation; //relaxation parameter omega ∈ [1;2)
     float t = trace_t_min;
-    float material = -1.0;
+    vec2 material = vec2(-1.0,0);
     float candidate_error = trace_INF;
     float candidate_t = trace_t_min;
     float previousRadius = 0.;
@@ -28,7 +28,7 @@ vec2 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool
     for (int i = 0; i < trace_MAX_ITERATIONS; ++i) {
 
         vec3 result = map(dir * t + pos);
-        material = result.y;
+        material = result.yz;
         //float signedRadius = functionSign * result.x;
         float signedRadius = result.x;
         float radius = abs(signedRadius);
@@ -53,19 +53,19 @@ vec2 enhancedTrace(vec3 pos, vec3 dir, float relaxation, float pixelRadius, bool
         t += stepLength;
     }
 
-    if ((t > trace_t_max || candidate_error > trace_pixelRadius) && !forceHit) return vec2(trace_INF);
-    return vec2(t, material);
+    if ((t > trace_t_max || candidate_error > trace_pixelRadius) && !forceHit) return vec3(trace_INF);
+    return vec3(t, material);
 }
 
 #ifdef USE_SUBROUTINES
 subroutine(RayMarch)
-vec2 defaultEnhancedTrace(vec3 origin,vec3 direction) {
+vec3 defaultEnhancedTrace(vec3 origin,vec3 direction) {
     const bool forceHit = false;
 
     return enhancedTrace(origin, direction, trace_relaxation, trace_pixelRadius, forceHit);
 }
 #else
-vec2 raymarch(vec3 origin,vec3 direction) {
+vec3 raymarch(vec3 origin,vec3 direction) {
     const bool forceHit = false;
 
     return enhancedTrace(origin, direction, trace_relaxation, trace_pixelRadius, forceHit);
@@ -75,28 +75,29 @@ vec2 raymarch(vec3 origin,vec3 direction) {
 #ifdef USE_SUBROUTINES
 subroutine(RayMarch)
 #endif
-vec2 simpleTrace(vec3 origin, vec3 direction) {
+vec3 simpleTrace(vec3 origin, vec3 direction) {
     const float tau = .001; //threshold
 
     float t = trace_t_min;
     int i = 0;
+    vec3 result;
     while(i < trace_MAX_ITERATIONS && t < trace_t_max) {
         vec3 position = direction*t+origin;
-        vec3 result = map(position);
+        result = map(position);
         if (result.x < tau) break;
-        if (t > trace_t_min) return vec2(trace_INF); //return INFINITY;
+        if (t > trace_t_min) return vec3(trace_INF); //return INFINITY;
         t += result.x;
         i++;
     }
-    return vec2(t, t);
+    return vec3(t, result.yz);
 }  // simple sphere tracer, adapted from Enhanced Sphere Tracing (https://doi.org/10.2312/stag.20141233, listing 1)
 
 #ifdef USE_SUBROUTINES
 subroutine(RayMarch)
 #endif
-vec2 textTrace(vec3 origin, vec3 direction) {
+vec3 textTrace(vec3 origin, vec3 direction) {
 
-	vec2 distAndMat;  // Distance and material
+	vec3 distAndMat;  // Distance and material
 	float t = 0.05;
 	const float maxDepth = 16.0; // farthest distance rays will travel
 	vec3 pos = origin;
@@ -112,20 +113,20 @@ vec2 textTrace(vec3 origin, vec3 direction) {
         // we know we are safe to "march" along the ray by that much distance
         // without hitting anything. We repeat this until we get really close
         // and then break because we have effectively hit the object.
-        distAndMat = map(pos).xy;
+        distAndMat = map(pos);
 
         // move along the ray a safe amount
         t += distAndMat.x;
         // If we are very close to the object, let's call it a hit and exit this loop.
         if ((t > maxDepth) || (abs(distAndMat.x) < smallVal)) break;
     }
-    return vec2(t, distAndMat.y);
+    return vec3(t, distAndMat.yz);
 }
 
 #ifdef USE_SUBROUTINES
 subroutine(RayMarch)
 #endif
-vec2 castRay(vec3 origin,vec3 direction ) {
+vec3 castRay(vec3 origin,vec3 direction ) {
     float tmin = trace_t_min;
     float tmax = trace_t_max;
 
@@ -146,16 +147,16 @@ vec2 castRay(vec3 origin,vec3 direction ) {
     }
 
     float t = tmin;
-    float material = -1;
+    vec2 material = vec2(-1,0);
     for( int i=0; i<trace_MAX_ITERATIONS; i++ )
     {
         float precis = 0.0005*t;
         vec3 result = map( direction*t+origin );
         if( result.x<precis || t>tmax ) break;
         t += result.x;
-        material = result.y;
+        material = result.yz;
     }
 
-    if( t>tmax ) material=-1;
-    return vec2( t, material );
+    if( t>tmax ) material= vec2(-1,0);
+    return vec3( t, material );
 }
