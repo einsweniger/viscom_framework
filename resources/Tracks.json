@@ -1,28 +1,6 @@
 {
     "value0": [
         {
-            "key": "distort_add",
-            "value": {
-                "name": "",
-                "keys": [
-                    {
-                        "interp": {
-                            "type": 0
-                        },
-                        "row": 0,
-                        "value": 0.3100000023841858
-                    },
-                    {
-                        "interp": {
-                            "type": 0
-                        },
-                        "row": 1115,
-                        "value": 0.3100000023841858
-                    }
-                ]
-            }
-        },
-        {
             "key": "ca_num_iter",
             "value": {
                 "name": "",
@@ -108,7 +86,7 @@
             }
         },
         {
-            "key": "test_debug_plane_mix",
+            "key": "distort_add",
             "value": {
                 "name": "",
                 "keys": [
@@ -117,21 +95,50 @@
                             "type": 0
                         },
                         "row": 0,
-                        "value": 1.0
+                        "value": 0.3100000023841858
                     },
                     {
                         "interp": {
                             "type": 0
                         },
-                        "row": 3584,
-                        "value": 0.0
+                        "row": 1115,
+                        "value": 0.3100000023841858
+                    }
+                ]
+            }
+        },
+        {
+            "key": "distort_grid_size",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 0.20000000298023225
                     },
                     {
                         "interp": {
                             "type": 0
                         },
-                        "row": 4097,
-                        "value": 1.0
+                        "row": 255,
+                        "value": 0.20000000298023225
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 511,
+                        "value": 0.20000000298023225
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1115,
+                        "value": 0.3100000023841858
                     }
                 ]
             }
@@ -447,7 +454,7 @@
             }
         },
         {
-            "key": "distort_grid_size",
+            "key": "test_debug_plane_mix",
             "value": {
                 "name": "",
                 "keys": [
@@ -456,28 +463,21 @@
                             "type": 0
                         },
                         "row": 0,
-                        "value": 0.20000000298023225
+                        "value": 1.0
                     },
                     {
                         "interp": {
                             "type": 0
                         },
-                        "row": 255,
-                        "value": 0.20000000298023225
+                        "row": 3584,
+                        "value": 0.0
                     },
                     {
                         "interp": {
                             "type": 0
                         },
-                        "row": 511,
-                        "value": 0.20000000298023225
-                    },
-                    {
-                        "interp": {
-                            "type": 0
-                        },
-                        "row": 1115,
-                        "value": 0.3100000023841858
+                        "row": 4097,
+                        "value": 1.0
                     }
                 ]
             }

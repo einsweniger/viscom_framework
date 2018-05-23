@@ -18,8 +18,11 @@ namespace minuseins::handlers {
 
         bool get_updated_value() override;
 
+        void draw2D() override;
+
         bool upload_value() override;
 
+        float value;
         viscom::ApplicationNodeImplementation* appImpl;
     };
 

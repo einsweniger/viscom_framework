@@ -11,12 +11,13 @@ namespace viscom {
 
 namespace minuseins::gui {
 
+    constexpr unsigned int row_count = 7000;
     struct Tracker {
         Tracker(viscom::ApplicationNodeImplementation *appImpl);
 
         bool Draw(bool* p_open);
         viscom::ApplicationNodeImplementation* appImpl;
-        unsigned int row_count = 7000;
+
         bool track_active_row = true;
         float texture_height = 1024;
         std::unique_ptr<audio::BassDecoder> decoder;

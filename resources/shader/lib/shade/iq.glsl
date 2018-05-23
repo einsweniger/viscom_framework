@@ -46,6 +46,7 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
             color = checker_texture(hit);
         }
         if(distAndMat.z != 0) {
+            // frequency works, id would be better :(
             color = material_color(distAndMat.z*100);
         }
 

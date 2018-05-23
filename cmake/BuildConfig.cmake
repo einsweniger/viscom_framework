@@ -1,12 +1,17 @@
 # Build-flags.
 
 target_compile_options(glbinding INTERFACE "-Wno-deprecated-declarations")
-target_compile_options(cereal INTERFACE "-Wno-class-memaccess")
-
 
 if(UNIX)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wno-unused-function -Wno-unused-parameter -Wno-ignored-qualifiers -Wextra -Wpedantic -pg")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      list(INSERT CORE_LIBS 0
+          c++experimental
+          c++abi
+      )
+  endif()
 
   list(APPEND CORE_LIBS
     stdc++fs
@@ -20,6 +25,11 @@ if(UNIX)
     dl
 
     )
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+      target_compile_options(cereal INTERFACE "-Wno-class-memaccess")
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      add_compile_options(-Wno-exceptions) # 'functor' has a non-throwing exception specification but can still throw
+  endif()
 
   # add compiler-options for AppleClang to ignore linker warnings from assimp on macOS
   if (CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
@@ -29,7 +39,8 @@ if(UNIX)
     add_compile_options(-stdlib=libc++ -isystem /usr/include/c++/v1)
     add_compile_options(-fcolor-diagnostics)
     #add_compile_options(-std=c++17)
-    list(APPEND CORE_LIBS c++experimental c++abi)
+    #set(CORE_LIBS "c++experimental c++abi ${CORE_LIBS}")
+    #list(APPEND CORE_LIBS c++experimental c++abi)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
   endif()
 #elseif(MSVC)

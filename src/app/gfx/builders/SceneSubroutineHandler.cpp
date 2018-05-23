@@ -50,8 +50,6 @@ namespace minuseins::handlers {
         if(subname == previous_active) {
             return;
         }
-
-        std::cout << name << " switching to " << subname << std::endl;
         previous_active = subname;
         auto it = std::find_if(subroutines.begin(), subroutines.end(), [&](const std::pair<gl::GLuint,std::string>& content) {
             return content.second == subname;

@@ -53,7 +53,7 @@ namespace viscom {
         fftTexSmoothed = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, texDescr);
         fftTexIntegrated = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, texDescr);
 
-        bass->openFile({"../resources/media/song.ogg"});
+        bass->openFile(Resource::FindResourceLocation("media/song.ogg", GetApplication()));
         auto [bytes, time] = bass->get_length();
         std::cout << "bass length in bytes: " << bytes << " and in seconds: " << time << std::endl;
         std::cout << "that's: " << time*minuseins::audio::row_rate  << " rows!" << std::endl;

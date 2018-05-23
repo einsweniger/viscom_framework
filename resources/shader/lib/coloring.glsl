@@ -101,7 +101,7 @@ vec3 applyFog( in vec3  rgb,      // original color of the pixel
 
 const float fog_density = .2;
 uniform bool shade_DRAW_DEBUG = false;
-uniform bool shade_fog = true;
+uniform bool shade_fog = false;
 
 float softshadow(vec3 ro,vec3 rd,float mint,float tmax ) {
     float res = 1.0;

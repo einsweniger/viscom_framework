@@ -13,9 +13,21 @@ namespace minuseins::gui {
 
     Tracker::Tracker(viscom::ApplicationNodeImplementation *appImpl) : appImpl(appImpl) {
         auto tmp = appImpl->bass->output_;
-        decoder = std::make_unique<audio::BassDecoder>(appImpl->bass->openFile({"../resources/media/song.ogg"},BASS_STREAM_DECODE | BASS_SAMPLE_MONO | BASS_POS_SCAN));
+        decoder = std::make_unique<audio::BassDecoder>(appImpl->bass->openFile(viscom::Resource::FindResourceLocation("media/song.ogg", appImpl->GetApplication()),BASS_STREAM_DECODE | BASS_SAMPLE_MONO | BASS_POS_SCAN));
         appImpl->bass->output_ = tmp;
         std::cout << "text_height:" << ImGui::GetTextLineHeight() << std::endl;
+    }
+
+
+    template<class Tracks>
+    void drawInvisibleTracks(Tracks& tracks) {
+        for(auto& track : tracks) {
+            if(track.second.visible) continue;
+            ImGui::SameLine();
+            if(ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size())) {
+                track.second.visible = true;
+            }
+        }
     }
 
     bool Tracker::Draw(bool *p_open) {
@@ -29,6 +41,9 @@ namespace minuseins::gui {
         }
 
         ImGui::Checkbox("Track", &track_active_row);
+        drawInvisibleTracks(appImpl->tracks);
+        drawInvisibleTracks(appImpl->namedTracks);
+        drawInvisibleTracks(appImpl->vec3Tracks);
 
         ImGui::PushItemWidth(100);
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,ImVec2(0,0));
@@ -43,41 +58,31 @@ namespace minuseins::gui {
         return true;
     }
 
+    template <class Tracks>
+    void drawTrackHeader(Tracks& tracks) {
+        for(auto& track : tracks) {
+            if(!track.second.visible) continue;
+            ImGui::SameLine();
+            //TODO mute, fold?
+            if(ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size())) {
+                track.second.visible=false;
+            }
+            if(ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::TextUnformatted(track.first.c_str());
+                ImGui::EndTooltip();
+            }
+
+        }
+    }
     void Tracker::draw_table() {
         // table header
         ImGui::Selectable("",false,0,ImVec2(128,ImGui::GetTextLineHeight()));
         ImGui::SameLine();
         ImGui::Text("row  ");
-        for(auto& track : appImpl->tracks) {
-            ImGui::SameLine();
-            //TODO mute, fold?
-            ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
-            if(ImGui::IsItemHovered()) {
-                ImGui::BeginTooltip();
-                ImGui::TextUnformatted(track.first.c_str());
-                ImGui::EndTooltip();
-            }
-        }
-        for(auto& track : appImpl->namedTracks) {
-            ImGui::SameLine();
-            //TODO mute, fold?
-            ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
-            if(ImGui::IsItemHovered()) {
-                ImGui::BeginTooltip();
-                ImGui::TextUnformatted(track.first.c_str());
-                ImGui::EndTooltip();
-            }
-        }
-        for(auto& track : appImpl->vec3Tracks) {
-            ImGui::SameLine();
-            //TODO mute, fold?
-            ImGui::Selectable(track.first.c_str(),false,0,tracker::element_size());
-            if(ImGui::IsItemHovered()) {
-                ImGui::BeginTooltip();
-                ImGui::TextUnformatted(track.first.c_str());
-                ImGui::EndTooltip();
-            }
-        }
+        drawTrackHeader(appImpl->tracks);
+        drawTrackHeader(appImpl->namedTracks);
+        drawTrackHeader(appImpl->vec3Tracks);
 
         // table content
         // draw row index
@@ -112,52 +117,78 @@ namespace minuseins::gui {
 
     }
 
+    template<class Tracks>
+    void drawTrackContent(Tracks& tracks, bool track_active_row, tracker::Row currentRow) {
+        for(auto& [name, track] : tracks) {
+            if(!track.visible) continue;
+            ImGui::SameLine();
+            ImGui::BeginGroup();
+            ImGui::PushID(name.c_str());
+            ImGuiListClipper clip(row_count, tracker::element_size().y);
+            if(track_active_row) {
+                auto offset = currentRow * tracker::element_size().y;
+                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
+            }
+
+            track.drawTrack(clip);
+
+            ImGui::PopID();
+            ImGui::EndGroup();
+        }
+    }
+
     void Tracker::draw_table_content() {
-        for(auto& [name, track] : appImpl->tracks) {
-            ImGui::SameLine();
-            ImGui::BeginGroup();
-            ImGui::PushID(name.c_str());
-            ImGuiListClipper clip(row_count, tracker::element_size().y);
-            if(track_active_row) {
-                auto offset = appImpl->currentRow * tracker::element_size().y;
-                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
-            }
-
-            track.drawTrack(clip);
-
-            ImGui::PopID();
-            ImGui::EndGroup();
-        }
-        for(auto& [name, track] : appImpl->namedTracks) {
-            ImGui::SameLine();
-            ImGui::BeginGroup();
-            ImGui::PushID(name.c_str());
-            ImGuiListClipper clip(row_count, tracker::element_size().y);
-            if(track_active_row) {
-                auto offset = appImpl->currentRow * tracker::element_size().y;
-                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
-            }
-
-            track.drawTrack(clip);
-
-            ImGui::PopID();
-            ImGui::EndGroup();
-        }
-        for(auto& [name, track] : appImpl->vec3Tracks) {
-            ImGui::SameLine();
-            ImGui::BeginGroup();
-            ImGui::PushID(name.c_str());
-            ImGuiListClipper clip(row_count, tracker::element_size().y);
-            if(track_active_row) {
-                auto offset = appImpl->currentRow * tracker::element_size().y;
-                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
-            }
-
-            track.drawTrack(clip);
-
-            ImGui::PopID();
-            ImGui::EndGroup();
-        }
+        drawTrackContent(appImpl->tracks, track_active_row, appImpl->currentRow);
+        drawTrackContent(appImpl->namedTracks, track_active_row, appImpl->currentRow);
+        drawTrackContent(appImpl->vec3Tracks, track_active_row, appImpl->currentRow);
+//        for(auto& [name, track] : appImpl->tracks) {
+//            if(!track.visible) continue;
+//            ImGui::SameLine();
+//            ImGui::BeginGroup();
+//            ImGui::PushID(name.c_str());
+//            ImGuiListClipper clip(row_count, tracker::element_size().y);
+//            if(track_active_row) {
+//                auto offset = appImpl->currentRow * tracker::element_size().y;
+//                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
+//            }
+//
+//            track.drawTrack(clip);
+//
+//            ImGui::PopID();
+//            ImGui::EndGroup();
+//        }
+//        for(auto& [name, track] : appImpl->namedTracks) {
+//            if(!track.visible) continue;
+//            ImGui::SameLine();
+//            ImGui::BeginGroup();
+//            ImGui::PushID(name.c_str());
+//            ImGuiListClipper clip(row_count, tracker::element_size().y);
+//            if(track_active_row) {
+//                auto offset = appImpl->currentRow * tracker::element_size().y;
+//                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
+//            }
+//
+//            track.drawTrack(clip);
+//
+//            ImGui::PopID();
+//            ImGui::EndGroup();
+//        }
+//        for(auto& [name, track] : appImpl->vec3Tracks) {
+//            if(!track.visible) continue;
+//            ImGui::SameLine();
+//            ImGui::BeginGroup();
+//            ImGui::PushID(name.c_str());
+//            ImGuiListClipper clip(row_count, tracker::element_size().y);
+//            if(track_active_row) {
+//                auto offset = appImpl->currentRow * tracker::element_size().y;
+//                ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + offset, 0.5f);
+//            }
+//
+//            track.drawTrack(clip);
+//
+//            ImGui::PopID();
+//            ImGui::EndGroup();
+//        }
     }
 
 }

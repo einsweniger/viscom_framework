@@ -4,7 +4,6 @@
 
 #include <variant>
 #include <app/ApplicationNodeImplementation.h>
-#include <CLucene.h>
 #include "TrackedUniformBuilder.h"
 
 namespace minuseins::handlers {
@@ -68,14 +67,21 @@ namespace minuseins::handlers {
               appImpl(appImpl){}
 
     bool TrackedUniform::get_updated_value() {
-        auto value = appImpl->get_track_value(name);
+        if(do_value_update) {
+            value = appImpl->get_track_value(name);
+        }
         return true;
     }
 
     bool TrackedUniform::upload_value() {
-        auto value = appImpl->get_track_value(name);
         gl::glUniform1f(location(),value);
         return true;
+    }
+
+    void TrackedUniform::draw2D() {
+        generic_uniform::draw2Dpre();
+        ImGui::DragFloat(name.c_str(), &value);
+        generic_uniform::draw2Dpost();
     }
 
     bool TrackVecFloat::get_updated_value() {

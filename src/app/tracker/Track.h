@@ -132,6 +132,7 @@ namespace minuseins::tracker {
         void draw_value_selectable(Row active_row, KeyType &key);
         void drawTrack(ImGuiListClipper& clip);
         std::vector<KeyType> keys;
+        bool visible = true;
     };
 
     template<class KeyType>

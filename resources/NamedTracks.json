@@ -1,66 +1,6 @@
 {
     "value0": [
         {
-            "key": "shade_scene",
-            "value": {
-                "name": "",
-                "keys": [
-                    {
-                        "row": 0,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 255,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 576,
-                        "value": "pbr"
-                    },
-                    {
-                        "row": 704,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 768,
-                        "value": "pbr"
-                    },
-                    {
-                        "row": 832,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 1024,
-                        "value": "pbr"
-                    },
-                    {
-                        "row": 1115,
-                        "value": "pbr"
-                    },
-                    {
-                        "row": 1537,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 2560,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 4097,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 4351,
-                        "value": "iq"
-                    },
-                    {
-                        "row": 4352,
-                        "value": "iq"
-                    }
-                ]
-            }
-        },
-        {
             "key": "map",
             "value": {
                 "name": "",
@@ -228,6 +168,66 @@
                     {
                         "row": 4352,
                         "value": "ferris"
+                    }
+                ]
+            }
+        },
+        {
+            "key": "shade_scene",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "row": 0,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 255,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 576,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 704,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 768,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 832,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 1024,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 1115,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 1537,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 2560,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 4097,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 4351,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 4352,
+                        "value": "iq"
                     }
                 ]
             }

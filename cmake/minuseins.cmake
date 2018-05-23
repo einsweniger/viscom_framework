@@ -1,11 +1,10 @@
 set(VISCOM_OPENGL_PROFILE "4.1" CACHE STRING "OpenGL profile version to use." FORCE)
 set(CMAKE_GENERATOR Ninja)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(VISCOM_USE_TUIO OFF CACHE BOOL "Use TUIO input library" FORCE)
+set(VISCOM_USE_TUIO ON CACHE BOOL "Use TUIO input library" FORCE)
 set(WITH_ERROR OFF CACHE BOOL "disable -Werror in cereal" FORCE)
 set(SKIP_PORTABILITY_TEST ON CACHE BOOL "skip 32-bit test in cereal" FORCE)
 set(JUST_INSTALL_CEREAL ON CACHE BOOL "skip cereal unittest sandbox and test" FORCE)
-
 
 #SGCT stuff.
 
@@ -34,4 +33,7 @@ if(${VISCOM_USE_SGCT})
 else()
 set(VISCOM_LOCAL_ONLY ON CACHE BOOL "Only do a local build without calibration information." FORCE)
 
+endif()
+if(UNIX)
+    set(VISCOM_INSTALL_BASE_PATH "/tmp/app" CACHE PATH "Path to install the project to (should be the shared apps directory)." FORCE)
 endif()

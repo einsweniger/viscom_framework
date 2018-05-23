@@ -89,9 +89,9 @@ namespace viscom {
         bool drawToy = false;
         shadertoy::Shader shaderParams_;
 
-        std::unordered_map<std::string, minuseins::tracker::Track> tracks;
-        std::unordered_map<std::string, minuseins::tracker::strTrack> namedTracks;
-        std::unordered_map<std::string, minuseins::tracker::FloatVecTrack> vec3Tracks;
+        std::map<std::string, minuseins::tracker::Track> tracks;
+        std::map<std::string, minuseins::tracker::strTrack> namedTracks;
+        std::map<std::string, minuseins::tracker::FloatVecTrack> vec3Tracks;
 
         float get_track_value(const std::string &name);
         std::vector<float> get_track_vec(const std::string& name);

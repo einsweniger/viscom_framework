@@ -108,7 +108,6 @@ namespace minuseins::handlers {
         else if(resource_type::glsl_ivec4 == type()) ImGui::DragInt4(header.c_str(), &value[0]);
         else ImGui::TextUnformatted(name.c_str());
     }
-
     void FloatUniform::drawValue() {
         using t = interfaces::types::resource_type;
         int color_flags = ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_Float;
@@ -258,7 +257,16 @@ namespace minuseins::handlers {
         if(location() > 0) gl::glGetUniformiv(program, location(), &value[0]);
     }
 
+    struct F : std::function<void(UniformWithValueVector<gl::GLfloat>&)> {
+        void operator()(UniformWithValueVector<gl::GLfloat>& u) {
+            ImGui::DragFloat(u.name.c_str(),&u.value[0]);
+        }
+    };
+
     void FloatUniform::init(gl::GLuint program) {
+        if(type() == resource_type::glsl_float) {
+            draw_value_fn = F();
+        }
         if(location() > 0) gl::glGetUniformfv(program, location(), &value[0]);
     }
 
