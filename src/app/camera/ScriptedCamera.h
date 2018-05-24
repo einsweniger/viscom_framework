@@ -23,16 +23,16 @@ namespace viscom {
         void UpdateCamera(double elapsedTime, const ApplicationNodeBase* sender) override;
         glm::quat GetOrientation() {return CameraBase::GetOrientation();};
         glm::vec3 GetPosition() {return CameraBase::GetPosition();};
-        glm::vec3 position{0,1,8};
-        glm::quat rotation{0,0,0,1};
     private:
         ApplicationNodeImplementation* appImpl;
         /** Holds the current pitch and yaw state. */
+        glm::quat startOrientation;
         glm::vec2 currentPY_;
         /** Holds the current mouse position. */
         glm::vec2 currentMousePosition_;
         /** Holds the flag for setting the previous mouse position. */
         bool firstRun_;
+        glm::vec3 startPosition;
     };
 }
 

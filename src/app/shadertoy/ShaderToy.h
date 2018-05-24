@@ -9,21 +9,6 @@
 
 namespace shadertoy {
 
-//        void drawShaderToy() {
-//            ImGui::Begin("ShaderToy");
-//            for(auto& stage: toy_->renderpass) {
-//
-//                auto size = stage.code.size();
-//                auto name = stage.name;
-//                if(ImGui::TreeNode(name.append("##source").c_str())) {
-//                    ImGui::InputTextMultiline(name.append("##source").c_str(), stage.code.data(), size, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
-//                    ImGui::TreePop();
-//                }
-//
-//            }
-//            ImGui::End();
-//        }
-
     struct Info {
         std::string id;
         std::string date;

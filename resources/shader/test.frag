@@ -15,7 +15,7 @@ in vec2 texCoord;
 
 uniform float iTime;             // shader playback time (in seconds)
 uniform float u_delta;  // delta time between frames (in seconds)
-uniform vec3  u_eye = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
+uniform vec3  u_eye;// = vec3(0.0,1.0,8.0);  // Position of the 3d camera when rendering 3d objects
 uniform float timescale =1.0;
 uniform vec4 u_date;  // year, month, day and seconds
 uniform uvec2 u_resolution;  // viewport resolution (in pixels)

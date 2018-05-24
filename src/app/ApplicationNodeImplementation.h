@@ -85,7 +85,7 @@ namespace viscom {
         unsigned int currentRow = 0;
         unsigned int lastActiveRow = 0;
         int iFrame = 0;
-        bool stopTime_ = true;
+        bool stopTime_;
         bool drawToy = false;
         shadertoy::Shader shaderParams_;
 
@@ -99,7 +99,7 @@ namespace viscom {
 
         std::unique_ptr<MyFreeCamera> freeCam_;
         std::unique_ptr<ScriptedCamera> scriptCam_;
-
+        using enh::ApplicationNodeBase::GetApplication;
     protected:
         void toggleMouseGrab();
 

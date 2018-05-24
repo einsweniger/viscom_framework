@@ -35,6 +35,8 @@ namespace viscom {
             currentMousePosition_{ 0.0f, 0.0f },
             firstRun_{ true }
     {
+        startOrientation = GetOrientation();
+        startPosition = GetPosition();
     }
 
     bool ScriptedCamera::HandleMouse(int button, int action, float mouseWheelDelta, const ApplicationNodeBase* sender)
@@ -56,7 +58,7 @@ namespace viscom {
                 glm::quat(glm::vec3(0,0,trackOrientation[2]));
 
         SetCameraPosition(camPos);
-        SetCameraOrientation(camOrient);
+        SetCameraOrientation(startOrientation*camOrient);
 
 //        auto previousMousePosition = currentMousePosition_;
 //        currentMousePosition_ = sender->GetMousePositionNormalized();

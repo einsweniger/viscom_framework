@@ -1,16 +1,15 @@
 set(VISCOM_OPENGL_PROFILE "4.1" CACHE STRING "OpenGL profile version to use." FORCE)
 set(CMAKE_GENERATOR Ninja)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(VISCOM_USE_TUIO ON CACHE BOOL "Use TUIO input library" FORCE)
+set(VISCOM_USE_TUIO OFF CACHE BOOL "Use TUIO input library" FORCE)
 set(WITH_ERROR OFF CACHE BOOL "disable -Werror in cereal" FORCE)
 set(SKIP_PORTABILITY_TEST ON CACHE BOOL "skip 32-bit test in cereal" FORCE)
 set(JUST_INSTALL_CEREAL ON CACHE BOOL "skip cereal unittest sandbox and test" FORCE)
 
 #SGCT stuff.
 
-set(VISCOM_USE_SGCT OFF CACHE BOOL "Use SGCT for local builds." FORCE)
+set(VISCOM_USE_SGCT ON CACHE BOOL "Use SGCT for local builds." FORCE)
 set(VISCOM_LOCAL_ONLY ON CACHE BOOL "Only do a local build without calibration information." FORCE)
-set(VISCOM_CONFIG_NAME "localms" CACHE STRING "Name/directory of the configuration files to be used (see data dir)." FORCE)
 set(VISCOM_CLIENTGUI OFF CACHE BOOL "Use ImGui on clients." FORCE)
 set(VISCOM_SYNCINPUT ON CACHE BOOL "Synchronize input from master to clients." FORCE)
 set(VISCOM_CLIENTMOUSECURSOR OFF CACHE BOOL "Show the mouse cursor on clients." FORCE)
@@ -34,6 +33,13 @@ else()
 set(VISCOM_LOCAL_ONLY ON CACHE BOOL "Only do a local build without calibration information." FORCE)
 
 endif()
+
+if(VISCOM_LOCAL_ONLY)
+    set(VISCOM_CONFIG_NAME "localms" CACHE STRING "Name/directory of the configuration files to be used (see data dir)." FORCE)
+else()
+    set(VISCOM_CONFIG_NAME "clusterR" CACHE STRING "Name/directory of the configuration files to be used (see data dir)." FORCE)
+endif()
+
 if(UNIX)
     set(VISCOM_INSTALL_BASE_PATH "/tmp/app" CACHE PATH "Path to install the project to (should be the shared apps directory)." FORCE)
 endif()

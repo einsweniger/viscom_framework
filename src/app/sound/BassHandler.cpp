@@ -152,7 +152,7 @@ namespace minuseins::audio {
         return colors;
     }
 
-    constexpr std::array<int, img_height+2> createLogLookup() {
+    static std::array<int, img_height+2> createLogLookup() {
         const float stepsize = FFT_SIZE / std::log((float)(img_height + 1));
         std::array<int, img_height+2> logTab{};
         for (size_t i = 0; i < img_height; ++i) {

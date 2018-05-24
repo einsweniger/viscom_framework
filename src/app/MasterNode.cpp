@@ -79,6 +79,7 @@ namespace viscom {
     }
 
     void MasterNode::CleanUp() {
+        gui_->cleanup();
         ApplicationNodeImplementation::CleanUp();
         store(findConfig(minuseins::gui::MasterNodeGui::config_name), gui_.get());
         store(findConfig("StartupPrograms.json"), &startupPrograms);

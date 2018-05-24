@@ -25,6 +25,11 @@ int main(int argc, char** argv)
 
     g3::log_levels::disable(WARNING);
 
+#ifdef WIN_NO_ERROR_REPORT
+    //don't open error reporting, let it crash. kthx
+    DWORD dwMode = SetErrorMode(SEM_NOGPFAULTERRORBOX);
+    SetErrorMode(dwMode | SEM_NOGPFAULTERRORBOX);
+#endif
 #ifndef NDEBUG
     g3::log_levels::enable(WARNING);
 #endif

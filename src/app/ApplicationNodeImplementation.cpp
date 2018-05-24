@@ -21,7 +21,9 @@ namespace viscom {
 
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
         ApplicationNodeBase{ appNode },
-        bass{std::make_unique<minuseins::audio::BassHandler>()}
+        bass{std::make_unique<minuseins::audio::BassHandler>()},
+        stopTime_{true},
+        grabMouse_{false}
     {
         freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
         scriptCam_ = std::make_unique<ScriptedCamera>(GetCamera()->GetPosition(), *GetCamera(), this);
@@ -62,6 +64,10 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
+        if(stopTime_) {
+            stopTime_ = !stopTime_;
+            bass->play();
+        }
         globalTime_ = static_cast<float>(currentTime);
         elapsedTime_ = static_cast<float>(elapsedTime);
         currentRow = static_cast<unsigned int>(bass->get_row());

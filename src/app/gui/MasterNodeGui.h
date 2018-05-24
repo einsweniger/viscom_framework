@@ -83,6 +83,8 @@ namespace minuseins::gui {
 
         void init();
 
+        void cleanup();
+
         void drawMainMenu(bool *p_open);
 
         void drawShaderToySelectImport(bool *p_open);

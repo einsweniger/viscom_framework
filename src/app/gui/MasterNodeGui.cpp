@@ -55,6 +55,14 @@ namespace minuseins::gui {
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     }
 
+    void MasterNodeGui::cleanup()
+    {
+        {  //set error callbacks
+            using namespace glbinding;
+            glbinding::removeCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
+        }
+    }
+
     void MasterNodeGui::UpdateFrame(double currentTime, double elapsedTime) {
         overlay.UpdateFrame(currentTime, elapsedTime);
     }

@@ -27,7 +27,7 @@ namespace minuseins::audio {
     struct BassDecoder {
         BassDecoder(unsigned int stream);
         const unsigned int stream;
-        const unsigned long sample_len;
+        const QWORD sample_len;
         const size_t sample_count;
         const std::array<unsigned int, 256*3> palette;
         const std::array<int, img_height+2> logLookup;
