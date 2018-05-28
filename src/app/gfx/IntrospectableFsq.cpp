@@ -7,8 +7,10 @@
 #include <iostream>
 #include <utility>
 
+#include <core/gfx/FullscreenQuad.h>
 #include <core/gfx/Shader.h>
 #include <core/glfw.h>
+#include <enh/ApplicationNodeBase.h>
 #include <glbinding-aux/Meta.h>
 #include <glm/gtc/type_ptr.hpp>
 

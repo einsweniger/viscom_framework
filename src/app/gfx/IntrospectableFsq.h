@@ -7,22 +7,30 @@
 #include <memory>
 #include <variant>
 
-#include <core/gfx/FullscreenQuad.h>
-#include <enh/ApplicationNodeBase.h>
-#include <enh/gfx/gl/GLUniformBuffer.h>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
 #include <cereal/cereal.hpp>
 
-#include "app/gfx/gl/ProgramInspector.h"
 #include "app/gui/dialogs/ShaderLog.h"
 #include "app/shadertoy/ShaderToy.h"
 
 namespace viscom {
 class ApplicationNodeImplementation;
+class FrameBuffer;
+class FullscreenQuad;
+class GPUProgram;
+class Texture;
+namespace enh {
+class ApplicationNodeBase;
 }
+}  // namespace viscom
 
 namespace minuseins {
+namespace interfaces::types {
+struct named_resource;
+}
+
+struct ProgramInspector;
 namespace handlers {
 struct ProgramOutputHandler;
 struct UniformHandler;
@@ -63,7 +71,8 @@ class IntrospectableFsq {
  protected:
   const std::string windowname = "GPUProgram";
   virtual const std::string& getWindowName() { return windowname; }
-  void prog_out_hook(std::vector<std::unique_ptr<named_resource>>& outputs);
+  void prog_out_hook(
+      std::vector<std::unique_ptr<interfaces::types::named_resource>>& outputs);
   void init_callbacks();
   virtual void init_hooks();
   void miscinfo();
@@ -78,7 +87,7 @@ class IntrospectableFsq {
 
   std::unique_ptr<ProgramInspector> gpi_;
 
-  gui::ShaderLog log_{};
+  gui::ShaderLog log_;
 
   handlers::ProgramOutputHandler* outputhdl;
   handlers::UniformHandler* uniformhdl;
