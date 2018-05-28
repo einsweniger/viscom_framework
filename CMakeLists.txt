@@ -104,14 +104,18 @@ elseif(UNIX)
 endif()
 
 list(APPEND CORE_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/extern/bass/)
-
-
 add_executable(${APP_NAME} ${SRC_FILES} ${SRC_FILES_CORE} ${SRC_FILES_ENH} ${SHADER_FILES} ${SHADER_FILES_CORE} ${SHADER_FILES_ENH} ${EXTERN_SOURCES_CORE})
 set_target_properties(${APP_NAME} PROPERTIES OUTPUT_NAME ${VISCOM_APP_NAME})
 set_property(TARGET ${APP_NAME} PROPERTY CXX_STANDARD 17)
 target_include_directories(${APP_NAME} PRIVATE ${CORE_INCLUDE_DIRS} ${ENH_INCLUDE_DIRS})
 target_link_libraries(${APP_NAME} ${CORE_LIBS} ${ENH_LIBS})
 target_compile_definitions(${APP_NAME} PRIVATE ${COMPILE_TIME_DEFS})
+
+if(UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -Wno-class-memaccess")
+    target_compile_options(glbinding INTERFACE "-Wno-deprecated-declarations")
+#    target_compile_options(${APP_NAME} INTERFACE )
+endif()
 
 set(VISCOM_CONFIG_BASE_DIR "../")
 set(VISCOM_CONFIG_PROGRAM_PROPERTIES "../config/${VISCOM_CONFIG_NAME}/propertiesPrecompute.xml")
