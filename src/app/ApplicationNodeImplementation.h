@@ -9,16 +9,16 @@
 
 #pragma once
 
-#include <app/camera/ScriptedCamera.h>
-#include <app/gfx/ShaderToyFsq.h>
-#include <app/gfx/gl/ProgramInspector.h>
-#include <app/sound/BassHandler.h>
-#include <app/tracker/Track.h>
 #include <enh/gfx/gl/GLTexture.h>
 #include <cereal/archives/json.hpp>
 #include <experimental/filesystem>
 #include <fstream>
+#include "app/camera/ScriptedCamera.h"
 #include "app/gfx/IntrospectableFsq.h"
+#include "app/gfx/ShaderToyFsq.h"
+#include "app/gfx/gl/ProgramInspector.h"
+#include "app/sound/BassHandler.h"
+#include "app/tracker/Track.h"
 #include "enh/ApplicationNodeBase.h"
 
 namespace sgct {

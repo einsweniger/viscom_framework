@@ -49,7 +49,7 @@ struct Input {
   std::string src;    // url or path
   std::string ctype;  // buffer cubemap keyboard mic music musicstream texture
                       // video volume webcam
-  int64_t channel;  // channel number, [0,1,2,3]
+  int64_t channel;    // channel number, [0,1,2,3]
   struct Sampler sampler;
   int64_t published;
 

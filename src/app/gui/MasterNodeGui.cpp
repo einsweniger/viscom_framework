@@ -193,30 +193,12 @@ void MasterNodeGui::drawTextureImportWindow(bool *p_open) {
 
 void MasterNodeGui::drawTextureWindow(bool *p_open) {
   if (!*p_open) return;
-  static viscom::ResourceManager<viscom::Texture> &tm =
-      appNode->GetTextureManager();
+  //  static viscom::ResourceManager<viscom::Texture> &tm =
+  //      appNode->GetTextureManager();
   if (!ImGui::Begin("Textures", p_open)) {
     ImGui::End();
     return;
   }
-
-  //        std::for_each(tm.cbegin(), tm.cend(), [](const auto& tex) {
-  //            if(!tex.second.expired()) {
-  //                std::shared_ptr<viscom::Texture> texture =
-  //                tex.second.lock(); ImGui::Text("texid: %d",
-  //                texture->getTextureId()); ImGui::SameLine();
-  //                ImGui::TextUnformatted(tex.first.c_str());
-  //                ImVec2 uv0(0, 1);
-  //                ImVec2 uv1(1, 0);
-  //                auto maxwidth = ImGui::GetContentRegionAvailWidth();
-  //                auto texdim = texture->getDimensions();
-  //                float aspect = texdim.x / texdim.y;
-  //                if(aspect > 1.0) {aspect = 1.0f/aspect;};
-  //                ImVec2 region(maxwidth, maxwidth * aspect);
-  //                ImGui::Image(reinterpret_cast<ImTextureID>((intptr_t)
-  //                texture->getTextureId()), region, uv0, uv1);
-  //            }
-  //        });
 
   ImGui::End();
 }

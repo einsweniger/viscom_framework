@@ -184,11 +184,11 @@ ShaderToySamplerBuilder::ShaderToySamplerBuilder(
       // TODO handle sampler w/buffer input.
     }
   }  // end input handling
-  for (auto &out : pass.outputs) {
-    // TODO double buffer and hook.
-    // out.channel
-    // out.id <- if id not in inputs, no double buffering needed
-  }
+  //  for (auto &out : pass.outputs) {
+  // TODO double buffer and hook.
+  // out.channel
+  // out.id <- if id not in inputs, no double buffering needed
+  //  }
 }
 
 std::unique_ptr<generic_uniform> ShaderToySamplerBuilder::operator()(

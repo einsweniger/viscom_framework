@@ -7,7 +7,7 @@
 
 #include <memory>
 namespace minuseins::audio {
-    struct BassDecoder;
+struct BassDecoder;
 }
 namespace viscom {
 class ApplicationNodeImplementation;

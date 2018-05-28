@@ -9,7 +9,6 @@
 #include <enh/gfx/gl/GLTexture.h>
 #include <experimental/filesystem>
 #include <iostream>
-#include <cmath>
 
 namespace minuseins::audio {
 // constexpr float bpm = 150.0f; /* beats per minute */
@@ -34,8 +33,6 @@ struct BassDecoder {
   const std::array<int, img_height + 2> logLookup;
 
   const float maxIntensity = 500 * 2;
-  const float intensity_step =
-      (palette.size() - 1) / std::log(maxIntensity + 1);
   size_t current_idx = 0;
   size_t img_y = 0;
 

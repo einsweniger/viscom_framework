@@ -36,10 +36,10 @@ void ShaderToyFsq::init_hooks() {
       // TODO handle sampler w/buffer input.
     }
   }  // end input handling
-  for (auto& out : params_.outputs) {
-    // TODO double buffer and hook.
-    // out.channel
-    // out.id <- if id not in inputs, no double buffering needed
-  }
+  //  for (auto& out : params_.outputs) {
+  // TODO double buffer and hook.
+  // out.channel
+  // out.id <- if id not in inputs, no double buffering needed
+  //  }
 }
 }  // namespace minuseins
