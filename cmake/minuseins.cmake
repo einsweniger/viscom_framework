@@ -8,7 +8,7 @@ set(JUST_INSTALL_CEREAL ON CACHE BOOL "skip cereal unittest sandbox and test" FO
 
 #SGCT stuff.
 
-set(VISCOM_USE_SGCT ON CACHE BOOL "Use SGCT for local builds." FORCE)
+set(VISCOM_USE_SGCT OFF CACHE BOOL "Use SGCT for local builds." FORCE)
 set(VISCOM_LOCAL_ONLY ON CACHE BOOL "Only do a local build without calibration information." FORCE)
 set(VISCOM_CLIENTGUI OFF CACHE BOOL "Use ImGui on clients." FORCE)
 set(VISCOM_SYNCINPUT ON CACHE BOOL "Synchronize input from master to clients." FORCE)

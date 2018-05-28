@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Cluster debug="true" masterAddress="localhost">
+    <Node address="localhost" dataTransferPort="20501" port="20401">
+        <Window fullScreen="false" monitor="0">
+            <Stereo type="none"/>
+            <Size x="540" y="1920"/>
+            <Pos x="0" y="0"/>
+            <Viewplane>
+                <Pos x="-1.7777777777777777" y="-1.0" z="0.0"/>
+                <Pos x="-1.7777777777777777" y="1.0" z="0.0"/>
+                <Pos x="0.0" y="1.0" z="0.0"/>
+                <Viewport eye="right">
+                    <Pos x="0.0" y="0.0"/>
+                    <Size x="1.0" y="1.0"/>
+                </Viewport>
+            </Viewplane>
+        </Window>
+    </Node>
+    <Node address="8.8.8.8" dataTransferPort="20502" port="20402">
+        <Window fullScreen="false" monitor="0">
+            <Stereo type="none"/>
+            <Size x="540" y="1920"/>
+            <Pos x="540" y="0"/>
+            <Viewplane>
+                <Pos x="0.0" y="-1.0" z="0.0"/>
+                <Pos x="0.0" y="1.0" z="0.0"/>
+                <Pos x="1.7777777777777777" y="1.0" z="0.0"/>
+                <Viewport eye="right">
+                    <Pos x="0.0" y="0.0"/>
+                    <Size x="1.0" y="1.0"/>
+                </Viewport>
+            </Viewplane>
+        </Window>
+    </Node>
+    <User eyeSeparation="0.0">
+        <Pos x="0.0" y="0.0" z="4.0"/>
+    </User>
+</Cluster>
