@@ -5,9 +5,10 @@
 #ifndef VISCOMFRAMEWORK_SHADERTOYSAMPLERBUILDER_H
 #define VISCOMFRAMEWORK_SHADERTOYSAMPLERBUILDER_H
 
-#include <app/gfx/gl/handlers/detail/UniformBuilder.h>
-#include <app/shadertoy/ShaderToy.h>
 #include <core/gfx/Texture.h>
+
+#include "app/gfx/gl/handlers/detail/UniformBuilder.h"
+#include "app/shadertoy/ShaderToy.h"
 
 namespace viscom {
 namespace enh {

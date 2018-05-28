@@ -4,9 +4,13 @@
 #ifndef VISCOMFRAMEWORK_UNIFORMHANDLER_H
 #define VISCOMFRAMEWORK_UNIFORMHANDLER_H
 
-#include <app/gfx/gl/ProgramInspector.h>
-#include <app/gfx/gl/handlers/detail/UniformBuilder.h>
-#include "detail/UniformTypes.h"
+namespace minuseins {
+class ProgramInspector;
+namespace handlers {
+struct generic_uniform;
+}
+}  // namespace minuseins
+#include "app/gfx/gl/ProgramInspector.h"
 
 namespace viscom {
 class ApplicationNodeBase;
@@ -39,7 +43,6 @@ struct UniformHandler : public resource_handler {
                    named_resource_container &resources) override;
   void postInit(ProgramInspector &inspect,
                 named_resource_container &resources) override{/* empty */};
-  void dumpState();
 };
 
 struct AbstractBuilder : UniformHandler::build_fn {

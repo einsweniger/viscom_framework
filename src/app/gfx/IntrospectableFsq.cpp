@@ -3,19 +3,22 @@
 //
 
 #include "IntrospectableFsq.h"
-#include <app/ApplicationNodeImplementation.h>
-#include <app/gfx/builders/TrackedUniformBuilder.h>
-#include <app/gfx/gl/handlers.h>
-#include <app/util.h>
+
+#include <iostream>
+#include <utility>
+
 #include <core/gfx/Shader.h>
 #include <core/glfw.h>
 #include <glbinding-aux/Meta.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include <utility>
+
+#include "app/ApplicationNodeImplementation.h"
 #include "app/gfx/builders/ExternalUniformBuilder.h"
 #include "app/gfx/builders/SceneSubroutineHandler.h"
 #include "app/gfx/builders/ShaderToySamplerBuilder.h"
+#include "app/gfx/builders/TrackedUniformBuilder.h"
+#include "app/gfx/gl/handlers.h"
+#include "app/util.h"
 
 namespace minuseins {
 IntrospectableFsq::IntrospectableFsq(const std::string& fragmentShader)

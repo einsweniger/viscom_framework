@@ -5,15 +5,16 @@
 #ifndef VISCOMFRAMEWORK_TRACK_H
 #define VISCOMFRAMEWORK_TRACK_H
 
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include <core/glfw.h>
 #include <imgui.h>
 #include <cereal/cereal.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace minuseins::tracker {
 using Row = unsigned int;

@@ -3,8 +3,10 @@
 //
 
 #include "TrackedUniformBuilder.h"
-#include <app/ApplicationNodeImplementation.h>
+
 #include <variant>
+
+#include "app/ApplicationNodeImplementation.h"
 #include "app/tracker/Track.h"
 
 namespace minuseins::handlers {

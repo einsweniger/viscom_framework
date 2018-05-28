@@ -7,8 +7,11 @@
  */
 
 #include "SlaveNode.h"
+
 #include <imgui.h>
+
 #include "app/sound/BassHandler.h"
+
 namespace viscom {
 
 SlaveNode::SlaveNode(ApplicationNodeInternal* appNode)

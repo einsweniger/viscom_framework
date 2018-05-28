@@ -3,10 +3,13 @@
 //
 
 #include "UniformBlockHandler.h"
-#include <app/gfx/gl/BasicInterface.h>
-#include <app/util.h>
 #include <enh/ApplicationNodeBase.h>
-#include "UniformHandler.h"
+#include <enh/gfx/gl/GLUniformBuffer.h>
+
+#include "app/gfx/gl/BasicInterface.h"
+#include "app/gfx/gl/handlers/UniformHandler.h"
+#include "app/gfx/gl/handlers/detail/UniformTypes.h"
+#include "app/util.h"
 
 namespace minuseins::handlers {
 

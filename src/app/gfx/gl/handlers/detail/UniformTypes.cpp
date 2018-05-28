@@ -3,12 +3,15 @@
 //
 
 #include "UniformTypes.h"
-#include <app/util.h>
+
+#include <iostream>
+#include <sstream>
+
 #include <glbinding/Binding.h>
 #include <glbinding/glbinding.h>
 #include <imgui.h>
-#include <iostream>
-#include <sstream>
+
+#include "app/util.h"
 
 namespace minuseins::handlers {
 using util::ensure_positive;

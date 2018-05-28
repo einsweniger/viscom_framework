@@ -5,10 +5,10 @@
 #ifndef VISCOMFRAMEWORK_BASSHANDLER_H
 #define VISCOMFRAMEWORK_BASSHANDLER_H
 
-#include <bass.h>
-#include <enh/gfx/gl/GLTexture.h>
 #include <experimental/filesystem>
 #include <iostream>
+
+#include <enh/gfx/gl/GLTexture.h>
 
 namespace minuseins::audio {
 // constexpr float bpm = 150.0f; /* beats per minute */
@@ -27,7 +27,7 @@ constexpr float samples_per_second = 100.f;
 struct BassDecoder {
   BassDecoder(unsigned int stream);
   const unsigned int stream;
-  const QWORD sample_len;
+  const uint64_t sample_len;
   const size_t sample_count;
   const std::array<unsigned int, 256 * 3> palette;
   const std::array<int, img_height + 2> logLookup;
@@ -46,13 +46,12 @@ struct BassDecoder {
 };
 
 class BassHandler {
-  static void print_problem(const std::string& calledFn) {
-    fprintf(stderr, "%s failed: %02d\n", calledFn.c_str(), BASS_ErrorGetCode());
-  }
+  static void print_problem(const std::string& calledFn);
 
  public:
   // last two parameters are for directSound
-  BassHandler(int device = default_device, DWORD freq = 44100, DWORD flags = 0);
+  BassHandler(int device = default_device, uint32_t freq = 44100,
+              uint32_t flags = 0);
 
   void pause();
 
@@ -62,33 +61,28 @@ class BassHandler {
 
   double get_row();
 
-  void set_position(double time) {
-    QWORD position = BASS_ChannelSeconds2Bytes(output_, time);
-    BASS_ChannelSetPosition(output_, position, BASS_POS_BYTE);
-  }
+  void set_position(double time);
 
-  double get_time() {
-    auto position = BASS_ChannelGetPosition(output_, BASS_POS_BYTE);
-    return BASS_ChannelBytes2Seconds(output_, position);
-  }
+  double get_time();
 
-  std::tuple<QWORD, double> get_length();
+  std::tuple<uint64_t, double> get_length();
 
-  void update(DWORD length = 0);
+  void update(uint32_t length = 0);
 
   bool get_fft(float* samples);
 
-  HRECORD startRecording(DWORD freq = 44100, DWORD channels = 1,
-                         DWORD flags = BASS_SAMPLE_8BITS);
+  uint32_t startRecording(uint32_t freq = 44100, uint32_t channels = 1,
+                          uint32_t flags = 1);  // BASS_SAMPLE_8BITS
 
-  HSTREAM openFile(const fs::path& path, DWORD flags = BASS_STREAM_PRESCAN);
+  uint32_t openFile(const fs::path& path,
+                    uint32_t flags = 0x20000);  // BASS_STREAM_PRESCAN
 
   virtual ~BassHandler();
 
-  DWORD outputDevice_;
-  DWORD inputDevice_;
-  HRECORD recorder_;
-  HSTREAM output_;
+  uint32_t outputDevice_;
+  uint32_t inputDevice_;
+  uint32_t recorder_;
+  uint32_t output_;
 };
 }  // namespace minuseins::audio
 

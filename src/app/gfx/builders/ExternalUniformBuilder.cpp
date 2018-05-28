@@ -3,12 +3,14 @@
 //
 
 #include "ExternalUniformBuilder.h"
-#include <app/ApplicationNodeImplementation.h>
+
 #include <enh/ApplicationNodeBase.h>
 #include <imgui.h>
 #include <glm/detail/type_mat.hpp>
 #include <glm/detail/type_mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "app/ApplicationNodeImplementation.h"
 
 namespace minuseins::handlers {
 namespace detail {

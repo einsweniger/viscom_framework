@@ -5,7 +5,7 @@
 #ifndef VISCOMFRAMEWORK_SUBROUTINEHANDLER_H
 #define VISCOMFRAMEWORK_SUBROUTINEHANDLER_H
 
-#include <app/gfx/gl/ProgramInspector.h>
+#include "app/gfx/gl/ProgramInspector.h"
 
 namespace minuseins::handlers {
 using namespace interfaces::types;

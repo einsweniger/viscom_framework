@@ -3,10 +3,12 @@
 //
 
 #include "ShaderToySamplerBuilder.h"
-#include <app/ApplicationNodeImplementation.h>
-#include <app/shadertoy/ShaderToy.h>
+
 #include <enh/ApplicationNodeBase.h>
 #include <imgui.h>
+
+#include "app/ApplicationNodeImplementation.h"
+#include "app/shadertoy/ShaderToy.h"
 
 namespace minuseins::handlers {
 

@@ -3,9 +3,12 @@
 //
 
 #include "Track.h"
-#include <app/util.h>
+
 #include <algorithm>
 #include <cmath>
+
+#include "app/util.h"
+
 namespace minuseins::tracker {
 
 float Track::get_value(float row) {

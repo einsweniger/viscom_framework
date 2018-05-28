@@ -5,12 +5,12 @@
 #ifndef VISCOMFRAMEWORK_UNIFORMBLOCKHANDLER_H
 #define VISCOMFRAMEWORK_UNIFORMBLOCKHANDLER_H
 
-#include <app/gfx/gl/ProgramInspector.h>
-#include <enh/gfx/gl/GLUniformBuffer.h>
+#include "app/gfx/gl/ProgramInspector.h"
 
 namespace viscom::enh {
 class ApplicationNodeBase;
-}
+class GLUniformBuffer;
+}  // namespace viscom::enh
 
 namespace minuseins::handlers {
 using UniformBuffer = viscom::enh::GLUniformBuffer;
@@ -24,7 +24,7 @@ struct UniformBlock : named_resource {
   gl::GLuint num_active_variables();
 
   void upload_data(std::size_t offset, std::size_t size, const void *data);
-  std::unique_ptr<UniformBuffer> buffer = nullptr;
+  std::unique_ptr<UniformBuffer> buffer;
 };
 
 struct UniformBlockHandler : resource_handler {

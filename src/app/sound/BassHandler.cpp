@@ -3,8 +3,10 @@
 //
 
 #include "BassHandler.h"
-#include <app/util.h>
+#include <bass.h>
 #include <cmath>
+
+#include "app/util.h"
 
 namespace minuseins::audio {
 BassHandler::BassHandler(int device, DWORD freq, DWORD flags) {
@@ -135,6 +137,21 @@ BassHandler::~BassHandler() {
     BASS_RecordFree();
   }
 }
+
+void BassHandler::set_position(double time) {
+  QWORD position = BASS_ChannelSeconds2Bytes(output_, time);
+  BASS_ChannelSetPosition(output_, position, BASS_POS_BYTE);
+}
+
+double BassHandler::get_time() {
+  auto position = BASS_ChannelGetPosition(output_, BASS_POS_BYTE);
+  return BASS_ChannelBytes2Seconds(output_, position);
+}
+
+void BassHandler::print_problem(const std::string &calledFn) {
+  fprintf(stderr, "%s failed: %02d\n", calledFn.c_str(), BASS_ErrorGetCode());
+}
+
 constexpr uint32_t color32(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
   return r | (g << 8) | (b << 16) | (a << 24);
 }

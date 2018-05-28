@@ -3,14 +3,19 @@
 //
 
 #include "UniformHandler.h"
-#include <app/ApplicationNodeImplementation.h>
-#include <app/util.h>
-#include <core/ApplicationNodeBase.h>
-#include <imgui.h>
+
 #include <algorithm>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <sstream>
+
+#include <core/ApplicationNodeBase.h>
+#include <imgui.h>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "app/ApplicationNodeImplementation.h"
+#include "app/gfx/gl/handlers/detail/UniformBuilder.h"
+#include "app/gfx/gl/handlers/detail/UniformTypes.h"
+#include "app/util.h"
 
 namespace minuseins::handlers {
 

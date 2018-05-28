@@ -3,9 +3,10 @@
 //
 
 #include "ShaderToyFsq.h"
-#include <app/ApplicationNodeImplementation.h>
-#include <app/gfx/gl/handlers.h>
+
+#include "app/ApplicationNodeImplementation.h"
 #include "app/gfx/builders/ShaderToySamplerBuilder.h"
+#include "app/gfx/gl/handlers.h"
 
 namespace minuseins {
 ShaderToyFsq::ShaderToyFsq(const std::string& fragmentShader)

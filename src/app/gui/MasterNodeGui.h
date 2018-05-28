@@ -5,10 +5,9 @@
 #ifndef VISCOMFRAMEWORK_MASTERNODEGUI_H
 #define VISCOMFRAMEWORK_MASTERNODEGUI_H
 
-#include <app/gfx/IntrospectableFsq.h>
-#include <app/gui/dialogs/OglLog.h>
-#include <app/gui/dialogs/ShaderLog.h>
-#include <app/shadertoy/ShaderToyLoader.h>
+#include <map>
+#include <string>
+
 #include <core/gfx/FullscreenQuad.h>
 #include <core/gfx/Shader.h>
 #include <core/gfx/Texture.h>
@@ -17,9 +16,12 @@
 #include <imgui.h>
 #include <cereal/cereal.hpp>
 #include <cereal/types/map.hpp>
-#include <map>
-#include <string>
+
+#include "app/gfx/IntrospectableFsq.h"
+#include "app/gui/dialogs/OglLog.h"
+#include "app/gui/dialogs/ShaderLog.h"
 #include "app/gui/dialogs/Window.h"
+#include "app/shadertoy/ShaderToyLoader.h"
 
 namespace viscom {
 class FrameBuffer;

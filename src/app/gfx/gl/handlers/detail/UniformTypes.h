@@ -5,7 +5,7 @@
 #ifndef VISCOMFRAMEWORK_UNIFORMTYPES_H
 #define VISCOMFRAMEWORK_UNIFORMTYPES_H
 
-#include <app/gfx/gl/types.h>
+#include "app/gfx/gl/types.h"
 
 namespace minuseins::handlers {
 using namespace interfaces::types;

@@ -3,8 +3,8 @@
 //
 
 #include "BasicInterface.h"
-#include <app/gfx/gl/types.h>
-#include <app/util.h>
+#include "app/gfx/gl/types.h"
+#include "app/util.h"
 
 namespace minuseins::interfaces {
 BasicInterface::BasicInterface(gl::GLenum interface, gl::GLuint program,

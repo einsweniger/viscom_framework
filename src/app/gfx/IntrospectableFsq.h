@@ -3,18 +3,20 @@
 //
 #pragma once
 
-#include <app/gfx/gl/ProgramInspector.h>
-#include <app/gui/dialogs/ShaderLog.h>
-#include <app/shadertoy/ShaderToy.h>
+#include <experimental/filesystem>
+#include <memory>
+#include <variant>
+
 #include <core/gfx/FullscreenQuad.h>
 #include <enh/ApplicationNodeBase.h>
 #include <enh/gfx/gl/GLUniformBuffer.h>
 #include <glbinding/gl/gl.h>
 #include <imgui.h>
 #include <cereal/cereal.hpp>
-#include <experimental/filesystem>
-#include <memory>
-#include <variant>
+
+#include "app/gfx/gl/ProgramInspector.h"
+#include "app/gui/dialogs/ShaderLog.h"
+#include "app/shadertoy/ShaderToy.h"
 
 namespace viscom {
 class ApplicationNodeImplementation;
@@ -71,7 +73,7 @@ class IntrospectableFsq {
   viscom::ApplicationNodeImplementation* appImpl;
   std::shared_ptr<viscom::GPUProgram> gpuProgram_;
   std::vector<std::shared_ptr<viscom::Texture>> usedTextures;
-  std::vector<viscom::FrameBuffer> backBuffers_{};
+  std::vector<viscom::FrameBuffer> backBuffers_;
   size_t prev_backbuf_size = 0;
 
   std::unique_ptr<ProgramInspector> gpi_;
