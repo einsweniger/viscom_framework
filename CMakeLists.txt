@@ -31,7 +31,7 @@ include(cmake/BuildConfig.cmake)
 # enable drop-down in cmake-gui, taken from https://blog.bethcodes.com/cmake-tips-tricks-drop-down-list
 # possible to populate from data/*
 set(VISCOM_CONFIG_NAME "single" CACHE STRING "Name/directory of the configuration files to be used (see data dir).")
-set_property(CACHE VISCOM_CONFIG_NAME PROPERTY STRINGS single quad localms)
+set_property(CACHE VISCOM_CONFIG_NAME PROPERTY STRINGS single quad localms clusterR)
 
 set(VISCOM_VIRTUAL_SCREEN_X 1920 CACHE INTEGER "Virtual screen size in x direction.")
 set(VISCOM_VIRTUAL_SCREEN_Y 1080 CACHE INTEGER "Virtual screen size in y direction.")
@@ -87,7 +87,7 @@ if(GENERATOR_IS_MULTI_CONFIG)
 endif()
 
 copy_core_lib_dlls(${APP_NAME})
-
+set(CMAKE_INSTALL_PREFIX ${VISCOM_INSTALL_BASE_PATH})
 install(TARGETS ${APP_NAME} RUNTIME DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME})
 install(DIRECTORY resources/ DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME}/resources)
 install(FILES ${CMAKE_BINARY_DIR}/framework_install.cfg DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME} RENAME framework.cfg)
