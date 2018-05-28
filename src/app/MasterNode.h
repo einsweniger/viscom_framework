@@ -41,7 +41,7 @@ class MasterNode final : public ApplicationNodeImplementation {
  private:
   bool imProgramRecourceWindow_ = true;
 
-  std::unique_ptr<minuseins::gui::MasterNodeGui> gui_ = nullptr;
+  std::unique_ptr<minuseins::gui::MasterNodeGui> gui_;
 
   void saveTracks();
 

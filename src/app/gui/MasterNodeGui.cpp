@@ -8,6 +8,9 @@
 #include <experimental/filesystem>
 
 #include <core/gfx/FrameBuffer.h>
+#include <core/gfx/FullscreenQuad.h>
+#include <core/gfx/Shader.h>
+#include <core/gfx/Texture.h>
 #include <core/glfw.h>
 #include <core/resources/Resource.h>
 #include <core/resources/ResourceManager.h>

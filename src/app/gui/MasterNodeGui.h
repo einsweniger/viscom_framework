@@ -5,59 +5,28 @@
 #ifndef VISCOMFRAMEWORK_MASTERNODEGUI_H
 #define VISCOMFRAMEWORK_MASTERNODEGUI_H
 
+#include <experimental/filesystem>
 #include <map>
 #include <string>
 
-#include <core/gfx/FullscreenQuad.h>
-#include <core/gfx/Shader.h>
-#include <core/gfx/Texture.h>
-#include <enh/gfx/animation/AnimationManager.h>
 #include <glbinding/gl/types.h>
-#include <imgui.h>
 #include <cereal/cereal.hpp>
 #include <cereal/types/map.hpp>
 
-#include "app/gfx/IntrospectableFsq.h"
 #include "app/gui/dialogs/OglLog.h"
-#include "app/gui/dialogs/ShaderLog.h"
-#include "app/gui/dialogs/Window.h"
-#include "app/shadertoy/ShaderToyLoader.h"
 
 namespace viscom {
 class FrameBuffer;
 class ApplicationNodeInternal;
 class ApplicationNodeImplementation;
+class Texture;
+class GPUProgram;
 }  // namespace viscom
+namespace shadertoy {
+class ShaderToyLoader;
+}
 namespace minuseins::gui {
 namespace fs = std::experimental::filesystem;
-//    struct menu_item {
-//        bool active;
-//    };
-//    struct menu {
-//        std::map<std::string, menu_item> items{};
-//
-//        void draw() {
-//            for(auto& [name, item] : items) {
-//                ImGui::MenuItem(name.c_str(), &item.active);
-//            }
-//        }
-//    };
-//    struct main_menu {
-//        main_menu(std::unordered_map<std::string, menu> menus) :
-//        menus(std::move(menus)) {}
-//
-//        std::unordered_map<std::string, menu> menus{};
-//        void draw(bool* p_open) {
-//            if(*p_open && ImGui::BeginMainMenuBar()) {
-//                for(auto& [name, menu] : menus) {
-//                    ImGui::BeginMenu(name.c_str());
-//                    menu.draw();
-//                    ImGui::EndMenu();
-//                }
-//            }
-//        }
-//
-//    };
 
 struct MasterNodeGui {
   static constexpr auto config_name = "MasterNodeGui.json";
@@ -69,8 +38,8 @@ struct MasterNodeGui {
 
   viscom::ApplicationNodeImplementation *appImpl;
   viscom::ApplicationNodeInternal *appNode;
-  std::unique_ptr<shadertoy::ShaderToyLoader> loader = nullptr;
-  std::vector<std::shared_ptr<viscom::Texture>> openTextures{};
+  std::unique_ptr<shadertoy::ShaderToyLoader> loader;
+  std::vector<std::shared_ptr<viscom::Texture>> openTextures;
   std::function<void(std::shared_ptr<viscom::GPUProgram>)> programCallback;
 
   std::map<std::string, bool> activeWindows{};

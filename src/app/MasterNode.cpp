@@ -20,6 +20,7 @@
 #include <core/glfw.h>  // for registering key presses.
 
 #include "app/gfx/gl/handlers.h"
+#include "app/shadertoy/ShaderToyLoader.h"
 #include "app/sound/BassHandler.h"
 #include "app/tracker/Track.h"
 namespace viscom {
