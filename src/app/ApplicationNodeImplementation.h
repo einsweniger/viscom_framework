@@ -120,10 +120,5 @@ namespace viscom {
         fs::path findConfig(const std::string &name);
 
         void restoreTracks();
-
-    private:
-
-        void update_scene();
-
     };
 }
