@@ -8,28 +8,33 @@
 
 #include "ApplicationNodeImplementation.h"
 
-#include "core/glfw.h"
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
 #include <imgui.h>
 #include <iostream>
-#include <glm/gtc/matrix_inverse.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <cereal/archives/json.hpp>
 
-#include "Vertices.h"
-#include "core/imgui/imgui_impl_glfw_gl3.h"
-#include "enh/gfx/postprocessing/DepthOfField.h"
-#include "enh/gfx/postprocessing/BloomEffect.h"
-#include "enh/gfx/postprocessing/FilmicTMOperator.h"
-// #include "core/gfx/mesh/MeshRenderable.h"
+#include "core/glfw.h"
+//#include "core/imgui/imgui_impl_glfw.h"
+
+#include "app/camera/MyFreeCamera.h"
+#include <sgct/SharedData.h>
 
 namespace viscom {
 
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
-        ApplicationNodeBase{ appNode }
+        ApplicationNodeBase{ appNode },
+        bass{std::make_unique<minuseins::audio::BassHandler>()},
+        stopTime_{true},
+        grabMouse_{false}
     {
+        restore(findConfig("StartupPrograms.json"), &startupPrograms);
+        restoreTracks();
+        syncRow = sgct::SharedUInt64(0);
+    }
+
+    void ApplicationNodeImplementation::restoreTracks() {
+        restore(findConfig("Tracks.json"), &tracks);
+        restore(findConfig("NamedTracks.json"), &namedTracks);
+        restore(findConfig("VectorTracks.json"), &vec3Tracks);
     }
 
     ApplicationNodeImplementation::~ApplicationNodeImplementation() = default;
@@ -38,92 +43,76 @@ namespace viscom {
     {
         enh::ApplicationNodeBase::InitOpenGL();
 
-        backgroundProgram_ = GetGPUProgramManager().GetResource("backgroundGrid", std::vector<std::string>{ "backgroundGrid.vert", "backgroundGrid.frag" });
-        backgroundMVPLoc_ = backgroundProgram_->getUniformLocation("MVP");
+        //init examples
+	
+        freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
+        scriptCam_ = std::make_unique<ScriptedCamera>(GetCamera()->GetPosition(), *GetCamera(), this);
+        //freeCam_->SetCameraPosition(glm::vec3(0,1,8));
+        for(const std::string& frag : startupPrograms) {
+            auto fsq = std::make_unique<minuseins::IntrospectableFsq>(frag);
+            fsq->init(this);
+            fsqs.push_back(std::move(fsq));
+        }
+        auto texDescr = enh::TextureDescriptor{sizeof(float), gl::GL_R32F,gl::GL_RED, gl::GL_FLOAT};
+        fftTex = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, texDescr);
+        fftTexSmoothed = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, texDescr);
+        fftTexIntegrated = std::make_unique<viscom::enh::GLTexture>(minuseins::audio::FFT_SIZE, texDescr);
 
-        triangleProgram_ = GetGPUProgramManager().GetResource("foregroundTriangle", std::vector<std::string>{ "foregroundTriangle.vert", "foregroundTriangle.frag" });
-        triangleMVPLoc_ = triangleProgram_->getUniformLocation("MVP");
+        bass->openFile(Resource::FindResourceLocation("media/song.ogg", GetApplication()));
+        auto [bytes, time] = bass->get_length();
+        std::cout << "bass length in bytes: " << bytes << " and in seconds: " << time << std::endl;
+        std::cout << "that's: " << time*minuseins::audio::row_rate  << " rows!" << std::endl;
+        bass->play();
+    }
 
-        teapotProgram_ = GetGPUProgramManager().GetResource("foregroundMesh", std::vector<std::string>{ "foregroundMesh.vert", "foregroundMesh.frag" });
-        teapotModelMLoc_ = teapotProgram_->getUniformLocation("modelMatrix");
-        teapotNormalMLoc_ = teapotProgram_->getUniformLocation("normalMatrix");
-        teapotVPLoc_ = teapotProgram_->getUniformLocation("viewProjectionMatrix");
+    void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
+    {
+//        if(stopTime_) {
+//            stopTime_ = !stopTime_;
+//            bass->play();
+//        }
+        
+        globalTime_ = static_cast<float>(currentTime);
+        elapsedTime_ = static_cast<float>(elapsedTime);
+        //currentRow = static_cast<unsigned int>(bass->get_row());
+        //currentRow = syncRow.getVal();
+        //bass->set_row(syncRow.getVal());
+        currentTime_ = static_cast<float>(bass->get_time());
+        if (bass->get_fft(&fftData[0])) {
 
-        std::vector<GridVertex> gridVertices;
+            for (int i = 0; i < minuseins::audio::FFT_SIZE; i++)
+            {
+                fftDataSmoothed[i] = fftDataSmoothed[i] * fftSmootingFactor + (1 - fftSmootingFactor) * fftData[i];
 
-        auto delta = 0.125f;
-        for (auto x = -1.0f; x < 1.0f; x += delta) {
-            auto green = (x + 1.0f) / 2.0f;
-
-            for (float y = -1.0; y < 1.0; y += delta) {
-                auto red = (y + 1.0f) / 2.0f;
-
-                auto dx = 0.004f;
-                auto dy = 0.004f;
-
-                gridVertices.emplace_back(glm::vec3(x + dx, y + dy, -1.0f), glm::vec4(red, green, 0.0f, 1.0f));//right top
-                gridVertices.emplace_back(glm::vec3(x - dx + delta, y + dy, -1.0f), glm::vec4(red, green, 0.0f, 1.0f));//left top
-                gridVertices.emplace_back(glm::vec3(x - dx + delta, y - dy + delta, -1.0f), glm::vec4(red, green, 0.0f, 1.0f));//left bottom
-
-                gridVertices.emplace_back(glm::vec3(x - dx + delta, y - dy + delta, -1.0f), glm::vec4(red, green, 0.0f, 1.0f));//left bottom
-                gridVertices.emplace_back(glm::vec3(x + dx, y - dy + delta, -1.0f), glm::vec4(red, green, 0.0f, 1.0f));//right bottom
-                gridVertices.emplace_back(glm::vec3(x + dx, y + dy, -1.0f), glm::vec4(red, green, 0.0f, 1.0f));//right top
+                fftDataSlightlySmoothed[i] = fftDataSlightlySmoothed[i] * fftSlightSmootingFactor + (1 - fftSlightSmootingFactor) * fftData[i];
+                fftDataIntegrated[i] = fftDataIntegrated[i] + fftDataSlightlySmoothed[i];
+                if (fftDataIntegrated[i] > fftMaxIntegralValue) {
+                    fftDataIntegrated[i] -= fftMaxIntegralValue;
+                }
             }
         }
 
-        numBackgroundVertices_ = static_cast<unsigned int>(gridVertices.size());
-
-        gridVertices.emplace_back(glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-        gridVertices.emplace_back(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-        gridVertices.emplace_back(glm::vec3(0.5f, -0.5f, 0.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-
-        gl::glGenBuffers(1, &vboBackgroundGrid_);
-        gl::glBindBuffer(gl::GL_ARRAY_BUFFER, vboBackgroundGrid_);
-        gl::glBufferData(gl::GL_ARRAY_BUFFER, gridVertices.size() * sizeof(GridVertex), gridVertices.data(), gl::GL_STATIC_DRAW);
-
-        gl::glGenVertexArrays(1, &vaoBackgroundGrid_);
-        gl::glBindVertexArray(vaoBackgroundGrid_);
-        gl::glEnableVertexAttribArray(0);
-        gl::glVertexAttribPointer(0, 3, gl::GL_FLOAT, gl::GL_FALSE, sizeof(GridVertex), reinterpret_cast<GLvoid*>(offsetof(GridVertex, position_)));
-        gl::glEnableVertexAttribArray(1);
-        gl::glVertexAttribPointer(1, 4, gl::GL_FLOAT, gl::GL_FALSE, sizeof(GridVertex), reinterpret_cast<GLvoid*>(offsetof(GridVertex, color_))); //-V112
-        gl::glBindVertexArray(0);
-
-        gl::glBindBuffer(gl::GL_ARRAY_BUFFER, 0);
-
-        teapotMesh_ = GetMeshManager().GetResource("/models/teapot/teapot.obj");
-        // teapotRenderable_ = MeshRenderable::create<SimpleMeshVertex>(teapotMesh_.get(), teapotProgram_.get());
-
-        FrameBufferDescriptor sceneFBODesc{ {
-                FrameBufferTextureDescriptor{ static_cast<GLenum>(gl::GL_RGBA32F) },
-                FrameBufferTextureDescriptor{ static_cast<GLenum>(gl::GL_RGBA32F) },
-                FrameBufferTextureDescriptor{ static_cast<GLenum>(gl::GL_DEPTH_COMPONENT) } }, {} };
-        sceneFBOs_ = CreateOffscreenBuffers(sceneFBODesc);
-
-        dof_ = std::make_unique<enh::DepthOfField>(this);
-        bloom_ = std::make_unique<enh::BloomEffect>(this);
-        tm_ = std::make_unique<enh::FilmicTMOperator>(this);
+        if(grabMouse_) {
+            freeCam_->UpdateCamera(elapsedTime, this);
+        } else {
+            scriptCam_->UpdateCamera(elapsedTime, this);
+        }
+        for(auto& fsq : fsqs) {
+            fsq->UpdateFrame(currentTime_, elapsedTime_);
+        }
+        for(auto& toy : toys) {
+            toy->UpdateFrame(currentTime_, elapsedTime_);
+        }
+        
     }
 
-    void ApplicationNodeImplementation::UpdateFrame(double currentTime, double)
-    {
-        GetCamera()->SetPosition(camPos_);
-        glm::quat pitchQuat = glm::angleAxis(camRot_.x, glm::vec3(1.0f, 0.0f, 0.0f));
-        glm::quat yawQuat = glm::angleAxis(camRot_.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::quat rollQuat = glm::angleAxis(camRot_.z, glm::vec3(0.0f, 0.0f, 1.0f));
-        GetCamera()->SetOrientation(yawQuat * pitchQuat * rollQuat);
-
-        triangleModelMatrix_ = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f)), 0.1f * static_cast<float>(currentTime), glm::vec3(0.0f, 1.0f, 0.0f));
-        teapotModelMatrix_ = glm::scale(glm::rotate(glm::translate(glm::mat4(0.01f), glm::vec3(-3.0f, 0.0f, -5.0f)), static_cast<float>(currentTime), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.01f));
+    void ApplicationNodeImplementation::PostDraw() {
+        bass->update();  // supposedly helps with vsync.
+        ApplicationNodeBase::PostDraw();
     }
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
     {
-        SelectOffscreenBuffer(sceneFBOs_)->DrawToFBO([]() {
-            gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
-        });
-
         fbo.DrawToFBO([]() {
             gl::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
@@ -132,129 +121,188 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
-        auto sceneFBO = SelectOffscreenBuffer(sceneFBOs_);
-        sceneFBO->DrawToFBO([this]() {
-            gl::glBindVertexArray(vaoBackgroundGrid_);
-            gl::glBindBuffer(gl::GL_ARRAY_BUFFER, vboBackgroundGrid_);
-
-            auto MVP = GetCamera()->GetViewPerspectiveMatrix();
-            {
-                gl::glUseProgram(backgroundProgram_->getProgramId());
-                gl::glUniformMatrix4fv(backgroundMVPLoc_, 1, gl::GL_FALSE, glm::value_ptr(MVP));
-                // gl::glDrawArrays(gl::GL_TRIANGLES, 0, numBackgroundVertices_);
+        
+        if(drawToy) {
+            if(toys.empty()) return;
+            auto it = toys.begin();
+            //draw into backbuffers until next to last.
+            while(it != toys.end()-1) {
+                auto& toy = (*it);
+                toy->DrawToBackBuffer();
+                it++;
             }
+            //then draw last to backbuffer
+            auto& toy = (*it);
+            toy->DrawFrame(fbo);
 
-            for (std::size_t i = 0; i < 50; ++i) {
-                gl::glDisable(gl::GL_CULL_FACE);
-                auto triangleMVP = MVP * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f * static_cast<float>(i - 8))) * triangleModelMatrix_;
-                gl::glUseProgram(triangleProgram_->getProgramId());
-                gl::glUniformMatrix4fv(triangleMVPLoc_, 1, gl::GL_FALSE, glm::value_ptr(triangleMVP));
-                gl::glDrawArrays(gl::GL_TRIANGLES, numBackgroundVertices_, 3);
-                gl::glEnable(gl::GL_CULL_FACE);
+        } else {
+            if(fsqs.empty()) return;
+            auto it = fsqs.begin();
+            //draw into backbuffers until next to last.
+            while(it != fsqs.end()-1) {
+                auto& fsq = (*it);
+                fsq->DrawToBackBuffer();
+                it++;
             }
+            //then draw last to backbuffer
+            auto& fsq = (*it);
+            fsq->DrawFrame(fbo);
+        }
+        iFrame++;
+    }
 
-            {
-                gl::glUseProgram(teapotProgram_->getProgramId());
-                auto normalMatrix = glm::inverseTranspose(glm::mat3(teapotModelMatrix_));
-                gl::glUniformMatrix4fv(teapotModelMLoc_, 1, gl::GL_FALSE, glm::value_ptr(teapotModelMatrix_));
-                gl::glUniformMatrix3fv(teapotNormalMLoc_, 1, gl::GL_FALSE, glm::value_ptr(normalMatrix));
-                gl::glUniformMatrix4fv(teapotVPLoc_, 1, gl::GL_FALSE, glm::value_ptr(MVP));
-                // teapotRenderable_->Draw(teapotModelMatrix_);
-            }
-
-            gl::glBindBuffer(gl::GL_ARRAY_BUFFER, 0);
-            gl::glBindVertexArray(0);
-            gl::glUseProgram(0);
-        });
-
-        dof_->ApplyEffect(*GetCamera(), sceneFBO->GetTextures()[0], sceneFBO->GetTextures()[2], sceneFBO, 1);
-        tm_->ApplyTonemapping(sceneFBO->GetTextures()[1], sceneFBO, 0);
-        bloom_->ApplyEffect(sceneFBO->GetTextures()[0], &fbo);
-
-        // fbo.DrawToFBO([this]() {});
+    void ApplicationNodeImplementation::PreSync()
+    {
+        
     }
 
     void ApplicationNodeImplementation::CleanUp()
     {
-        if (vaoBackgroundGrid_ != 0) gl::glDeleteVertexArrays(1, &vaoBackgroundGrid_);
-        vaoBackgroundGrid_ = 0;
-        if (vboBackgroundGrid_ != 0) gl::glDeleteBuffers(1, &vboBackgroundGrid_);
-        vboBackgroundGrid_ = 0;
-
-        dof_ = nullptr;
-        tm_ = nullptr;
-        bloom_ = nullptr;
-        sceneFBOs_.clear();
-
-        teapotMesh_ = nullptr;
-        teapotProgram_ = nullptr;
-        triangleProgram_ = nullptr;
-        backgroundProgram_ = nullptr;
-
+        startupPrograms.clear();
+        for(auto& fsq : fsqs) {
+            startupPrograms.push_back(fsq->fragmentShader);
+        }
         ApplicationNodeBase::CleanUp();
     }
 
     bool ApplicationNodeImplementation::KeyboardCallback(int key, int scancode, int action, int mods)
     {
-        if (ApplicationNodeBase::KeyboardCallback(key, scancode, action, mods)) return true;
-
-        switch (key)
-        {
-        case GLFW_KEY_W:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, -0.001);
-            return true;
-
-        case GLFW_KEY_S:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, 0.001);
-            return true;
-
-        case GLFW_KEY_A:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(-0.001, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_D:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.001, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_LEFT_CONTROL:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, -0.001, 0.0);
-            return true;
-
-        case GLFW_KEY_LEFT_SHIFT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.001, 0.0);
-            return true;
-
-        case GLFW_KEY_UP:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(-0.002, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_DOWN:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.002, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_LEFT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, -0.002, 0.0);
-            return true;
-
-        case GLFW_KEY_RIGHT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.002, 0.0);
-            return true;
-
-        case GLFW_KEY_Q:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, -0.002);
-            return true;
-
-        case GLFW_KEY_E:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, 0.002);
-            return true;
+        if(ApplicationNodeBase::KeyboardCallback(key, scancode, action, mods)) {return true;}
+        if(!(action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            return false;  //fast exit if not pressed or repeated
         }
         return false;
     }
 
-    bool ApplicationNodeImplementation::MouseButtonCallback(int button, int action)
+    void ApplicationNodeImplementation::toggleMouseGrab()
     {
-        auto test = GetCamera()->GetPickPosition(glm::vec2(0.75f, 0.5f));
-        return true;
+        if (!grabMouse_) {
+            SetCursorInputMode(GLFW_CURSOR_DISABLED);
+            grabMouse_ = true;
+            freeCam_->resetMouse();
+        } else {
+            SetCursorInputMode(GLFW_CURSOR_NORMAL);
+            grabMouse_ = false;
+        }
+    }
+
+    void ApplicationNodeImplementation::EncodeData()
+    {
+        ApplicationNodeBase::EncodeData();
+        sgct::SharedData::instance()->writeUInt64(&syncRow);
+    }
+    void ApplicationNodeImplementation::DecodeData()
+    {
+        ApplicationNodeBase::DecodeData();
+        sgct::SharedData::instance()->readUInt64(&syncRow);
+    }
+    bool ApplicationNodeImplementation::AddTuioCursor(TUIO::TuioCursor *tcur)
+    {
+        return ApplicationNodeBase::AddTuioCursor(tcur);
+    }
+
+    glm::vec2 ApplicationNodeImplementation::GetScreenSize() {
+        auto size = GetConfig().virtualScreenSize_;
+        return size;
+    }
+
+    void ApplicationNodeImplementation::update_scene() {
+        //MUSIC: 0 brass drone fade in and out
+        //MUSIC: 3.5 drone almost gone, small choir
+
+        //fade in light
+
+        //MUSIC: 5.5 another drone, no choir
+
+        //fade in text
+
+        //MUSIC: 8.5 drone gome, another choir; louder
+        //MUSIC: 11 short pulse
+
+        //rotate, done
+
+        //MUSIC: 14 six blips
+
+        // fade out light
+
+        //MUSIC: 16 blips end, medium intense strings
+        //MUSIC: 18 fadeouts
+        //MUSIC: 19.5 small string
+        //MUSIC: 21 strings almost gone, fade in cymbal
+        //MUSIC: 22.3 beat picking up, echoing drum, brass in background
+
+
+
+
+
+
+        //8 iterations, ends with brrrt. 42-44
+
+
+        //MUSIC: 44.5 wobbling music kicks in, vocals pick up
+        //MUSIC: 61 vocals peak
+        //MUSIC: 66.5 drop, vocals gone
+        //MUSIC: 90 vocals return
+        //MUSIC: 93.5 beat picks back up
+        //MUSIC: 95 next drop
+        //MUSIC: 110.5 short break
+        //MUSIC: 111.8 back again
+        //MUSIC: 128.0 voice break
+        //MUSIC: 113.9 fadeout break
+        //MUSIC: ~135 could stop here.
+        //MUSIC: 139.2 bg picks up
+        //MUSIC: 143.7 drone pickup
+        //MUSIC: 145 intense droning
+        //MUSIC: 150 other drone
+        //MUSIC: 153.3 smear drone out
+        //MUSIC: 156 slow music, repeating vocals
+        //MUSIC: 178.5 pickup
+        //MUSIC: 183 short break
+        //MUSIC: 184 pickup
+        //MUSIC: 188 pause
+        //MUSIC: 189.5 back again, rising hard
+        //MUSIC: 195.2 before drop, intense
+        //MUSIC: 200.7 baaaam, still revving up
+        //MUSIC: 219 additional rise from bg
+        //MUSIC: 222 it's almost there
+        //MUSIC: 223.2 woooop
+        //MUSIC: 228 revving
+        //MUSIC: 229 return to beat, hi-hat
+        //MUSIC: 233 1s break
+        //MUSIC: 234 revup
+        //MUSIC: 239 brrrrrt
+        //MUSIC: 240 revving again
+        //MUSIC: 245 vocals return, break-beat
+        //MUSIC: 250 vocal pauses
+        //MUSIC: 256 vocal back on
+        //MUSIC: 262 beat stops (bip bip), final riser
+        //MUSIC: 268 vocals echo, synth blips fade in; song is closing
+        //MUSIC: 272 synths turn sharp
+        //MUSIC: 277 synth smoothes out
+        //MUSIC: 278.3 last blips
+        //MUSIC: 279 done.
+    }
+
+    fs::path ApplicationNodeImplementation::findConfig(const std::string &config_name) {
+        try {
+            auto filename = Resource::FindResourceLocation(config_name, GetApplication());
+            return {filename};
+        } catch (resource_loading_error&) {
+            auto resdir = fs::path{GetApplication()->GetConfig().resourceSearchPaths_.at(0)};
+            return resdir/ fs::path{config_name};
+        }
+    }
+
+    float ApplicationNodeImplementation::get_track_value(const std::string &name) {
+        return tracks[name].get_value(bass->get_row());
+    }
+
+    std::string ApplicationNodeImplementation::get_named_track_value(const std::string &name) {
+        return namedTracks[name].get_value(bass->get_row());
+    }
+
+    std::vector<float> ApplicationNodeImplementation::get_track_vec(const std::string &name) {
+        return vec3Tracks[name].get_value(bass->get_row());
     }
 
 }

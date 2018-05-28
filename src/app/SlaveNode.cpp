@@ -18,7 +18,9 @@ namespace viscom {
 
     void SlaveNode::Draw2D(FrameBuffer& fbo)
     {
-        if constexpr (SHOW_CLIENT_GUI) ImGui::ShowTestWindow();
+#ifdef VISCOM_CLIENTGUI
+        ImGui::ShowTestWindow();
+#endif
 
         // always do this call last!
         SlaveNodeInternal::Draw2D(fbo);
@@ -26,4 +28,11 @@ namespace viscom {
 
     SlaveNode::~SlaveNode() = default;
 
+    void SlaveNode::UpdateFrame(double currentTime, double elapsedTime)
+    {
+        currentRow = syncRow.getVal();
+        bass->set_row(syncRow.getVal());
+
+        ApplicationNodeImplementation::UpdateFrame(currentTime, elapsedTime);
+    }
 }
