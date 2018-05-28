@@ -25,8 +25,6 @@ namespace viscom {
         stopTime_{true},
         grabMouse_{false}
     {
-        freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
-        scriptCam_ = std::make_unique<ScriptedCamera>(GetCamera()->GetPosition(), *GetCamera(), this);
         restore(findConfig("StartupPrograms.json"), &startupPrograms);
         restoreTracks();
     }
@@ -44,7 +42,10 @@ namespace viscom {
         enh::ApplicationNodeBase::InitOpenGL();
 
         //init examples
-        freeCam_->SetCameraPosition(glm::vec3(0,1,8));
+	
+        freeCam_ = std::make_unique<MyFreeCamera>(GetCamera()->GetPosition(), *GetCamera(), 15);
+        scriptCam_ = std::make_unique<ScriptedCamera>(GetCamera()->GetPosition(), *GetCamera(), this);
+        //freeCam_->SetCameraPosition(glm::vec3(0,1,8));
         for(const std::string& frag : startupPrograms) {
             auto fsq = std::make_unique<minuseins::IntrospectableFsq>(frag);
             fsq->init(this);
