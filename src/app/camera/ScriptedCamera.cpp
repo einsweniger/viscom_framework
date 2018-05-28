@@ -53,12 +53,13 @@ namespace viscom {
         glm::vec3 camPos{trackPosition[0], trackPosition[1], trackPosition[2]};
         std::vector<float> trackOrientation = appImpl->get_track_vec("CamOrientation");
         //glm::quat camOrient{trackOrientation[0], trackOrientation[1], trackOrientation[2], trackOrientation[3]};
-        glm::quat camOrient = glm::quat(glm::vec3(trackOrientation[0],0,0)) *
-                glm::quat(glm::vec3(0,trackOrientation[1],0)) *
-                glm::quat(glm::vec3(0,0,trackOrientation[2]));
+        auto yaw = glm::quat(glm::vec3(trackOrientation[0], 0, 0));
+        auto pit = glm::quat(glm::vec3(0, trackOrientation[1], 0));
+        auto rol = glm::quat(glm::vec3(0, 0, trackOrientation[2]));
+        glm::quat camOrient = yaw * pit * rol;
 
         SetCameraPosition(camPos);
-        SetCameraOrientation(startOrientation*camOrient);
+        SetCameraOrientation(camOrient);
 
 //        auto previousMousePosition = currentMousePosition_;
 //        currentMousePosition_ = sender->GetMousePositionNormalized();
