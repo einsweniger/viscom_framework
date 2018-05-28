@@ -118,8 +118,14 @@ void main()
 
     //use inverse MVP to find ray direction
     vec4 dir_projection = inverse(u_MVP)*vec4(st, 1.,1.);
+    mat4 vpInv = inverse(u_MVP);
+    vec3 camPos = u_eye;
     ray_direction = normalize(vec3(dir_projection/dir_projection.w));
+    vec3 coordsNDC = vec3((2.0f * texCoord) - vec2(1.0f), 1.0f);
+    vec4 coordsWorld = vpInv * vec4(coordsNDC, 1.0f);
 
+    vec3 viewDir = normalize((coordsWorld.xyz / coordsWorld.w) - camPos);
+    //ray_direction = viewDir;
     //trace
     float distance;
     vec3 color = shade_scene(u_eye, ray_direction, distance);
