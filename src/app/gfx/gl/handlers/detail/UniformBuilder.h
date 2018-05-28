@@ -8,10 +8,10 @@
 #include "UniformTypes.h"
 
 namespace minuseins::handlers {
-    struct UniformBuilder : std::function<std::unique_ptr<generic_uniform>(named_resource res)> {
-        virtual std::unique_ptr<generic_uniform> operator()(named_resource res);
-    };
-}
+struct UniformBuilder
+    : std::function<std::unique_ptr<generic_uniform>(named_resource res)> {
+  virtual std::unique_ptr<generic_uniform> operator()(named_resource res);
+};
+}  // namespace minuseins::handlers
 
-
-#endif //VISCOMFRAMEWORK_UNIFORMBUILDER_H
+#endif  // VISCOMFRAMEWORK_UNIFORMBUILDER_H

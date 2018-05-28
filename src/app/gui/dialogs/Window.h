@@ -7,7 +7,7 @@
 
 #include <string>
 
-//namespace minuseins::gui {
+// namespace minuseins::gui {
 //    struct window {
 //        window(std::string name) : name(name) {}
 //        std::string name;
@@ -18,4 +18,4 @@
 //    };
 //}
 
-#endif //VISCOMFRAMEWORK_WINDOW_H
+#endif  // VISCOMFRAMEWORK_WINDOW_H

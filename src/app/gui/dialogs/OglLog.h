@@ -10,13 +10,13 @@
 #include "ShaderLog.h"
 
 namespace minuseins::gui {
-    struct OglLog : std::function<void(const glbinding::FunctionCall &)>, ShaderLog {
-        void callback(const glbinding::FunctionCall& call);
+struct OglLog : std::function<void(const glbinding::FunctionCall &)>,
+                ShaderLog {
+  void callback(const glbinding::FunctionCall &call);
 
-        void Draw(const char *title, bool *p_open) override;
-    };
+  void Draw(const char *title, bool *p_open) override;
+};
 
-}
+}  // namespace minuseins::gui
 
-
-#endif //VISCOMFRAMEWORK_OGLLOG_H
+#endif  // VISCOMFRAMEWORK_OGLLOG_H

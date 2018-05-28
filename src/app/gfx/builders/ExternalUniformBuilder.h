@@ -9,12 +9,11 @@
 
 namespace minuseins::handlers {
 
-    struct ExternalUniformBuilder : TrackedUniformBuilder {
-        using TrackedUniformBuilder::TrackedUniformBuilder;
-        std::unique_ptr<generic_uniform> operator()(named_resource res) override;
-    };
+struct ExternalUniformBuilder : TrackedUniformBuilder {
+  using TrackedUniformBuilder::TrackedUniformBuilder;
+  std::unique_ptr<generic_uniform> operator()(named_resource res) override;
+};
 
-}
+}  // namespace minuseins::handlers
 
-
-#endif //VISCOMFRAMEWORK_EXTERNALUNIFORMBUILDER_H
+#endif  // VISCOMFRAMEWORK_EXTERNALUNIFORMBUILDER_H

@@ -8,15 +8,13 @@
 #include <enh/gfx/animation/AnimationManager.h>
 
 namespace minuseins::gui {
-    struct Animation {
-        Animation(const std::string& dir, viscom::CameraHelper* helper);
+struct Animation {
+  Animation(const std::string& dir, viscom::CameraHelper* helper);
 
-        void draw(bool *p_open);
-        viscom::enh::AnimationManager animManager;
+  void draw(bool* p_open);
+  viscom::enh::AnimationManager animManager;
+};
 
-    };
+}  // namespace minuseins::gui
 
-}
-
-
-#endif //VISCOMFRAMEWORK_ANIMATION_H
+#endif  // VISCOMFRAMEWORK_ANIMATION_H

@@ -12,14 +12,12 @@
 
 namespace viscom {
 
-    class SlaveNode final : public SlaveNodeInternal
-    {
-    public:
-        explicit SlaveNode(ApplicationNodeInternal* appNode);
-        virtual ~SlaveNode() override;
+class SlaveNode final : public SlaveNodeInternal {
+ public:
+  explicit SlaveNode(ApplicationNodeInternal* appNode);
+  virtual ~SlaveNode() override;
 
-        void UpdateFrame(double currentTime, double elapsedTime) override;
-        void Draw2D(FrameBuffer& fbo) override;
-
-    };
-}
+  void UpdateFrame(double currentTime, double elapsedTime) override;
+  void Draw2D(FrameBuffer& fbo) override;
+};
+}  // namespace viscom

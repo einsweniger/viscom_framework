@@ -8,35 +8,37 @@
 
 #pragma once
 
-#include "core/camera/CameraBase.h"
-#include "core/CameraHelper.h"
 #include <glm/gtc/quaternion.hpp>
+#include "core/CameraHelper.h"
+#include "core/camera/CameraBase.h"
 
 namespace viscom {
 
-    /**
-    * Represents a free moving camera.
-    */
-    class MyFreeCamera final : public CameraBase
-    {
-    public:
-        MyFreeCamera(const glm::vec3& camPos, viscom::CameraHelper& cameraHelper, double moveSpeed = 30.0) noexcept;
+/**
+ * Represents a free moving camera.
+ */
+class MyFreeCamera final : public CameraBase {
+ public:
+  MyFreeCamera(const glm::vec3& camPos, viscom::CameraHelper& cameraHelper,
+               double moveSpeed = 30.0) noexcept;
 
-        bool HandleMouse(int button, int action, float mouseWheelDelta, const ApplicationNodeBase* sender) override;
-        void UpdateCamera(double elapsedTime, const ApplicationNodeBase* sender) override;
-        void SetMoveSpeed(double speed);
-        double GetMoveSpeed();
-        void resetMouse();
-        void Draw2D(bool* p_open);
+  bool HandleMouse(int button, int action, float mouseWheelDelta,
+                   const ApplicationNodeBase* sender) override;
+  void UpdateCamera(double elapsedTime,
+                    const ApplicationNodeBase* sender) override;
+  void SetMoveSpeed(double speed);
+  double GetMoveSpeed();
+  void resetMouse();
+  void Draw2D(bool* p_open);
 
-    private:
-        /** Holds the current pitch and yaw state. */
-        glm::vec2 currentPY_;
-        float pitch =0, yaw=0, roll=0;
-        /** Holds the current mouse position. */
-        glm::vec2 currentMousePosition_;
-        double moveSpeed_;
-        /** Holds the flag for setting the previous mouse position. */
-        bool firstRun_;
-    };
-}
+ private:
+  /** Holds the current pitch and yaw state. */
+  glm::vec2 currentPY_;
+  float pitch = 0, yaw = 0, roll = 0;
+  /** Holds the current mouse position. */
+  glm::vec2 currentMousePosition_;
+  double moveSpeed_;
+  /** Holds the flag for setting the previous mouse position. */
+  bool firstRun_;
+};
+}  // namespace viscom

@@ -11,28 +11,24 @@
 
 namespace viscom {
 
-    SlaveNode::SlaveNode(ApplicationNodeInternal* appNode) :
-        SlaveNodeInternal{ appNode }
-    {
-    }
+SlaveNode::SlaveNode(ApplicationNodeInternal* appNode)
+    : SlaveNodeInternal{appNode} {}
 
-    void SlaveNode::Draw2D(FrameBuffer& fbo)
-    {
+void SlaveNode::Draw2D(FrameBuffer& fbo) {
 #ifdef VISCOM_CLIENTGUI
-        ImGui::ShowTestWindow();
+  ImGui::ShowTestWindow();
 #endif
 
-        // always do this call last!
-        SlaveNodeInternal::Draw2D(fbo);
-    }
-
-    SlaveNode::~SlaveNode() = default;
-
-    void SlaveNode::UpdateFrame(double currentTime, double elapsedTime)
-    {
-        currentRow = syncRow.getVal();
-        bass->set_row(syncRow.getVal());
-
-        ApplicationNodeImplementation::UpdateFrame(currentTime, elapsedTime);
-    }
+  // always do this call last!
+  SlaveNodeInternal::Draw2D(fbo);
 }
+
+SlaveNode::~SlaveNode() = default;
+
+void SlaveNode::UpdateFrame(double currentTime, double elapsedTime) {
+  currentRow = syncRow.getVal();
+  bass->set_row(syncRow.getVal());
+
+  ApplicationNodeImplementation::UpdateFrame(currentTime, elapsedTime);
+}
+}  // namespace viscom
