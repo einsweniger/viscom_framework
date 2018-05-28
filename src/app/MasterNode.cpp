@@ -23,6 +23,8 @@
 #include "app/shadertoy/ShaderToyLoader.h"
 #include "app/sound/BassHandler.h"
 #include "app/tracker/Track.h"
+#include "gui/MasterNodeGui.h"
+
 namespace viscom {
 
 MasterNode::MasterNode(ApplicationNodeInternal* appNode)

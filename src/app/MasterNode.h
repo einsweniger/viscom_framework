@@ -8,13 +8,15 @@
 
 #pragma once
 
-#include <cereal/archives/json.hpp>
 #include "ApplicationNodeImplementation.h"
-#include "gui/MasterNodeGui.h"
 
 #ifdef WITH_TUIO
 #include "core/TuioInputWrapper.h"
 #endif
+
+namespace minuseins::gui {
+    class MasterNodeGui;
+}
 
 namespace viscom {
 template <class T>

@@ -8,7 +8,9 @@
 #include <experimental/filesystem>
 #include <iostream>
 
-#include <enh/gfx/gl/GLTexture.h>
+namespace viscom::enh {
+    class GLTexture;
+}
 
 namespace minuseins::audio {
 // constexpr float bpm = 150.0f; /* beats per minute */

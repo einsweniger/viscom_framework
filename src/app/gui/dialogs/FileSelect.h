@@ -5,12 +5,13 @@
 #ifndef VISCOMFRAMEWORK_FILESELECT_H
 #define VISCOMFRAMEWORK_FILESELECT_H
 
-#include <imgui.h>
 #include <experimental/filesystem>
 #include <functional>
 #include <unordered_map>
 #include <vector>
-#include "Window.h"
+
+#include <imgui.h>
+
 
 namespace minuseins::gui {
 namespace fs = std::experimental::filesystem;

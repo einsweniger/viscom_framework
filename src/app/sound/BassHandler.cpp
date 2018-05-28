@@ -3,10 +3,14 @@
 //
 
 #include "BassHandler.h"
-#include <bass.h>
+
 #include <cmath>
 
+#include <bass.h>
+#include <enh/gfx/gl/GLTexture.h>
+
 #include "app/util.h"
+
 
 namespace minuseins::audio {
 BassHandler::BassHandler(int device, DWORD freq, DWORD flags) {
