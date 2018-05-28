@@ -59,6 +59,32 @@ namespace viscom {
                 default: return false;
             }
         }
+        if (GLFW_KEY_SPACE == key) {
+            if (!grabMouse_) {
+                stopTime_ = !stopTime_;
+                lastActiveRow = currentRow;
+                if (stopTime_) {
+                    bass->pause();
+                }
+                else {
+                    bass->play();
+                }
+                return true;
+            }
+        }
+        if (GLFW_KEY_ESCAPE == key) {
+            if (!grabMouse_) {
+                stopTime_ = !stopTime_;
+                if (stopTime_) {
+                    bass->pause();
+                    bass->set_row(lastActiveRow);
+                }
+                else {
+                    bass->play();
+                }
+                return true;
+            }
+        }
 
         switch (key) {
             case GLFW_KEY_C: toggleMouseGrab(); return true;

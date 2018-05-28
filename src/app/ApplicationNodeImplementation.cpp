@@ -163,32 +163,6 @@ namespace viscom {
         if(!(action == GLFW_PRESS || action == GLFW_REPEAT)) {
             return false;  //fast exit if not pressed or repeated
         }
-
-        if(GLFW_KEY_SPACE == key) {
-            if(!grabMouse_) {
-                stopTime_ = !stopTime_;
-                lastActiveRow = currentRow;
-                if(stopTime_) {
-                    bass->pause();
-                } else {
-                    bass->play();
-                }
-                return true;
-            }
-        }
-        if(GLFW_KEY_ESCAPE == key) {
-            if(!grabMouse_) {
-                stopTime_ = !stopTime_;
-                if(stopTime_) {
-                    bass->pause();
-                    bass->set_row(lastActiveRow);
-                } else {
-                    bass->play();
-                }
-                return true;
-            }
-        }
-
         return false;
     }
 
