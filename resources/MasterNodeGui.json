@@ -1,0 +1,70 @@
+{
+    "value0": {
+        "activeWindows": [
+            {
+                "key": "AnimationManager",
+                "value": false
+            },
+            {
+                "key": "GPUProgram",
+                "value": true
+            },
+            {
+                "key": "Globals",
+                "value": false
+            },
+            {
+                "key": "ImGuiDemo",
+                "value": false
+            },
+            {
+                "key": "MainMenu",
+                "value": true
+            },
+            {
+                "key": "NewScene",
+                "value": false
+            },
+            {
+                "key": "OGLerrors",
+                "value": true
+            },
+            {
+                "key": "Overlay",
+                "value": false
+            },
+            {
+                "key": "Shader",
+                "value": true
+            },
+            {
+                "key": "ShaderImport",
+                "value": false
+            },
+            {
+                "key": "ShaderToyImport",
+                "value": false
+            },
+            {
+                "key": "Shaders",
+                "value": false
+            },
+            {
+                "key": "TextureImport",
+                "value": false
+            },
+            {
+                "key": "Textures",
+                "value": false
+            },
+            {
+                "key": "TimeSlider",
+                "value": true
+            },
+            {
+                "key": "Tracker",
+                "value": true
+            }
+        ]
+    }
+}
