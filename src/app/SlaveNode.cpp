@@ -28,4 +28,11 @@ namespace viscom {
 
     SlaveNode::~SlaveNode() = default;
 
+    void SlaveNode::UpdateFrame(double currentTime, double elapsedTime)
+    {
+        currentRow = syncRow.getVal();
+        bass->set_row(syncRow.getVal());
+
+        ApplicationNodeImplementation::UpdateFrame(currentTime, elapsedTime);
+    }
 }

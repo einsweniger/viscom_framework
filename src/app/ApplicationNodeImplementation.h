@@ -20,6 +20,14 @@
 #include <cereal/archives/json.hpp>
 #include <app/camera/ScriptedCamera.h>
 
+namespace sgct
+{
+    class SharedFloat;
+    class SharedInt64;
+    class SharedUInt64;
+}
+
+
 namespace fs = std::experimental::filesystem;
 template<class T>
 bool restore(fs::path cfgPath, T* entitiy) {
@@ -50,12 +58,15 @@ namespace viscom {
         void UpdateFrame(double currentTime, double elapsedTime) override;
         void ClearBuffer(FrameBuffer& fbo) override;
         void DrawFrame(FrameBuffer& fbo) override;
+
+        void PreSync() override;
         void CleanUp() override;
         void EncodeData() override;
         void DecodeData() override;
         bool AddTuioCursor(TUIO::TuioCursor *tcur) override;
         bool KeyboardCallback(int key, int scancode, int action, int mods) override;
         glm::vec2 GetScreenSize();
+        using enh::ApplicationNodeBase::GetApplication;
 
         void PostDraw() override;
 
@@ -89,6 +100,8 @@ namespace viscom {
         bool drawToy = false;
         shadertoy::Shader shaderParams_;
 
+        sgct::SharedUInt64 syncRow;
+
         std::map<std::string, minuseins::tracker::Track> tracks;
         std::map<std::string, minuseins::tracker::strTrack> namedTracks;
         std::map<std::string, minuseins::tracker::FloatVecTrack> vec3Tracks;
@@ -99,7 +112,7 @@ namespace viscom {
 
         std::unique_ptr<MyFreeCamera> freeCam_;
         std::unique_ptr<ScriptedCamera> scriptCam_;
-        using enh::ApplicationNodeBase::GetApplication;
+        ApplicationNodeInternal* GetApplication() { return GetApplication(); }
     protected:
         void toggleMouseGrab();
 

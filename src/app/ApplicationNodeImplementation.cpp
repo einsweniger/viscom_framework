@@ -16,6 +16,7 @@
 //#include "core/imgui/imgui_impl_glfw.h"
 
 #include "app/camera/MyFreeCamera.h"
+#include <sgct/SharedData.h>
 
 namespace viscom {
 
@@ -27,6 +28,7 @@ namespace viscom {
     {
         restore(findConfig("StartupPrograms.json"), &startupPrograms);
         restoreTracks();
+        syncRow = sgct::SharedUInt64(0);
     }
 
     void ApplicationNodeImplementation::restoreTracks() {
@@ -60,49 +62,48 @@ namespace viscom {
         auto [bytes, time] = bass->get_length();
         std::cout << "bass length in bytes: " << bytes << " and in seconds: " << time << std::endl;
         std::cout << "that's: " << time*minuseins::audio::row_rate  << " rows!" << std::endl;
-
+        bass->play();
     }
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
-        if(stopTime_) {
-            stopTime_ = !stopTime_;
-            bass->play();
-        }
+//        if(stopTime_) {
+//            stopTime_ = !stopTime_;
+//            bass->play();
+//        }
+        
         globalTime_ = static_cast<float>(currentTime);
         elapsedTime_ = static_cast<float>(elapsedTime);
-        currentRow = static_cast<unsigned int>(bass->get_row());
+        //currentRow = static_cast<unsigned int>(bass->get_row());
+        //currentRow = syncRow.getVal();
+        //bass->set_row(syncRow.getVal());
+        currentTime_ = static_cast<float>(bass->get_time());
+        if (bass->get_fft(&fftData[0])) {
 
-        if(!stopTime_) {
+            for (int i = 0; i < minuseins::audio::FFT_SIZE; i++)
+            {
+                fftDataSmoothed[i] = fftDataSmoothed[i] * fftSmootingFactor + (1 - fftSmootingFactor) * fftData[i];
 
-            currentTime_ += elapsedTime_;
-            currentTime_ = static_cast<float>(bass->get_time());
-            if (bass->get_fft(&fftData[0])) {
-
-                for ( int i = 0; i < minuseins::audio::FFT_SIZE; i++ )
-                {
-                    fftDataSmoothed[i] = fftDataSmoothed[i] * fftSmootingFactor + (1 - fftSmootingFactor) * fftData[i];
-
-                    fftDataSlightlySmoothed[i] = fftDataSlightlySmoothed[i] * fftSlightSmootingFactor + (1 - fftSlightSmootingFactor) * fftData[i];
-                    fftDataIntegrated[i] = fftDataIntegrated[i] + fftDataSlightlySmoothed[i];
-                    if (fftDataIntegrated[i] > fftMaxIntegralValue) {
-                        fftDataIntegrated[i] -= fftMaxIntegralValue;
-                    }
+                fftDataSlightlySmoothed[i] = fftDataSlightlySmoothed[i] * fftSlightSmootingFactor + (1 - fftSlightSmootingFactor) * fftData[i];
+                fftDataIntegrated[i] = fftDataIntegrated[i] + fftDataSlightlySmoothed[i];
+                if (fftDataIntegrated[i] > fftMaxIntegralValue) {
+                    fftDataIntegrated[i] -= fftMaxIntegralValue;
                 }
             }
         }
+
         if(grabMouse_) {
             freeCam_->UpdateCamera(elapsedTime, this);
         } else {
             scriptCam_->UpdateCamera(elapsedTime, this);
         }
-        update_scene();
         for(auto& fsq : fsqs) {
             fsq->UpdateFrame(currentTime_, elapsedTime_);
         }
         for(auto& toy : toys) {
             toy->UpdateFrame(currentTime_, elapsedTime_);
         }
+        
     }
 
     void ApplicationNodeImplementation::PostDraw() {
@@ -120,6 +121,7 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
+        
         if(drawToy) {
             if(toys.empty()) return;
             auto it = toys.begin();
@@ -147,6 +149,11 @@ namespace viscom {
             fsq->DrawFrame(fbo);
         }
         iFrame++;
+    }
+
+    void ApplicationNodeImplementation::PreSync()
+    {
+        
     }
 
     void ApplicationNodeImplementation::CleanUp()
@@ -182,10 +189,12 @@ namespace viscom {
     void ApplicationNodeImplementation::EncodeData()
     {
         ApplicationNodeBase::EncodeData();
+        sgct::SharedData::instance()->writeUInt64(&syncRow);
     }
     void ApplicationNodeImplementation::DecodeData()
     {
         ApplicationNodeBase::DecodeData();
+        sgct::SharedData::instance()->readUInt64(&syncRow);
     }
     bool ApplicationNodeImplementation::AddTuioCursor(TUIO::TuioCursor *tcur)
     {
@@ -193,7 +202,8 @@ namespace viscom {
     }
 
     glm::vec2 ApplicationNodeImplementation::GetScreenSize() {
-        return GetConfig().virtualScreenSize_;
+        auto size = GetConfig().virtualScreenSize_;
+        return size;
     }
 
     void ApplicationNodeImplementation::update_scene() {

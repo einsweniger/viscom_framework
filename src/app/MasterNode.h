@@ -36,6 +36,7 @@ namespace viscom {
 
         void InitOpenGL() override;
 
+        void PreSync() override;
         void CleanUp() override;
 
     private:

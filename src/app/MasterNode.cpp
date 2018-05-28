@@ -17,7 +17,7 @@
 
 #include "core/glfw.h"  // for registering key presses.
 #include "gfx/gl/handlers.h"
-
+#include <sgct/SharedData.h>
 
 
 namespace viscom {
@@ -118,6 +118,13 @@ namespace viscom {
         if(restore(findConfig(minuseins::gui::MasterNodeGui::config_name), gui_.get())) {
             gui_->init();
         }
+    }
+
+    void MasterNode::PreSync()
+    {
+        ApplicationNodeImplementation::PreSync();
+        currentRow = static_cast<unsigned int>(bass->get_row());
+        syncRow.setVal(currentRow);
     }
 
     void MasterNode::saveTracks() {
