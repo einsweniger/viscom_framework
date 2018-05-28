@@ -104,10 +104,13 @@ namespace minuseins {
         if(!active) return;
         fbo.DrawToFBO([this,&fbo]{
 #ifdef VISCOM_USE_SGCT
-            auto windowId = appImpl->GetApplication()->GetCurrentWindowId();
-            auto viewportPosition = -appImpl->GetApplication()->GetViewportScreen(windowId).position_;
+            auto windowId = appImpl->GetApplication()->GetCurrentWindowIndex();
+            auto viewportPosition = appImpl->GetApplication()->GetViewportScreen(windowId).position_;
             auto viewportSize = appImpl->GetApplication()->GetViewportScreen(windowId).size_;
-            gl::glViewport(viewportPosition.x, viewportPosition.y, viewportSize.x, viewportSize.y);
+//            auto viewportQuad = appImpl->GetApplication()->GetViewportQuadSize(windowId);
+//            auto vpScale = appImpl->GetApplication()->GetViewportScaling(windowId);
+
+            //gl::glViewport(viewportPosition.x, viewportPosition.y, viewportSize.x, viewportSize.y);
 #endif
 
             gpi_->prepareDraw();

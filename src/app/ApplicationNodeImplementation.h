@@ -112,7 +112,7 @@ namespace viscom {
 
         std::unique_ptr<MyFreeCamera> freeCam_;
         std::unique_ptr<ScriptedCamera> scriptCam_;
-        ApplicationNodeInternal* GetApplication() { return GetApplication(); }
+        ApplicationNodeInternal* GetApplication() { return ApplicationNodeBase::GetApplication(); }
     protected:
         void toggleMouseGrab();
 
