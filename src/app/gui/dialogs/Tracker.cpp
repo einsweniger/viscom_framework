@@ -7,7 +7,7 @@
 #include <app/tracker/Track.h>
 #include <core/glfw.h>
 #include <imgui.h>
-
+#include "app/sound/BassHandler.h"
 namespace minuseins::gui {
 constexpr unsigned int FFT_TEX_W = 128;
 

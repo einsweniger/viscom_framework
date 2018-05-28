@@ -222,7 +222,7 @@ void BassDecoder::step() {
     return;
   }
   const float intensity_step =
-          (palette.size() - 1) / std::log(maxIntensity + 1);
+      (palette.size() - 1) / std::log(maxIntensity + 1);
   int palettePos =
       static_cast<int>(intensity_step * log(intensity + 1));  // f2* ~[0,6.91]
 

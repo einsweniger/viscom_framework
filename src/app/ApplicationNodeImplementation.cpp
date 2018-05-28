@@ -13,10 +13,15 @@
 #include <iostream>
 
 #include "core/glfw.h"
-//#include "core/imgui/imgui_impl_glfw.h"
 
 #include <sgct/SharedData.h>
 #include "app/camera/MyFreeCamera.h"
+#include "app/camera/ScriptedCamera.h"
+#include "app/gfx/IntrospectableFsq.h"
+#include "app/gfx/ShaderToyFsq.h"
+#include "app/gfx/gl/ProgramInspector.h"
+#include "app/sound/BassHandler.h"
+#include "app/tracker/Track.h"
 
 namespace viscom {
 

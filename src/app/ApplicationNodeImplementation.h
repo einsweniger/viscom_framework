@@ -9,24 +9,29 @@
 
 #pragma once
 
+#include <enh/ApplicationNodeBase.h>
 #include <enh/gfx/gl/GLTexture.h>
 #include <cereal/archives/json.hpp>
 #include <experimental/filesystem>
 #include <fstream>
-#include "app/camera/ScriptedCamera.h"
-#include "app/gfx/IntrospectableFsq.h"
-#include "app/gfx/ShaderToyFsq.h"
-#include "app/gfx/gl/ProgramInspector.h"
-#include "app/sound/BassHandler.h"
-#include "app/tracker/Track.h"
-#include "enh/ApplicationNodeBase.h"
 
 namespace sgct {
 class SharedFloat;
 class SharedInt64;
 class SharedUInt64;
 }  // namespace sgct
-
+namespace minuseins {
+class IntrospectableFsq;
+class ShaderToyFsq;
+namespace audio {
+class BassHandler;
+}
+namespace tracker {
+struct FloatVecTrack;
+struct strTrack;
+struct Track;
+}  // namespace tracker
+}  // namespace minuseins
 namespace fs = std::experimental::filesystem;
 template <class T>
 bool restore(fs::path cfgPath, T* entitiy) {
@@ -42,6 +47,7 @@ bool restore(fs::path cfgPath, T* entitiy) {
 namespace viscom {
 class MeshRenderable;
 class MyFreeCamera;
+class ScriptedCamera;
 
 class ApplicationNodeImplementation : public enh::ApplicationNodeBase {
  public:
@@ -72,8 +78,8 @@ class ApplicationNodeImplementation : public enh::ApplicationNodeBase {
 
   std::unique_ptr<minuseins::IntrospectableFsq> active_fsq_;
   std::vector<std::unique_ptr<Texture>> textures;
-  std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs{};
-  std::vector<std::unique_ptr<minuseins::ShaderToyFsq>> toys{};
+  std::vector<std::unique_ptr<minuseins::IntrospectableFsq>> fsqs;
+  std::vector<std::unique_ptr<minuseins::ShaderToyFsq>> toys;
   std::unique_ptr<minuseins::audio::BassHandler> bass;
   std::vector<std::string> startupPrograms = {"test.frag",
                                               "renderTexture.frag"};
@@ -83,10 +89,10 @@ class ApplicationNodeImplementation : public enh::ApplicationNodeBase {
   std::unique_ptr<viscom::enh::GLTexture> fftTex;
   std::unique_ptr<viscom::enh::GLTexture> fftTexSmoothed;
   std::unique_ptr<viscom::enh::GLTexture> fftTexIntegrated;
-  std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftData;
-  std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSmoothed;
-  std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataIntegrated;
-  std::array<gl::GLfloat, minuseins::audio::FFT_SIZE> fftDataSlightlySmoothed;
+  std::array<gl::GLfloat, 1024> fftData;
+  std::array<gl::GLfloat, 1024> fftDataSmoothed;
+  std::array<gl::GLfloat, 1024> fftDataIntegrated;
+  std::array<gl::GLfloat, 1024> fftDataSlightlySmoothed;
   float fftSmootingFactor = 0.840f;
   float fftSlightSmootingFactor = 0.6f;
   float fftMaxIntegralValue = 1024.0f * 4;
@@ -99,7 +105,6 @@ class ApplicationNodeImplementation : public enh::ApplicationNodeBase {
   int iFrame = 0;
   bool stopTime_;
   bool drawToy = false;
-  shadertoy::Shader shaderParams_;
 
   sgct::SharedUInt64 syncRow;
 

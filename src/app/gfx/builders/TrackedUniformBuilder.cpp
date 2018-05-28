@@ -5,6 +5,7 @@
 #include "TrackedUniformBuilder.h"
 #include <app/ApplicationNodeImplementation.h>
 #include <variant>
+#include "app/tracker/Track.h"
 
 namespace minuseins::handlers {
 

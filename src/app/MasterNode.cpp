@@ -16,9 +16,10 @@
 #include <iostream>
 
 #include <sgct/SharedData.h>
+#include "app/sound/BassHandler.h"
+#include "app/tracker/Track.h"
 #include "core/glfw.h"  // for registering key presses.
 #include "gfx/gl/handlers.h"
-
 namespace viscom {
 
 MasterNode::MasterNode(ApplicationNodeInternal* appNode)
