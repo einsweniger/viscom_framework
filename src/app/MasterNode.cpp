@@ -7,19 +7,21 @@
  */
 
 #include "MasterNode.h"
+#include <iostream>
+
 #include <glbinding-aux/Meta.h>
 #include <glbinding/glbinding.h>
 #include <imgui.h>
+#include <sgct/SharedData.h>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/vector.hpp>
-#include <iostream>
 
-#include <sgct/SharedData.h>
+#include <core/glfw.h>  // for registering key presses.
+
+#include "app/gfx/gl/handlers.h"
 #include "app/sound/BassHandler.h"
 #include "app/tracker/Track.h"
-#include "core/glfw.h"  // for registering key presses.
-#include "gfx/gl/handlers.h"
 namespace viscom {
 
 MasterNode::MasterNode(ApplicationNodeInternal* appNode)

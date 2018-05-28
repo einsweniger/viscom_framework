@@ -5,7 +5,7 @@
 #ifndef VISCOMFRAMEWORK_SCENESUBROUTINEHANDLER_H
 #define VISCOMFRAMEWORK_SCENESUBROUTINEHANDLER_H
 
-#include <app/gfx/gl/handlers/SubroutineUniformHandler.h>
+#include "app/gfx/gl/handlers/SubroutineUniformHandler.h"
 
 namespace viscom {
 class ApplicationNodeImplementation;

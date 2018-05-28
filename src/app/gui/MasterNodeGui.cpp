@@ -4,17 +4,21 @@
 //
 
 #include "MasterNodeGui.h"
+
+#include <experimental/filesystem>
+
 #include <core/gfx/FrameBuffer.h>
 #include <core/glfw.h>
 #include <core/resources/Resource.h>
 #include <core/resources/ResourceManager.h>
 #include <enh/ApplicationNodeBase.h>
+
 #include <glbinding-aux/Meta.h>
 #include <glbinding/gl/gl.h>
 #include <glbinding/gl/types.h>
 #include <glbinding/glbinding.h>
-#include <experimental/filesystem>
 #include <glm/gtc/type_ptr.hpp>
+
 #include "app/MasterNode.h"
 #include "app/camera/MyFreeCamera.h"
 #include "app/camera/ScriptedCamera.h"
@@ -29,6 +33,7 @@
 #include "app/shadertoy/ShaderToyLoader.h"
 #include "app/sound/BassHandler.h"
 #include "app/util.h"
+
 namespace minuseins::gui {
 
 static Overlay overlay;

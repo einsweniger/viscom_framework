@@ -3,11 +3,13 @@
 //
 
 #include "Tracker.h"
-#include <app/ApplicationNodeImplementation.h>
-#include <app/tracker/Track.h>
+
 #include <core/glfw.h>
 #include <imgui.h>
+
+#include "app/ApplicationNodeImplementation.h"
 #include "app/sound/BassHandler.h"
+#include "app/tracker/Track.h"
 namespace minuseins::gui {
 constexpr unsigned int FFT_TEX_W = 128;
 
