@@ -41,7 +41,7 @@ std::unique_ptr<named_resource> UniformHandler::initialize(
     }
     std::unique_ptr<named_resource> new_res = std::move(new_uniform);
     new_res.swap(old_res);
-    return std::move(new_res);
+    return new_res;
   } catch (std::out_of_range&) { /*no previous value --> new uniform*/
   }
 

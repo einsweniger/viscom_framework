@@ -70,6 +70,7 @@ struct interpolation {
 
 template <typename ValueType>
 struct Key {
+  virtual ~Key() = default;
   using value_type = ValueType;
   interpolation interp;
   Row row;

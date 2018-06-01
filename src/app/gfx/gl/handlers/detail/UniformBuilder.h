@@ -11,6 +11,7 @@ namespace minuseins::handlers {
 struct UniformBuilder
     : std::function<std::unique_ptr<generic_uniform>(named_resource res)> {
   virtual std::unique_ptr<generic_uniform> operator()(named_resource res);
+  virtual ~UniformBuilder() = default;
 };
 }  // namespace minuseins::handlers
 

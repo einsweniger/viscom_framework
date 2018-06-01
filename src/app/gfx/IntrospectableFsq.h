@@ -48,6 +48,7 @@ namespace fs = std::experimental::filesystem;
 class IntrospectableFsq {
  public:
   IntrospectableFsq(const std::string& fragmentProgram);
+  virtual ~IntrospectableFsq() = default;
   virtual void loadParams(shadertoy::Renderpass params);
   virtual void init(viscom::enh::ApplicationNodeBase*);
 
