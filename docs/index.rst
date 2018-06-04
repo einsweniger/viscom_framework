@@ -8,11 +8,19 @@ Welcome to Projektbericht's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Introspection
    :glob:
 
-   chapters/*
+   01_introspection/*
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Tracker
+   :glob:
+
+   02_tracker/*
+
+   
 Indices and tables
 ==================
 
