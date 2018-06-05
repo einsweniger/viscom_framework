@@ -425,9 +425,156 @@ Initializing from the defaults set via GLSL is quite simple.
 Handling Uniforms
 ^^^^^^^^^^^^^^^^^
 
+Back to the handler, the benefits of abstraction become more evident.
+The uniform handler can be constructed with an external builder which statisfies ``std::function<std::unique_ptr<generic_uniform>(named_resource res)>``.
+A default is provided, which is a large switch-case returning the previously established basic uniforms.
+This builder is called during ``initialize``:
 
+.. code-block:: cpp
+   :linenos:
+
+   std::unique_ptr<named_resource> UniformHandler::initialize(
+       ProgramInspector& inspect, named_resource res) {
+     std::unique_ptr<generic_uniform> new_uniform = builder(res);
+     try {
+       // if neither throws, we had a previous run with that uniform.
+       auto old_res_idx =
+           inspect.GetResourceIndex(gl::GL_UNIFORM, new_uniform->name);  // throws!
+       auto& old_res = inspect.GetContainer(gl::GL_UNIFORM).at(old_res_idx);
+       {
+         auto& old_uniform = dynamic_cast<generic_uniform&>(*old_res);
+         // We can now try to restore values.
+         if (old_uniform.type() == new_uniform->type()) {
+           old_uniform.update_properties(*new_uniform);
+         }
+       }
+       std::unique_ptr<named_resource> new_res = std::move(new_uniform);
+       new_res.swap(old_res);
+       return new_res;
+     } catch (std::out_of_range&) { /*no previous value --> new uniform*/
+     }
+      
+     return std::move(new_uniform);
+   }
+
+When ``name`` and ``type`` match with a previously created uniform (e.g. ``initialize`` is called after recompilation), the new properties are copied over and the old uniform is returned.
+This is easier than copying all of the previously set members (update/upload functions, value, ...).
+
+With generic_uniform, preparing for the draw call is then as little as:
+
+.. code-block:: cpp
+   :linenos:
+
+   void UniformHandler::prepareDraw(ProgramInspector& inspect,
+                                    named_resource_container& resources) {
+     for (auto& res : resources) {
+       auto& uniform = dynamic_cast<generic_uniform&>(*res);
+       uniform.get_updated_value();
+       uniform.upload_value();
+     }
+   }
+
+You might have noticed the absence of a catch for ``std::bad_cast``.
+This choice is deliberate: in case the builder did not produce a valid generic_uniform.
+
+Sampler Uniforms
+^^^^^^^^^^^^^^^^
+
+The exception to the above uniforms is a sampler in GLSL (e.g. ``uniform sampler2D tex_wood;``)
+
+.. code-block:: cpp
+   :linenos:
+
+   struct SamplerUniform : public empty_uniform {
+     using empty_uniform::empty_uniform;
    
+     void draw2D() override;
+   
+     bool upload_value() override;
+   
+     bool get_updated_value() override;
+   
+     gl::GLint boundTexture = 0;
+     gl::GLint textureUnit = 0;
+     std::string wrap = "clamp";
+   };
+
+``empty_uniform`` overrides all pure virtual functions in generic uniform with no-ops, to avoid more boilerplate when the uniform is not meant to hold a value.
+The implementation does not implement filters, only wrapping.
+
+.. code-block:: cpp
+   :linenos:
+
+   bool SamplerUniform::upload_value() {
+     if (generic_uniform::upload_value()) return true;
+     if (wrap == "repeat") {
+       gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_REPEAT);
+       gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_REPEAT);
+     } else if (wrap == "mirror") {  // GL_MIRRORED_REPEAT
+       gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S,
+                               gl::GL_MIRRORED_REPEAT);
+       gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T,
+                               gl::GL_MIRRORED_REPEAT);
+     } else if (wrap == "clamp") {
+       gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S,
+                               gl::GL_CLAMP_TO_EDGE);
+       gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T,
+                               gl::GL_CLAMP_TO_EDGE);
+     }
+     gl::glActiveTexture(gl::GL_TEXTURE0 + textureUnit);
+     gl::glBindTexture(gl::GL_TEXTURE_2D, boundTexture);
+     gl::glUniform1i(location(), textureUnit);
+     return true;
+   }
+
+Choosing std::string over an enum was to simplify interaction with Shadertoy, explained in the upcoming chapter.
+
 Uniform Blocks
 --------------
 
+First of all: Uniform Blocks were not implemented in a way they could be used in another framework.
+They were mostly implemented for exploring pros and cons about the API.
+This section is more about how uniforms' override functions can be used.
 
+That's why we skip ``initialize`` and go straight to ``postInit``:
+
+.. code-block:: cpp
+   :linenos:
+   :emphasize-lines: 13-17
+
+   void UniformBlockHandler::postInit(ProgramInspector& inspect,
+                                      named_resource_container& resources) {
+     auto interface = inspect.GetInterface(gl::GL_UNIFORM_BLOCK);
+     try {
+       auto& uniforms = inspect.GetContainer(gl::GL_UNIFORM);
+       for (auto& res : resources) {
+         auto& block = dynamic_cast<UniformBlock&>(*res);
+         auto active_vars = interface.GetActiveVariables(
+             block.resourceIndex, block.num_active_variables());
+         // FIXME on recompile, uniforms that remain in program still have the
+         // update function set.
+         for (auto& resIndex : active_vars) {
+           auto& uniform = dynamic_cast<generic_uniform&>(*uniforms.at(resIndex));
+           uniform.value_upload_fn = [&]() {
+             auto offset = uniform.properties.at(gl::GL_OFFSET);
+             block.upload_data(offset, uniform.uploadSize(), uniform.valuePtr());
+           };
+         }
+       }
+     } catch (std::out_of_range& err) {
+       std::cerr << err.what() << std::endl;
+     }
+   }
+
+The highlighted lines also demonstrate the use of ``valuePtr`` and ``uploadSize`` methods.
+Uniform block variables carry the property ``GL_BUFFER_DATA_SIZE``, so we can initialize our buffer with it.
+The active variables from the uniform block interface contain a subset of resource indices from the uniform interface.
+Uniforms that are active in an Uniform Block assume ``GL_LOCATION == -1`` and ``GL_BLOCK_INDEX != -1``.
+``GL_OFFSET`` on the uniform will also tell us where in the block it's value is located.
+
+Con: as lines 10 and 11 state, once you move a uniform out of the block, this implementation will crash.
+The uniform handler will copy new properties to the uniform, leaving the upload override in place.
+With the buffer gone, you'll either experience writes to memory or a straight-up crash with invalid memory access.
+This could be solved by implementing a ``preInit`` function, where you might remove the overrides.
+
+Pro: this removes **all** guesswork around ``std140`` and ``std430`` layout qualifiers and enables using vendor specific layouts.

@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Projektbericht's documentation!
-==========================================
+Project Report
+==============
 
 .. toctree::
    :maxdepth: 2
@@ -15,7 +15,7 @@ Welcome to Projektbericht's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tracker
+   :caption: Animation
    :glob:
 
    02_tracker/*
