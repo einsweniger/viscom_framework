@@ -40,7 +40,7 @@ Achieved Goals
 
 Due to several difficulties not very many of these goals were achieved:
 
-Currently, the executable weighs in at 48 MiB, compressing it with UPX leads to rougly 13 MiB.
+Currently, the executable weighs in at 48 MiB, compressing it with UPX_ leads to rougly 13 MiB.
 This does also not include the shaders and the music.
 
 This project did neither produce a synthesizer, nor self made music.
@@ -51,11 +51,15 @@ At time of writing the project does not produce the same result on the beamers a
 
 Failing pretty much all goals set from the beginning, there's also some other outcomes.
 
+.. _UPX: https://upx.github.io/
+
 Outcomes
 --------
 
-Introspection API
-Tracker
-Gui?
+**Introspection API**: to minimize recompiling the C++ code, an API was built that automatically detects uniforms in a program and allows manipulating their values.
+Built upon this API, it's possible to **import Shadertoys**. This was done to help understanding some SDF and raymarching techniques.
+**Audio playback** and a **Sync Tracker** were implemented to automate manipulation of uniforms and other application states (e.g. camera position).
+These were all combined in a **GUI** to control all of the above at runtime.
+
 
 
