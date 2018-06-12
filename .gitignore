@@ -17,3 +17,4 @@ resources.tgz
 resources/ShaderToy/
 resources/media/
 extern/rocket
+msbuild/*
