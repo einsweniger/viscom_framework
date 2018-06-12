@@ -159,8 +159,9 @@ namespace minuseins::handlers {
 
             bool upload_value() override {
                 if(do_value_upload) {
+                    auto tex = appImpl->fsqs.at(0)->GetBackbuffer()->GetTextures().at(1);
                     gl::glActiveTexture(gl::GL_TEXTURE0 + sampler);
-                    gl::glBindTexture(gl::GL_TEXTURE_2D, appImpl->postproc_tex);
+                    gl::glBindTexture(gl::GL_TEXTURE_2D, tex);
                     gl::glUniform1i(location(), sampler);
                 }
                 return true;
