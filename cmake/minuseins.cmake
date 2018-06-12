@@ -8,15 +8,17 @@ set(JUST_INSTALL_CEREAL ON CACHE BOOL "skip cereal unittest sandbox and test" FO
 
 #SGCT stuff.
 
-set(VISCOM_USE_SGCT OFF CACHE BOOL "Use SGCT for local builds." FORCE)
-set(VISCOM_LOCAL_ONLY ON CACHE BOOL "Only do a local build without calibration information." FORCE)
+set(VISCOM_USE_SGCT ON CACHE BOOL "Use SGCT for local builds." FORCE)
+set(VISCOM_LOCAL_ONLY OFF CACHE BOOL "Only do a local build without calibration information." FORCE)
 set(VISCOM_CLIENTGUI OFF CACHE BOOL "Use ImGui on clients." FORCE)
-set(VISCOM_SYNCINPUT ON CACHE BOOL "Synchronize input from master to clients." FORCE)
+set(VISCOM_SYNCINPUT OFF CACHE BOOL "Synchronize input from master to clients." FORCE)
 set(VISCOM_CLIENTMOUSECURSOR OFF CACHE BOOL "Show the mouse cursor on clients." FORCE)
 set(OpenGL_GL_PREFERENCE GLVND)
 if(${VISCOM_USE_SGCT})
     if(MSVC)
         set(ENV{SGCT_ROOT_DIR} "D:/dev/libs/SGCT-2.7.3/mscv14_x64")
+        set(SGCT_DEBUG_LIBRARY "D:/dev/libs/SGCT-2.7.3/mscv15_x64/lib/sgctd.lib")
+        set(SGCT_RELEASE_LIBRARY "D:/dev/libs/SGCT-2.7.3/mscv15_x64/lib/sgct.lib")
     endif()
     if(UNIX)
         set(sgct_build_dir "/home/bone/projects/viscom_framework/extern/fwcore/extern/sgct/build")
