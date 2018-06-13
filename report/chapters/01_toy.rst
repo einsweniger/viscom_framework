@@ -3,12 +3,12 @@ Shadertoy import
 
 .. figure:: /res/shadertoy.png
 
-   several successfuly imported shadertoys and their rendering result.
+   several successfully imported shadertoys and their rendering result.
             
-To test the API, I've implemented rudamentary support for importing Shadertoys.
+To test the API, I've implemented rudimentary support for importing Shadertoys.
 Shadertoy provides an API to access and download user content descriptions as JSON.
 I've written two programs: one is in charge of retrieving shader descriptions and used assets, the other extracts headers and footers of the shaders.
-They were written in python and javascript, respectively.
+They were written in python and JavaScript, respectively.
 Headers and footers are necessary, since they are not included in the JSON data.
 
 Importing through cereal was proved straight forward.
