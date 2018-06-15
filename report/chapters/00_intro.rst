@@ -23,6 +23,7 @@ To achieve small sizes, several techniques are used.
 Object meshes are generated procedurally, some choose to do render without meshes.
 Ray marching Signed Distance Functions can completely remove the need to use Meshes and instead define geometry through screen space shaders.
 Since shaders are text, compressing them yields far better compression ratios than tessellated object meshes.
+The goal is not to achieve a small binary, but to use techniques that are utilized to aim for small sizes.
 
 In general, audio is synthesized during run time.
 Most groups write their own synthesizers to maximize compression with their own music description format.
@@ -32,14 +33,11 @@ Achieved Goals
 
 Due to several difficulties not very many of these goals were achieved:
 
-Currently, the executable weighs in at 48 MiB, compressing it with UPX_ leads to rougly 13 MiB.
-This does also not include the shaders and the music.
-
 This project did neither produce a synthesizer, nor self-made music.
 
 The visuals are not as long as the chosen piece of music and, compared to entries in public competitions, not very pleasing.
 
-Failing pretty much all goals set from the beginning, there's also some other outcomes.
+Failing several goals set from the beginning, there's also some other outcomes.
 
 .. _UPX: https://upx.github.io/
 
