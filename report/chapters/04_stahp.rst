@@ -15,7 +15,7 @@ I've avoided them were possible as they add to the already long compile times.
 The more complex templates were also discarded in favor of maintainability.
 
 The incompatibilities between the Microsoft Compiler and the compilers available on Linux further complicated the matter.
-While Clang (most of the time) provides better error reporting they are no longer compatilbe with GCC's STL.
+While Clang (most of the time) provides better error reporting they are no longer compatible with GCC's STL.
 Clang's implementation (6.0.0) does not support ``map::extract`` and their libc++ proved to be not straightforward to compile with.
 Even now linking the executable fails while using clang.
 
@@ -28,17 +28,17 @@ There were some partially undocumented variables and vaguely phrased behaviors t
 My requested fixes were included in the most recent version of the Core Specification.
 
 The beamer rig in the lab is awful to use.
-I've written several powershell scripts to make synchronization and execution faster, but there's still room for improvment.
-Windows' headstrong behaviour to "improve user experience" at the most inconvenient times stands quite contraty to what I'd expect from a stable development environment.
+I've written several powershell scripts to make synchronization and execution faster, but there's still room for improvement.
+Windows' headstrong behaviour to "improve user experience" at the most inconvenient times stands quite contrary to what I'd expect from a stable development environment.
 That's why I've decided to develop on Linux, knowing that some code will have to be ported for Windows later.
 
 Final Thoughts
 --------------
 
-I'm pretty statisfied with the Introspection API and the underlying system for interacting with OpenGL.
+I'm pretty satisfied with the Introspection API and the underlying system for interacting with OpenGL.
 I've put much work into it and hope that it will help others in understanding, teaching and experimenting with OpenGL and Shaders.
 I might develop it further to create a standalone library with some examples.
 Documentation is almost finished: it needs a little polishing, otherwise it's good to go.
 
-The visuals that I've produced leave me unstatisfied.
+The visuals that I've produced leave me unsatisfied.
 I would have liked to make it more appealing and finish some of my ideas, but there was not enough time.

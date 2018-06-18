@@ -11,7 +11,7 @@ I've written two programs: one is in charge of retrieving shader descriptions an
 They were written in python and JavaScript, respectively.
 Headers and footers are necessary, since they are not included in the JSON data.
 
-Importing through cereal was proved straight forward.
+Importing through cereal was straight forward.
 Using the Introspection API to hook into the uniforms provide state access to time and mouse position was trivial.
 The same is also true for textures that are used in these programs.
 

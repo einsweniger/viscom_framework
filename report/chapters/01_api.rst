@@ -10,7 +10,7 @@ Besides uniforms, this includes subroutines, uniform blocks, program inputs/outp
 
 The inspector will call attached handlers when a program is recompiled and provide basic information: the name of the resource and their properties as key/value pairs.
 Handlers can substitute this ``named_resource`` by their own implementation, which must derive from this class.
-``named_resource`` provides a ``virtual draw2d`` function that deriving classes sould override to allow interaction.
+``named_resource`` provides a ``virtual draw2d`` function that deriving classes should override to allow interaction.
 
 Uniforms
 --------
@@ -55,21 +55,21 @@ Besides uniforms, the reference implementation provides three other main handler
 
 ``ProgramOutputHandler`` is in charge of rendering variables declared as ``out vec4 variableName;``.
 It assumes the variable to be color output from the fragment shader.
-As allocating back buffers depends on the used framework it will call an additional callback function during ``postInit``.
+Since allocating back buffers depends on the used framework, it will call an additional callback function during ``postInit``.
 This function should be in charge of creating these Textures.
-If the program was rendering to a texture its result can be drawn through the GUI.
-This allows to create additional outputs for visual debugging, like drawing normals or verifying shader inputs.
+If the program was rendering to a texture, its result can be drawn through the GUI.
+This allows creating additional outputs for visual debugging, like drawing normals or verifying shader inputs.
 
 Uniform blocks were not decoupled from the beamer framework:
 their use is to provide accessible usage of uniform blocks without knowledge of the layout specific details of the OpenGL standard.
 I've been using them to bunch up uniforms visually, they also can be used to share information across shaders.
 
-Subroutines allow to select from a set of functions defined in the shader.
+Subroutines allow selecting from a set of functions defined in the shader.
 This project uses them to select from:
 
 - SDF scenes defined or included through the fragment shader,
-- several different ray-marching implementations and
-- postprocessing effects.
+- several ray-marching implementations and
+- post processing effects.
 
 Other possible uses might be graphics settings (anti-aliasing methods) or comparing the output of different implementations.
 
@@ -82,14 +82,14 @@ Possible Improvements & Ideas
 
 Uniform blocks override the upload functions of uniforms belonging to the block.
 With this implementation it's not possible to remove the override once the uniform moves out of the block.
-Assing a ``preInit`` function to the inspector and handlers would allow to remove these overrides.
+Adding a ``preInit`` function to the inspector and handlers would allow to remove these overrides.
 
-This architecture proves quite challenging to serialize uniforms through cereal.
+This architecture proves quite challenging serializing uniforms through cereal.
 All type information has to be reconstructed through dynamic casting the uniform back to it's derived class.
-When a override function was set and is expected to be the same after deserialization, I'm still not quite sure how I'd accomplish that.
+When an override function was set and is expected to be the same after deserialization, I'm still not quite sure how I'd accomplish that.
 
 Together with ImGui's Drag and Drop functions, this API could be extended to create connections between program outputs, external data sources and uniforms.
-It's just a rough idea: declaring resources with provided and accepted types so they can be connected:
+It's just a rough idea: declaring resources with provided and accepted types, so they can be connected:
 e.g. a uniform float accepts a float value, ``currentTime`` provides a float value so the uniform resource can update it's value from there.
 Another example would be to connect one program output (texture) to another program's sampler uniform.
 

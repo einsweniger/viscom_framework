@@ -13,7 +13,7 @@ For a valid entry, several rules have to be met. The following rules were taken 
 
 As stated, no resources other than the executable are allowed.
 Putting this into perspective: the amount of music encoded as MP3 with 128kb/s would leave room for roughly 4s of audio.
-Audio and Visuals must be generated during run time either proceduraly or through space efficient instructions.
+Audio and Visuals must be generated during run time either procedurally or through space efficient instructions.
 For bonus points visuals either respond to the music or are synced manually to match the rhythm.
 
 The other priority of this project is to run on the array of beamers for two reasons:
@@ -35,7 +35,7 @@ Due to several difficulties not very many of these goals were achieved:
 
 This project did neither produce a synthesizer, nor self-made music.
 
-The visuals are not as long as the chosen piece of music and, compared to entries in public competitions, not very pleasing.
+The visuals are not as long as the chosen piece of music and, compared to entries in public competitions not very pleasing.
 
 Failing several goals set from the beginning, there's also some other outcomes.
 

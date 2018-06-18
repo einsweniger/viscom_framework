@@ -15,7 +15,7 @@ Both are well documented, iq's articles_ provide additional information.
 .. _articles: http://iquilezles.org/www/index.htm
 .. _Primitives: https://www.shadertoy.com/view/Xds3zN
 
-Rendering a "box" with hg sdf works like this:
+Rendering a "box" with hg_sdf works like this:
 
 .. code-block:: glsl
 
@@ -42,25 +42,25 @@ One of them was to use structs to describe the scene and provide overrides for r
 
 The reason was two-fold:
 
-- structs have fully named and easy to remember members through an ``sdf`` function.
+- structs have fully named and easy to remember members and could be rendered through an  overloaded ``sdf`` function.
 - A C++ application could potentially generate the shader source from a scene description of primitives.
-  Constructive Solid Geometry approaches could optimize the functions for runtime.
+  Constructive Solid Geometry approaches could optimize the functions for run time.
 
-This approach was not pursued further: defining the structs and corresponding overrides was labour intensive.
+This approach was not pursued further: defining the structs and corresponding overrides was labour-intensive.
 Other variables (e.g. available OpenGL Extensions) for generating shaders from scene descriptions either reduce re-usability or add significant overhead to compensate.
-Additionally, this approach would limit flexibility so I've decided against it.
+Additionally, this approach would limit flexibility, so I've decided against it.
 
 Ray Marching
 ------------
 
 Shadertoy served as primary source for raymarching, SDF and associated techniques.
-Mercury recommends to implement the "Enhanced Sphere Tracing" algorithm (2014, Keinert et. al.: EuroGraphics_).
+Mercury recommends implementing the "Enhanced Sphere Tracing" algorithm (2014, Keinert et. al.: EuroGraphics_).
 The code of their paper proved straightforward to implement in GLSL.
 
 .. _EuroGraphics: http://doi.org/10.2312/stag.20141233
 
-iq implementation is simpler and is widely used throughout Shadertoy, but has it's limitations:
-It's designed for very small scenes and perfroms not quite as nice for long rays and high resolutions.
+iq implementation is simpler and is widely used throughout Shadertoy, but has its limitations:
+It's designed for very small scenes and performs not quite as nice for long rays and high resolutions.
 'Simple' Scenes work well withing their bounds and shortcuts: in general, the Enhanced algorithm is faster and produces nicer edges.
 
 All ray marching algorithm performances degrade for large object counts: each object/functions adds to the calculation time for the rays.
@@ -76,7 +76,7 @@ Grid Traversal
 ^^^^^^^^^^^^^^
 
 For scenes with many repeating objects and distinct colors are wanted, some implementations use multi-stage ray marching for repetition and identification of objects.
-First, they seperate their scene into a regular grid of cubes, cylinders or hexagons on a plane.
+First, they separate their scene into a regular grid of cubes, cylinders or hexagons on a plane.
 The ray-plane intersection is then used to identify the hit object's position and color.
 Within the bounding box of the object, the ray is cast again within this limited range for an accurate rendering result.
 An example can be seen in :numref:`cylgrid`

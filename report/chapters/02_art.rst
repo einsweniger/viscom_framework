@@ -33,14 +33,14 @@ Visuals
    
 Visuals are produced entirely by fragment shaders.
 There are two main shaders: the first produces the scene, the next applies screen-space processing effects.
-The scenes and post processing effects are selected through subroutines at runtime.
+The scenes and post processing effects are selected through subroutines at run time.
 Both can respond to the music's FFT output.
 
 The scenes are rendered entirely through ray marching SDFs.
 Scenes work like plugins, can be included by the main program and are provided as subroutines after recompilation.
 
 Regrettably, there's not much to say about the visuals.
-I've run into several time consuming problems during the implementation and could't focus on them as much as I'd liked.
+I've run into several time-consuming problems during the implementation and could't focus on them as much as I'd liked.
 
-The visuals run in sync to the music, scenes and postprocessing are selected to fit the audio.
-There's a rudamentary PBR shader but no material system to fully exploit its capabilities.
+The visuals run in sync to the music, scenes and post processing are selected to fit the audio.
+There's a rudimentary PBR shader but no material system to fully exploit its capabilities.
