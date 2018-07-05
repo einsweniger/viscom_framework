@@ -31,7 +31,7 @@
             },
             {
                 "key": "Overlay",
-                "value": false
+                "value": true
             },
             {
                 "key": "Shader",
@@ -55,7 +55,7 @@
             },
             {
                 "key": "Textures",
-                "value": false
+                "value": true
             },
             {
                 "key": "TimeSlider",

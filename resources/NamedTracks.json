@@ -19,7 +19,7 @@
                     },
                     {
                         "row": 640,
-                        "value": "blockyGround"
+                        "value": "windingTunnel"
                     },
                     {
                         "row": 704,
@@ -64,6 +64,14 @@
                     {
                         "row": 4097,
                         "value": "hexagons"
+                    },
+                    {
+                        "row": 4607,
+                        "value": "hexagons"
+                    },
+                    {
+                        "row": 4608,
+                        "value": "windingTunnel"
                     }
                 ]
             }
@@ -168,6 +176,14 @@
                     {
                         "row": 4352,
                         "value": "ferris"
+                    },
+                    {
+                        "row": 4607,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 4608,
+                        "value": "ferris"
                     }
                 ]
             }
@@ -228,6 +244,14 @@
                     {
                         "row": 4352,
                         "value": "iq"
+                    },
+                    {
+                        "row": 4607,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 4608,
+                        "value": "tunnel"
                     }
                 ]
             }

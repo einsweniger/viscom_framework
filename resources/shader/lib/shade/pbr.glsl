@@ -97,27 +97,29 @@ subroutine(SceneShader)
 vec3 pbr(in vec3 origin, in vec3 direction, out float distance) {
     // Sky gradient
     vec3 color = vec3(0.65, 0.85, 1.0) + direction.y * 0.72;
-
+    vec3 light_direction = normalize(render_light_direction);
     // (distance, material)
     vec3 hit = raymarch(origin, direction);
     distance = hit.x;
     float material = hit.y;
+    if(material == trace_INF) {
+       material = 55.0;
+    }
 
     // We've hit something in the map
-    if (material > 0.0) {
+    if (material != trace_INF) {
         vec3 position = origin + distance * direction;
 
         vec3 v = normalize(-direction);
-        vec3 n = calcNormal(position);
-//        vec3 l = normalize(vec3(0.6, 0.7, -0.7));
-        vec3 l = normalize(render_light_direction);
-        vec3 h = normalize(v + l);
-        vec3 r = normalize(reflect(direction, n));
+        vec3 normal = calcNormal(position);
+        vec3 h = normalize(v + light_direction);
+        vec3 reflected = normalize(reflect(direction, normal));
+        trace_normals = vec4(normal,1);
 
-        float NoV = abs(dot(n, v)) + 1e-5;
-        float NoL = saturate(dot(n, l));
-        float NoH = saturate(dot(n, h));
-        float LoH = saturate(dot(l, h));
+        float NoV = abs(dot(normal, v)) + 1e-5;
+        float NoL = saturate(dot(normal, light_direction));
+        float NoH = saturate(dot(normal, h));
+        float LoH = saturate(dot(light_direction, h));
 
         vec3 baseColor = vec3(0.0);
         float roughness = 0.0;
@@ -146,7 +148,7 @@ vec3 pbr(in vec3 origin, in vec3 direction, out float distance) {
         vec3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
         vec3 f0 = 0.04 * (1.0 - metallic) + baseColor.rgb * metallic;
 
-        float attenuation = softshadow( position, l, 0.02, 2.5 );
+        float attenuation = softshadow( position, light_direction, 0.02, 2.5 );
 
         // specular BRDF
         float D = D_GGX(linearRoughness, NoH, h);
@@ -161,22 +163,27 @@ vec3 pbr(in vec3 origin, in vec3 direction, out float distance) {
         color *= (intensity * attenuation * NoL) * vec3(0.98, 0.92, 0.89);
 
         // diffuse indirect
-        vec3 indirectDiffuse = Irradiance_SphericalHarmonics(n) * Fd_Lambert();
+        vec3 indirectDiffuse = Irradiance_SphericalHarmonics(normal) * Fd_Lambert();
 
-        vec3 indirectHit = raymarch(position, r);
-        vec3 indirectSpecular = vec3(0.65, 0.85, 1.0) + r.y * 0.72;
-        if (indirectHit.y > 0.0) {
+        vec3 indirectHit = raymarch(position, reflected);
+        vec3 indirectSpecular = vec3(0.65, 0.85, 1.0) + reflected.y * 0.72;
+        if (indirectHit.y != trace_INF) {
             if (indirectHit.y < 4.0)  {
-                vec3 indirectPosition = position + indirectHit.x * r;
+                vec3 indirectPosition = position + indirectHit.x * reflected;
                 // Checkerboard floor
                 float f = mod(floor(6.0 * indirectPosition.z) + floor(6.0 * indirectPosition.x), 2.0);
                 indirectSpecular = checker_texture(indirectPosition);
             } else if (indirectHit.y < 16.0) {
                 // Metallic objects
-                indirectSpecular = material_color(material);
+                indirectSpecular = material_color(indirectHit.y);
+                metallic = 0.4;
+                roughness = 0.2;
             } else {
-                indirectSpecular = material_color(material);
+                indirectSpecular = material_color(indirectHit.y);
+                roughness = 0.6;
             }
+        } else {
+            indirectSpecular = sky_color(reflected, light_direction);
         }
 
         // indirect contribution
@@ -185,6 +192,8 @@ vec3 pbr(in vec3 origin, in vec3 direction, out float distance) {
         vec3 ibl = diffuseColor * indirectDiffuse + indirectSpecular * specularColor;
 
         color += ibl * indirectIntensity;
+    } else {
+        color = sky_color(direction, light_direction);
     }
 
     return color;

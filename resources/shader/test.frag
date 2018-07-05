@@ -57,6 +57,7 @@ uniform float text_rotation = 0;
 #include "maps/text.glsl"
 #include "maps/hexagons.glsl"
 #include "maps/cubes.glsl"
+#include "maps/windingTunnel.glsl"
 
 out vec4 test_color;
 out vec4 test_worldPos;
