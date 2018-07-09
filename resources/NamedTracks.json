@@ -184,6 +184,50 @@
                     {
                         "row": 4608,
                         "value": "ferris"
+                    },
+                    {
+                        "row": 5089,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 5097,
+                        "value": "glitch"
+                    },
+                    {
+                        "row": 5105,
+                        "value": "pixelate"
+                    },
+                    {
+                        "row": 5113,
+                        "value": "sobel"
+                    },
+                    {
+                        "row": 5121,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 5223,
+                        "value": "glitch"
+                    },
+                    {
+                        "row": 5248,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 5353,
+                        "value": "chromaticAberrationV2"
+                    },
+                    {
+                        "row": 5368,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 5480,
+                        "value": "sobel"
+                    },
+                    {
+                        "row": 5504,
+                        "value": "ferris"
                     }
                 ]
             }
