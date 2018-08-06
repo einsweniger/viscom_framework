@@ -21,9 +21,15 @@ namespace minuseins::gui {
             callback(callback)
     {
         for(auto pathstr : pathstrs) {
-            auto base = fs::path{pathstr + basepath_suffix};
+            auto base = fs::path{pathstr};
+            if(0<basepath_suffix.length()) {
+                base /= basepath_suffix;
+            }
+            if(!fs::is_directory(base)) {
+              continue;
+            }
             basepaths_.push_back(base);
-            currentPath[base.string()] = fs::path{"/"};
+            currentPath[base.string()] = base;
             pathContents[base.string()] = scan(base);
         }
     }
@@ -50,7 +56,7 @@ namespace minuseins::gui {
                     if(ImGui::SmallButton(path.filename().string().c_str())) {
                         if(fs::is_directory(path)) {
                             currentPath[base.string()] = currentPath[base.string()] / path.filename() ;
-                            pathContents[base.string()] = scan(base / currentPath[base.string()]);
+                            pathContents[base.string()] = scan(path);
                             break;
                         } else if(callback(currentPath[base.string()] / path.filename())) {
                             *p_open = false;
@@ -73,11 +79,13 @@ namespace minuseins::gui {
     void FileSelect::drawMenu(fs::path &base) {
         if (ImGui::BeginMenuBar()) {
             if(ImGui::MenuItem("rescan")) {
-                pathContents[base.string()] = scan(base / currentPath[base.string()]);
+                pathContents[base.string()] = scan(currentPath[base.string()]);
             }
             if(ImGui::MenuItem("up") && currentPath[base.string()].has_parent_path()) {
-                currentPath[base.string()] = currentPath[base.string()].parent_path();
-                pathContents[base.string()] = scan(base / currentPath[base.string()]);
+                if(currentPath[base.string()] != base) {
+                    currentPath[base.string()] = currentPath[base.string()].parent_path();
+                    pathContents[base.string()] = scan(currentPath[base.string()]);
+                }
             }
             ImGui::EndMenuBar();
         }

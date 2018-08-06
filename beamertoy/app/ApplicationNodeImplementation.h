@@ -9,6 +9,7 @@
 #pragma once
 
 #include "core/app/ApplicationNodeBase.h"
+#include <Shadertoy.h>
 
 namespace viscom {
 
@@ -32,40 +33,9 @@ namespace viscom {
 
         virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
+        std::vector<std::unique_ptr<shadertoy::Shader>> toys;
+
     private:
-        /** Holds the shader program for drawing the background. */
-        std::shared_ptr<GPUProgram> backgroundProgram_;
-        /** Holds the location of the MVP matrix. */
-        GLint backgroundMVPLoc_ = -1;
-
-        /** Holds the shader program for drawing the foreground triangle. */
-        std::shared_ptr<GPUProgram> triangleProgram_;
-        /** Holds the location of the MVP matrix. */
-        GLint triangleMVPLoc_ = -1;
-
-        /** Holds the shader program for drawing the foreground teapot. */
-        std::shared_ptr<GPUProgram> teapotProgram_;
-        /** Holds the location of the model matrix. */
-        GLint teapotModelMLoc_ = -1;
-        /** Holds the location of the normal matrix. */
-        GLint teapotNormalMLoc_ = -1;
-        /** Holds the location of the VP matrix. */
-        GLint teapotVPLoc_ = -1;
-
-        /** Holds the number of vertices of the background grid. */
-        unsigned int numBackgroundVertices_ = 0;
-        /** Holds the vertex buffer for the background grid. */
-        GLuint vboBackgroundGrid_ = 0;
-        /** Holds the vertex array object for the background grid. */
-        GLuint vaoBackgroundGrid_ = 0;
-
-        /** Holds the teapot mesh. */
-        std::shared_ptr<Mesh> teapotMesh_;
-        /** Holds the teapot mesh renderable. */
-        std::unique_ptr<MeshRenderable> teapotRenderable_;
-
-        glm::mat4 triangleModelMatrix_;
-        glm::mat4 teapotModelMatrix_;
         glm::vec3 camPos_;
         glm::vec3 camRot_;
     };

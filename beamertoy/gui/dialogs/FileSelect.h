@@ -7,12 +7,14 @@
 
 #include <unordered_map>
 #include <vector>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 #include "Window.h"
+#include <imgui.h>
+
 
 namespace minuseins::gui {
-    namespace fs = std::experimental::filesystem;
+    namespace fs = std::filesystem;
     struct FileSelect {
         ImGuiTextFilter filter;
 
@@ -21,7 +23,7 @@ namespace minuseins::gui {
         std::vector<fs::path> basepaths_;
         std::unordered_map<std::string, std::vector<fs::path>> pathContents;
         std::unordered_map<std::string, fs::path> currentPath;
-        std::vector<fs::path> paths{};
+        std::vector<fs::path> paths;
 
         void draw(bool *p_open);
 

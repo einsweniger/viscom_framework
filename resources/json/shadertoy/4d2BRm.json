@@ -1,0 +1,79 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4d2BRm",
+      "date": "1499923327",
+      "viewed": 220,
+      "name": "minifeedback",
+      "username": "victor_shepardson",
+      "description": "not quite small enough",
+      "likes": 5,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "feedback",
+        "codegolf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(c,u) c=texelFetch(iChannel0, ivec2(u),0)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// LICENSE:\n// Creative Commons Attribution 4.0 International License.\n// https://creativecommons.org/licenses/by/4.0/\n\n#define T(x) texture(iChannel0, (x)/d)\n#define C T(T(u-y).zw+u+(y=r.yx*r))/4.\n\nvoid mainImage(out vec4 c, vec2 u)\n{\n    vec2 d = iResolution.xy, y = vec2(-1,1), r = y;\n    \n    vec4 b = cos(c = C+C+C+C);\n    \n    c += .2*(fract((sin(u/d+b.bg)/b.ra).xxyy + c).gbar-c);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

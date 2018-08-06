@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4d2fD1",
+      "date": "1500320812",
+      "viewed": 155,
+      "name": "[SH17A] 4 Eyes",
+      "username": "public_int_i",
+      "description": "4 eyes",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "eyes",
+        "4",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\n\n#define a cos(log(length(u+(r+=cos(r.yx*34.54+vec2(7,2))*.2)))*8.)*.2\n\n//Credits to pellicus and theGiallo for minimizing mainImage https://www.shadertoy.com/view/Xd2BWh\n#define mainImage(o,c) vec2 u = c/iResolution.xy-.5, r = c*0.; o += a+a+a+a-o;",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

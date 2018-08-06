@@ -8,11 +8,13 @@
 
 #include "CoordinatorNode.h"
 #include <imgui.h>
+#include <gui/Gui.h>
 
 namespace viscom {
 
     CoordinatorNode::CoordinatorNode(ApplicationNodeInternal* appNode) :
-        ApplicationNodeImplementation{ appNode }
+        ApplicationNodeImplementation{ appNode },
+        appNode{appNode}
     {
     }
 
@@ -20,18 +22,8 @@ namespace viscom {
 
     void CoordinatorNode::Draw2D(FrameBuffer& fbo)
     {
-        fbo.DrawToFBO([]() {
-            ImGui::ShowTestWindow();
-
-            ImGui::SetNextWindowPos(ImVec2(60, 60), ImGuiSetCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiSetCond_FirstUseEver);
-            ImGui::StyleColorsDark();
-            if (ImGui::Begin("Select input directory", nullptr, ImGuiWindowFlags_MenuBar))
-            {
-                ImGui::Text("Hello World on Master!");
-            }
-            ImGui::End();
-        });
+        static minuseins::gui::Gui gui(this, appNode);
+        gui.Draw2D(fbo);
 
         ApplicationNodeImplementation::Draw2D(fbo);
     }

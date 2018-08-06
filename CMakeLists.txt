@@ -67,14 +67,4 @@ install(TARGETS ${APP_NAME} RUNTIME DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VI
 install(DIRECTORY resources/ DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME}/resources)
 install(FILES ${CMAKE_BINARY_DIR}/framework_install.cfg DESTINATION ${VISCOM_INSTALL_BASE_PATH}/${VISCOM_APP_NAME} RENAME framework.cfg)
 
-option(OPTION_BUILD_EXAMPLES "" OFF)
-option(OPTION_BUILD_TOOLS    "" OFF)
-option(OPTION_BUILD_SHARED_LIBS "" ON)
-add_subdirectory(extern/glbinding EXCLUDE_FROM_ALL)
-
-option(WITH_WERROR "" OFF)
-option(SKIP_PORTABILITY_TEST "" ON)
-add_subdirectory(extern/cereal EXCLUDE_FROM_ALL)
-target_compile_options(cereal INTERFACE "-Wimplicit-fallthrough")
-
 add_subdirectory(beamertoy)
