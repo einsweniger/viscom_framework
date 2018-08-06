@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/cereal" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/assimp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/g3log" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/glfw" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/sgct" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/sgct/src/deps/glfw" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/stb" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/fwcore/extern/tuio" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/glbinding" vcs="Git" />
+  </component>
+</project>
