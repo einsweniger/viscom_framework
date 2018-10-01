@@ -35,8 +35,12 @@ namespace viscom {
 
         std::vector<std::unique_ptr<shadertoy::Shader>> toys;
 
+        glm::vec2 GetScreenSize();
+
+        float currentTime_ = 0.0f;
+        float elapsedTime_ = 0.0f;
+        int iFrame = 0;
+        unsigned int postproc_tex = 0;
     private:
-        glm::vec3 camPos_;
-        glm::vec3 camRot_;
     };
 }

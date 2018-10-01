@@ -3,9 +3,9 @@
 //
 
 #include "resource.h"
-#include <imgui/imgui.h>
+#include <imgui.h>
 #include <sstream>
-#include <inspect/glwrap/strings.h>
+#include <glbinding-aux/Meta.h>
 
 void resource_tooltip(const property_t &props, const std::string& extra_text) {
   ImGui::SameLine();
@@ -14,11 +14,11 @@ void resource_tooltip(const property_t &props, const std::string& extra_text) {
     std::ostringstream tooltip;
     tooltip << "resource properties:\n";
     for(auto prop : props) {
-      if(GL_TYPE == prop.first) {
-        tooltip << getString(prop.first) << ": "
-                << getString(prop.second) << "\n";
+      if(gl::GL_TYPE == prop.first) {
+        tooltip << glbinding::aux::Meta::getString(prop.first) << ": "
+                << glbinding::aux::Meta::getString(prop.second) << "\n";
       } else {
-        tooltip << getString(prop.first) << ": "<< prop.second << "\n";
+        tooltip << glbinding::aux::Meta::getString(prop.first) << ": "<< prop.second << "\n";
       }
     }
     tooltip << extra_text;
@@ -28,7 +28,7 @@ void resource_tooltip(const property_t &props, const std::string& extra_text) {
   }
 }
 
-resource::resource(GLuint resourceIndex, property_t properties) :
+resource::resource(gl::GLuint resourceIndex, property_t properties) :
     resourceIndex(resourceIndex),
     properties(std::move(properties))
 {}

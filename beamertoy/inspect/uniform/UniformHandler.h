@@ -4,21 +4,18 @@
 #ifndef VISCOMFRAMEWORK_UNIFORMHANDLER_H
 #define VISCOMFRAMEWORK_UNIFORMHANDLER_H
 
-#include <app/gfx/gl/ProgramInspector.h>
-#include <app/gfx/gl/handlers/detail/UniformBuilder.h>
-#include "detail/UniformTypes.h"
+#include "../ProgramInspector.h"
+#include "../resource_handler.h"
+#include "UniformTypes.h"
 
-namespace viscom {
-    class ApplicationNodeBase;
-}
+//namespace viscom {
+//    class ApplicationNodeBase;
+//}
 
 namespace minuseins::handlers {
-    struct AbstractBuilder;
-
     struct UniformHandler : public resource_handler {
         using build_fn = std::function<std::unique_ptr<generic_uniform>(named_resource res)>;
 
-        UniformHandler();
         UniformHandler(build_fn builder);
 
         using callback_fn = std::function<void(std::string_view, generic_uniform *res)>;
@@ -34,7 +31,6 @@ namespace minuseins::handlers {
         std::unique_ptr<named_resource> initialize(ProgramInspector& inspect,named_resource res) override;
         void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override;
         void postInit(ProgramInspector &inspect, named_resource_container &resources) override {/* empty */};
-        void dumpState();
     };
 
     struct AbstractBuilder : UniformHandler::build_fn {

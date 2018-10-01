@@ -6,24 +6,21 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
-#include <app/util.h>
 #include "UniformHandler.h"
-#include <core/ApplicationNodeBase.h>
+#include "DefaultBuilder.h"
+#include "../glwrap/interface.h"
 #include <glm/gtc/type_ptr.hpp>
-#include <app/ApplicationNodeImplementation.h>
 
 namespace minuseins::handlers {
 
     UniformHandler::UniformHandler(UniformHandler::build_fn builder) : builder(builder) {}
 
-    UniformHandler::UniformHandler() : UniformHandler(UniformBuilder()) {}
-
     std::unique_ptr<named_resource> UniformHandler::initialize(ProgramInspector& inspect, named_resource res) {
         std::unique_ptr<generic_uniform> new_uniform = builder(res);
         try {
             //if neither throws, we had a previous run with that uniform.
-            auto old_res_idx = inspect.GetResourceIndex(gl::GL_UNIFORM, new_uniform->name);//throws!
-            auto& old_res = inspect.GetContainer(gl::GL_UNIFORM).at(old_res_idx);
+            auto old_res_idx = inspect.GetResourceIndex(glwrap::uniform, new_uniform->name);//throws!
+            auto& old_res = inspect.GetContainer(glwrap::uniform).at(old_res_idx);
             {
                 auto& old_uniform = dynamic_cast<generic_uniform&>(*old_res);
                 //We can now try to restore values.

@@ -12,11 +12,11 @@
 #include <glbinding/gl/gl.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <core/glfw.h>
 #include <core/resources/Resource.h>
 #include <core/resources/ResourceManager.h>
 #include <core/gfx/Shader.h>
 #include <core/gfx/FrameBuffer.h>
+#include <core/glfw.h>
 #include <cereal/archives/json.hpp>
 
 #include "../app/ApplicationNodeImplementation.h"
@@ -363,14 +363,6 @@ namespace minuseins::gui {
 
         ImGui::InputFloat4("cam orientation", glm::value_ptr(o));
 
-//        ImGui::DragFloat("fftSmoothing",&appImpl->fftSmootingFactor, 0.01f,0.0f,0.98f);
-//        ImGui::DragFloat("fftMaxIntegral", &appImpl->fftMaxIntegralValue);
-//        ImGui::Separator();
-//        ImGui::DragFloat("hist scale", &histogram_scale, 0.001,0,0.1);
-//        auto width = ImGui::GetContentRegionAvailWidth();
-//        ImGui::PlotHistogram("", appImpl->fftDataIntegrated.data(), 750, 0, nullptr, 0.0f, appImpl->fftMaxIntegralValue, ImVec2(width,300));
-//        ImGui::PlotHistogram("", appImpl->fftData.data()          , 750, 0, nullptr, 0.0f, histogram_scale, ImVec2(width,300));
-//        ImGui::PlotHistogram("", appImpl->fftDataSmoothed.data()  , 750, 0, nullptr, 0.0f, histogram_scale, ImVec2(width,300));
         ImGui::Separator();
 
         ImGui::End();
@@ -407,11 +399,11 @@ namespace minuseins::gui {
                 ImGui::Text("type: %s", pass.type.c_str());
                 ImGui::TextUnformatted("inputs:");
                 for(auto& inp : pass.inputs) {
-                    ImGui::Text("id: %d, ctype: %s, src: %s, channel: %d", inp.id, inp.ctype.c_str(), inp.src.c_str(), inp.channel);
+                    ImGui::Text("id: %d, ctype: %s, src: %s, channel: %ld", inp.id, inp.ctype.c_str(), inp.src.c_str(), inp.channel);
                 }
                 ImGui::TextUnformatted("outputs:");
                 for(auto& out : pass.outputs) {
-                    ImGui::Text("id: %d, channel: %d", out.id, out.channel);
+                    ImGui::Text("id: %ld, channel: %ld", out.id, out.channel);
                 }
 
                 ImGui::BeginChild("inputs");

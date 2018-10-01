@@ -3,8 +3,8 @@
 //
 #pragma once
 
-#include <inspect/glwrap/resource.h>
-#include <inspect/models/resource.h>
+#include "../glwrap/resource.h"
+#include "../models/resource.h"
 
 struct uniform_resource : public named_resource {
     using named_resource::named_resource;

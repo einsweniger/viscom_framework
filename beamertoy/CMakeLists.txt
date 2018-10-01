@@ -15,11 +15,21 @@ include_directories(extern/cereal/include)
 include_directories(../extern/fwcore/extern/sgct/include)
 include_directories(include)
 
-add_subdirectory(inspect)
 add_subdirectory(gui)
+add_subdirectory(inspect)
 
 
-add_executable(beamertoy main.cpp app/ApplicationNodeImplementation.cpp app/CoordinatorNode.cpp app/WorkerNode.cpp app/ToyPlayer.cpp app/ToyPlayer.h)
-target_link_libraries(beamertoy PRIVATE VISCOMCore gui)
+add_executable(beamertoy
+        main.cpp
+        app/ApplicationNodeImplementation.cpp
+        app/CoordinatorNode.cpp
+        app/WorkerNode.cpp
+
+        app/ToyPlayer.cpp
+        app/IntrospectableFsq.cpp
+        app/handlers/ProgramOutputHandler.cpp
+        app/handlers/ExternalUniformBuilder.cpp
+        app/handlers/ShaderToySamplerBuilder.cpp)
+target_link_libraries(beamertoy PUBLIC VISCOMCore INTERFACE glbinding::glbinding glbinding::glbinding-aux PRIVATE gui inspect)
 target_include_directories(beamertoy PRIVATE  . INTERFACE VISCOMCore)
 set_property(TARGET beamertoy PROPERTY CXX_STANDARD 17)

@@ -5,25 +5,23 @@
 #ifndef VISCOMFRAMEWORK_SHADERTOYSAMPLERBUILDER_H
 #define VISCOMFRAMEWORK_SHADERTOYSAMPLERBUILDER_H
 
-#include <app/shadertoy/ShaderToy.h>
 #include <core/gfx/Texture.h>
-#include <app/gfx/gl/handlers/detail/UniformBuilder.h>
+#include <Shadertoy.h>
+#include "inspect/uniform/DefaultBuilder.h"
 
 namespace viscom {
-    namespace enh {
-        class ApplicationNodeBase;
-    }
+    class ApplicationNodeBase;
     class ApplicationNodeImplementation;
 }
 
 namespace minuseins::handlers {
     namespace detail {
         struct iChannel : generic_uniform {
-            iChannel(named_resource res, const shadertoy::Input &input, viscom::enh::ApplicationNodeBase *appBase);
+            iChannel(named_resource res, const shadertoy::Input &input, viscom::ApplicationNodeBase *appBase);
 
             std::shared_ptr<viscom::Texture> tex;
             shadertoy::Input input;
-            viscom::enh::ApplicationNodeBase* appBase;
+            viscom::ApplicationNodeBase* appBase;
             std::string uname;
             std::string wrap = "repeat";
 
@@ -37,16 +35,16 @@ namespace minuseins::handlers {
             void *valuePtr() override { return nullptr; }
         };
     }
-    struct ShaderToySamplerBuilder : UniformBuilder {
-        ShaderToySamplerBuilder(viscom::enh::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass);
+    struct ShaderToySamplerBuilder : DefaultBuilder {
+        ShaderToySamplerBuilder(viscom::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass);
 
-        viscom::enh::ApplicationNodeBase* appBase;
+        viscom::ApplicationNodeBase* appBase;
         viscom::ApplicationNodeImplementation* appImpl;
         shadertoy::Renderpass pass;
 
         gl::GLuint samplerCounter = 0;
 
-        std::unique_ptr<generic_uniform> operator()(named_resource res) override;
+        std::unique_ptr<generic_uniform> operator()(named_resource res);
     };
 }
 

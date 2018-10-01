@@ -2,13 +2,13 @@
 // Created by bone on 30.04.18.
 //
 
-#include "UniformBuilder.h"
-
+#include "DefaultBuilder.h"
+#include "../glwrap/resource.h"
 namespace minuseins::handlers {
 
-    std::unique_ptr<generic_uniform> UniformBuilder::operator()(named_resource res) {
-        using t = interfaces::types::resource_type;
-        switch (static_cast<interfaces::types::resource_type>(res.properties.at(gl::GL_TYPE))) {
+    std::unique_ptr<generic_uniform> DefaultBuilder::operator()(named_resource res) {
+        using t = glwrap::resource_type;
+        switch (static_cast<glwrap::resource_type>(res.properties.at(gl::GL_TYPE))) {
             case t::glsl_float:
             case t::glsl_vec2:
             case t::glsl_vec3:

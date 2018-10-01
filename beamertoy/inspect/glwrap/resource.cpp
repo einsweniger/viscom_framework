@@ -3,7 +3,7 @@
 //
 
 #include "resource.h"
-
+namespace glwrap {
 size_t getSize(resource_type type) {
   switch (type) {
     case resource_type::glsl_float:
@@ -136,4 +136,5 @@ size_t getSize(resource_type type) {
       return 0;
   }
   return 0;
+}
 }

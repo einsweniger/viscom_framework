@@ -5,21 +5,21 @@
 #ifndef VISCOMFRAMEWORK_PROGRAMOUTPUTHANDLER_H
 #define VISCOMFRAMEWORK_PROGRAMOUTPUTHANDLER_H
 
-#include <app/gfx/gl/ProgramInspector.h>
-
+#include <inspect/resource_handler.h>
+#include <inspect/glwrap/resource.h>
+#include <inspect/models/resource.h>
 namespace viscom {
     class ApplicationNodeBase;
     class FrameBuffer;
 }
 namespace minuseins::handlers {
-    using namespace interfaces::types;
     struct ProgramOutput : public named_resource
     {
         explicit ProgramOutput(named_resource res);
 
         void draw2D() override;
 
-        resource_type type;
+        glwrap::resource_type type;
         gl::GLuint location;
         gl::GLsizei textureLocation = 0;
     };

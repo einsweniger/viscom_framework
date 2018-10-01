@@ -2,17 +2,19 @@
 // Created by bone on 09.07.18.
 //
 
-#include "gl/gl.h"
+#pragma once
+
+#include <glbinding/gl/gl.h>
 #include "abc.h"
 
 #include <unordered_map>
 
-using property_t = std::unordered_map<GLenum, GLint>;
+using property_t = std::unordered_map<gl::GLenum, gl::GLint>;
 
 struct resource {
-    resource(GLuint resourceIndex, property_t properties);
+    resource(gl::GLuint resourceIndex, property_t properties);
 
-    GLuint resourceIndex;
+    gl::GLuint resourceIndex;
     property_t properties;
 
 };

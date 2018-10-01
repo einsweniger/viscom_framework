@@ -6,13 +6,13 @@
 #include <core/gfx/FrameBuffer.h>
 #include <iostream>
 #include "ProgramOutputHandler.h"
-#include <core/ApplicationNodeBase.h>
+#include <core/app/ApplicationNodeBase.h>
 
 namespace minuseins::handlers {
 
     ProgramOutput::ProgramOutput(named_resource res) :
             named_resource(std::move(res)),
-            type{toType(properties.at(gl::GL_TYPE))},
+            type{glwrap::toType(properties.at(gl::GL_TYPE))},
             location{static_cast<gl::GLuint>(properties.at(gl::GL_LOCATION))}
     {}
 

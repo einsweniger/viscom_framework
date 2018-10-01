@@ -34,11 +34,7 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double)
     {
-        GetCamera()->SetPosition(camPos_);
-        glm::quat pitchQuat = glm::angleAxis(camRot_.x, glm::vec3(1.0f, 0.0f, 0.0f));
-        glm::quat yawQuat = glm::angleAxis(camRot_.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::quat rollQuat = glm::angleAxis(camRot_.z, glm::vec3(0.0f, 0.0f, 1.0f));
-        GetCamera()->SetOrientation(yawQuat * pitchQuat * rollQuat);
+
     }
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
@@ -68,57 +64,16 @@ namespace viscom {
     {
         if (ApplicationNodeBase::KeyboardCallback(key, scancode, action, mods)) return true;
 
-        switch (key)
-        {
-        case GLFW_KEY_W:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, -0.001);
-            return true;
-
-        case GLFW_KEY_S:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.0, 0.001);
-            return true;
-
-        case GLFW_KEY_A:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(-0.001, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_D:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.001, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_LEFT_CONTROL:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, -0.001, 0.0);
-            return true;
-
-        case GLFW_KEY_LEFT_SHIFT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camPos_ += glm::vec3(0.0, 0.001, 0.0);
-            return true;
-
-        case GLFW_KEY_UP:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(-0.002, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_DOWN:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.002, 0.0, 0.0);
-            return true;
-
-        case GLFW_KEY_LEFT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, -0.002, 0.0);
-            return true;
-
-        case GLFW_KEY_RIGHT:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.002, 0.0);
-            return true;
-
-        case GLFW_KEY_Q:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, -0.002);
-            return true;
-
-        case GLFW_KEY_E:
-            if (action == GLFW_REPEAT || action == GLFW_PRESS) camRot_ += glm::vec3(0.0, 0.0, 0.002);
+        switch (key) {
+          case GLFW_KEY_W:
+            if (action == GLFW_REPEAT || action == GLFW_PRESS) return true;
             return true;
         }
         return false;
+    }
+
+    glm::vec2 ApplicationNodeImplementation::GetScreenSize() {
+        return GetConfig().virtualScreenSize_;
     }
 
 }

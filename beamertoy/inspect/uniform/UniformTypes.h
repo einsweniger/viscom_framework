@@ -5,10 +5,11 @@
 #ifndef VISCOMFRAMEWORK_UNIFORMTYPES_H
 #define VISCOMFRAMEWORK_UNIFORMTYPES_H
 
-#include <app/gfx/gl/types.h>
+#include "../glwrap/resource.h"
+#include "../models/resource.h"
 
 namespace minuseins::handlers {
-    using namespace interfaces::types;
+
     struct gets_updates {
         virtual bool get_updated_value() = 0;
     };
@@ -42,7 +43,7 @@ namespace minuseins::handlers {
 
         gl::GLint block_index();
         gl::GLint location();
-        resource_type type();
+        glwrap::resource_type type();
         gl::GLuint array_size();
     };
 
@@ -62,7 +63,7 @@ namespace minuseins::handlers {
     struct UniformWithValueVector : public generic_uniform {
         explicit UniformWithValueVector(named_resource arg)  :
                 generic_uniform(std::move(arg)),
-                value{std::vector<T>(getSize(type()))}
+                value{std::vector<T>(glwrap::getSize(type()))}
         {
         }
 

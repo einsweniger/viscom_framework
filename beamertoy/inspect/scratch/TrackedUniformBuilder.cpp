@@ -3,7 +3,7 @@
 //
 
 #include <variant>
-#include <app/ApplicationNodeImplementation.h>
+
 #include "TrackedUniformBuilder.h"
 
 namespace minuseins::handlers {

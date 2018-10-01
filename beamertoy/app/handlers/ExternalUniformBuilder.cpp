@@ -5,13 +5,17 @@
 #include <glm/detail/type_mat.hpp>
 #include <glm/detail/type_mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
+#include <imgui.h>
+
+#include <inspect/uniform/UniformTypes.h>
+
 #include "ExternalUniformBuilder.h"
-#include <enh/ApplicationNodeBase.h>
-#include <app/ApplicationNodeImplementation.h>
+#include "../ApplicationNodeImplementation.h"
 
 namespace minuseins::handlers {
     namespace detail {
-        using viscom::enh::ApplicationNodeBase;
+        using viscom::ApplicationNodeBase;
         using viscom::ApplicationNodeImplementation;
 
         struct iResolution : FloatUniform {
@@ -202,6 +206,6 @@ namespace minuseins::handlers {
         // uniform samplerXXiChannel0..3;          input channel. XX = 2D/Cube
         // uniform float    iSampleRate;           sound sample rate (i.e., 44100)
         std::cout << "warning, uncaught " << res.name << std::endl;
-        return TrackedUniformBuilder::operator()(std::move(res));
+        return ShaderToySamplerBuilder::operator()(std::move(res));
     }
 }

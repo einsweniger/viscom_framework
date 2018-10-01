@@ -2,45 +2,48 @@
 // Created by bone on 09.07.18.
 //
 
-#include <inspect/glwrap/interface.h>
 #include "interface.h"
 #include "resource.h"
 #include "../util.h"
-basic_interface::basic_interface(GLenum interface, GLuint program, std::vector<GLenum> properties) :
+#include "../glwrap/interface.h"
+
+using namespace gl;
+
+basic_interface::basic_interface(glwrap::interface_type interface, GLuint program, std::vector<GLenum> properties) :
     interface(interface), program(program), properties{properties} {}
 
 std::unordered_map<GLenum, GLint> basic_interface::GetProgramResourceiv(const GLuint index, const std::vector<GLenum> &props) const {
-  return ::GetProgramResourceiv(program, interface, index, properties);
+  return glwrap::GetProgramResourceiv(program, interface, index, properties);
 }
 
 std::vector<GLint> basic_interface::GetProgramResourceiv_vector(const GLuint index, const GLenum props,
                                                                const GLuint size) const {
-  return ::GetProgramResourceiv_vector(program, interface, index, props, size);
+  return glwrap::GetProgramResourceiv_vector(program, interface, index, props, size);
 }
 
 std::string basic_interface::GetProgramResourceName(const GLuint index, const GLint bufSize) const {
-  return ::GetProgramResourceName(program, interface, index, bufSize);
+  return glwrap::GetProgramResourceName(program, interface, index, bufSize);
 }
 
 std::string basic_interface::GetProgramResourceName(const GLuint index) const {
-  auto length = GetProgramInterfaceiv(program, interface, GL_MAX_NAME_LENGTH);
+  auto length = glwrap::GetProgramInterfaceiv(program, interface, GL_MAX_NAME_LENGTH);
   return GetProgramResourceName(index, length);
 }
 
 GLuint basic_interface::GetActiveResourceCount() const {
-  return GetProgramInterfaceiv(program, interface, GL_ACTIVE_RESOURCES);
+  return glwrap::GetProgramInterfaceiv(program, interface, GL_ACTIVE_RESOURCES);
 }
 
 GLuint basic_interface::GetMaxNameLenght() const {
-  return GetProgramInterfaceiv(program, interface, GL_MAX_NAME_LENGTH);
+  return glwrap::GetProgramInterfaceiv(program, interface, GL_MAX_NAME_LENGTH);
 }
 
 GLuint basic_interface::GetMaxNumActiveVariables() const {
-  return GetProgramInterfaceiv(program, interface, GL_MAX_NUM_ACTIVE_VARIABLES);
+  return glwrap::GetProgramInterfaceiv(program, interface, GL_MAX_NUM_ACTIVE_VARIABLES);
 }
 
 GLuint basic_interface::GetMaxNumCompatibleSubroutines() const {
-  return GetProgramInterfaceiv(program, interface, GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
+  return glwrap::GetProgramInterfaceiv(program, interface, GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
 }
 
 std::unordered_map<GLenum, GLint> basic_interface::GetResourceProperties(GLuint index) const{
@@ -82,7 +85,7 @@ std::vector<named_resource> basic_interface::GetAllNamedResources() const {
 std::vector<GLuint> basic_interface::GetCompatibleSubroutines(const GLuint index, const GLuint length) {
   auto unsig = std::vector<GLuint>{};
   for (auto sig : GetProgramResourceiv_vector(index, GL_COMPATIBLE_SUBROUTINES, length)) {
-    unsig.push_back(positive(sig));
+    unsig.push_back(glwrap::positive(sig));
   }
   return unsig;
 }
@@ -90,7 +93,7 @@ std::vector<GLuint> basic_interface::GetCompatibleSubroutines(const GLuint index
 std::vector<GLuint> basic_interface::GetActiveVariables(const GLuint index, const GLuint length) {
   auto unsig = std::vector<GLuint>{};
   for (auto sig : GetProgramResourceiv_vector(index, GL_ACTIVE_VARIABLES, length)) {
-    unsig.push_back(positive(sig));
+    unsig.push_back(glwrap::positive(sig));
   }
   return unsig;
 }

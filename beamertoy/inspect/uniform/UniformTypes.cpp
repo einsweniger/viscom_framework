@@ -4,11 +4,15 @@
 
 #include <imgui.h>
 #include <sstream>
-#include "UniformTypes.h"
-#include <app/util.h>
-#include <glbinding/Binding.h>
 #include <iostream>
+
+#include <glbinding/Binding.h>
 #include <glbinding/glbinding.h>
+#include <glbinding-aux/Meta.h>
+
+#include "UniformTypes.h"
+#include "../util.h"
+#include "../glwrap/interface.h"
 
 namespace minuseins::handlers {
     using util::ensure_positive;
@@ -22,7 +26,7 @@ namespace minuseins::handlers {
             for(auto prop : props) {
                 if(gl::GL_TYPE == prop.first) {
                     tooltip << glbinding::aux::Meta::getString(prop.first) << ": "
-                            << toString(prop.second).c_str() << "\n";
+                            << glbinding::aux::Meta::getString(prop.second).c_str() << "\n";
                 } else {
                     tooltip << glbinding::aux::Meta::getString(prop.first) << ": "<< prop.second << "\n";
                 }
@@ -96,11 +100,12 @@ namespace minuseins::handlers {
 
     gl::GLint generic_uniform::location() {return properties.at(gl::GL_LOCATION);}
 
-    resource_type generic_uniform::type() {return interfaces::types::toType(properties.at(gl::GL_TYPE));}
+    glwrap::resource_type generic_uniform::type() {return glwrap::toType(properties.at(gl::GL_TYPE));}
 
     gl::GLuint generic_uniform::array_size() {return util::ensure_positive(properties.at(gl::GL_ARRAY_SIZE));}
 
     void IntegerUniform::drawValue() {
+        using glwrap::resource_type;
         std::string header = name;// + "(" + std::to_string(uniform.location) + ")";
         if     (resource_type::glsl_int   == type()) ImGui::DragInt (header.c_str(), &value[0]);
         else if(resource_type::glsl_ivec2 == type()) ImGui::DragInt2(header.c_str(), &value[0]);
@@ -109,7 +114,7 @@ namespace minuseins::handlers {
         else ImGui::TextUnformatted(name.c_str());
     }
     void FloatUniform::drawValue() {
-        using t = interfaces::types::resource_type;
+        using t = glwrap::resource_type;
         int color_flags = ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_Float;
         const float v_speed = 0.1000f;
         const float v_min = 0.0f;
@@ -138,7 +143,7 @@ namespace minuseins::handlers {
 
     void BooleanUniform::drawValue() {
         using minuseins::util::enumerate;
-        if(resource_type::glsl_bool == type()) {
+        if(glwrap::resource_type::glsl_bool == type()) {
             ImGui::Checkbox(name.c_str(), reinterpret_cast<bool*>(&value[0]));
         } else {
             for(auto [index, value]: enumerate(value)) {
@@ -184,6 +189,7 @@ namespace minuseins::handlers {
     }
 
     bool IntegerUniform::upload_value() {
+        using glwrap::resource_type;
         if(generic_uniform::upload_value()) return true;
         if      (resource_type::glsl_int == type())   gl::glUniform1iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_ivec2 == type()) gl::glUniform2iv(location(), array_size(), &value[0]);
@@ -194,6 +200,7 @@ namespace minuseins::handlers {
     }
 
     bool FloatUniform::upload_value() {
+        using glwrap::resource_type;
         if(generic_uniform::upload_value()) return true;
         if      (resource_type::glsl_float == type()) gl::glUniform1fv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_vec2 == type())  gl::glUniform2fv(location(), array_size(), &value[0]);
@@ -204,6 +211,7 @@ namespace minuseins::handlers {
     }
 
     bool BooleanUniform::upload_value() {
+        using glwrap::resource_type;
         if(generic_uniform::upload_value()) return true;
         if      (resource_type::glsl_bool  == type()) gl::glUniform1iv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_bvec2 == type()) gl::glUniform2iv(location(), array_size(), &value[0]);
@@ -214,6 +222,7 @@ namespace minuseins::handlers {
     }
 
     bool DoubleUniform::upload_value() {
+        using glwrap::resource_type;
         if      (resource_type::glsl_double == type()) gl::glUniform1dv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_dvec2 == type())  gl::glUniform2dv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_dvec3 == type())  gl::glUniform3dv(location(), array_size(), &value[0]);
@@ -223,6 +232,7 @@ namespace minuseins::handlers {
     }
 
     bool UnsignedUniform::upload_value() {
+        using glwrap::resource_type;
         if(generic_uniform::upload_value()) return true;
         if      (resource_type::glsl_uint  == type()) gl::glUniform1uiv(location(), array_size(), &value[0]);
         else if (resource_type::glsl_uvec2 == type()) gl::glUniform2uiv(location(), array_size(), &value[0]);
@@ -264,6 +274,7 @@ namespace minuseins::handlers {
     };
 
     void FloatUniform::init(gl::GLuint program) {
+        using glwrap::resource_type;
         if(type() == resource_type::glsl_float) {
             draw_value_fn = F();
         }
