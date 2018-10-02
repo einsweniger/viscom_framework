@@ -9,7 +9,7 @@
 #include <app/ApplicationNodeImplementation.h>
 
 #include <inspect/ProgramInspector.h>
-#include <inspect/uniform/UniformHandler.h>
+#include <inspect/uniform/handler.h>
 #include "handlers/ProgramOutputHandler.h"
 #include <inspect/models/resource.h>
 
@@ -17,8 +17,8 @@
 #include "IntrospectableFsq.h"
 
 #include <core/gfx/Shader.h>
-#include "handlers/ExternalUniformBuilder.h"
-#include <inspect/uniform/FloatUniform.h>
+#include "builders/ExternalUniformBuilder.h"
+#include <inspect/uniform/float.h>
 
 namespace minuseins {
     IntrospectableFsq::IntrospectableFsq(const std::string &fragmentShader) :
@@ -122,28 +122,7 @@ namespace minuseins {
     }
 
     void IntrospectableFsq::miscinfo() {
-//      if (!ImGui::TreeNode(std::string("source##").append(gpuProgram_->GetProgramName()).c_str()))
-//        return;
-//
-//      for(const auto& shader : gpuProgram_->GetShaders()) {
-//        if(shader->GetType() != gl::GLenum::GL_FRAGMENT_SHADER)
-//          continue;
-//        auto id = shader->getShaderId();
-//        ImGui::SameLine();
-//        ImGui::Text("shader %d", id);
-//        gl::GLint shaderlen;
-//        gl::glGetShaderiv(id,gl::GL_SHADER_SOURCE_LENGTH, &shaderlen);
-//        ImGui::SameLine();
-//        ImGui::Text("source len %d", shaderlen);
-//        std::string text;
-//        text.resize(shaderlen);
-//        gl::glGetShaderSource(id, shaderlen, nullptr, text.data());
-//        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-//        //ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_AllowTabInput);
-//        ImGui::InputTextMultiline("##source", text.data(), shaderlen, ImVec2(-1.0f, -1.0f), ImGuiInputTextFlags_AllowTabInput);
-//        ImGui::PopStyleVar();
-//      }
-//      ImGui::TreePop();
+
     }
 
     const viscom::FrameBuffer * IntrospectableFsq::GetBackbuffer() {

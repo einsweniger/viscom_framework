@@ -9,16 +9,20 @@
 #pragma once
 
 #include "app/ApplicationNodeImplementation.h"
+#include <filesystem>
 
 namespace viscom {
-
+    namespace fs = std::filesystem;
     class CoordinatorNode final : public ApplicationNodeImplementation
     {
+
     public:
         explicit CoordinatorNode(ApplicationNodeInternal* appNode);
         virtual ~CoordinatorNode() override;
 
         void Draw2D(FrameBuffer& fbo) override;
+
+        bool loadShadertoy(fs::path path);
 
     private:
         ApplicationNodeInternal* appNode;

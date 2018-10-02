@@ -57,7 +57,7 @@ namespace minuseins::handlers {
         void iChannel::draw2D() {
             generic_uniform::draw2D();
             if ("buffer" == input.ctype) {
-                ImGui::InputInt(name.c_str(), &input.id);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &input.id);
             }
             std::string popupname = "wrap##" + name;
             if (ImGui::BeginPopupContextItem(popupname.c_str())) {

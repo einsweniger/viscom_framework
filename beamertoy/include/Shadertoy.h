@@ -44,7 +44,7 @@ namespace shadertoy {
     };
 
     struct Input {
-        int id;
+        size_t id;
         std::string src;  //url or path
         std::string ctype; //buffer cubemap keyboard mic music musicstream texture video volume webcam
         size_t channel; // channel number, [0,1,2,3]
@@ -59,8 +59,8 @@ namespace shadertoy {
     };
 
     struct Output {
-        int64_t id;
-        int64_t channel;
+        size_t id;
+        size_t channel;
 
         template<class Archive>
         void serialize(Archive &archive) {

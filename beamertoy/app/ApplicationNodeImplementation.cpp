@@ -17,7 +17,7 @@
 #include <glbinding/gl/gl.h>
 #include <glbinding/Binding.h>
 #include <core/glfw.h>
-
+#include "ToyPlayer.h"
 namespace viscom {
 
     ApplicationNodeImplementation::ApplicationNodeImplementation(ApplicationNodeInternal* appNode) :
@@ -74,6 +74,10 @@ namespace viscom {
 
     glm::vec2 ApplicationNodeImplementation::GetScreenSize() {
         return GetConfig().virtualScreenSize_;
+    }
+
+    std::string ApplicationNodeImplementation::getOutputDir() {
+        return GetConfig().resourceSearchPaths_.at(GetConfig().resourceSearchPaths_.size()-1);
     }
 
 }

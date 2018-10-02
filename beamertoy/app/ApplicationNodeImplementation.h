@@ -11,6 +11,11 @@
 #include "core/app/ApplicationNodeBase.h"
 #include <Shadertoy.h>
 
+
+namespace minuseins {
+    class ToyPlayer;
+}
+
 namespace viscom {
 
     class MeshRenderable;
@@ -34,6 +39,8 @@ namespace viscom {
         virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
         std::vector<std::unique_ptr<shadertoy::Shader>> toys;
+        std::vector<std::unique_ptr<minuseins::ToyPlayer>> players;
+        std::string getOutputDir();
 
         glm::vec2 GetScreenSize();
 

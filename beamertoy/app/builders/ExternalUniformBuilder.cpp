@@ -35,60 +35,6 @@ namespace minuseins::handlers {
             }
         };
 
-        struct u_MVP : models::generic_uniform {
-            ApplicationNodeBase* appBase;
-            glm::mat4 value;
-
-            u_MVP(named_resource res, ApplicationNodeBase *appBase) :
-                    generic_uniform(std::move(res)),
-                    appBase(appBase) {}
-
-            bool get_updated_value() override {
-                if(do_value_update) {
-                    value = appBase->GetCamera()->GetViewPerspectiveMatrix();
-                }
-                return true;
-            }
-
-            bool upload_value() override {
-                if(do_value_upload) {
-                    gl::glUniformMatrix4fv(location(), array_size(), gl::GL_FALSE, glm::value_ptr(value));
-                }
-                return true;
-            }
-
-            void* valuePtr() override {
-                return glm::value_ptr(value);
-            }
-
-            size_t uploadSize() override {
-                return sizeof(value);
-            }
-
-            void init(gl::GLuint program) override {
-                //TODO, is this possible?
-            }
-        };
-
-        struct u_eye : models::FloatUniform {
-            ApplicationNodeBase* appBase;
-
-            u_eye(named_resource arg, ApplicationNodeBase *appBase) :
-                    FloatUniform(std::move(arg)),
-                    appBase(appBase)
-            {}
-
-            bool get_updated_value() override {
-                if(do_value_update) {
-                    auto position = appBase->GetCamera()->GetPosition();
-                    value[0] = position.x;
-                    value[1] = position.y;
-                    value[2] = position.z;
-                }
-                return true;
-            }
-        };
-
         struct iFrame : models::FloatUniform {
             ApplicationNodeImplementation* appImpl;
 
@@ -168,13 +114,6 @@ namespace minuseins::handlers {
     }
 
     std::unique_ptr<models::generic_uniform> ExternalUniformBuilder::operator()(named_resource res) {
-//local uniforms
-        if(res.name == "u_MVP" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_MAT4) {
-            return std::make_unique<detail::u_MVP>(std::move(res), appBase);
-        }
-        if(res.name == "u_eye" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC3) {
-            return std::make_unique<detail::u_eye>(std::move(res), appBase);
-        }
 //shadertoy uniforms
         // uniform vec3     iResolution;           viewport resolution (in pixels)
         if(res.name == "iResolution" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_VEC3) {
