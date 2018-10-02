@@ -10,7 +10,7 @@
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/Meta.h>
 
-#include "UniformTypes.h"
+#include "empty_uniform.h"
 #include "../util.h"
 #include "../glwrap/interface.h"
 

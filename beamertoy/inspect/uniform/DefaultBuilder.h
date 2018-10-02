@@ -5,17 +5,11 @@
 #pragma once
 
 #include <memory>
-#include "UniformTypes.h"
-#include "UniformHandler.h"
-
-namespace models {
-    struct DefaultBuilder : minuseins::handlers::AbstractBuilder {
-        std::unique_ptr<models::generic_uniform> operator()(named_resource res) override;
-    };
-}
+#include "empty_uniform.h"
+#include "handler.h"
 
 namespace minuseins::handlers {
-    struct DefaultBuilder : AbstractBuilder {
+    struct DefaultBuilder : minuseins::handlers::AbstractBuilder {
         std::unique_ptr<models::generic_uniform> operator()(named_resource res) override;
     };
 }

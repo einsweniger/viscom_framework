@@ -3,7 +3,7 @@
 //
 
 #include <imgui.h>
-#include "IntegerUniform.h"
+#include "integer.h"
 #include "../glwrap/resource.h"
 
 namespace models {

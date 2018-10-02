@@ -2,7 +2,7 @@
 // Created by bone on 02.10.18.
 //
 
-#include "FloatUniform.h"
+#include "float.h"
 #include <imgui.h>
 
 namespace models {

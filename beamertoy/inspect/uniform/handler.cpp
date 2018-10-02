@@ -6,7 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
-#include "UniformHandler.h"
+#include "handler.h"
 #include "DefaultBuilder.h"
 #include "../glwrap/interface.h"
 #include <glm/gtc/type_ptr.hpp>

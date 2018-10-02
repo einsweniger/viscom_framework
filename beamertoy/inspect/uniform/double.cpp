@@ -2,7 +2,7 @@
 // Created by bone on 02.10.18.
 //
 
-#include "DoubleUniform.h"
+#include "double.h"
 #include <imgui.h>
 
 namespace models {

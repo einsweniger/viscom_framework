@@ -7,16 +7,17 @@ add_library(inspect
         models/interface.cpp
         models/uniform.cpp
 
-        uniform/generic_uniform.cpp
-        uniform/UniformTypes.cpp
-        uniform/UniformHandler.cpp
+        uniform/handler.cpp
         uniform/DefaultBuilder.cpp
-        uniform/IntegerUniform.cpp
-        uniform/FloatUniform.cpp
-        uniform/BooleanUniform.cpp
-        uniform/DoubleUniform.cpp
-        uniform/UnsignedUniform.cpp
-        uniform/SamplerUniform.cpp
+
+        uniform/generic_uniform.cpp
+        uniform/empty_uniform.cpp
+        uniform/integer.cpp
+        uniform/float.cpp
+        uniform/boolean.cpp
+        uniform/double.cpp
+        uniform/unsigned.cpp
+        uniform/sampler.cpp
         )
 target_include_directories(inspect PRIVATE VISCOMCore INTERFACE cereal)
 target_link_libraries(inspect PUBLIC VISCOMCore glbinding::glbinding glbinding::glbinding-aux)

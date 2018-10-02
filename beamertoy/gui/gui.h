@@ -18,33 +18,6 @@ namespace viscom {
 }
 namespace minuseins::gui {
     namespace fs = std::filesystem;
-//    struct menu_item {
-//        bool active;
-//    };
-//    struct menu {
-//        std::map<std::string, menu_item> items{};
-//
-//        void draw() {
-//            for(auto& [name, item] : items) {
-//                ImGui::MenuItem(name.c_str(), &item.active);
-//            }
-//        }
-//    };
-//    struct main_menu {
-//        main_menu(std::unordered_map<std::string, menu> menus) : menus(std::move(menus)) {}
-//
-//        std::unordered_map<std::string, menu> menus{};
-//        void draw(bool* p_open) {
-//            if(*p_open && ImGui::BeginMainMenuBar()) {
-//                for(auto& [name, menu] : menus) {
-//                    ImGui::BeginMenu(name.c_str());
-//                    menu.draw();
-//                    ImGui::EndMenu();
-//                }
-//            }
-//        }
-//
-//    };
 
     struct Gui {
         static constexpr auto config_name = "Gui.json";

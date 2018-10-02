@@ -7,7 +7,8 @@
 
 #include <core/gfx/Texture.h>
 #include <Shadertoy.h>
-#include "inspect/uniform/DefaultBuilder.h"
+#include <inspect/uniform/DefaultBuilder.h>
+#include <inspect/uniform/handler.h>
 
 namespace viscom {
     class ApplicationNodeBase;
@@ -44,7 +45,7 @@ namespace minuseins::handlers {
 
         gl::GLuint samplerCounter = 0;
 
-        std::unique_ptr<models::generic_uniform> operator()(named_resource res);
+        std::unique_ptr<models::generic_uniform> operator()(named_resource res) override;
     };
 }
 

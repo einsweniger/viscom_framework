@@ -4,7 +4,8 @@
 
 #include "ShaderToySamplerBuilder.h"
 #include <imgui.h>
-#include "app/ApplicationNodeImplementation.h"
+#include <inspect/uniform/float.h>
+#include "../ApplicationNodeImplementation.h"
 
 namespace minuseins::handlers {
 
@@ -73,7 +74,7 @@ namespace minuseins::handlers {
         }
 
 
-        struct iChannelResolution : FloatUniform {
+        struct iChannelResolution : models::FloatUniform {
             iChannelResolution(named_resource res, viscom::ApplicationNodeBase *appBase, const shadertoy::Input &input)
                 :
                 FloatUniform(std::move(res)),
@@ -95,7 +96,7 @@ namespace minuseins::handlers {
             }
         };
 
-        struct fftSampler : empty_uniform {
+        struct fftSampler : models::empty_uniform {
             fftSampler(named_resource res, viscom::ApplicationNodeImplementation *appImpl) :
                 empty_uniform(std::move(res)),
                 appImpl(appImpl) {}
@@ -129,7 +130,7 @@ namespace minuseins::handlers {
         }
     }
 
-    std::unique_ptr<generic_uniform> ShaderToySamplerBuilder::operator()(named_resource res) {
+    std::unique_ptr<models::generic_uniform> ShaderToySamplerBuilder::operator()(named_resource res) {
         if("tex_text" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
             auto inp = shadertoy::Input{};
             inp.src = "/media/a/text.png";
@@ -184,7 +185,7 @@ namespace minuseins::handlers {
             }
         }
 
-        return UniformBuilder::operator()(std::move(res));
+        return DefaultBuilder::operator()(std::move(res));
     }
 
 }

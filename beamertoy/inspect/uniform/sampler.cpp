@@ -2,7 +2,7 @@
 // Created by bone on 02.10.18.
 //
 
-#include "SamplerUniform.h"
+#include "sampler.h"
 #include <imgui.h>
 namespace models {
 

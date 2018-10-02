@@ -7,20 +7,22 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <imgui.h>
+
+#include <inspect/uniform/float.h>
+
 #include "ExternalUniformBuilder.h"
-#include "inspect/uniform/UniformTypes.h"
-#include "app/ApplicationNodeImplementation.h"
+#include "../ApplicationNodeImplementation.h"
 
 namespace minuseins::handlers {
     namespace detail {
         using viscom::ApplicationNodeBase;
         using viscom::ApplicationNodeImplementation;
 
-        struct iResolution : FloatUniform {
+        struct iResolution : models::FloatUniform {
             ApplicationNodeImplementation* appImpl;
 
             iResolution(named_resource arg, ApplicationNodeImplementation *appImpl) :
-                    FloatUniform(std::move(arg)),
+                models::FloatUniform(std::move(arg)),
                     appImpl(appImpl)
             {
             }
@@ -33,7 +35,7 @@ namespace minuseins::handlers {
             }
         };
 
-        struct u_MVP : generic_uniform {
+        struct u_MVP : models::generic_uniform {
             ApplicationNodeBase* appBase;
             glm::mat4 value;
 
@@ -68,7 +70,7 @@ namespace minuseins::handlers {
             }
         };
 
-        struct u_eye : FloatUniform {
+        struct u_eye : models::FloatUniform {
             ApplicationNodeBase* appBase;
 
             u_eye(named_resource arg, ApplicationNodeBase *appBase) :
@@ -87,7 +89,7 @@ namespace minuseins::handlers {
             }
         };
 
-        struct iFrame : FloatUniform {
+        struct iFrame : models::FloatUniform {
             ApplicationNodeImplementation* appImpl;
 
             iFrame(const named_resource &arg, ApplicationNodeImplementation *appImpl) :
@@ -103,7 +105,7 @@ namespace minuseins::handlers {
             }
         };
 
-        struct iTime : FloatUniform {
+        struct iTime : models::FloatUniform {
             ApplicationNodeImplementation* appImpl;
 
             iTime(const named_resource &arg, ApplicationNodeImplementation *appImpl) :
@@ -129,7 +131,7 @@ namespace minuseins::handlers {
             }
         };
 
-        struct iDate : FloatUniform {
+        struct iDate : models::FloatUniform {
             using FloatUniform::FloatUniform;
 
             bool get_updated_value() override {
@@ -145,7 +147,7 @@ namespace minuseins::handlers {
             }
         };
 
-        struct iMouse : FloatUniform {
+        struct iMouse : models::FloatUniform {
             using FloatUniform::FloatUniform;
 
             bool get_updated_value() override {
@@ -165,7 +167,7 @@ namespace minuseins::handlers {
         };
     }
 
-    std::unique_ptr<generic_uniform> ExternalUniformBuilder::operator()(named_resource res) {
+    std::unique_ptr<models::generic_uniform> ExternalUniformBuilder::operator()(named_resource res) {
 //local uniforms
         if(res.name == "u_MVP" && res.properties.at(gl::GL_TYPE) == gl::GL_FLOAT_MAT4) {
             return std::make_unique<detail::u_MVP>(std::move(res), appBase);
