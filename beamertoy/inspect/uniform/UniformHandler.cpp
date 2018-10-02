@@ -16,13 +16,13 @@ namespace minuseins::handlers {
     UniformHandler::UniformHandler(UniformHandler::build_fn builder) : builder(builder) {}
 
     std::unique_ptr<named_resource> UniformHandler::initialize(ProgramInspector& inspect, named_resource res) {
-        std::unique_ptr<generic_uniform> new_uniform = builder(res);
+        std::unique_ptr<models::generic_uniform> new_uniform = builder(res);
         try {
             //if neither throws, we had a previous run with that uniform.
             auto old_res_idx = inspect.GetResourceIndex(glwrap::uniform, new_uniform->name);//throws!
             auto& old_res = inspect.GetContainer(glwrap::uniform).at(old_res_idx);
             {
-                auto& old_uniform = dynamic_cast<generic_uniform&>(*old_res);
+                auto& old_uniform = dynamic_cast<models::generic_uniform&>(*old_res);
                 //We can now try to restore values.
                 if(old_uniform.type() == new_uniform->type()) {
                     old_uniform.update_properties(*new_uniform);
@@ -52,13 +52,13 @@ namespace minuseins::handlers {
 
     void UniformHandler::prepareDraw(ProgramInspector &inspect, named_resource_container &resources) {
         for(auto& res : resources) {
-            auto& uniform = dynamic_cast<generic_uniform&>(*res);
+            auto& uniform = dynamic_cast<models::generic_uniform&>(*res);
             uniform.get_updated_value();
             uniform.upload_value();
         }
     }
 
-    void UniformHandler::set_callback_fn(std::function<void(std::string_view, generic_uniform *res)> fn) {
+    void UniformHandler::set_callback_fn(std::function<void(std::string_view, models::generic_uniform *res)> fn) {
         callback = fn;
     }
 

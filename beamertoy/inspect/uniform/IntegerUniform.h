@@ -6,14 +6,51 @@
 
 
 #include "uniform_with_value.h"
+namespace models {
+    struct IntegerUniform : public UniformWithValueVector<GLint> {
+        using UniformWithValueVector::UniformWithValueVector;
+        void init(GLuint program) override;
+    };
+    struct int_func {
+        IntegerUniform& ref;
+        explicit int_func(IntegerUniform &ref);
+        virtual void operator()() =0;
+    };
+    struct drag_int1 : int_func {
+        using int_func::int_func;
+        void operator()() override;
+    };
 
-struct IntegerUniform : public UniformWithValueVector<GLint> {
-    
-    IntegerUniform(named_resource arg);
+    struct drag_int2 : int_func {
+        using int_func::int_func;
+        void operator()() override;
+    };
 
-    bool upload_value() override;
+    struct drag_int3 : int_func {
+        using int_func::int_func;
+        void operator()() override;
+    };
 
-    void init(GLuint program) override;
+    struct drag_int4 : int_func {
+        using int_func::int_func;
+        void operator()() override;
+    };
 
-    void drawValue() override;
-};
+    struct upload_int1 : int_func {
+        using int_func::int_func;
+        void operator()() override;
+    };
+    struct upload_int2 : int_func{
+        using int_func::int_func;
+        void operator()() override;
+    };
+    struct upload_int3 : int_func {
+        using int_func::int_func;
+        void operator()() override;
+    };
+    struct upload_int4 : int_func {
+        using int_func::int_func;
+        void operator()() override;
+    };
+
+}

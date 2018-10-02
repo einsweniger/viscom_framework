@@ -12,7 +12,7 @@ namespace minuseins::handlers {
     struct ExternalUniformBuilder : ShaderToySamplerBuilder {
         using ShaderToySamplerBuilder::ShaderToySamplerBuilder;
 
-        std::unique_ptr<generic_uniform> operator()(named_resource res);
+        std::unique_ptr<models::generic_uniform> operator()(named_resource res);
     };
 
 }

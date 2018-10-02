@@ -5,9 +5,10 @@
 #pragma once
 
 #include <functional>
-#include "uniform_resource.h"
+#include "../models/uniform.h"
 
-struct generic_uniform : public uniform_resource {
+namespace models {
+struct generic_uniform : public uniform {
     explicit generic_uniform(named_resource res);
     virtual ~generic_uniform() = default;
 
@@ -30,3 +31,4 @@ struct generic_uniform : public uniform_resource {
     bool do_value_upload = true;
     bool do_value_update = true;
 };
+}

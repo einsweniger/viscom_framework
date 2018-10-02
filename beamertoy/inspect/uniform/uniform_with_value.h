@@ -6,19 +6,16 @@
 
 
 #include "generic_uniform.h"
-
+namespace models {
 template<typename T>
 struct UniformWithValueVector : public generic_uniform {
     explicit UniformWithValueVector(named_resource arg)  :
         generic_uniform(std::move(arg)),
-        value{std::vector<T>(getSize(type()))}
+        value{std::vector<T>(getSize(type()))} //TODO: how does array_size play into this?
     {
     }
 
-    virtual void drawValue() = 0;
-
-    std::function<void(UniformWithValueVector<T>&)> draw_value_fn;
-    std::function<void(UniformWithValueVector<T>&)> value_upload_fn;
+    std::function<void()> draw_value_fn;
 
     size_t uploadSize() override {
       return value.size() * sizeof(T);
@@ -30,12 +27,11 @@ struct UniformWithValueVector : public generic_uniform {
     void draw2D() override {
       draw2Dpre();
       if(draw_value_fn) {
-        draw_value_fn(*this);
-      } else {
-        drawValue();
+        draw_value_fn();
       }
       draw2Dpost();
     }
 
     std::vector<T> value;
 };
+}

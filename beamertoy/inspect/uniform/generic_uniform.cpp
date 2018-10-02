@@ -3,10 +3,11 @@
 //
 
 #include "generic_uniform.h"
-#include <imgui/imgui.h>
-#include <inspect/glwrap/strings.h>
+#include <imgui.h>
 #include <sstream>
+#include <glbinding-aux/Meta.h>
 
+namespace models {
 void uniform_tooltip(const property_t &props, const std::string &extra_text) {
   ImGui::SameLine();
   ImGui::TextDisabled("(?)");
@@ -15,10 +16,10 @@ void uniform_tooltip(const property_t &props, const std::string &extra_text) {
     tooltip << "resource properties:\n";
     for(auto prop : props) {
       if(GL_TYPE == prop.first) {
-        tooltip << getString(prop.first) << ": "
-                << getString(static_cast<const GLenum>(prop.second)).c_str() << "\n";
+        tooltip << glbinding::aux::Meta::getString(prop.first) << ": "
+                << glbinding::aux::Meta::getString(static_cast<const GLenum>(prop.second)).c_str() << "\n";
       } else {
-        tooltip << getString(prop.first) << ": "<< prop.second << "\n";
+        tooltip << glbinding::aux::Meta::getString(prop.first) << ": "<< prop.second << "\n";
       }
     }
     tooltip << extra_text;
@@ -79,5 +80,6 @@ bool generic_uniform::get_updated_value() {
 }
 
 generic_uniform::generic_uniform(named_resource res) :
-    uniform_resource(res.name, std::move(res)) {
+    uniform(res.name, std::move(res)) {
+}
 }

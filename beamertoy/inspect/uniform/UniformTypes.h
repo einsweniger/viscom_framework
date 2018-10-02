@@ -7,6 +7,16 @@
 
 #include "../glwrap/resource.h"
 #include "../models/resource.h"
+#include "generic_uniform.h"
+namespace models {
+    struct empty_uniform : generic_uniform {
+        using generic_uniform::generic_uniform;
+        void init(GLuint program) override {}
+        size_t uploadSize() override { return 0; }
+        void *valuePtr() override { return nullptr; }
+    };
+}
+/*
 
 namespace minuseins::handlers {
 
@@ -22,17 +32,18 @@ namespace minuseins::handlers {
         explicit generic_uniform(named_resource res);
         virtual ~generic_uniform() = default;
 
-        void update_properties(const generic_uniform &res);
         virtual void init(gl::GLuint program) = 0;
         virtual size_t uploadSize() = 0;
         virtual void* valuePtr() = 0;
 
+        bool get_updated_value() override;
+        bool upload_value() override;
+
+        void update_properties(const generic_uniform &res);
+
         void draw2Dpre();
         void draw2D() override;
         void draw2Dpost(std::string extra_text = "");
-
-        bool get_updated_value() override;
-        bool upload_value() override;
 
         std::function<void()> value_update_fn;
         std::function<void()> value_upload_fn;
@@ -167,5 +178,6 @@ namespace minuseins::handlers {
         std::string wrap = "clamp";
     };
 }
+*/
 
 #endif //VISCOMFRAMEWORK_UNIFORMTYPES_H

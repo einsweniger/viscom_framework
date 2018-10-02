@@ -17,7 +17,8 @@
 #include "IntrospectableFsq.h"
 
 #include <core/gfx/Shader.h>
-#include <inspect/scratch/ExternalUniformBuilder.h>
+#include "handlers/ExternalUniformBuilder.h"
+#include <inspect/uniform/FloatUniform.h>
 
 namespace minuseins {
     IntrospectableFsq::IntrospectableFsq(const std::string &fragmentShader) :
@@ -162,8 +163,8 @@ namespace minuseins {
           usedTextures.push_back(tex);
           //TODO think about if input::sampler should be stored in other type than SamplerUniform
           //TODO if using double buffering, this needs to be communicated to sampler.
-          uniformhdl->add_init_hook("iChannelResolution[" + std::to_string(inp.channel) + "]", [&](std::string_view name, handlers::generic_uniform* gu) {
-              auto& floater = dynamic_cast<handlers::FloatUniform&>(*gu);
+          uniformhdl->add_init_hook("iChannelResolution[" + std::to_string(inp.channel) + "]", [&](std::string_view name, models::generic_uniform* gu) {
+              auto& floater = dynamic_cast<models::FloatUniform&>(*gu);
               auto x = tm.GetResource(inp.src);
               floater.value[0] = x->getDimensions().x;
               floater.value[1] = x->getDimensions().y;

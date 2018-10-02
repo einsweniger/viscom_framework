@@ -8,8 +8,14 @@
 #include "UniformTypes.h"
 #include "UniformHandler.h"
 
+namespace models {
+    struct DefaultBuilder : minuseins::handlers::AbstractBuilder {
+        std::unique_ptr<models::generic_uniform> operator()(named_resource res) override;
+    };
+}
+
 namespace minuseins::handlers {
     struct DefaultBuilder : AbstractBuilder {
-        std::unique_ptr<generic_uniform> operator()(named_resource res) override;
+        std::unique_ptr<models::generic_uniform> operator()(named_resource res) override;
     };
 }

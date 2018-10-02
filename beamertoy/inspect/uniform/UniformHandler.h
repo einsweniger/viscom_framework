@@ -6,7 +6,7 @@
 
 #include "../ProgramInspector.h"
 #include "../resource_handler.h"
-#include "UniformTypes.h"
+#include "generic_uniform.h"
 
 //namespace viscom {
 //    class ApplicationNodeBase;
@@ -14,11 +14,11 @@
 
 namespace minuseins::handlers {
     struct UniformHandler : public resource_handler {
-        using build_fn = std::function<std::unique_ptr<generic_uniform>(named_resource res)>;
+        using build_fn = std::function<std::unique_ptr<models::generic_uniform>(named_resource res)>;
 
         UniformHandler(build_fn builder);
 
-        using callback_fn = std::function<void(std::string_view, generic_uniform *res)>;
+        using callback_fn = std::function<void(std::string_view, models::generic_uniform *res)>;
 
         build_fn builder;
 
@@ -26,7 +26,7 @@ namespace minuseins::handlers {
         void set_callback_fn(callback_fn);
         std::unordered_map<std::string, callback_fn> init_hooks;
         void add_init_hook(const std::string& name, callback_fn fn);
-        std::function<void(std::string_view, generic_uniform *res)> callback;
+        std::function<void(std::string_view, models::generic_uniform *res)> callback;
 
         std::unique_ptr<named_resource> initialize(ProgramInspector& inspect,named_resource res) override;
         void prepareDraw(ProgramInspector &inspect, named_resource_container &resources) override;
@@ -34,7 +34,7 @@ namespace minuseins::handlers {
     };
 
     struct AbstractBuilder : UniformHandler::build_fn {
-        virtual std::unique_ptr<generic_uniform> operator()(named_resource res) = 0;
+        virtual std::unique_ptr<models::generic_uniform> operator()(named_resource res) = 0;
     };
 }
 

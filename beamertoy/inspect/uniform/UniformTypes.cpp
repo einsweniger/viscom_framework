@@ -37,6 +37,7 @@ namespace minuseins::handlers {
             ImGui::EndTooltip();
         }
     }
+/*
 
     generic_uniform::generic_uniform(named_resource res) :
             named_resource(std::move(res))
@@ -288,5 +289,6 @@ namespace minuseins::handlers {
     void DoubleUniform::init(gl::GLuint program) {
         if(location() > 0) gl::glGetUniformdv(program, location(), &value[0]);
     }
+*/
 
 }

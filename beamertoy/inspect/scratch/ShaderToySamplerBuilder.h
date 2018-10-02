@@ -16,7 +16,7 @@ namespace viscom {
 
 namespace minuseins::handlers {
     namespace detail {
-        struct iChannel : generic_uniform {
+        struct iChannel : models::generic_uniform {
             iChannel(named_resource res, const shadertoy::Input &input, viscom::ApplicationNodeBase *appBase);
 
             std::shared_ptr<viscom::Texture> tex;
@@ -44,7 +44,7 @@ namespace minuseins::handlers {
 
         gl::GLuint samplerCounter = 0;
 
-        std::unique_ptr<generic_uniform> operator()(named_resource res);
+        std::unique_ptr<models::generic_uniform> operator()(named_resource res);
     };
 }
 
