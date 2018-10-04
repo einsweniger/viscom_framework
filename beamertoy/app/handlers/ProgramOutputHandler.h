@@ -8,12 +8,13 @@
 #include <inspect/resource_handler.h>
 #include <inspect/glwrap/resource.h>
 #include <inspect/models/resource.h>
+#include <inspect/models/program_output.h>
 namespace viscom {
     class ApplicationNodeBase;
     class FrameBuffer;
 }
 namespace minuseins::handlers {
-    struct ProgramOutput : public named_resource
+    struct ProgramOutput : public models::program_output
     {
         explicit ProgramOutput(named_resource res);
 

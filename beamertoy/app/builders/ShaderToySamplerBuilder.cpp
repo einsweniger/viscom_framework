@@ -6,10 +6,56 @@
 #include <imgui.h>
 #include <inspect/uniform/float.h>
 #include "../ApplicationNodeImplementation.h"
+#include "../ToyPlayer.h"
 
 namespace minuseins::handlers {
 
     namespace detail {
+        struct buffer_channel : public models::generic_uniform {
+            ToyPlayer* player;
+            shadertoy::Input input;
+            std::string passname;
+            buffer_channel(named_resource res, const shadertoy::Input &input, ToyPlayer* player, std::string passname) :
+            generic_uniform(std::move(res)),
+            input(input), player(player), passname(passname)
+            {
+
+            }
+
+            bool upload_value() override {
+                if(do_value_upload) {
+                    auto wrap = input.sampler.wrap;
+                    gl::GLuint boundTexture = player->GetInputBufferTextureById(input.id);
+                    if (wrap == "repeat") {
+                        gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_REPEAT);
+                        gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_REPEAT);
+                    } else if (wrap == "mirror") { //GL_MIRRORED_REPEAT
+                        gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_MIRRORED_REPEAT);
+                        gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_MIRRORED_REPEAT);
+                    } else if (wrap == "clamp") {
+                        gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_S, gl::GL_CLAMP_TO_EDGE);
+                        gl::glTextureParameteri(boundTexture, gl::GL_TEXTURE_WRAP_T, gl::GL_CLAMP_TO_EDGE);
+                    }
+                    gl::glActiveTexture(gl::GL_TEXTURE0 + input.channel);
+                    gl::glBindTexture(gl::GL_TEXTURE_2D, boundTexture);
+                    gl::glUniform1i(location(), input.channel);
+                    return true;
+                }
+                return false;
+            }
+
+            void init(GLuint program) override {
+
+            }
+
+            size_t uploadSize() override {
+                return 0;
+            }
+
+            void *valuePtr() override {
+                return nullptr;
+            }
+        };
 
         iChannel::iChannel(named_resource res, const shadertoy::Input &input, viscom::ApplicationNodeBase *appBase)
             : generic_uniform(std::move(res)), input(input), appBase(appBase) {
@@ -96,23 +142,11 @@ namespace minuseins::handlers {
             }
         };
 
-        struct fftSampler : models::empty_uniform {
-            fftSampler(named_resource res, viscom::ApplicationNodeImplementation *appImpl) :
-                empty_uniform(std::move(res)),
-                appImpl(appImpl) {}
-
-            size_t uploadSize() override {
-                return sampler;
-            }
-
-            viscom::ApplicationNodeImplementation *appImpl;
-            gl::GLuint sampler = 0;
-        };
-
     }
-    ShaderToySamplerBuilder::ShaderToySamplerBuilder(viscom::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass)
+    ShaderToySamplerBuilder::ShaderToySamplerBuilder(viscom::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass,
+                                                         minuseins::ToyPlayer *player)
             : appBase(appBase),
-              appImpl(static_cast<viscom::ApplicationNodeImplementation*>(appBase)), pass(pass)
+              appImpl(static_cast<viscom::ApplicationNodeImplementation*>(appBase)), pass(pass), player(player)
     {
         for(auto& inp : pass.inputs) {
             if("texture" == inp.ctype) {
@@ -131,41 +165,22 @@ namespace minuseins::handlers {
     }
 
     std::unique_ptr<models::generic_uniform> ShaderToySamplerBuilder::operator()(named_resource res) {
-        if("tex_text" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
-            auto inp = shadertoy::Input{};
-            inp.src = "/media/a/text.png";
-            inp.ctype = "texture";
-            inp.sampler.wrap = "repeat";
-            inp.channel = samplerCounter++;
-            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
-        }
-        if("tex_noise" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
-            auto inp = shadertoy::Input{};
-            inp.src = "/media/a/noise.png";
-            inp.ctype = "texture";
-            inp.sampler.wrap = "repeat";
-            inp.channel = samplerCounter++;
-            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
-        }
-        if("tex_wood" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
-            auto inp = shadertoy::Input{};
-            inp.src = "/media/a/wood.jpg";
-            inp.ctype = "texture";
-            inp.sampler.wrap = "repeat";
-            inp.channel = samplerCounter++;
-            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
-        }
+        if(res.name == "iChannel0") {
+            for(auto& input : pass.inputs) {
+                if(input.channel == 0) {
+                    if(input.ctype == "buffer") {
+                        if(pass.name == "Image") {
+                            //TODO This is wrong, should get by input.id; not buffer name.
+                            //TODO change toyplayer accordingly.
+                            return std::make_unique<detail::buffer_channel>(std::move(res), input, player, "image");
+                        } else {
+                            return std::make_unique<detail::buffer_channel>(std::move(res), input, player, pass.name);
+                        }
 
-        if("bufferTexture" == res.name && res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
-            auto inp = shadertoy::Input{};
-            inp.src = "/media/previz/buffer00.png";
-            inp.ctype = "buffer";
-            inp.sampler.wrap = "repeat";
-            inp.channel = samplerCounter++;
-            inp.id = 4;
-            return std::make_unique<detail::iChannel>(std::move(res), std::move(inp), appBase);
+                    }
+                }
+            }
         }
-
         if(res.name.length() == 9)  { //ichannel0
             if(res.properties.at(gl::GL_TYPE) == gl::GL_SAMPLER_2D) {
                 auto substr = res.name.substr(0, 8);

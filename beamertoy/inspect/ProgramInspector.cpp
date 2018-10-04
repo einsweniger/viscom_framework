@@ -59,7 +59,7 @@ namespace minuseins {
             }
             ImGui::EndTooltip();
         }
-        ImGui::SameLine();
+        //ImGui::SameLine();
 //        if(ImGui::TreeNode("details")) {
             for(auto& interface : draw_interfaces) {
                 if(containers.at(interface).empty()) continue;
@@ -68,11 +68,12 @@ namespace minuseins {
                 //std::string interface_str = "INTERFACE_PLACEHOLDER";
                 //ImGui::Begin(interface_str.c_str());
                 ImGui::PushID(name.c_str());
-                ImGui::Separator();
-                ImGui::TextUnformatted(name.c_str());
+
+                ImGui::TextUnformatted(interface_str.c_str());
                 for(auto& resource: containers.at(interface)) {
                     resource->draw2D();
                 }
+                ImGui::Separator();
                 ImGui::PopID();
                 //ImGui::End();
             }

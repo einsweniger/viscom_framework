@@ -25,6 +25,8 @@ namespace minuseins::handlers {
                 models::FloatUniform(std::move(arg)),
                     appImpl(appImpl)
             {
+                value_upload_fn = models::upload_float3(*this);
+                draw_value_fn = models::drag_float3(*this);
             }
 
             void init(gl::GLuint program) override {
@@ -41,7 +43,10 @@ namespace minuseins::handlers {
             iFrame(const named_resource &arg, ApplicationNodeImplementation *appImpl) :
                     FloatUniform(arg),
                     appImpl(appImpl)
-            {}
+            {
+                value_upload_fn = models::upload_float1(*this);
+                draw_value_fn = models::drag_float1(*this);
+            }
 
             bool get_updated_value() override {
                 if(do_value_update) {
@@ -56,7 +61,10 @@ namespace minuseins::handlers {
 
             iTime(const named_resource &arg, ApplicationNodeImplementation *appImpl) :
                     FloatUniform(arg),
-                    appImpl(appImpl) {}
+                    appImpl(appImpl) {
+                value_upload_fn = models::upload_float1(*this);
+                draw_value_fn = models::drag_float1(*this);
+            }
 
             bool get_updated_value() override {
                 if(do_value_update) {

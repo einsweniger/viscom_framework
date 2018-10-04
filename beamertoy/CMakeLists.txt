@@ -29,7 +29,8 @@ add_executable(beamertoy
         app/IntrospectableFsq.cpp
         app/handlers/ProgramOutputHandler.cpp
         app/builders/ExternalUniformBuilder.cpp
-        app/builders/ShaderToySamplerBuilder.cpp)
+        app/builders/ShaderToySamplerBuilder.cpp
+        )
 target_link_libraries(beamertoy PUBLIC VISCOMCore INTERFACE glbinding::glbinding glbinding::glbinding-aux PRIVATE gui inspect)
 target_include_directories(beamertoy PRIVATE  . INTERFACE VISCOMCore)
 set_property(TARGET beamertoy PROPERTY CXX_STANDARD 17)

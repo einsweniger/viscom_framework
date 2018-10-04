@@ -43,9 +43,23 @@ namespace viscom {
         }, "json/shadertoy/"};
         select.draw(&drawToyImport);
 
-        for(auto& player : players) {
-          player->draw2d();
+
+        ImGui::Begin("Imported Toys");
+        std::string removeToy = "";
+        for(auto& [id, player] : playermap) {
+            ImGui::PushID(id.c_str());
+            if(ImGui::SmallButton("x")) {
+                removeToy = id;
+            } else {
+                ImGui::SameLine();
+                player->draw2d();
+            }
+            ImGui::PopID();
         }
+        if("" != removeToy){
+            playermap.erase(removeToy);
+        }
+        ImGui::End();
 
         ApplicationNodeImplementation::Draw2D(fbo);
     }
@@ -62,9 +76,11 @@ namespace viscom {
             cereal::JSONInputArchive iarchive(file);
 
             iarchive(toy);
+            auto id = toy.info.id;
             auto toyp = std::make_unique<minuseins::ToyPlayer>(std::move(toy),this,this);
             toyp->init();
-            players.push_back(std::move(toyp));
+            playermap[id] = std::move(toyp);
+            //players.push_back();
         } catch (viscom::resource_loading_error& err) {
             std::cerr << err.errorDescription_ << std::endl;
         } catch (viscom::shader_compiler_error& err) {

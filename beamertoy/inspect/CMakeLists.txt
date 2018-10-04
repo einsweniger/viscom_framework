@@ -6,6 +6,7 @@ add_library(inspect
         models/resource.cpp
         models/interface.cpp
         models/uniform.cpp
+        models/program_output.cpp
 
         uniform/handler.cpp
         uniform/DefaultBuilder.cpp

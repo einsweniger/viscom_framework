@@ -32,9 +32,10 @@ namespace viscom {
         glbinding::Binding::initialize([](const char * name) {return glfwGetProcAddress(name);}, false);
     }
 
-    void ApplicationNodeImplementation::UpdateFrame(double currentTime, double)
+    void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
-
+        currentTime_ = static_cast<float>(currentTime);
+        elapsedTime_ = static_cast<float>(elapsedTime);
     }
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
@@ -48,12 +49,16 @@ namespace viscom {
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
+        for(auto& [id, player] : playermap) {
+            player->drawOnBackBuffer();
+        }
         static std::unique_ptr<viscom::FullscreenQuad> dummy = GetApplication()->GetFramework().CreateFullscreenQuad("dummy.frag");
         fbo.DrawToFBO([this]() {
             using namespace gl;
             auto MVP = GetCamera()->GetViewPerspectiveMatrix();
             glUseProgram(0);
         });
+        iFrame += 1;
     }
 
     void ApplicationNodeImplementation::CleanUp()

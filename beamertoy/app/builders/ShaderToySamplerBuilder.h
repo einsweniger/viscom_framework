@@ -15,6 +15,10 @@ namespace viscom {
     class ApplicationNodeImplementation;
 }
 
+namespace minuseins {
+    class ToyPlayer;
+}
+
 namespace minuseins::handlers {
     namespace detail {
         struct iChannel : models::generic_uniform {
@@ -37,10 +41,12 @@ namespace minuseins::handlers {
         };
     }
     struct ShaderToySamplerBuilder : DefaultBuilder {
-        ShaderToySamplerBuilder(viscom::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass);
+        ShaderToySamplerBuilder(viscom::ApplicationNodeBase *appBase, const shadertoy::Renderpass &pass,
+                                        minuseins::ToyPlayer *player);
 
         viscom::ApplicationNodeBase* appBase;
         viscom::ApplicationNodeImplementation* appImpl;
+        minuseins::ToyPlayer* player;
         shadertoy::Renderpass pass;
 
         gl::GLuint samplerCounter = 0;

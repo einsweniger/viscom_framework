@@ -58,11 +58,11 @@ namespace minuseins {
       });
 
       //gpi_->addHandler(gl::GL_UNIFORM, std::make_unique<UniformHandler>(handlers::ExternalUniformBuilder(appBase)));
-      gpi_->setHandler(glwrap::uniform, std::make_unique<handlers::UniformHandler>(handlers::ExternalUniformBuilder(appBase,params_)));
+//      gpi_->setHandler(glwrap::uniform, std::make_unique<handlers::UniformHandler>(handlers::ExternalUniformBuilder(appBase,params_)));
       gpi_->setHandler(glwrap::program_output, std::make_unique<handlers::ProgramOutputHandler>());
 //      gpi_->setHandler(gl::GL_UNIFORM_BLOCK, std::make_unique<UniformBlockHandler>(appBase));
 //      gpi_->setHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM, std::make_unique<handlers::SceneSubroutineHandler>(gl::GL_FRAGMENT_SHADER, appImpl));
-      uniformhdl = dynamic_cast<handlers::UniformHandler*>(gpi_->GetHandler(glwrap::uniform));
+//      uniformhdl = dynamic_cast<handlers::UniformHandler*>(gpi_->GetHandler(glwrap::uniform));
       outputhdl = dynamic_cast<handlers::ProgramOutputHandler*>(gpi_->GetHandler(glwrap::program_output));
 //      ublockhdl = dynamic_cast<UniformBlockHandler*>(gpi_->GetHandler(gl::GL_UNIFORM_BLOCK));
 //      subroutinehdl = dynamic_cast<SubroutineUniformHandler*>(gpi_->GetHandler(gl::GL_FRAGMENT_SUBROUTINE_UNIFORM));

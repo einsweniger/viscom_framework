@@ -7,11 +7,12 @@
 #include <iostream>
 #include "ProgramOutputHandler.h"
 #include <core/app/ApplicationNodeBase.h>
+#include <inspect/models/program_output.h>
 
 namespace minuseins::handlers {
 
     ProgramOutput::ProgramOutput(named_resource res) :
-            named_resource(std::move(res)),
+            program_output(res.name, std::move(res)),
             type{glwrap::toType(properties.at(gl::GL_TYPE))},
             location{static_cast<gl::GLuint>(properties.at(gl::GL_LOCATION))}
     {}
