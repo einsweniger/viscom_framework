@@ -9,7 +9,6 @@
 #include <vector>
 #include <unordered_map>
 #include <glbinding/gl/gl.h>
-#include <glbinding-aux/Meta.h>
 #include "../glwrap/interface.h"
 
 struct resource;
@@ -70,146 +69,146 @@ public:
 
 
 static basic_interface build_interface(glwrap::interface_type interface, gl::GLuint program) {
-  switch (interface) {
-    case glwrap::uniform:
-      return basic_interface(interface, program, {
-          gl::GL_REFERENCED_BY_VERTEX_SHADER,
-          gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-          gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-          gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
-          gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
-          gl::GL_REFERENCED_BY_COMPUTE_SHADER,
-          gl::GL_TYPE,
-          gl::GL_ARRAY_SIZE,
-          gl::GL_LOCATION,
-          gl::GL_OFFSET,
-          gl::GL_BLOCK_INDEX,
-          gl::GL_ARRAY_STRIDE,
-          gl::GL_MATRIX_STRIDE,
-          gl::GL_IS_ROW_MAJOR,
-          gl::GL_NAME_LENGTH,
-          gl::GL_ATOMIC_COUNTER_BUFFER_INDEX
-      });
-    case glwrap::uniform_block:
-      return basic_interface(interface, program, {
-          gl::GL_BUFFER_BINDING, gl::GL_NUM_ACTIVE_VARIABLES, gl::GL_BUFFER_DATA_SIZE,
-          gl::GL_NAME_LENGTH,
-          gl::GL_REFERENCED_BY_VERTEX_SHADER, gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER, gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-          gl::GL_REFERENCED_BY_GEOMETRY_SHADER, gl::GL_REFERENCED_BY_FRAGMENT_SHADER, gl::GL_REFERENCED_BY_COMPUTE_SHADER
-      });
-    case glwrap::program_output:
-      return basic_interface(interface, program, {
-          gl::GL_REFERENCED_BY_VERTEX_SHADER,
-          gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-          gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-          gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
-          gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
-          gl::GL_REFERENCED_BY_COMPUTE_SHADER,
-          gl::GL_TYPE,
-          gl::GL_ARRAY_SIZE,
-          gl::GL_LOCATION,
-          gl::GL_NAME_LENGTH,
-          gl::GL_IS_PER_PATCH,
-          gl::GL_LOCATION_COMPONENT,
-          gl::GL_LOCATION_INDEX
-      });
-    case glwrap::program_input:
-      return basic_interface(interface, program, {
-          gl::GL_REFERENCED_BY_VERTEX_SHADER,
-          gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-          gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-          gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
-          gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
-          gl::GL_REFERENCED_BY_COMPUTE_SHADER,
-          gl::GL_TYPE,
-          gl::GL_ARRAY_SIZE,
-          gl::GL_LOCATION,
-          gl::GL_NAME_LENGTH,
-          gl::GL_IS_PER_PATCH,
-          gl::GL_LOCATION_COMPONENT
-      });
-    case glwrap::buffer_variable:
-      return basic_interface(interface, program, {
-          gl::GL_REFERENCED_BY_VERTEX_SHADER,
-          gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-          gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-          gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
-          gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
-          gl::GL_REFERENCED_BY_COMPUTE_SHADER,
-          gl::GL_TYPE,
-          gl::GL_ARRAY_SIZE,
-          gl::GL_OFFSET,
-          gl::GL_BLOCK_INDEX,
-          gl::GL_ARRAY_STRIDE,
-          gl::GL_MATRIX_STRIDE,
-          gl::GL_IS_ROW_MAJOR,
-          gl::GL_TOP_LEVEL_ARRAY_SIZE,
-          gl::GL_TOP_LEVEL_ARRAY_STRIDE,
-          gl::GL_NAME_LENGTH
-      });
-    case glwrap::shader_storage_block:
-      return basic_interface(interface, program, {
-          gl::GL_BUFFER_BINDING,
-          gl::GL_NUM_ACTIVE_VARIABLES,
-          gl::GL_BUFFER_DATA_SIZE,
-          gl::GL_NAME_LENGTH,
-          gl::GL_REFERENCED_BY_VERTEX_SHADER,
-          gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-          gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-          gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
-          gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
-          gl::GL_REFERENCED_BY_COMPUTE_SHADER
-      });
-    case glwrap::atomic_counter_buffer:
-      return basic_interface(interface, program, {
-          gl::GL_REFERENCED_BY_VERTEX_SHADER,
-          gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-          gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-          gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
-          gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
-          gl::GL_REFERENCED_BY_COMPUTE_SHADER,
-          gl::GL_BUFFER_BINDING,
-          gl::GL_NUM_ACTIVE_VARIABLES,
-          gl::GL_BUFFER_DATA_SIZE
-      });
-    case glwrap::transform_feedback_varying:
-      return basic_interface(interface, program, {
-          gl::GL_TYPE,
-          gl::GL_ARRAY_SIZE,
-          gl::GL_OFFSET,
-          gl::GL_TRANSFORM_FEEDBACK_BUFFER_INDEX,
-          gl::GL_NAME_LENGTH
-      });
-    case glwrap::transform_feedback_buffer:
-      return basic_interface(interface, program, {
-          gl::GL_TRANSFORM_FEEDBACK_BUFFER_STRIDE,
-          gl::GL_BUFFER_BINDING,
-          gl::GL_NUM_ACTIVE_VARIABLES
-      });
-    case glwrap::vertex_subroutine_uniform:
-    case glwrap::tess_control_subroutine_uniform:
-    case glwrap::tess_evaluation_subroutine_uniform:
-    case glwrap::geometry_subroutine_uniform:
-    case glwrap::fragment_subroutine_uniform:
-    case glwrap::compute_subroutine_uniform:
-      return basic_interface(interface, program, {
-          gl::GL_ARRAY_SIZE,
-          gl::GL_LOCATION,
-          gl::GL_NAME_LENGTH,
-          gl::GL_NUM_COMPATIBLE_SUBROUTINES
-      });
-    case glwrap::vertex_subroutine:
-    case glwrap::tess_control_subroutine:
-    case glwrap::tess_evaluation_subroutine:
-    case glwrap::geometry_subroutine:
-    case glwrap::fragment_subroutine:
-    case glwrap::compute_subroutine:
-      return basic_interface(interface, program, {
-          gl::GL_NAME_LENGTH
-      });
-    default:
-      throw std::runtime_error("unexpected interface: " + glbinding::aux::Meta::getString(interface));
-  }
+    switch (interface) {
+        case glwrap::uniform:
+            return basic_interface(interface, program, {
+                gl::GL_REFERENCED_BY_VERTEX_SHADER,
+                gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+                gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
+                gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
+                gl::GL_REFERENCED_BY_COMPUTE_SHADER,
+                gl::GL_TYPE,
+                gl::GL_ARRAY_SIZE,
+                gl::GL_LOCATION,
+                gl::GL_OFFSET,
+                gl::GL_BLOCK_INDEX,
+                gl::GL_ARRAY_STRIDE,
+                gl::GL_MATRIX_STRIDE,
+                gl::GL_IS_ROW_MAJOR,
+                gl::GL_NAME_LENGTH,
+                gl::GL_ATOMIC_COUNTER_BUFFER_INDEX
+            });
+        case glwrap::uniform_block:
+            return basic_interface(interface, program, {
+                gl::GL_BUFFER_BINDING, gl::GL_NUM_ACTIVE_VARIABLES, gl::GL_BUFFER_DATA_SIZE,
+                gl::GL_NAME_LENGTH,
+                gl::GL_REFERENCED_BY_VERTEX_SHADER, gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER, gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                gl::GL_REFERENCED_BY_GEOMETRY_SHADER, gl::GL_REFERENCED_BY_FRAGMENT_SHADER, gl::GL_REFERENCED_BY_COMPUTE_SHADER
+            });
+        case glwrap::program_output:
+            return basic_interface(interface, program, {
+                gl::GL_REFERENCED_BY_VERTEX_SHADER,
+                gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+                gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
+                gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
+                gl::GL_REFERENCED_BY_COMPUTE_SHADER,
+                gl::GL_TYPE,
+                gl::GL_ARRAY_SIZE,
+                gl::GL_LOCATION,
+                gl::GL_NAME_LENGTH,
+                gl::GL_IS_PER_PATCH,
+                gl::GL_LOCATION_COMPONENT,
+                gl::GL_LOCATION_INDEX
+            });
+        case glwrap::program_input:
+            return basic_interface(interface, program, {
+                gl::GL_REFERENCED_BY_VERTEX_SHADER,
+                gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+                gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
+                gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
+                gl::GL_REFERENCED_BY_COMPUTE_SHADER,
+                gl::GL_TYPE,
+                gl::GL_ARRAY_SIZE,
+                gl::GL_LOCATION,
+                gl::GL_NAME_LENGTH,
+                gl::GL_IS_PER_PATCH,
+                gl::GL_LOCATION_COMPONENT
+            });
+        case glwrap::buffer_variable:
+            return basic_interface(interface, program, {
+                gl::GL_REFERENCED_BY_VERTEX_SHADER,
+                gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+                gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
+                gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
+                gl::GL_REFERENCED_BY_COMPUTE_SHADER,
+                gl::GL_TYPE,
+                gl::GL_ARRAY_SIZE,
+                gl::GL_OFFSET,
+                gl::GL_BLOCK_INDEX,
+                gl::GL_ARRAY_STRIDE,
+                gl::GL_MATRIX_STRIDE,
+                gl::GL_IS_ROW_MAJOR,
+                gl::GL_TOP_LEVEL_ARRAY_SIZE,
+                gl::GL_TOP_LEVEL_ARRAY_STRIDE,
+                gl::GL_NAME_LENGTH
+            });
+        case glwrap::shader_storage_block:
+            return basic_interface(interface, program, {
+                gl::GL_BUFFER_BINDING,
+                gl::GL_NUM_ACTIVE_VARIABLES,
+                gl::GL_BUFFER_DATA_SIZE,
+                gl::GL_NAME_LENGTH,
+                gl::GL_REFERENCED_BY_VERTEX_SHADER,
+                gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+                gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
+                gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
+                gl::GL_REFERENCED_BY_COMPUTE_SHADER
+            });
+        case glwrap::atomic_counter_buffer:
+            return basic_interface(interface, program, {
+                gl::GL_REFERENCED_BY_VERTEX_SHADER,
+                gl::GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+                gl::GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+                gl::GL_REFERENCED_BY_GEOMETRY_SHADER,
+                gl::GL_REFERENCED_BY_FRAGMENT_SHADER,
+                gl::GL_REFERENCED_BY_COMPUTE_SHADER,
+                gl::GL_BUFFER_BINDING,
+                gl::GL_NUM_ACTIVE_VARIABLES,
+                gl::GL_BUFFER_DATA_SIZE
+            });
+        case glwrap::transform_feedback_varying:
+            return basic_interface(interface, program, {
+                gl::GL_TYPE,
+                gl::GL_ARRAY_SIZE,
+                gl::GL_OFFSET,
+                gl::GL_TRANSFORM_FEEDBACK_BUFFER_INDEX,
+                gl::GL_NAME_LENGTH
+            });
+        case glwrap::transform_feedback_buffer:
+            return basic_interface(interface, program, {
+                gl::GL_TRANSFORM_FEEDBACK_BUFFER_STRIDE,
+                gl::GL_BUFFER_BINDING,
+                gl::GL_NUM_ACTIVE_VARIABLES
+            });
+        case glwrap::vertex_subroutine_uniform:
+        case glwrap::tess_control_subroutine_uniform:
+        case glwrap::tess_evaluation_subroutine_uniform:
+        case glwrap::geometry_subroutine_uniform:
+        case glwrap::fragment_subroutine_uniform:
+        case glwrap::compute_subroutine_uniform:
+            return basic_interface(interface, program, {
+                gl::GL_ARRAY_SIZE,
+                gl::GL_LOCATION,
+                gl::GL_NAME_LENGTH,
+                gl::GL_NUM_COMPATIBLE_SUBROUTINES
+            });
+        case glwrap::vertex_subroutine:
+        case glwrap::tess_control_subroutine:
+        case glwrap::tess_evaluation_subroutine:
+        case glwrap::geometry_subroutine:
+        case glwrap::fragment_subroutine:
+        case glwrap::compute_subroutine:
+            return basic_interface(interface, program, {
+                gl::GL_NAME_LENGTH
+            });
+        default:
+            throw std::runtime_error("unexpected interface: " + glwrap::getString(interface));
+    }
 }
 
 

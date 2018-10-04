@@ -16,7 +16,7 @@ void resource_tooltip(const property_t &props, const std::string& extra_text) {
     for(auto prop : props) {
       if(gl::GL_TYPE == prop.first) {
         tooltip << glbinding::aux::Meta::getString(prop.first) << ": "
-                << glbinding::aux::Meta::getString(prop.second) << "\n";
+                << glbinding::aux::Meta::getString(static_cast<gl::GLenum>(prop.second)) << "\n";
       } else {
         tooltip << glbinding::aux::Meta::getString(prop.first) << ": "<< prop.second << "\n";
       }
