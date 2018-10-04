@@ -10,7 +10,6 @@
 #include <string_view>
 #include <glbinding/gl/gl.h>
 
-
 // opengl wrappers
 namespace glwrap {
     enum interface_type {
@@ -37,8 +36,10 @@ namespace glwrap {
         compute_subroutine_uniform           = static_cast<unsigned int>(gl::GL_COMPUTE_SUBROUTINE_UNIFORM),
     };
     extern const std::vector<interface_type> all_interfaces;
-
     using property_map = std::unordered_map<gl::GLenum, gl::GLint>;
+
+    std::string getString(interface_type iface);
+
     constexpr gl::GLuint positive(const gl::GLint num) {
 //    assert(0 >=num);
       if (0 >= num) {
