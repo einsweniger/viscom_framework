@@ -7,11 +7,12 @@
 #include <Shadertoy.h>
 #include <unordered_map>
 #include <glbinding/gl/types.h>
-
+#include <inspect/ProgramInspector.h>
 namespace viscom {
     class Texture;
     class ApplicationNodeImplementation;
-    class ApplicationNodeInternal;
+    class ApplicationNodeBase;
+    class GPUProgram;
 }
 
 namespace minuseins {
@@ -21,21 +22,28 @@ namespace minuseins {
     class ToyPlayer {
     public:
         ToyPlayer(shadertoy::Shader params, viscom::ApplicationNodeImplementation *appImpl,
-                          viscom::ApplicationNodeInternal *appNode);
+                          viscom::ApplicationNodeBase *appBase);
         void init();
         shadertoy::Shader params_;
         viscom::ApplicationNodeImplementation* appImpl;
-        viscom::ApplicationNodeInternal* appNode;
+        viscom::ApplicationNodeBase* appBase;
         std::unique_ptr<shadertoy::Renderpass> image;
         std::vector<std::unique_ptr<shadertoy::Renderpass>> buffers;
         std::unique_ptr<shadertoy::Renderpass> common;
         std::unordered_map<std::string, std::shared_ptr<viscom::Texture>> textures;
+
+//        std::vector<std::shared_ptr<viscom::GPUProgram>> programs;
+        std::unordered_map<std::string, std::shared_ptr<viscom::GPUProgram>> progmap;
+//        std::vector<std::unique_ptr<ProgramInspector>> inspectors;
+        std::unordered_map<std::string, std::unique_ptr<ProgramInspector>> inspectmap;
+
         void draw2d();
+        void drawpass(shadertoy::Renderpass& pass);
 
         void assignPasses();
         bool hasCommonPass();
 
-        void writeShaders();
+        void writeAndLoadShaders();
     };
 
 }

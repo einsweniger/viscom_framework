@@ -62,7 +62,7 @@ namespace viscom {
             cereal::JSONInputArchive iarchive(file);
 
             iarchive(toy);
-            auto toyp = std::make_unique<minuseins::ToyPlayer>(std::move(toy),this,appNode);
+            auto toyp = std::make_unique<minuseins::ToyPlayer>(std::move(toy),this,this);
             toyp->init();
             players.push_back(std::move(toyp));
         } catch (viscom::resource_loading_error& err) {
