@@ -4,11 +4,8 @@
 
 #include <iostream>
 #include <sstream>
-#include "resource_handler.h"
-#include "models/resource.h"
 #include "ProgramInspector.h"
 #include <imgui.h>
-#include <glbinding-aux/Meta.h>
 
 
 namespace minuseins {
@@ -58,7 +55,7 @@ namespace minuseins {
                 GLint count;
                 gl::glGetProgramInterfaceiv(programId_, static_cast<gl::GLenum>(interface), GL_ACTIVE_RESOURCES, &count);
                 if(0 >= count) continue;
-                ImGui::BulletText("%s: %d", glbinding::aux::Meta::getString(interface).c_str(), count);
+                ImGui::BulletText("%s: %d", glwrap::getString(interface).c_str(), count);
             }
             ImGui::EndTooltip();
         }
@@ -67,9 +64,9 @@ namespace minuseins {
             for(auto& interface : draw_interfaces) {
                 if(containers.at(interface).empty()) continue;
 
-                std::string interface_str = glbinding::aux::Meta::getString(interface);
+                std::string interface_str = glwrap::getString(interface);
                 //std::string interface_str = "INTERFACE_PLACEHOLDER";
-                ImGui::Begin(interface_str.c_str());
+                //ImGui::Begin(interface_str.c_str());
                 ImGui::PushID(name.c_str());
                 ImGui::Separator();
                 ImGui::TextUnformatted(name.c_str());
@@ -77,7 +74,7 @@ namespace minuseins {
                     resource->draw2D();
                 }
                 ImGui::PopID();
-                ImGui::End();
+                //ImGui::End();
             }
 //            ImGui::TreePop();
 //        }

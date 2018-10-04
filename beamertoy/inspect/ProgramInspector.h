@@ -11,9 +11,9 @@
 #include <glbinding/gl/gl.h>
 #include "models/interface.h"
 #include "glwrap/interface.h"
+#include "resource_handler.h"
+#include "models/resource.h"
 
-struct named_resource;
-struct resource_handler;
 namespace minuseins {
 
     class ProgramInspector {
