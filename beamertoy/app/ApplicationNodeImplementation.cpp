@@ -34,8 +34,9 @@ namespace viscom {
 
     void ApplicationNodeImplementation::UpdateFrame(double currentTime, double elapsedTime)
     {
-        currentTime_ = static_cast<float>(currentTime);
-        elapsedTime_ = static_cast<float>(elapsedTime);
+        if(nullptr != active_player) {
+            active_player->UpdateFrame(currentTime, elapsedTime);
+        }
     }
 
     void ApplicationNodeImplementation::ClearBuffer(FrameBuffer& fbo)
@@ -45,20 +46,17 @@ namespace viscom {
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         });
+        if(nullptr != active_player) {
+            active_player->ClearBuffers();
+        }
+
     }
 
     void ApplicationNodeImplementation::DrawFrame(FrameBuffer& fbo)
     {
-        for(auto& [id, player] : playermap) {
-            player->drawOnBackBuffer();
+        if(nullptr != active_player) {
+            active_player->draw(&fbo);
         }
-        static std::unique_ptr<viscom::FullscreenQuad> dummy = GetApplication()->GetFramework().CreateFullscreenQuad("dummy.frag");
-        fbo.DrawToFBO([this]() {
-            using namespace gl;
-            auto MVP = GetCamera()->GetViewPerspectiveMatrix();
-            glUseProgram(0);
-        });
-        iFrame += 1;
     }
 
     void ApplicationNodeImplementation::CleanUp()

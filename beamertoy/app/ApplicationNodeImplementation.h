@@ -39,15 +39,10 @@ namespace viscom {
         virtual bool KeyboardCallback(int key, int scancode, int action, int mods) override;
 
         std::vector<std::unique_ptr<shadertoy::Shader>> toys;
-        //std::vector<std::unique_ptr<minuseins::ToyPlayer>> players;
-        std::unordered_map<std::string, std::unique_ptr<minuseins::ToyPlayer>> playermap;
+        std::unique_ptr<minuseins::ToyPlayer> active_player;
         std::string getOutputDir();
 
         glm::vec2 GetScreenSize();
-
-        float currentTime_ = 0.0f;
-        float elapsedTime_ = 0.0f;
-        int iFrame = 0;
         unsigned int postproc_tex = 0;
     private:
     };

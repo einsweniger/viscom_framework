@@ -26,11 +26,8 @@ add_executable(beamertoy
         app/WorkerNode.cpp
 
         app/ToyPlayer.cpp
-        app/IntrospectableFsq.cpp
         app/handlers/ProgramOutputHandler.cpp
-        app/builders/ExternalUniformBuilder.cpp
-        app/builders/ShaderToySamplerBuilder.cpp
-        )
+        app/player/BufferPass.cpp app/player/BufferPass.h app/player/ImagePass.cpp app/player/ImagePass.h app/builders/ShaderToyUniformBuilder.cpp app/builders/ShaderToyUniformBuilder.h)
 target_link_libraries(beamertoy PUBLIC VISCOMCore INTERFACE glbinding::glbinding glbinding::glbinding-aux PRIVATE gui inspect)
 target_include_directories(beamertoy PRIVATE  . INTERFACE VISCOMCore)
 set_property(TARGET beamertoy PROPERTY CXX_STANDARD 17)

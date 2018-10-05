@@ -23,7 +23,8 @@ struct generic_uniform : public uniform {
 
     void draw2Dpre();
     void draw2D() override;
-    void draw2Dpost(std::string extra_text = "");
+
+    virtual void draw2Dpost(std::string extra_text = "");
 
     std::function<void()> value_update_fn;
     std::function<void()> value_upload_fn;

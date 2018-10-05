@@ -45,19 +45,8 @@ namespace viscom {
 
 
         ImGui::Begin("Imported Toys");
-        std::string removeToy = "";
-        for(auto& [id, player] : playermap) {
-            ImGui::PushID(id.c_str());
-            if(ImGui::SmallButton("x")) {
-                removeToy = id;
-            } else {
-                ImGui::SameLine();
-                player->draw2d();
-            }
-            ImGui::PopID();
-        }
-        if("" != removeToy){
-            playermap.erase(removeToy);
+        if(nullptr != active_player) {
+            active_player->draw2d();
         }
         ImGui::End();
 
@@ -79,12 +68,14 @@ namespace viscom {
             auto id = toy.info.id;
             auto toyp = std::make_unique<minuseins::ToyPlayer>(std::move(toy),this,this);
             toyp->init();
-            playermap[id] = std::move(toyp);
+            active_player = std::move(toyp);
             //players.push_back();
         } catch (viscom::resource_loading_error& err) {
             std::cerr << err.errorDescription_ << std::endl;
         } catch (viscom::shader_compiler_error& err) {
             std::cerr << err.what() << std::endl;
+        } catch (minuseins::toyplayer_exception& exception) {
+            std::cerr << exception.message << std::endl;
         }
         return false;
     }

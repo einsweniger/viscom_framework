@@ -10,7 +10,6 @@ namespace models {
         if(location() > 0) gl::glGetUniformfv(program, location(), &value[0]);
     }
 
-
     float_func::float_func(FloatUniform &ref) : ref(ref) {}
 
     void drag_float1::operator()() { ImGui::DragFloat (ref.name.c_str(), &ref.value[0]); }
