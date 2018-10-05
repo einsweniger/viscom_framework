@@ -1,0 +1,74 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MstBRN",
+      "date": "1524861773",
+      "viewed": 57,
+      "name": "Perfect Mirrors",
+      "username": "qwertsol",
+      "description": "Inspired by [url]https://gfycat.com/CavernousSingleChimpanzee[/url].",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raytracing",
+        "reflections",
+        "mirrors"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 24,
+            "src": "/media/a/488bd40303a2e2b9a71987e48c66ef41f5e937174bf316d3ed0e86410784b919.jpg",
+            "ctype": "cubemap",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 25,
+            "src": "/media/a/550a8cce1bf403869fde66dddf6028dd171f1852f4a704a465e1b80d23955663.png",
+            "ctype": "cubemap",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Square root of number of samples used for super-sampling\n#define SAMPLES 2 \n\nfloat mirrorDistance( float minSize, float iTime )\n{\n    float maxSize = 2.0;\n    iTime = max(iTime - .4, 0.0);\n    \n    return minSize + (cos(iTime * .5) + 1.0) / 2.0 * maxSize;\n}\n\nbool isMirror( vec3 pos, float size )\n{\n    //return true;\n    \n    if (all(lessThan(abs(pos.xz), vec2(size))))\n        return true;\n    \n    if (pos.y < size * 2.0 && pos.y > epsilon)\n    {\n        if (abs(pos.x) < size)\n        \treturn true;\n        \n        if (abs(pos.z) < size)\n        \treturn true;\n    }\n        \n\treturn false;\n}\n\nvec3 trace( Ray ray, vec3 spherePos )\n{  \n    float mirrorSize = 1.5;\n    float dist = mirrorDistance(mirrorSize, iTime);\n    AABB box = AABB(vec3(-dist, 0.0, -dist), vec3(dist, mirrorSize + dist, dist));\n    vec4 sphere = vec4(spherePos, 0.15);\n    \n    float t0, t1;\n    bool i = intersectAABB(ray, box, t0, t1);\n    vec3 pos = evalRay(ray, t0);\n    \n    if (i) \n    {\n        if (t0 > 0.0 && isMirror(pos, mirrorSize))\n        {\n            vec3 normal = getNormal(box, pos);\n       \t\treflectRay(ray, pos, normal);\n        \treturn .5 * toLinear(texture(iChannel1, ray.Dir).rgb);\n        }\n        else\n        {\n            for (int j=0; j<128; j++) \n    \t\t{\n                float tMin = 100000.0;\n                \n                i = intersectSphere(ray, sphere, t0, t1);\n                if (i && t0 > 0.0) \n                {\n                    tMin = t0;\n                    return vec3(1.0, 1.0, 0.9);\n                }\n                \n            \ti = intersectAABB(ray, box, t0, t1);\n\n            \tvec3 pos = evalRay(ray, t1);\n\n            \tif (t1 > 0.0 && isMirror(pos, mirrorSize)) \n            \t{\n            \t    vec3 normal = getNormal(box, pos);\n            \t    reflectRay(ray, pos, normal);\n                } \n                else \n                {\n                    break;\n                }                 \n        \t}\n        }\n    }\n    \n    return toLinear(texture(iChannel0, ray.Dir).rgb);\n}\n\nfloat easeInOut( float t ) \n{ \n    return t<0.5 ? 2.0*t*t : -1.0+(4.0-2.0*t)*t; \n}\n\nvec3 cameraPos( float t, vec3 spherePos )\n{\n    t = max(t - 0.5, 0.0);\n    float m = easeInOut(clamp(t / 4.0, 0.0, 1.0));\n    \n    if (t > 7.0 && iMouse.z > 0.0) \n    {\n        vec2 r1 = rotate(vec2(0.8, -1.2), iMouse.x / iResolution.x * 5.0);\n        vec2 r2 = rotate(vec2(length(r1), 0.7), (-iMouse.y / iResolution.y + .4) * 1.0);\n        vec2 v = normalize(r1) * r2.x;\n    \treturn vec3(v.x, r2.y, v.y);    \n    }\n    \n    return mix(vec3(6.0, 6.0, 6.0), vec3(0.8, 0.7, -1.2), m);\n}\n\nvec3 spherePos( float t )\n{\n\tvec3 x = vec3(0, 2.5, 0);\n    vec3 v = vec3(0.2, 1.0, 0.1);\n    vec3 a = vec3(0, -9.8, 0);\n    \n    for (int i=0; i<6; i++) \n    {\n        float sqr = sqrt(2.0 * a.y * (0.15 - x.y) + v.y * v.y);\n        float t0 = -(sqr + v.y) / a.y;\n        float t1 = (sqr - v.y) / a.y;\n        float im = (t1 > epsilon && t1 < t0) ? t1 : t0;\n        float tC = (t0 > epsilon) ? im : t1;\n            \n        if (t < tC)\n        {\n            x = x + v * t + 0.5 * a * t * t;\n            return x;\n        }\n        \n        x = x + v * tC + 0.5 * a * tC * tC;\n        v = v + a * tC;\n        v *= .6;\n        v.y = -v.y;\n        t -= tC;\n    }\n    \n    return x;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    const float fov = pi / 2.0;\n    float step = 1.0 / float(SAMPLES);\n    \n \n    vec3 outColor = vec3(0.0, 0.0, 0.0);\n    \n    for (int i=0; i<SAMPLES; i++) \n    {\n        for (int j=0; j<SAMPLES; j++)\n        {\n            vec2 coords = fragCoord + vec2(float(i) * step, float(j) * step);\n            vec3 sphere = spherePos(iTime);\n            vec3 pos = cameraPos(iTime, sphere);\n            Ray ray = lookAt(sphere, pos, up, coords, iResolution.xy, fov);\n            outColor += trace(ray, sphere);          \n        }\n    }\n    \n    outColor /= float(SAMPLES * SAMPLES);\n    \n\tfragColor = vec4(tosRGB(outColor), 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "const float epsilon = 0.00001;\nconst float pi = 3.14159265359;\nconst vec3 up = vec3(0.0, 1.0, 0.0);\nconst vec3 forward = vec3(0.0, 0.0, -1.0);\nconst vec3 right = vec3(1.0, 0.0, 0.0);\n\nvec2 rotate( vec2 v, float a ) {\n\tfloat s = sin(a);\n\tfloat c = cos(a);\n\tmat2 m = mat2(c, -s, s, c);\n\treturn m * v;\n}\n\nvec3 toLinear(vec3 v) {\n  \treturn pow(v, vec3(2.2));\n}\n\nvec3 tosRGB( vec3 color )\n{\n    return pow(color, vec3(1.0/2.2));\n}\n    \nstruct Ray \n{\n    vec3 Origin;\n    vec3 Dir;\n};\n    \nstruct AABB \n{\n    vec3 Min;\n    vec3 Max;\n};\n    \nRay lookAt( vec3 target, vec3 pos, vec3 up, vec2 coords, vec2 resolution, float fov )\n{\n    vec3 axisZ = normalize(target - pos);\n    vec3 axisX = cross(axisZ, up);\n    vec3 axisY = cross(axisX, axisZ);\n    float camNear = (resolution.x * .5) / abs(tan(fov / 2.0));\n    vec2 uv = coords - resolution / 2.0;\n    \n    return Ray(pos, normalize(axisX * uv.x + axisY * uv.y + camNear * axisZ)); \n}\n\nvoid reflectRay( inout Ray ray, vec3 pos, vec3 normal )\n{\n    ray.Origin = pos + normal * epsilon;\n    ray.Dir = reflect(ray.Dir, normal);\n}\n\nvoid transformRay( inout Ray ray, mat4 mat )\n{\n\tray.Origin = (mat * vec4(ray.Origin, 1.0)).xyz;\n    ray.Dir = normalize(mat * vec4(ray.Dir, 0.0)).xyz;\n}\n\nvec3 evalRay( Ray ray, float t )\n{\n    return ray.Origin + t * ray.Dir;\n}\n\nAABB createAABB( vec3 middle, vec3 halfWidth )\n{    \n    return AABB(middle - halfWidth, middle + halfWidth);\n}\n\n// returns t and normal\nbool intersectAABB( Ray r, AABB aabb, out float t0, out float t1 ) \n{\n\tvec3 invR = 1.0 / r.Dir;\n    \n    vec3 tbot = invR * (aabb.Min-r.Origin);\n    vec3 ttop = invR * (aabb.Max-r.Origin);\n    \n    vec3 tmin = min(ttop, tbot);\n    vec3 tmax = max(ttop, tbot);\n    \n    vec2 t = max(tmin.xx, tmin.yz);\n    t0 = max(t.x, t.y);\n    t = min(tmax.xx, tmax.yz);\n    t1 = min(t.x, t.y);\n\n\treturn t0 <= t1;\n}\n\nvec3 getNormal( AABB aabb, vec3 pos )\n{\n    vec3 d1 = abs(aabb.Min - pos);\n    vec3 d2 = abs(aabb.Max - pos);\n    \n    vec3 n = -1.0 * vec3(lessThan(d1, vec3(epsilon)));\n\tn += vec3(lessThan(d2, vec3(epsilon)));\n\n    return normalize(n);\n}\n\nvec3 middle( AABB aabb )\n{\n    return (aabb.Min + aabb.Max) * .5;\n}\n\nbool intersectSphere( Ray r, vec4 sphere, out float t0, out float t1 )\n{\n    vec3 dv = r.Origin - sphere.xyz;\n    \n    float b = dot(r.Dir, dv) * 2.0;\n    float c = dot(dv, dv) - (sphere.w * sphere.w);\n    \n    float d = b * b - 4.0 * c;\n    if (d < 0.0)\n    {\n        return false;\n    }\n    \n    d = sqrt(d);\n    \n    float ta = (-b - d) * 0.5;\n    float tb = (-b + d) * 0.5;\n    \n    t0 = min(ta, tb);\n    t1 = max(ta, tb);\n        \n    return t0 <= t1;\n}",
+        "name": "Common",
+        "description": "",
+        "type": "common"
+      }
+    ]
+  }
+}

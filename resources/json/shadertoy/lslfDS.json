@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lslfDS",
+      "date": "1498130940",
+      "viewed": 241,
+      "name": "voronoi weave",
+      "username": "public_int_i",
+      "description": "voronoi weave",
+      "likes": 8,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "voronoi",
+        "weave"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n    #define l(i) length(fract(u*.01+fract(i*vec2(1,8))+cos(u.yx*fract(iTime*.01)*.2+i*8.))-.5)\n\to += min(l(.6),l(.1))*1.66-o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

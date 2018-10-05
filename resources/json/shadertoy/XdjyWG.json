@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdjyWG",
+      "date": "1493583091",
+      "viewed": 308,
+      "name": "octree spheres",
+      "username": "abje",
+      "description": "rendering a 3d sphere with octree traversing. has artifacts. ",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "sphere",
+        "voxel",
+        "octree"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define detail 7\n#define steps 1000\n\nfloat time;\n\nvec3 ball;\n\nfloat box(vec3 pos, float size) {\n    return length(max(vec3(0.0),abs(pos)-size*0.5));\n}\n\nbool map(vec3 pos, float size) {\n    return box(mod(pos+1.0,2.0)-1.0, size) > 0.5;\n}\n\nvoid mainImage( out vec4 fragColor,  vec2 fragCoord )\n{\n    fragColor = vec4(0.0);\n    time = iTime;\n    vec2 uv = (fragCoord.xy * 2.0 - iResolution.xy) /iResolution.y;\n    ball = vec3(0.0,0.0,0.0);\n    float stepsize = 1.0;\n    \n    vec3 cam = vec3(0.52,0.52,-1.4);\n    vec3 raypos = cam;\n    vec3 dir = normalize(vec3(uv,2.0));\n    vec3 mask = vec3(0.0);\n    float count = 0.0;\n    \n    float dist = 0.0;\n    vec3 floorpos = floor(raypos);\n    vec3 localpos = raypos;\n    vec3 localfloor = floorpos;\n    \n    //traversing here\n    for (int i = 0; i < steps; i++) {\n        bool len = map(floorpos-ball+stepsize*0.5, stepsize);\n        if (count > float(detail)||dist > 50.0) break;\n        \n        if((max(max(localfloor.x,localfloor.y),localfloor.z) > 1.5||min(min(localfloor.x,localfloor.y),localfloor.z) < -0.5) && count > 0.5) {\n            stepsize *= 2.0; //makes stepsize larger\n            count--; //moves up a level\n            floorpos += -localfloor*stepsize/2.0+mask*sign(dir)*stepsize;\n            raypos += 0.0001*mask*sign(dir);\n            localpos = mod(raypos/stepsize-mask*sign(dir),2.0)+mask*sign(dir);\n\n            localfloor = floor(localpos);\n\t\t} else\n        if (!len && count <= float(detail)) {\n            stepsize *= 0.5; //makes stepsize smaller\n            count++; //move down a level\n            localpos = (localpos-localfloor)*2.0;\n            localfloor = step(vec3(1.0),localpos);\n            floorpos += localfloor*stepsize;\n        } else {\n            //coloring\n            \n            vec3 dists = abs((sign(dir)*0.5+0.5)-(localpos-localfloor))*1.0/abs(dir);\n\t\t\t\n            float m = min(min(dists.x,dists.y),dists.z);\n\t\t\t\n            mask = step(dists,vec3(m));\n\t\t\t\n            dist += m*stepsize;\n            raypos += m*dir*stepsize; //moves the ray to the next grid border\n            localpos += m*dir;\t\t\t\t\t\t\n            localfloor += mask*sign(dir);\t\t\t\n            floorpos += mask*sign(dir)*stepsize; //moves to the next grid cell\n        }\n    }\n    \n    if(count > float(detail)) {\n        vec3 normal = mix(abs(normalize(mod(raypos-ball+1.0,2.0)-1.0)),mask,sin(time)*0.5+0.5);\n    \tfragColor = vec4(normal*0.5+0.5,1.0)/(dist*0.1+1.0);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

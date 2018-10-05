@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltlfzS",
+      "date": "1512381370",
+      "viewed": 146,
+      "name": "a beginner's test",
+      "username": "xieguanglei",
+      "description": "a beginner's test",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "test"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(fract(uv*10.0),0.0,0.5);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

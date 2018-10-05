@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlKGDK",
+      "date": "1476827714",
+      "viewed": 295,
+      "name": "cumulated sine  (130/165 chars)",
+      "username": "FabriceNeyret2",
+      "description": "sin(sin(sin(...(sin(x))..)))",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "curve",
+        "short",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\n\tU /= iResolution.xy;\n    float v = U.x*12.6;\n    \n    O -= O;\n    \n    for (int i=0; i<60; i++)\n        v = sin(v),                                // recursion\n     // v = cos(7.*U.x*v), \n     // v = cos(3.14*U.x*v) *.9,\n     // v = cos(7.*iMouse.y/iResolution.y*v),\n     // v = sin(v*(1.+.3*sin(iDate.w))),   \n\t // O += 1e-3/abs(2.*U.y-1. - v);  // 130 chars\n\t    O = smoothstep(.02,.0,abs(2.*U.y-1. - v)) + O*vec4(.99,.98,.97,1); // curve + relaxation\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

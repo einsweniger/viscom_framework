@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sjcRd",
+      "date": "1493382991",
+      "viewed": 230,
+      "name": "\"precision\" compiler bug",
+      "username": "FabriceNeyret2",
+      "description": "Not only \"precision\" is no longer allowed, but not even in comments ;-)",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "glsl",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;     // hello precision lowp hello\n\n\tfragColor = vec4(uv,0.5+0.5*sin(iTime),1.0); /* hello precision lowp hello */\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

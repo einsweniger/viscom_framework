@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Ml33z2",
+      "date": "1470274989",
+      "viewed": 351,
+      "name": "No Geometry 360 Video",
+      "username": "KylBlz",
+      "description": "Mouse to look around. Just kicking around an idea; the input image should be equirectangular for the effect to work.",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "video",
+        "projection",
+        "equirectangular"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159265\n\n//tools\nvec3 rotateXY(vec3 p, vec2 angle) {\n    vec2 c = cos(angle), s = sin(angle);\n    p = vec3(p.x, c.x*p.y + s.x*p.z, -s.x*p.y + c.x*p.z);\n    return vec3(c.y*p.x + s.y*p.z, p.y, -s.y*p.x + c.y*p.z);\n}\n\nvoid mainImage( out vec4 fC, in vec2 fX ) {\n    //place 0,0 in center from -1 to 1 ndc\n    vec2 uv = fX.xy * 2./iResolution.xy - 1.;\n\t\n    //see the entire hemisphere (test)\n    //vec3 camDir = normalize(vec3(uv.xy, 1.0 - uv.x*uv.x - uv.y*uv.y));\n    vec3 camDir = normalize(vec3(uv.xy, .5));\n    \n    //camRot is angle vec in rad\n    vec3 camRot = vec3(iMouse.yx / iResolution.xy * PI - 0.5, 0.);\n    \n    //rotate\n    vec3 rd = normalize(rotateXY(camDir, camRot.xy));\n    \n    //radial azmuth polar\n    vec2 RadAzPol = vec2(atan(rd.z, rd.x) + PI, acos(-rd.y)) / vec2(2.0 * PI, PI);\n\n    //this is not a radial texture but whatever\n    fC = texture(iChannel0, RadAzPol * vec2(2.0, 1.0));\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

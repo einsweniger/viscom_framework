@@ -1,0 +1,232 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dlyDM",
+      "date": "1488462601",
+      "viewed": 466,
+      "name": "Track Differences",
+      "username": "ok2nmz",
+      "description": "It provides a way to visualise differences between two subsequent frames",
+      "likes": 4,
+      "published": 3,
+      "flags": 34,
+      "tags": [
+        "substractdifference"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\t\n    \n    vec2 p = fragCoord.xy / iResolution.xy;\n\n    vec3 colA = texture( iChannel0, p ).xyz;\n    vec3 colLast = texture( iChannel1, p ).xyz;\n\t\n    fragColor = vec4(colA-colLast, 1.0 );\n\t\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{    \n    float frameTime = 0.050;\n    float doubleFrameTime = 2.0*frameTime;\n    vec2 p = fragCoord.xy / iResolution.xy;\n    vec3 colOld = texture( iChannel0, p ).xyz;\n    vec3 colNew = texture( iChannel2, p ).xyz;\n   \n    if(iTime - doubleFrameTime*floor(iTime/(doubleFrameTime)) < frameTime)\n    {\n    \tfragColor = vec4(colNew,1.0);\n    }\n    else\n    {\n        fragColor = vec4(colOld,1.0);\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{    \n    float frameTime = 0.050;\n    float doubleFrameTime = 2.0*frameTime;\n    vec2 p = fragCoord.xy / iResolution.xy;\n    vec3 colOld = texture( iChannel0, p ).xyz;\n    vec3 colNew = texture( iChannel2, p ).xyz;\n   \n    if(iTime - doubleFrameTime*floor(iTime/(doubleFrameTime)) > frameTime)\n    {\n    \tfragColor = vec4(colNew,1.0);\n    }\n    else\n    {\n        fragColor = vec4(colOld,1.0);\n    }\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{    \n    vec2 p = fragCoord.xy / iResolution.xy;\n\n    vec3 colNew = texture( iChannel1, p ).xyz;\n\n    fragColor = vec4(colNew,1.0);\n\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

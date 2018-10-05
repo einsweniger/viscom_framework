@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltG3R3",
+      "date": "1475774721",
+      "viewed": 253,
+      "name": "Metaballs 01",
+      "username": "lokii",
+      "description": "Metaball visualization for the logo of a product I am working on.. ",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "metaball"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Author: Akshay S. Loke\n// Title: Metaballs 01\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n#define NUM_BALLS 8\n#define PI 6.28\n#define RADIUS 0.02\n#define MOVING_RADIUS 0.02\n\n//http://iquilezles.org/www/articles/palettes/palettes.htm\nvec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {\n    return a + b*cos( 6.28318*(c*t+d) );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 st = fragCoord/iResolution.y;\n    float aspect = iResolution.x/iResolution.y;\n    \n    vec3 col = vec3(0.);\n    float mi_total = 0.0;\n    \n    vec2 c0 = vec2(cos(iTime)*0.3+0.5*aspect, \n                   sin(iTime)*0.3+0.5);\n    float d0 = distance(st, c0);\n\tfloat m0 = MOVING_RADIUS/d0;\n    col += m0*vec3(1, 1, 1);\n    \n    for (int i=0; i<NUM_BALLS;i++) {\n        vec2 ci = vec2(cos(-iTime*0.5+float(i)*PI/float(NUM_BALLS))*0.3+0.5*aspect, \n                       sin(-iTime*0.5+float(i)*PI/float(NUM_BALLS))*0.3+0.5);\n        float d = distance(st, ci);\n        float mi = RADIUS/d;\n        mi_total += mi;\n        col += mi*palette(float(i)/float(NUM_BALLS), \n                          vec3(0.5,0.5,0.5),\n                          vec3(0.5,0.5,0.5),\n                          vec3(1.0,1.0,1.0),\n                          vec3(0.0,0.33,0.67));\n    }\n\n    float m = smoothstep(0.2, 2.0, m0+mi_total);\n    vec3 color = (col);\n    \n    fragColor = vec4(color*m, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

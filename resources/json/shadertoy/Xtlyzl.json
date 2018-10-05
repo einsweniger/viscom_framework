@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xtlyzl",
+      "date": "1506009509",
+      "viewed": 434,
+      "name": "Apollonian Elevator-247 chars",
+      "username": "GregRostami",
+      "description": "This is a slight modification and reduction of Shane's amazing SH17A entry:\n[url]https://www.shadertoy.com/view/4d2BW1[/url]\nA BIG thanks to Fabrice for helping me reduce this shader.",
+      "likes": 9,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "raymarching",
+        "twotweets",
+        "apollonian",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12219,
+            "src": "https://soundcloud.com/antonio-antetomaso/mutiny-on-the-bounty-closing-titles-cover",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// 247 chars - color shading and centered\n// Fabrice has already made this smaller ...\n/**/\nfloat m(vec3 p)\n{\n    float i=0., s = 1., k;\n    for(p.y += .2*iTime ; i++<7.; s *= k )\n        p *= k = 1.5 / dot(p = mod(--p, 2.) - 1., p);\n    return length(p)/s - .01;   \n}\n\n#define mainImage(c,u)\t                 \\\n    vec3 o = iResolution,                \\\n         d = vec3((u+u-o.xy)/o.y, 1)/6.; \\\n         o/=o;\t                         \\\n    while(c.w++<1e2) o += m(o)*d;        \\\n    c.rgb = ( o*m(o - d) - 2. ) / o.z + 1.\n/**/\n\n// 219 chars - bare bones minimum\n/**\nfloat m(vec3 p) {\n    float i=0., s = 1., k;\n    for(p.z -= iTime ; i++<7.; s *= k )\n        p *= k = 1.5 / dot(p = mod(p - 1., 2.) - 1., p);\n    return length(p)/s - .01;   }\n\n#define mainImage(c,u)\t\t\t\t\t\t\t\t\\\n    vec3 d = vec3(u/iResolution.y-.8, 1)/6., o=d/d;\t\\\n    while(c.w++<1e2) o += m(o)*d;\t\t\t\t\t\\\n    c += m(o - d)\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

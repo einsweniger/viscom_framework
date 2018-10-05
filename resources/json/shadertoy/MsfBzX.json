@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsfBzX",
+      "date": "1497191086",
+      "viewed": 203,
+      "name": "dot continuum",
+      "username": "public_int_i",
+      "description": "dot continuum",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "dot",
+        "continuum"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 o, in vec2 u )\n{\n    o = sin(reflect(u.xyyx*0.01,cos(u.yxyx)))*0.5+0.5;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

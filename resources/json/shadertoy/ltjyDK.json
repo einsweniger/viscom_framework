@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltjyDK",
+      "date": "1510171455",
+      "viewed": 8,
+      "name": "Center-around Greyscale Effect",
+      "username": "starea",
+      "description": "forked from starea's [url]https://www.shadertoy.com/view/ldSfDV[/url] and [url]https://www.shadertoy.com/view/XlSyWV[/url]",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "center",
+        "greyscale",
+        "around"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float greyScale(in vec3 col) \n{\n    return dot(col, vec3(0.3, 0.59, 0.11));\n}\n\nvoid mainImage( out vec4 O, in vec2 U )\n{\n    // U = fragCoord\n    float boost = 1.5; \n    float reduction = 4.0;\n    //float boost = iMouse.x < 0.01 ? 1.5 : iMouse.x / iResolution.x * 2.0; \n    //float reduction = iMouse.y < 0.01 ? 2.0 : iMouse.y / iResolution.y * 4.0; \n\tvec2 uv = U / iResolution.xy;\n    vec3 col = texture(iChannel0, uv).rgb;\n    float vignette = distance( iResolution.xy * 0.5, U ) / iResolution.x;\n    vec3 grey = vec3(greyScale(col)); \n    col = mix(grey, col, clamp(boost - vignette * reduction, 0.0, 1.0));\n\tO = vec4(col, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

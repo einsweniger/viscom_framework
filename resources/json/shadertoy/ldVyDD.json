@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldVyDD",
+      "date": "1522123421",
+      "viewed": 143,
+      "name": "Newton thing",
+      "username": "Ebanflo",
+      "description": "Pretty sure my complex cubing is wrong, but I thought it looked cool anyway. Mouse does stuff.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "fractal"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define AA 3\n#define zoom 3.0\n#define fractalIters 100\nconst float pi = 4.0*atan(1.0);\n\nvec2 cinv(vec2 z){return vec2(z.x, -z.y)/dot(z, z);}\n\nvec2 csqr(vec2 z){return vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y);}\n\nvec2 ccube(vec2 z){\n    return vec2(z.x*z.x*z.x - 3.0*z.x*z.y*z.y, 3.0*z.x*z.x*z.y - z.y*z.y*z.y);\n}\n\nvec2 cmul(vec2 a, vec2 b){return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);}\n\nvec2 m(float t){\n    return iMouse.xy == vec2(0) ? 2.0*vec2(sin(t), cos(t)) + vec2(4)\n        : 8.0*iMouse.xy/iResolution.xy;\n}\n\nvec2 f(vec2 z){return ccube(z) - m(iTime) + vec2(4);}\n\n//vec2 df(vec2 z){return 3.0*csqr(z);}\n//*\nvec2 df(vec2 z){\n    vec2 e = vec2(0.0001);\n    return 10000.0*(f(z + e) - f(z));\n}\n//*/\nvec4 newton(vec2 p){\n    vec2 z = p, z1 = z - f(z)/df(z);\n    float d;\n    for(int i = 0; i < fractalIters; i++){\n        d = distance(z, z1);\n        if(d < 0.1 || d > 100.0) return vec4(z1, d, i);\n        z = z1;\n        z1 -= cmul(f(z1), cinv(df(z1)));\n    }\n    return vec4(z1, d, fractalIters);\n}\n\nvec3 render(vec2 p){\n    vec4 n = newton(zoom*(2.0*p - iResolution.xy)/iResolution.y);\n    float arg = atan(n.y, n.x);\n    vec3 col = sin(arg - vec3(0.333*pi, 0.666*pi, 0))*0.5 + 0.5;\n    return vec3(5.0*n.w*col/float(fractalIters))*(1.0 + n.z);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 col = vec3(0.0);\n    \n#if AA>1\n    for( int m=0; m<AA; m++ )\n    for( int n=0; n<AA; n++ ){\n        vec2 px = fragCoord + vec2(float(m),float(n))/float(AA);\n    \tcol += render(px);    \n    }\n    col /= float(AA*AA);\n#else\n    col = render(fragCoord);\n#endif\n\tfragColor = vec4( col, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

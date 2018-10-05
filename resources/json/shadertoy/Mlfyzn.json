@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mlfyzn",
+      "date": "1503062031",
+      "viewed": 225,
+      "name": "shortest inversion",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( O, u )                   \\\n    O = fract( (u+u-(O.xy = u+u-iResolution.xy)).y * O / dot(O,O) )\n\n        \n        \n/**  // 77 chars\n\n#define mainImage( O, u )                   \\\n    O.xy = u+u-iResolution.xy;              \\\n    O = fract( O / dot(O,O) * (u+u-O.y).y )\n/**/\n        \n  \n        \n        \n/**  // 78 chars\n\n#define mainImage( O, u )                   \\\n    vec2 R = iResolution.xy, U = u+u - R ;  \\\n\tO.xy = fract( U / dot(U,U) *R.y )\n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MllBW7",
+      "date": "1512146951",
+      "viewed": 73,
+      "name": "B/W alternating pixels",
+      "username": "Otringal",
+      "description": "A \"shortest-challenge\" type of shader for making each consecutive pixel black/white and so on.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "bw",
+        "pixels",
+        "white",
+        "black",
+        "alternating"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 c, in vec2 uv)\n{\n\tc -= c - mod(uv.x + uv.y, 2.);\n}\n\n/*\n//OR\nvoid mainImage(out vec4 c, in vec2 uv)\n{\n\tc -= c - fract(uv.x * uv.y);\n}\n*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

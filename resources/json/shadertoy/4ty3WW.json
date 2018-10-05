@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4ty3WW",
+      "date": "1474536174",
+      "viewed": 1017,
+      "name": "Another IFS",
+      "username": "vox",
+      "description": "Another IFS",
+      "likes": 11,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "anotherifs"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//-----------------CONSTANTS MACROS-----------------\n\n#define PI 3.14159265359\n#define E 2.7182818284\n#define GR 1.61803398875\n\n//-----------------UTILITY MACROS-----------------\n\n#define time ((sin(float(__LINE__))*GR/2.0/PI+GR/PI)*iTime+100.0)\n#define saw(x) (acos(cos(x))/PI)\n#define flux(x) (vec3(cos(x),cos(4.0*PI/3.0+x),cos(2.0*PI/3.0+x))*.5+.5)\n#define rotatePoint(p,n,theta) (p*cos(theta)+cross(n,p)*sin(theta)+n*dot(p,n) *(1.0-cos(theta)))\n\n\n//#define iTime (iTime*.1)\n\n#define PI 3.14159265359\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy*2.0-1.0;\n    uv.x *= iResolution.x/iResolution.y;\n    \n\t//vec3 eye = vec3(0.0, 0.0, 3.0);\n\tvec3 eye = vec3(cos(iTime), sin(iTime*.5), sin(iTime))*2.0;\n    vec3 look = vec3(0.0, 0.0, 0.0);\n    vec3 up = vec3(0.0, 1.0, 0.0);\n    vec3 foward = normalize(look-eye);\n    vec3 right = normalize(cross(foward, up));\n    up = normalize(cross(right, foward));\n    vec3 ray = normalize(foward+uv.x*right+uv.y*up);\n    \n    fragColor = vec4(0.0);\n    \n \tconst float outerCount = 12.0;\n \tconst float innerCount = 8.0;\n        \n    float map = 0.0;\n    float sum = 0.0;\n    \n    for(float i = 0.0; i < 10.0; i+=1.0)\n    {\n        if(i >= outerCount)\n            break;\n        \n        float theta1 = i/outerCount*2.0*PI;\n        \n        for(float j = 0.0; j < 10.0; j+=1.0)\n        {\n            if(j >= innerCount)\n                break;\n            \n            float theta2 = theta1+j/innerCount*PI*2.0;\n\n            \n            float omega1 = theta1;\n            float omega2 = theta2+time*sign(cos(i*PI));\n            \n            \n       \t \tvec3 p1 = vec3(cos(omega1)*sin(omega2),\n                           sin(omega1)*sin(omega2),\n                           cos(omega2));\n                           \n       \t \tvec3 p2 = vec3(cos(omega1)*sin(omega2+PI/8.0),\n                           sin(omega1)*sin(omega2+PI/8.0),\n                           cos(omega2+PI/8.0));\n            \n            vec3 ray2 = normalize(p2-p1);\n            \n            float a = dot(ray,ray);\n            float b = dot(ray,ray2);\n            float c = dot(ray2,ray2);\n            float d = dot(ray,eye-p1);\n            float e = dot(eye-p1,ray2);\n            \n            float t1 = (b*e-c*d)/(a*c-b*b);\n            float t2 = (a*e-b*d)/(a*c-b*b);\n            \n            float dist = length((eye+ray*t1)-(p1+ray2*t2));\n            \n            float lineWidth = 50.0/max(iResolution.x, iResolution.y);\n            \n            float lineLength = 2.5+.5*sin(time);\n            \n            float isFoward = (sign(t1)*.5+.5);\n            \n            \n            \n                float sides = (1.0-smoothstep(0.0, lineWidth, dist));\n                float ends = (1.0-smoothstep(0.0, lineLength, abs(t2)));\n                float line = sides*ends*isFoward;\n                \n                map += line*(1.0+i/innerCount+j/outerCount)/2.0;\n                sum += 1.0*line*isFoward;\n        }\n    }\n    \n\tfragColor = vec4(flux(PI*map/sum+time), 1.0)*clamp(map, 0.0, 1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

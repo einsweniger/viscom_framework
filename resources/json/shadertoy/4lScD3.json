@@ -1,0 +1,85 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lScD3",
+      "date": "1510244209",
+      "viewed": 232,
+      "name": "Gray-Scott Model (MIP Laplacian)",
+      "username": "FabriceNeyret2",
+      "description": "revisit [url]https://www.shadertoy.com/view/XtjcWK[/url] using MIPmap to calculate laplacian. More stable -> dt*2.\nYou might relate it to Multigrid solvers and to Difference of Gaussians. \n\nMouse paint.",
+      "likes": 3,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "simulation",
+        "mipmap",
+        "diffusion",
+        "gray",
+        "reactiondiffusion",
+        "reaction",
+        "grayscott",
+        "scottmodel"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,U)  O = texelFetch( iChannel0, ivec2(U), 0);  O.x = 1.-O.x",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// directly inspired from https://www.shadertoy.com/view/XtjcWK\n// But using MIPmap to evaluate Laplacian\n\n#define T(z) texture(iChannel0, U, z)\n\nvoid mainImage( out vec4 O,  vec2 U )\n{  \n    vec2 R = iResolution.xy;\n    U /= R;\n    \n   \tvec4 C = T(0.),\n         D = 4.5* ( T(.66) - C );             // laplacian\n    \n    float dt = 2.,\n          f = .01 + U.x/13.,\n          k = .04 + U.y/35.,\n          s = C.x*C.y*C.y;\n\n    C += dt * vec4( -s + f*(1.-C.x) + .2*D.x, // Gray-Scott Model + integration\n                     s - (f+k)*C.y  + .1*D.y, // http://mrob.com/pub/comp/xmorphia/\n                     0, 0 );\n\n    O = length( iMouse.xy  -U*R ) < 10.\n            ? vec4(.25,.5,0,0)                // mouse paint\n            : C;\n\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

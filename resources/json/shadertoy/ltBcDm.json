@@ -1,0 +1,81 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltBcDm",
+      "date": "1508798674",
+      "viewed": 243,
+      "name": "Simple gaussian blur",
+      "username": "luluco250",
+      "description": "Simple gaussian blur filter.",
+      "likes": 3,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "blur",
+        "filter",
+        "gaussian"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Vertical blur\n\nconst float pi = atan(1.0) * 4.0;\nconst int samples = 71;\nconst float sigma = sqrt(float(samples));\n\nfloat gaussian(float x) {\n    return (1.0 / sqrt(2.0 * pi * sigma * sigma)) * exp(-((x * x) / (2.0 * (sigma * sigma))));\n}\n\nvoid mainImage(out vec4 color, vec2 coord) {\n    vec2 ps = vec2(1.0) / iResolution.xy;\n    vec2 uv = coord * ps;\n    \n    vec2 scale = ps * vec2(0.0, 1.0);\n    \n    color = vec4(0.0);\n    float accum = 0.0;\n    float weight = 0.0;\n    \n    for (int i = -samples / 2; i < samples / 2; ++i) {\n        weight = gaussian(float(i));\n        color.rgb += texture(iChannel0, uv + scale * vec2(i)).rgb * weight;\n        accum += weight;\n    }\n    \n    color.rgb /= accum;\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Horizontal blur\n\nconst float pi = atan(1.0) * 4.0;\nconst int samples = 71;\nconst float sigma = sqrt(float(samples));\n\nfloat gaussian(float x) {\n    return (1.0 / sqrt(2.0 * pi * sigma * sigma)) * exp(-((x * x) / (2.0 * (sigma * sigma))));\n}\n\nvoid mainImage(out vec4 color, vec2 coord) {\n    vec2 ps = vec2(1.0) / iResolution.xy;\n    vec2 uv = coord * ps;\n    \n    vec2 scale = ps * vec2(1.0, 0.0);\n    \n    color = vec4(0.0);\n    float accum = 0.0;\n    float weight = 0.0;\n    \n    for (int i = -samples / 2; i < samples / 2; ++i) {\n        weight = gaussian(float(i));\n        color.rgb += texture(iChannel0, uv + scale * vec2(i)).rgb * weight;\n        accum += weight;\n    }\n    \n    color.rgb /= accum;\n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

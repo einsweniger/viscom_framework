@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lllBR7",
+      "date": "1511483426",
+      "viewed": 228,
+      "name": "\"HelloWorld!!\"",
+      "username": "felipunkerito",
+      "description": "Just learning ",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "trigonometry"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float Circle( vec2 uv, vec2 p, float r, float blur )\n{\n\n\tfloat d = length(uv - p);\n    float c = smoothstep(r, r-blur, d);\n    return c;\n    \n}\n\nfloat Hash( float h )\n{\n\n    return h = fract(cos(h) * 5422.2465);\n\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    float c = 0.0;\n    \n    uv -= .5;\n    uv.x *= iResolution.x / iResolution.y;\n    float sizer = 1.0;\n    float steper = .1;\n    for(float i = -sizer; i<sizer; i+=steper)\n        for(float j = -sizer; j<sizer; j+=steper){\n    {\t\n        float timer = .5;\n    \t//c = Circle(uv, vec2(0.0,0), sin(iTime*timer), 0.1);\n    \t//c -= Circle(uv, vec2(0.0,0.0), sin(iTime*timer+.2), 0.1);\n        if(c<=1.0){\n    \t\t\n            c += Circle(uv, vec2(i, j),sin(Hash(i))*cos(Hash(j))*(iTime*timer), sin(Hash(j)));\n        \n        }\n        else if(c>=1.0)\n        {\n            c -= Circle(uv, vec2(i, j),sin(Hash(i))*cos(Hash(j))*(iTime*timer), sin(Hash(j)));     \n        }\n        }\n    }\n    fragColor = vec4(vec3(c),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

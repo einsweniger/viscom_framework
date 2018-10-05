@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ll2fWG",
+      "date": "1517072185",
+      "viewed": 228,
+      "name": "wave greek frieze (156 chars)",
+      "username": "FabriceNeyret2",
+      "description": "other greek friezes here: [url]https://www.shadertoy.com/results?query=frieze[/url]\n\n option:  U.x -= .1*fract(U.y);  after U = ... ; \noption: float y = ceil(U.y), s = sign(mod(y,2.)-.5);  then *s in cos and/or smoothstep",
+      "likes": 10,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "waves",
+        "patterns",
+        "2tweets",
+        "short",
+        "greek",
+        "frieze"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,u)                         \\\n    vec2 U = 8.*u/iResolution.y;               \\\n    U.y = dot( cos( 3.* ceil(U.y) * max(0.,.5-length(U = fract(U)-.5)) - vec2(33,0) ), U); \\\n\tO += smoothstep(-1.,1.,U/fwidth(U)).y\n  \n        \n        \n        \n/** // 166 chars\n             \n#define mainImage(O,u)                         \\\n\tvec2 R = iResolution.xy,                   \\\n         U = 8.*u/R.y;                         \\\n    U.y = dot( cos( 3.* ceil(U.y) * max(0.,.5-length(U = fract(U)-.5)) - vec2(33,0) ), U); \\\n\tO += smoothstep(-1.,1.,U.y/fwidth(U.y))\n        \n/**/\n        \n        \n        \n/** // 168 chars\n\n#define mainImage(O,u)                         \\\n\tvec2 R = iResolution.xy,                   \\\n         U = 8.*u/R.y;                         \\\n    U *= mat2(cos( 3.* ceil(U.y) * max(0.,.5-length(U = fract(U)-.5)) + vec4(0,33,55,0) )); \\\n\tO += smoothstep(-1.,1.,U.y/fwidth(U.y))\n        \n/**/\n        \n        \n        \n/**  // 188 chars\n\n#define mainImage(O,u)                         \\\n\tvec2 R = iResolution.xy,                   \\\n         U = 8.*u/R.y;                         \\\n    float a = 1.5*ceil(U.y) * max(0.,1.-2.*length(U = fract(U)-.5)); \\\n    U *= mat2(cos(a),-sin(a),sin(a),cos(a));   \\\n\tO += smoothstep(-1.,1.,U.y/fwidth(U.y))\n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

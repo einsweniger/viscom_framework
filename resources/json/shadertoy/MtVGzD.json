@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtVGzD",
+      "date": "1473672790",
+      "viewed": 319,
+      "name": "white dots illusion",
+      "username": "FabriceNeyret2",
+      "description": "the classical white dot illusion. Here, black dot are not existing.",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "illusion",
+        "short",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define S(v) smoothstep(.1,0., abs(v)) \n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    U = fract( U * 5./iResolution.y ) -.5;\n    O +=  S(U.x)  + S(U.y)  -O;\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

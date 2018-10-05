@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mddyzl",
+      "date": "1519873437",
+      "viewed": 154,
+      "name": "blue Sky",
+      "username": "SourceW",
+      "description": "2D sky",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "sun",
+        "clouds",
+        "sky",
+        "blue"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define time iTime\n\n\nhighp float hash(highp vec2 p){ \n    \nreturn smoothstep(0.0,0.9,fract(cos(p.x*12.10+p.y*35.10)*334.552));\n    \n}\n\n\nhighp float noise( highp vec2 p )\n{\n    highp vec2 i = floor( p*1.2 );\n    highp vec2 f = fract( p*1.2 );\n\thighp vec2 u = f*f*(3.0-2.0*f);\n\n    return mix( mix( hash( i + vec2(0.0,0.0) ), hash( i + vec2(1.0,0.0) ), u.x),mix( hash( i + vec2(0.0,1.0) ), hash( i + vec2(1.0,1.0) ), u.x), u.y);\n}\n\n\nhighp float fbm(highp vec2 p){\n\nhighp float set = 1.0;\nhighp float set2 = 1.85;\nhighp float clouds = 0.0;\n\nfor(int i = 0; i < 8; i++){\nset = set*set2;\nclouds += abs(clamp(noise(p),0.0,1.0)) / set;\nset = set / set2;\nset *= 2.5;\np *= 2.0;\n}\n\treturn clouds;\n}\n\n\nfloat sun(float x,float y,float t){\n   float xx  =x + sin(t);\n   float yy = y + cos(t);\n   return 1.0/sqrt(xx*xx+yy*yy);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n\n   vec2 p =(fragCoord.xy/iResolution.x)*2.0-vec2(1.0,iResolution.y/iResolution.x);\n\n   float a = sun(p.x,p.y,time);\n    \n   vec4 sun = vec4(2.0,2.0,0.2,1.0)*(a/10.0);\n   \n   vec4 sky = vec4(0.23,0.42,1.0,1.0);\n   \n   vec2 p2 = fragCoord.xy / iResolution.xy;\n    \n   highp float col = fbm(p2*5.0);\n\n   fragColor = sun + mix(sky,vec4(1.0)*col,min(max(smoothstep(0.5, 1.0, col),0.0),1.0));\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

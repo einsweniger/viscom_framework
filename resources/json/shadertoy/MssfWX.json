@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MssfWX",
+      "date": "1498596806",
+      "viewed": 114,
+      "name": "Fullscreen",
+      "username": "Ebanflo",
+      "description": "Playing around with automata, fullscreen to see the interesting bit. Mouse does stuff. I also suggest you pause it and use the arrow keys to increment the frame",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "automata",
+        "cellular"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float mdist(vec2 a, vec2 b){vec2 v = abs(a - b); return v.x + v.y;}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    if(iFrame == 0) fragColor = vec4(mod(fragCoord, 2.0), mod(fragCoord + 1.0, 2.0));\n    else {\n        vec4 samp1 = texture(iChannel0, (fragCoord + vec2(1.0, 0.0)) / iResolution.xy);\n        vec4 samp2 = texture(iChannel0, (fragCoord - vec2(1.0, 0.0)) / iResolution.xy);\n        vec4 samp3 = texture(iChannel0, (fragCoord + vec2(0.0, 1.0)) / iResolution.xy);\n        vec4 samp4 = texture(iChannel0, (fragCoord - vec2(0.0, 1.0)) / iResolution.xy);\n        fragColor = mod(samp1 + samp2 + samp3 + samp4, 2.0);\n        if(mdist(iMouse.xy, fragCoord) < 10.0 && iMouse.xy == iMouse.zw && iMouse.xy != vec2(0)){\n            fragColor = vec4(1.0, 0.0, 1.0, 1.0);\n        } \n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

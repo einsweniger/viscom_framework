@@ -1,0 +1,47 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lst3R4",
+      "date": "1448434531",
+      "viewed": 654,
+      "name": "blur wave illusion",
+      "username": "FabriceNeyret2",
+      "description": "do you see a displacement in the pattern ?",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "blur",
+        "2tweets",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "\nvoid mainImage( out vec4 o, vec2 u )\n{\n\tvec2 R = iResolution.xy;\n         u = (u+u-R) / R.y;\n    \n    float t = iTime,\n        l = .5+.5*sin(6.28*(length(u)-t));\n    o = texture(iChannel0, u,2.*l);  \n\n}",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XssBRf",
+      "date": "1505579657",
+      "viewed": 228,
+      "name": "PBR Shading Test",
+      "username": "BeardThings",
+      "description": "A PBR scene to test some lighting.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "test",
+        "sdf",
+        "pbr"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 4,
+            "src": "/media/a/e6e5631ce1237ae4c05b3563eda686400a401df4548d0f9fad40ecac1659c46c.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 24,
+            "src": "/media/a/488bd40303a2e2b9a71987e48c66ef41f5e937174bf316d3ed0e86410784b919.jpg",
+            "ctype": "cubemap",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 25,
+            "src": "/media/a/550a8cce1bf403869fde66dddf6028dd171f1852f4a704a465e1b80d23955663.png",
+            "ctype": "cubemap",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 RayDirection(in vec3 \tforward,\n                  in float \tfocalDistance,\n                  in vec3 \tright,\n                  in vec3 \tup,\n                  in vec2 \tscreenSpaceCoord,\n                  in float \taspectRatioXOverY)\n{\n    return normalize(forward * focalDistance + \n                     right * screenSpaceCoord.x * aspectRatioXOverY +\n                     up * screenSpaceCoord.y);\n}\n\nfloat Sphere(vec3 p, float r)\n{\n    return length(p) - r;\n}\n\n\nfloat SDF(vec3 p)\n{\n    float sphereIntersect = Sphere(p, 1.0);\n    return sphereIntersect;\n}\n\nvec3 Norm(vec3 p)\n{\n    const float cEps = 0.01;\n \n\treturn normalize\n\t(\tvec3\n\t\t(\tSDF(p + vec3(cEps, 0, 0)\t) - SDF(p - vec3(cEps, 0, 0)),\n\t\t\tSDF(p + vec3(0, cEps, 0)\t) - SDF(p - vec3(0, cEps, 0)),\n\t\t\tSDF(p + vec3(0, 0, cEps)\t) - SDF(p - vec3(0, 0, cEps))\n\t\t)\n\t);\n}\n\nvec4 Sample(vec3 o, vec3 direction)\n{\n    vec4 fc;\n    \n    float d = 0.0;\n    for(float i = 0.; i < 32.; ++i)\n    {\n        vec3 pos = o + direction * d;\n\n        float sdf = SDF(pos);\n        d += sdf;\n        \n        fc = pow(texture(iChannel0, direction), vec4(2.2));\n        \n        const float EPSILON = 0.01;\n        const float IDEAL_EPSILON = 0.001;\n        if(sdf < EPSILON)\n        {\n            vec3 lo = vec3(cos(iTime) * 3.0, 1.5, sin(iTime) * 3.0);\n            vec3 ld = normalize(lo - pos);\n            vec3 n = Norm(pos);\n            \n            vec4 tex = texture(iChannel2, vec2(n.x * 0.5 + 0.5, n.y * 0.5 + 0.5));\n            vec3 c = vec3(1.000, 0.68, 0.1) * (tex.rgb + vec3(0.4));\n            vec3 r = reflect(direction, n);\n            \n            float roughness = tex.r * 200.0;\n            float intensity = 10.0;\n            vec3 h = normalize(ld + -direction);\n            \n            n += tex.xyz * 0.2;\n            n = normalize(n);\n            \n            vec3 cDiff = vec3(1.0);\n            vec3 cSpec = vec3(1.000, 0.766, 0.336);\n            vec3 diffTerm = cDiff / 3.1415;\n            \n            float r0 = pow((1.0 - 0.27732) / (1.0 + 0.27732), 2.0);\n            \n            float aH = dot(h, ld);\n            float oH = max(dot(h, n), 0.0);\n            \n            float schlick = r0 + (1.0 - r0) * pow(1.0 - aH, 5.0);\n            \n            vec3 specTerm = cSpec * ((roughness + 8.0) / (8.0 * 3.14)) * schlick * pow(oH, roughness);\n            \n            float El = max(dot(ld, n), 0.0) * (1.0 / pow(distance(lo, pos), 2.0));\n            float reflectionSclick =  r0 + (1.0 - r0)*pow(1.0 - dot(-direction,n), 5.0);\n            \n            vec3 diffusion = c * El * diffTerm* intensity;\n            vec3 specular = c * El * intensity * specTerm;\n            vec3 reflection = pow(texture(iChannel0, r).rgb, vec3(2.2)) * c;\n            \n            vec3 indirect = texture(iChannel1, n).rgb * 0.5;\n            float diffuseFac = 1.0 - reflectionSclick;\n            fc.xyz = (diffusion * diffuseFac) + specular + reflection * reflectionSclick + indirect * c;\n            \n            break;\n        }\n        \n        if(d > 30.)\n        {\n            break;\n        }\n    }\n    \n    return fc;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n\tvec2 screenSpace = uv * 2.0 - 1.0;\n\t\n    const float height = 0.0;\n    vec3 o = vec3(0,height,3.0);\n    \n    vec3 f = vec3(0,0,-1.0);\n    vec3 u = vec3(0,1,0);\n    vec3 r = normalize(cross(f, u));\n    \n    vec3 direction = RayDirection(f, \n                                  1.0, \n                                  r, \n                                  u, \n                                  screenSpace, \n                                  iResolution.x / iResolution.y);\n    \n    vec3 fc = Sample(o, direction).xyz;\n    \n    const float gamma = 2.2;\n    // reinhard tone mapping\n    vec3 mapped = fc.xyz;\n    // gamma correction \n    mapped = pow(mapped, vec3(1.0 / gamma));\n    \n    fragColor = vec4(mapped, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

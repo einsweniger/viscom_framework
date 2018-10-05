@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsGcDt",
+      "date": "1523708420",
+      "viewed": 105,
+      "name": "basketweave pattern (104 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O, u )                                     \\\n    vec2 U = 24.* u/iResolution.y; ivec2 I = ivec2(U)/4;     \\\n    O += 1. - abs( mod( U[ (I.x+I.y) % 2 ], 2.) - 1.)\n        \n\n        \n        \n        \n/**    // 117 chars\n\n#define mainImage(O, u )                                     \\\n    vec2 U = 12.* u/iResolution.y,   I = ceil(U/2.);         \\\n    U = fract( mod(I.x+I.y,2.) < 1. ? U : U.yx ) * 2. - 1.;  \\\n    O += 1. - abs(U.x)       \n\n/**/\n                  ",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

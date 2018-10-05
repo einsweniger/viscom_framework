@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xd2Bzw",
+      "date": "1499903220",
+      "viewed": 875,
+      "name": "[SH17A] Fractal Thingy #2",
+      "username": "Klems",
+      "description": "Based on [url]https://www.shadertoy.com/view/Mt3Szr[/url]. Click to fast-forward!",
+      "likes": 46,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "2d",
+        "fractal",
+        "psychedelic",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11044,
+            "src": "https://soundcloud.com/lucifersamberlin/04-the-psychedelic-folk",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 c, vec2 p ) {\n    \n    // set position\n    vec2 v = iResolution.xy;\n    p = (p-v*.5) / v.x;\n    // breathing effect\n    p += p * sin(dot(p, p)*20.-iTime) * .04;\n    \n    // accumulate color\n    c *= 0.;\n    for (float i = .5 ; i < 8. ; i++) {\n        \n        // fractal formula and rotation\n        p = abs(2.*fract(p-.5)-1.) * mat2(cos(.01*(iTime+iMouse.x*.1)*i*i + .78*vec4(1,7,3,1)));\n        \n        // coloration\n        c += exp(-abs(p.y)*5.) * (cos(vec4(2,3,1,0)*i)*.5+.5);\n        \n    }\n    \n    // palette\n    c.gb *= .5;\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

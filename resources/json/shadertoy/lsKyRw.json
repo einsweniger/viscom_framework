@@ -1,0 +1,41 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsKyRw",
+      "date": "1521495979",
+      "viewed": 143,
+      "name": "layered animated figure (407 ch)",
+      "username": "FabriceNeyret2",
+      "description": "golfing fading-less version of [url]https://shadertoy.com/view/XsGyRm[/url]\nReproducing [url]https://www.facebook.com/CosmosUpp/videos/1001518269996955/[/url]\n\n",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "lines",
+        "illusion",
+        "points",
+        "short",
+        "reproduction",
+        "animgif"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// golfing fading-less version of https://shadertoy.com/view/XsGyRm\n\n#define P(i) cos(2.6914*(i)+T*.1 + vec2(0,11) ) // heptastar vertex i\n#define S(D) dot( A=(D)*R.y , A )               // smooth draw                                  \n#define L(b) 1./ S( -clamp(dot(B=b-Q, A=U-Q)/dot(B,B), 0.,1.) *B +A) // draw a line\n                                                // point(n,t) on heptastar \n#define p(d) mix( P(i= ceil( t= T/5.+ (n d)*.583)), P(--i), .5+.5*cos(3.*fract(t)) )\n\n#define mainImage(O,u)                                            \\\n    vec2 A,B,Q,R=iResolution.xy, U = ( u+u - R ) / R.y;           \\\n    for ( float t,i,T=iTime, n=0.; n++ < 12.;                     \\\n        O.a += 30. / S( Q-U ) )               /* dots         */  \\\n        Q = P(n),                                                 \\\n        O.rga += n>5. ? L( P(n+1.) ) : 0.,    /* yellow lines */  \\\n        Q = p(),                                                  \\\n        O.ra += L( p(+4.) ),                  /* triangles    */  \\\n        O.ba += L( p(+3.) );                  /* squares      */  \\\n    O += 1.4-.7*O.a                           /* background   */ ",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

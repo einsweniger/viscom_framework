@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtXSR7",
+      "date": "1435237595",
+      "viewed": 397,
+      "name": "Skyline in 124 chars",
+      "username": "GregRostami",
+      "description": "This is a reduction of gsingh93's shader down to one tweet (138 chars).\nhttps://www.shadertoy.com/view/4tXSRM#\nThanks to 834144373, FabriceNeyret2 and 104 we went from 174 chars down to 138 chars!",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "short",
+        "2tc",
+        "onetweet",
+        "skyline"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(f,U)\t\t\t\\\nvec2 u=U/iResolution.xy;\t\t\\\nfor (float i = 1.; i++ < 20.;)\t\\\n    f = u.y < sin( ceil(2e2*u.x/i+i*i+iTime) ) - .04*i ? f-f+i/20. : f\n\n// Thanks to 834144373, FabriceNeyret2, 104 and iapafoto we went from 174 to 139 chars!\n/**\nvoid mainImage(out vec4 f, vec2 u)\n{\n    f-=f;\n    u /= iResolution.xy;\n    for (float i = 1.; i++ < 20.;) \n\t\tf = u.y < sin( ceil(2e2*u.x/i+i*i+iTime) ) - .04*i ? f-f+i/20. : f; \n}\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

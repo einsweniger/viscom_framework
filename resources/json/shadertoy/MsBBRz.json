@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsBBRz",
+      "date": "1499096734",
+      "viewed": 210,
+      "name": "Procrastination",
+      "username": "alexpolt",
+      "description": "Better than Facebook.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "dumb"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfloat t = iTime;\n\tconst float pi = 3.14159265;\n  \tvec2 ar = vec2(iResolution.x/iResolution.y, 1);\n    //thx to Fabrice for suggesting smoothstep in place of step\n  \tfloat c = smoothstep(.0, .2, cos( 4.*t + 8.*pi*length(ar*uv-ar*.5) ) );\n  \tfragColor = vec4(c, c, c, 1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

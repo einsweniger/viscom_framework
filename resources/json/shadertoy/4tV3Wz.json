@@ -1,0 +1,78 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tV3Wz",
+      "date": "1474197830",
+      "viewed": 212,
+      "name": "SOUNDTRACK XD",
+      "username": "Imsure1200q_1UWE130",
+      "description": "sound design",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "dein"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 13,
+            "src": "/media/a/3c33c415862bb7964d256f4749408247da6596f2167dca2c86cc38f83c244aa6.mp3",
+            "ctype": "music",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 18,
+            "src": "/media/a/29de534ed5e4a6a224d2dfffab240f2e19a9d95f5e39de8898e850efdb2a99de.mp3",
+            "ctype": "music",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 24,
+            "src": "/media/a/488bd40303a2e2b9a71987e48c66ef41f5e937174bf316d3ed0e86410784b919.jpg",
+            "ctype": "cubemap",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvec3 en(vec3 p)\n{\n    return p*texture(iChannel1, p.xy).r;\n}\nfloat star(vec3 p, float d)\n{\n    return length(sqrt(sin(en(p))*2.0))-length(texture(iChannel1, p.yx).rgb);\n}\nfloat rand2f(float x)\n{\n    return cos(sin(dot(x, 2.3465))*min(x, 5.24156));\n}\nfloat trace(vec3 ro, vec3 rd)\n{\n    float t = 0.0;\n        for(float i = 0.0; i < 24.0; i++)\n        {\n            vec3 p = ro+t*rd;\n            float d = star(p, 0.5);\n            t += d * 0.5;\n        }\n    return t;\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float X = iMouse.x / iResolution.x / 2000.0;\n    float Y = iMouse.y / iResolution.y / 2000.0;\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv = uv * 2.0 - 1.0 + texture(iChannel1, uv).r;\n    uv.x *= iResolution.x / iResolution.y;\n    vec3 rd = normalize(vec3(uv, 1.0));\n    rd.xz *= mat2(cos(iTime/2.0),-sin(iTime/2.0),sin(iTime/2.0),cos(iTime/2.0));\n    vec3 ro = vec3(rand2f(iTime+0.5)+iTime+0.5,\n                   rand2f(iTime)+iTime,\n                   rand2f(iTime+1.0)+iTime+1.0);\n    float t = trace(ro, rd);\n    float fog = 1.0/(1.0+t*t*0.1);\n    vec3 fc = vec3(fog);\n\tfragColor = vec4(fc,1.0)/texture(iChannel2, uv).r;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

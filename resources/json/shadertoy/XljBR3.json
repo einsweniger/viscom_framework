@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XljBR3",
+      "date": "1516705219",
+      "viewed": 881,
+      "name": "9Buffers 2Synths",
+      "username": "hamoid",
+      "description": "Testing SoundCloud integration\n\nI created the audio track using SuperCollider synthesizers, BuddhaOrchestra to convert images to melodies and events, and field recording samples.\n\nhttps://soundcloud.com/hamoid/9buffers-2synths",
+      "likes": 14,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "sound",
+        "nature",
+        "drone"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 13235,
+            "src": "https://soundcloud.com/hamoid/9buffers-2synths",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, in vec2 uv ) {\n\tvec2 mid = vec2(0.5+0.4*cos(iTime*0.01), 0.5);\n\tuv /= iResolution.y;\n    vec2 v = uv - mid;\n    float d = length(v);  \n    float amp = texture(iChannel0, vec2(d*0.7, 0.0)).r;\n    \n    float a2 = amp * 6.28;\n    vec2 p = d * vec2(cos(a2), sin(a2)) * 0.5;\n    float bri = (d*amp / distance(p, v)) * 0.9;\n\tO = vec4(amp*1.5, (amp+bri)*0.5, bri, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

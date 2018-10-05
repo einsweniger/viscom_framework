@@ -1,0 +1,31 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4ssBDs",
+      "date": "1498869983",
+      "viewed": 241,
+      "name": "PacMan Wrench Hand Wedge",
+      "username": "ollj",
+      "description": "mouse.x=wedge-angle\nmouse.y=chamfer\n\ni wanted to make a better distance field to a cake, wedge\nand ended up making pacman AND a wrench, minifig-doll-hand, screw-head...\n\nall this just to visualize a rotation.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "line",
+        "pacman",
+        "slice",
+        "segment",
+        "shape",
+        "pie",
+        "cake",
+        "minifig",
+        "doll",
+        "wedge",
+        "screw"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": []
+  }
+}

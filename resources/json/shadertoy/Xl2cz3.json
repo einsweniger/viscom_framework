@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xl2cz3",
+      "date": "1509559861",
+      "viewed": 278,
+      "name": "FauxK 240hz (TI DLP 1920 x 1080)",
+      "username": "BattleAxeVR",
+      "description": "Temporal packing 4 1080p jittered frames rendered at 1 / 240th time increments and packed into a single 2160p60 image for display on new 0.47 inch 4K DLPs",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "dlp4k240hzpackingtunnelingjitter"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Proof of concept shader to test TI's new quad-shifting DLP 4K projectors (1080p native)\n\n// See this article\n// https://www.soundandvision.com/content/texas-instruments-chips\n\n// They operate internally at 240hz, showing each pixel in a 4x4 region of a 2160p60 input\n// at any given time in a round-robin fashion: top left, top right, bottom left, bottom right\n\n// This shader temporally correlates each of the four 1080p sub-images with their correct timestamp\n\n// BenQ w1700 (HT2550 in US) is using this 0.47 inch DMD, and is coming out in Jan 2018 for ~2000$\n// It supports HDR, 3D, frame interpolation. This is not an advertisement, I'm waiting for laser version\n\n// Implementation:\n// For each 4x4 block of pixels, render the colour at a different timestamp\n// This will allow a 4K60 4X jittered XPR DLP (2160p60 actually) to display 1080p240hz temporally\n// and with the appropriate spatial offset should also result in close to 2160p240hz overall.\n\n// DMD DLP470TE:\n// https://e2e.ti.com/blogs_/b/enlightened/archive/2017/09/06/seeing-more-with-4k-uhd-display\n// http://www.ti.com/product/DLP470TE\n\n\n// Controller for DLP480RE = DLPC4422:\n// http://www.ti.com/lit/ds/symlink/dlpc4422.pdf\n\n// You need two such controllers to hit 300 Mhz bandwidth for 4K60:\n// http://www.ti.com/lit/ml/ssnb002/ssnb002.pdf\n\n\n// Set this define to 1 to see Red = top left pixel, Green = top right, \n// Blue = bottom left,  Black = bottom right\n// The pixel position in a 4x4 grid determines its timestamp offset in 1/240 second increments\n\n#define SHOW_STATIC_CORNER_PIXELS 0\n\n#if SHOW_STATIC_CORNER_PIXELS\n\nvec4 get_top_left_colour()\n{\n\treturn vec4(1.0, 0.0, 0.0, 1.0); \n}\n\nvec4 get_top_right_colour()\n{\n\treturn vec4(0.0, 1.0, 0.0, 1.0);      \n}\n\nvec4 get_bottom_left_colour()\n{\n\treturn vec4(0.0, 0.0, 1.0, 1.0);  \n}\n\nvec4 get_bottom_right_colour()\n{\n\treturn vec4(0.0, 0.0, 0.0, 0.0);    \n}\n\nvec4 get_colour_at_corner(int corner)\n{\n    if (corner == 0)\n    {\n        return get_top_left_colour();\n    }\n    else if (corner == 1)\n    {\n        return get_top_right_colour();\n    }\n    else if (corner == 2)\n    {\n        return get_bottom_left_colour();\n    }\n    else if (corner == 3)\n    {\n        return get_bottom_right_colour();\n    }\n    \n    return vec4(0.0, 0.0, 0.0, 1.0);    \n    //return vec4(1.0, 1.0, 1.0, 1.0);    \n}\n\n#endif\n\n//The pixel coordinate in a 4x4 region determines which of four 1/240th of a second frames we are on\nfloat get_time_offset(vec2 fragCoord)\n{\n    const float quarter_frame_offset_seconds = 1.0 / 240.0; // 4.16 ms\n    \n    int corner = int(mod(fragCoord.x, 2.0)) + int(mod(fragCoord.y, 2.0)) * 2;\n    return quarter_frame_offset_seconds * float(corner);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n       \n#if SHOW_STATIC_CORNER_PIXELS\n    int corner = int(mod(fragCoord.x, 2.0)) + int(mod(fragCoord.y, 2.0)) * 2;\n    fragColor = get_colour_at_corner(corner);\n    \n#else\n    \n    // This spatially-correlated time offset / function is all you need\n    // for your shader to get 240hz on the new 0.47 4K60 DLPs such as BenQ w1700 / HT2550 coming out Jan '18\n    float time_offset = get_time_offset(fragCoord); \n    \n    float time_for_this_pixel = iTime + time_offset;\n    \n    float speedup = 10.0; // set this to 100 to clearly see a difference between the corners\n    // Use the pause button on the left and you will see the grid showing temporally-correlated pixel values\n    \n    // Faster \"speedup\" represents faster motion, which would expose the difference between subpixels the most.\n    // In other words, the faster the motion, the more obvious the benefit of 240 fps over 60 fps is.\n\t\n    fragColor = vec4(uv,0.5+0.5*sin(time_for_this_pixel * speedup), 1.0);\n    //fragColor = vec4(uv,0.5+0.5*sin(time_for_this_pixel * speedup) * sin(float(corner) * speedup / 3.0), 1.0);\n    \n#endif\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsSfWz",
+      "date": "1500052140",
+      "viewed": 295,
+      "name": "[SH17A]Jade sea",
+      "username": "Nesvi7",
+      "description": "Jade sea.",
+      "likes": 7,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "water",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 11177,
+            "src": "https://soundcloud.com/sonospacetechnology/ocean-sound-2",
+            "ctype": "musicstream",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//By Nestor Vina\n\n#define j  - texture(iChannel0,(c.xz+iTime/m)/2e2*++m).r*.4/m\n\nvoid mainImage( out vec4 c, vec2 f ){\n\tc-=c; \n    float i = 1.,m;\n    while( i++ < 1e2 )\n        m=.0,\n        c += (vec4(f/iResolution.x,1,0)-.5)*(c.y+2. j j j j j j);\n    \n    m = 1.-length(c)*.1;\n    c.rgb= mix(vec3(0,.1,.1),vec3(0,.6,.4),m*m*m*1.5);\n}\n\n\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

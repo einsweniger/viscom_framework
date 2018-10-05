@@ -1,0 +1,372 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MslfWl",
+      "date": "1498899330",
+      "viewed": 321,
+      "name": "16 textures ",
+      "username": "FabriceNeyret2",
+      "description": "No way no get more image textures at the same time in Shadertoy... \na part by capturing the 6 faces of cubemaps or video frames ;-)",
+      "likes": 3,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "texture"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 260,
+            "src": "/media/previz/buffer03.png",
+            "ctype": "buffer",
+            "channel": 3,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    U *= 2./iResolution.xy;\n    int t = int(iTime*.5);\n    vec2 n = mod( floor(U) + vec2(t,t/2), 2.); \n    U = fract(U);\n    O =   n==vec2(0,0) ? texture( iChannel0, U)\n        : n==vec2(1,0) ? texture( iChannel1, U)\n        : n==vec2(0,1) ? texture( iChannel2, U)\n        :                texture( iChannel3, U);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 28,
+            "src": "/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+            "ctype": "texture",
+            "channel": 3,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 48,
+            "src": "/media/a/8979352a182bde7c3c651ba2b2f4e0615de819585cc37b7175bcefbca15a6683.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    U *= 2./iResolution.xy;\n    int t = int(iTime*2.);\n    vec2 n = mod( floor(U) + vec2(t,t/2), 2.); \n    O =   n==vec2(0,0) ? texture( iChannel0, U)\n        : n==vec2(1,0) ? texture( iChannel1, U)\n        : n==vec2(0,1) ? texture( iChannel2, U)\n        :                texture( iChannel3, U);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 3,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 7,
+            "src": "/media/a/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 15,
+            "src": "/media/a/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    U *= 2./iResolution.xy;\n    int t = int(iTime*2.);\n    vec2 n = mod( floor(U) + vec2(t,t/2), 2.); \n    O =   n==vec2(0,0) ? texture( iChannel0, U)\n        : n==vec2(1,0) ? texture( iChannel1, U)\n        : n==vec2(0,1) ? texture( iChannel2, U)\n        :                texture( iChannel3, U);\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 2,
+            "src": "/media/a/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 14,
+            "src": "/media/a/cbcbb5a6cfb55c36f8f021fbb0e3f69ac96339a39fa85cd96f2017a2192821b5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 46,
+            "src": "/media/a/79520a3d3a0f4d3caa440802ef4362e99d54e12b1392973e4ea321840970a88a.jpg",
+            "ctype": "texture",
+            "channel": 3,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    U *= 2./iResolution.xy;\n    int t = int(iTime*2.);\n    vec2 n = mod( floor(U) + vec2(t,t/2), 2.); \n    O =   n==vec2(0,0) ? texture( iChannel0, U)\n        : n==vec2(1,0) ? texture( iChannel1, U)\n        : n==vec2(0,1) ? texture( iChannel2, U)\n        :                texture( iChannel3, U);\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 1,
+            "src": "/media/a/10eb4fe0ac8a7dc348a2cc282ca5df1759ab8bf680117e4047728100969e7b43.jpg",
+            "ctype": "texture",
+            "channel": 3,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 45,
+            "src": "/media/a/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 260,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    U *= 2./iResolution.xy;\n    int t = int(iTime*2.);\n    vec2 n = mod( floor(U) + vec2(t,t/2), 2.); \n    O =   n==vec2(0,0) ? texture( iChannel0, U)\n        : n==vec2(1,0) ? texture( iChannel1, U)\n        : n==vec2(0,1) ? texture( iChannel2, U)\n        :                texture( iChannel3, U);\n}",
+        "name": "Buf D",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

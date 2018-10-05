@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtVXzc",
+      "date": "1485288452",
+      "viewed": 230,
+      "name": "Funnier checkboard 1",
+      "username": "FabriceNeyret2",
+      "description": "B&W checkboards of these days are so saaaad ! :-p",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "short",
+        "checkboard",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n\tvec2 V = floor( U *= 10./ iResolution.y );\n\n\tO = .4* sin( 6.28*( length( 2.*fract(U)-1. ) + vec4(0,.3,.7,1))) // sin(-iDate.w + \n         + .3 +.4*mod(V.x+V.y,2.) ; //  mix( .3, .7,  mod(V.x+V.y,2.) );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltsBW7",
+      "date": "1512559669",
+      "viewed": 147,
+      "name": "Shaking Bands",
+      "username": "frZ",
+      "description": "Graphic bands shaking",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "shake",
+        "bouncy",
+        "band",
+        "graphic"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float hash13(vec3 p3)\n{\n\tp3  = fract(p3 * 10.32);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy*4.;\n    float t = iTime + 0.1;\n    float n = pow(hash13(vec3(floor(uv*1.),t))*tan(t),2.2)*.2;\n    uv.x += n;\t\n    uv = fract(uv);\n    \n    float p = step(uv.x,.4);\n    float q = 1.-step(uv.x,.2);\n    \n\tfragColor = vec4(p,p-q,0.,1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

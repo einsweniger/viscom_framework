@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdVyzy",
+      "date": "1522597981",
+      "viewed": 109,
+      "name": "greenscreen shader",
+      "username": "bfazekas",
+      "description": "Stoop shader, that does greenscreen effect.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "first"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11,
+            "src": "/media/a/c3a071ecf273428bc72fc72b2dd972671de8da420a2d4f917b75d20e1c24b34c.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\n    // Time varying pixel color\n    vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n    \n    vec4 tex1 = texture(iChannel0, uv);\n    vec4 tex2 = texture(iChannel1, uv);\n    \n    if(tex2.g > (tex2.b+tex2.r))\n\t\ttex2 = tex1;\n    \n    // Output to screen\n    fragColor = tex2;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

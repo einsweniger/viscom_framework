@@ -1,0 +1,63 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsdyWj",
+      "date": "1520220035",
+      "viewed": 186,
+      "name": "Back buffers are double-buffered",
+      "username": "ttg",
+      "description": "Scribble on the image (quickly such that discrete dots appear).  What do you observe?",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( f, e ) f = texelFetch(iChannel0, ivec2(e), 0)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( f, e ) if (length(iMouse.xy-e)>5.) discard; f++",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

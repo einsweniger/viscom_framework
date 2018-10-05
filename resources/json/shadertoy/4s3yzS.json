@@ -1,0 +1,42 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4s3yzS",
+      "date": "1519246862",
+      "viewed": 191,
+      "name": "shortest KIFS (208 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 6,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "fractal",
+        "ifs",
+        "kifs",
+        "2tweets",
+        "short",
+        "classic",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// golfed from https://shadertoy.com/view/Xs3yzS\n\n#define mainImage(O,u)                              \\\n    vec2 R = iResolution.xy,                        \\\n         U = 1.2 * ( u+u - R ) / R.y;               \\\n                                                    \\\n    O = sin( vec4(.2,.87, 1.4,-1.2) * iTime );      \\\n    O -= .4*O.zwxy;                                 \\\n                                                    \\\n    for( int i=0; i++<5; )                          \\\n        U =  ( 1. + ( abs(U) - 1. ) /(.4+O.x/12.) ) \\\n            * mat2(cos( O.y + vec4(0,33,55,0)));    \\\n                                                    \\\n    O += 1./dot(U,U) -O\n\n\n             \n             \n\n/**    // 276 chars\n\nvoid mainImage( out vec4 O, vec2 u ) {\n    float T = .5*iTime;\n    vec2 R = iResolution.xy,\n         U = 1.2 * ( u+u - R ) / R.y, \n //      M = iMouse.xy / R;\n // if ( length(iMouse.xy)<10. )      // auto-demo\n         M = .5 + .4 *vec2( cos(T)-.4*sin(2.7*T), sin(1.73*T)-.3*cos(2.3*T) ) / 1.4;                     // relaxation duration\n\n    float s = (.5+.5*M.x)/2.,         // scaling\n          t = 1.-s,                   // translation\n          a = 3.14*M.y;               // rotation\n    \n    for( int i=0; i++<5; )\n        U = ( abs(U)-t ) / s * mat2(cos( a + vec4(0,33,55,0)));\n    \n    O += 1./dot(U,U); \n}\n\n/**/\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mt3XWl",
+      "date": "1482082659",
+      "viewed": 347,
+      "name": "freezing",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "pattern",
+        "freezing"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\n\tO = texture(iChannel0, U/iResolution.xy); //  * vec4(0,.1,1.5,1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define T0(i,j) texture(iChannel0, (U+vec2(i,j))/R)\n#define T1(i) texture(iChannel1,  (U+vec2(i,0))/R+ floor(iTime*256.)/256.)\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    vec2 R = iResolution.xy;\n    O = T0(0,1);\n    if (U.y == R.y-.5) \n    \n  //if (iFrame<30)\n        O = vec4(T1(U.x).r > .85) * T1(U.x).g;\n      //O = step(.9,T1(U.x));\n        \n\tO += T0(1,0) * step(.9, T1(1).r)  +   T0(-1,0) * step(T1(-1).r ,.1);\n  //O += vec4( ( T0(1,0).r > 0. && T1(1) > .5 ) ||  ( T0(-1,0).r > 0. && T1(-1) < .5 ) );\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

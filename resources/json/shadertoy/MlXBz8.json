@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlXBz8",
+      "date": "1510924969",
+      "viewed": 179,
+      "name": "bug: iMouse.x  = int  vs int +.5",
+      "username": "FabriceNeyret2",
+      "description": "Try mouse move at different window sizes.\nIf red, iMouse.x is int + .5\nIf green, iMouse.x is int\nBlue: iMouse.y is always int+.5",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\n\tO = vec4( iMouse.x == U.x , iMouse.x == U.x-.5 , iMouse.y == U.y-.5, 1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

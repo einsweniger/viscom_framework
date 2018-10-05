@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdSBRV",
+      "date": "1501121321",
+      "viewed": 235,
+      "name": "Smallest Checkerboard-51c",
+      "username": "GregRostami",
+      "description": "This was inspired by code that Fabrice had written a long time ago.\nCan you make it smaller?\nP.S. The shader is really 57 chars ... I don't know why a comment adds another char?!",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "short",
+        "halftweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// 51 chars - The father of Shadertoy schools me again...\n#define mainImage(o,u) o+=9./sin(u.x*.1)/sin(u.y*.1)\n\n// 57 chars - Original shader\n//#define mainImage(o,u) o.xy=99.*sin(u*.1); o=vec4(o.x*o.y);\n\n// 53 chars - Smaller color variation:\n//#define mainImage(o,u) o.xy=99.*sin(u*.1); o.z=o.x*o.y;",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

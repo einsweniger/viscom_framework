@@ -1,0 +1,78 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dBBWR",
+      "date": "1499974300",
+      "viewed": 369,
+      "name": "[SH17A] microfeedback 2",
+      "username": "victor_shepardson",
+      "description": "more tiny feedback",
+      "likes": 10,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "feedback"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 c, vec2 u)\n{\n    c = texelFetch(iChannel0, ivec2(u),0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// LICENSE:\n// Creative Commons Attribution 4.0 International License.\n// https://creativecommons.org/licenses/by/4.0/\n\n#define T(x) texture(iChannel0, fract((x)/d))\n#define S c+=T(u-c.xy)*2.-.6;\n\nvoid mainImage(out vec4 c, vec2 u)\n{\n    vec2 d = iResolution.xy;\n    \n    c = (u/d/2.).xxyy*sin(iTime/3.);\n    \n    S S S S\n    \n\tc = mix(T(u+c.zy), fract(c/3.).argb, .1);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

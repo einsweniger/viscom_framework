@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llt3RN",
+      "date": "1468246207",
+      "viewed": 414,
+      "name": "Gabor illusion 1e",
+      "username": "FabriceNeyret2",
+      "description": "inspired from https://www.youtube.com/watch?v=Jri0del_6t4",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "illusion",
+        "gabor",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// color + const rotation version of  https://www.shadertoy.com/view/XdVXWd\n// inspired from https://www.youtube.com/watch?v=Jri0del_6t4\n\n\n// Gabor kernel\n#define G(U,a,v,r) exp(-.5*dot(U,U)*1e3/r/r) * sin( 100.*dot(U,sin(a+vec2(1.57,0)))-4.*(v)*iTime ) \n//#define G(U,a,v) exp(-.5*dot(U,U)*1e3) * sin( 100.*dot(U,sin(a+vec2(1.57,0)))-20.*(v)*sin(.5*iDate.w) ) \n\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n\tU = (U+U - (O.xy=iResolution.xy) ) / O.y;\n    O -= O;\n    \n    for (float i=-3.; i<4.; i++)    // 4 lines of 7 splats\n        for (float k=1.; k<1.1; k+=.2)  // variant: k=.2, ...\n        O +=   G( U-k*vec2(i/5.,  .7), 1.57, i*k,k)\n             + G( U-k*vec2(i/5., -.7), 1.57, i*k,k)\n             + G( U-k*vec2(-.7, i/5.), 0.  ,-i*k,k)\n             + G( U-k*vec2( .7, i/5.), 0.  ,-i*k,k);\n \n    float s = smoothstep(-.04,.04,max(abs(U.x),abs(U.y)) - .7);    // solid square\n  //float s = smoothstep(0.,.1,abs(max(abs(U.x),abs(U.y))-.7));    // frame\n\n    //s = 2.*(s-.5)*(O.x-.5)+.5; O = sqrt(vec4(cos(1.57*s + vec2(0,-1.57)), 0,1)); return;\n\tO = (.5 + .5*O) \n          * sqrt(vec4(cos(1.57*s + vec2(0,-1.57)), 0,1));          // colorization. (sqrt ~ tone mapping)\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

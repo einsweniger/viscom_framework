@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Md2yRw",
+      "date": "1491419623",
+      "viewed": 176,
+      "name": "DF Test 1",
+      "username": "aiekick",
+      "description": "DF Test 1",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "test",
+        "1",
+        "df"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 p = (fragCoord.xy * 2. - iResolution.xy) / iResolution.y;\n\t\n\tfloat evo = sin(iTime*.1);\n\tfloat a = floor(atan(p.x,p.y)/3.14159*20.)*3.*evo;\n\t\n\tfloat d = length(p) - cos(a)*0.288;\n\t\n\td = smoothstep(0.,1.,.8 - d);\n\td = smoothstep(0.,0.01/d,d);\n\tfragColor = vec4(d);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

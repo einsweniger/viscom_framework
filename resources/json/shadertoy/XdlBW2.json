@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdlBW2",
+      "date": "1498164841",
+      "viewed": 172,
+      "name": "Flash out",
+      "username": "stas0",
+      "description": "Flash out",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "flash"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159;\n\nfloat circ(vec2 p) {\n\tfloat r = length(p);\n    r = sqrt(r);\n    \n    return abs(4. * r * fract(1. - iTime));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord - .5 * iResolution.xy) / iResolution.y;\n   \tvec3 color = vec3(.0);\n    \n    float rz = abs(circ(uv));\n    \n    color = vec3(.2) / rz;\n    \n\tfragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

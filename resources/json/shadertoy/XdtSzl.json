@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdtSzl",
+      "date": "1460904953",
+      "viewed": 379,
+      "name": "Earth+Moon  (343 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 2,
+            "src": "/media/a/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 7,
+            "src": "/media/a/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define P(T,V,C0,C1,v) ( W = asin(V), W.x = acos((V).x/cos(W.y))-iTime*v, mix(C0,C1,step(texture(T,.5+.5*W).x,.5+.5*(V).x))*vec4(dot(V,V)<1.))\n\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    U /= iResolution.y; vec2 W;\n    O =             P(iChannel1, .8*(U-vec2(1.4,-.38)), vec4(0,0,.8,1) ,vec4(1),        .5);\n    O += (1.-O.w)*  P(iChannel0, 4.*(U-vec2(.4,.6))   , vec4(.2,.2,0,1),vec4(1,1,.9,1), .2);\n \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

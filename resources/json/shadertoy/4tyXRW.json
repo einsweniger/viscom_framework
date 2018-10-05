@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tyXRW",
+      "date": "1483079697",
+      "viewed": 441,
+      "name": "Kaleidoscope Effect fork",
+      "username": "MobileForks01",
+      "description": "original : https://www.shadertoy.com/view/XdGXRG#\ntweaking on mobile.",
+      "likes": 0,
+      "published": 3,
+      "flags": 3,
+      "tags": [
+        "webcam"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.1415\n#define TWO_PI PI * 2.0\n#define SIDES 5.0\n//#define MOUSE_INTERACTION\n\n\nfloat SphereIntersect( vec3 vSphereOrigin, float fSphereRadius, vec3 vRayOrigin, vec3 vRayDir )\n{\n\tvec3 vToOrigin = vSphereOrigin - vRayOrigin;\n\tfloat fProjection = dot(vToOrigin, vRayDir);\n\tvec3 vClosest = vRayOrigin + vRayDir * fProjection;\n\t\n\tvec3 vClosestToOrigin = vClosest - vSphereOrigin;\n\tfloat fClosestDist2 = dot(vClosestToOrigin, vClosestToOrigin);\n\n\tfloat fSphereRadius2 = fSphereRadius * fSphereRadius;\n\t\n\tif(fClosestDist2 < fSphereRadius2)\n\t{\n\t\tfloat fHCL = sqrt(fSphereRadius2 - fClosestDist2);\n\t\n\t\tfloat t = fProjection + fHCL;\n\t\t\n        return t;\n\t}\n    \n    return -1.0;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    // Center UV\n    vec2 p = uv - 0.5;\n\n    // Convert from cartesian coordinates to polar coordinates\n    float r = length(p); \t\t// r = \u00e2\u02c6\u0161( x2 + y2 )\n    float angle = atan(p.y, p.x);\t// \u00ce\u00b8 = tan-1 ( y / x )\n\n    // Kaleidoscope effect\n    angle = mod(angle, TWO_PI/SIDES);\n    angle = abs(angle - PI/SIDES);\n\n    // Convert from polar coordinates to cartesian coordinates\n    p = r * vec2(cos(angle), sin(angle));\t// x = r \u00c3\u2014 cos( \u00ce\u00b8 ), y = r \u00c3\u2014 sin( \u00ce\u00b8 )\n\n    // Final color\n    #ifdef MOUSE_INTERACTION\n        vec2 pp = iMouse.xy / iResolution.xy;\n        fragColor = texture(iChannel0, p + pp);\n    #else\n    \tfragColor = texture(iChannel0, p - cos(iTime)/4.0);\n    #endif\n}\n\n\nvoid mainVR( out vec4 vFragColor, in vec2 vFragCoord, in vec3 fragRayOri, in vec3 fragRayDir )\n{\n\tfloat fSphereT = SphereIntersect( vec3(0,0,0.0), 4.0, fragRayOri, fragRayDir );\n\tvec3 vHit = fragRayOri + fragRayDir * fSphereT;  \n    \n    vHit *= 0.5;\n    \n    vec2 vUV = vHit.xy * 0.5 + 0.5;\n        \n    //vUV = clamp( vUV, vec2(0), vec2(1));\n    \n   mainImage( vFragColor, vUV * iResolution.xy );\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

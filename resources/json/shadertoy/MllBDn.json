@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MllBDn",
+      "date": "1511702629",
+      "viewed": 140,
+      "name": "Reversi bias",
+      "username": "Limeth",
+      "description": "A function to bias the choice of reversi moves.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "reversi"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const int size = 20;\nconst float corner_bias_weight = 0.5;\nconst float edge_bias_weight = 1.0;\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 position = floor(vec2(size) * uv);\n    \n    // Mirror by x axis and y axis in the center\n    position.x = position.x >= float(size) / 2.0 ? float(size) - position.x - 1.0 : position.x;\n    position.y = position.y >= float(size) / 2.0 ? float(size) - position.y - 1.0 : position.y;\n    \n    int larger_coord = int(max(position.x, position.y));\n    int smaller_coord = int(min(position.x, position.y));\n    \n    float half_iso = sqrt(2.0 * float(size / 2) * float(size / 2));\n    float corner_weight = 1.0 - length(position) / half_iso;\n    float corner_bias = 1.0 - float(larger_coord % 2);\n    float edge_bias = 1.0 - float(smaller_coord % 2);\n    float bias = corner_bias * corner_weight + edge_bias * (1.0 - corner_weight);\n    bias = mix(edge_bias, corner_bias, corner_weight);\n    \n    \n    bias *= 2.0;\n    bias -= 1.0;\n    vec2 from_center = position - vec2(float(size / 2));\n    float center_weight = length(from_center) / half_iso;\n    bias *= center_weight;\n    bias *= abs(bias);\n    \n    \n    fragColor = vec4(bias, 0, -bias, 1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

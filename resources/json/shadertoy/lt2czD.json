@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lt2czD",
+      "date": "1507788458",
+      "viewed": 193,
+      "name": "side bar mask",
+      "username": "aferriss",
+      "description": "Simple mask for blending edges",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "smoothstep",
+        "mask",
+        "sidebars"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv.x = 1.0 - abs(uv.x * 2.0 - 1.0);\n    uv.x = smoothstep( 0.1,0.13,uv.x);\n\tfragColor = vec4(vec3(uv.x),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

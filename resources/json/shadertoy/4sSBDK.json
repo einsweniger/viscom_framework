@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sSBDK",
+      "date": "1502130391",
+      "viewed": 81,
+      "name": "ASCII Art",
+      "username": "starea",
+      "description": "Forked from https://www.shadertoy.com/view/lssGDj",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "asciiart"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float ASCII_Details = 8.0; \nfloat PixelSize = 3.5;\nfloat greyScale(in vec3 col) \n{\n    //return dot(col, vec3(0.3, 0.59, 0.11));\n    return dot(col, vec3(0.2126, 0.7152, 0.0722)); //sRGB\n}\n\nfloat character(float n, vec2 p)\n{\n\tp = floor(p*vec2(4.0, -4.0) + 2.5);\n\tif (clamp(p.x, 0.0, 4.0) == p.x && clamp(p.y, 0.0, 4.0) == p.y\n\t && int(mod(n/exp2(p.x + 5.0*p.y), 2.0)) == 1) return 1.0;\n\treturn 0.0;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy;\n\tvec3 col = texture(iChannel0, floor(uv / ASCII_Details) * ASCII_Details / iResolution.xy).rgb;\t\n\tfloat gray = greyScale(col);\n    float n = 65536.0 + \n              step(0.2, gray) * 64.0 + \n              step(0.3, gray) * 267172.0 +\n        \t  step(0.4, gray) * 14922314.0 + \n        \t  step(0.5, gray) * 8130078.0 - \n        \t  step(0.6, gray) * 8133150.0 - \n        \t  step(0.7, gray) * 2052562.0 -\n        \t  step(0.8, gray) * 1686642.0;\n        \n\tvec2 p = mod(uv / PixelSize, 2.0) - vec2(1.0);\n\tif (iMouse.z > 0.5)\tcol = gray * vec3(character(n, p));\n\telse col = col*character(n, p);\n\t\n\tfragColor = vec4(col, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

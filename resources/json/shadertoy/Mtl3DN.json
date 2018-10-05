@@ -1,0 +1,45 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mtl3DN",
+      "date": "1422273698",
+      "viewed": 240,
+      "name": "[2TC 15] Dance floor",
+      "username": "Nrx",
+      "description": "Remake of my [url=https://www.shadertoy.com/view/lsBXDW]Dance floor[/url].",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2tc15"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 34,
+            "src": "/media/a/d96b229eeb7a08d53adfcf1ff89e54c9ffeebed193d317d1a01cc8125c0f5cca.mp3",
+            "ctype": "music",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "// Created by Nicolas Robert (Nrx) - 2015\n// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License\n\n// Entry for [2TC 15] (= 280 chars or less, as counted by Shadertoy)\n\n#define T(X) texture (iChannel0, vec2 (X)).x);\nvoid mainImage (out vec4 c, vec2 p) {\n\tvec3 R = iResolution, f = vec3 ((2. * p - R.xy) / R.y, 0);\n\tf *= 5. - cos (f.yxz) * sin (T (0)\n\tfloat r = cos (dot (floor (f), R));\n\tR = step (-.8, -cos (f * 6.3));\n\tc = 3. * fract (r + vec4 (0, .3, .7, 0)) * R.x * R.y * (1. - length (fract (f) - .5)) * cos (r * iDate.w + T (1)\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

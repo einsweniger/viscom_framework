@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdtcDn",
+      "date": "1518545750",
+      "viewed": 242,
+      "name": "3d Julia",
+      "username": "felipunkerito",
+      "description": "Raymarched simple fractal",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "fractal"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define tim iTime * 0.2\n\nmat2 rot( float a )\n{\n\n    return mat2( cos( a ), -sin( a ),\n                 sin( a ),  cos( a ) );\n    \n}\n\nfloat map( vec3 p )  \n{\n\n    for( int i = 0; i < 3; ++i )\n    {\n        \n        if( dot( p, p ) < 8.0 )\n        {\n            \n            p.x = dot( p.x, p.x ) - dot( p.y, p.y ); // * sin( iTime * 0.42 );\n            p.y = dot( p.y, p.y ) - dot( p.x, p.x ); // * sin( iTime * 0.42 );\n            p.z = dot( p.x, p.x ) - dot( p.z, p.x ) ;\n            p.xy *= rot( tim );\n            p.yz *= rot( tim );\n            p.xz *= rot( tim );\n        }    \n        \n    }\n    \n    return ( length( p ) - 1.0 );\n}\n\nvec3 grad( vec3 p )\n{\n\n\n    vec2 e = vec2( 0.0, 0.0001 );\n    vec3 n = vec3( map( p + e.xyy ) - map( p - e.xyy ),\n                   map( p + e.yxy ) - map( p - e.yxy ),\n                   map( p + e.yyx ) - map( p - e.yyx )\n                 );\n    return n;\n    \n}\n\nfloat softShadows( in vec3 ro, in vec3 rd )\n{\n\n    float res = 1.0;\n    for( float t = 0.1; t < 8.0; ++t )\n    {\n    \n        float h = map( ro + rd * t );\n        if( h < 0.0001 ) return 0.0;\n        res = min( res, h * 8.0 / t );\n        t += h;\n        \n    }\n    \n    return res;\n    \n}\n\nvec3 shade( vec3 ro, vec3 rd, float t )\n{\n\n    vec3 p = ro + rd * t;\n    vec3 n = normalize( grad( p ) );\n    vec3 lig = normalize( vec3( sin( iTime ), 0.8, cos( iTime ) ) );\n    vec3 ref = reflect( rd, n );\n    vec3 col;\n    \n    float amb = 0.5 + 0.5 * n.y;\n    float dif = max( 0.0, dot( n, lig ) );\n    float sha = softShadows( p, lig );\n    float spe = pow( clamp ( dot( lig, ref ), 0.0, 1.0 ), 16.0 );\n    \n    //col = vec3( 1.0 );\n    col += vec3( 0.45 ) * amb;\n    col += dif * vec3( 0.5 ) * sha; \n    col *= 2.0 * n;\n    col += 1.0 * spe;\n    \n    return col;\n    \n}\n    \nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = ( -iResolution.xy + 2.0 * fragCoord ) / iResolution.y;\n    \n    vec4 mouser = iMouse / iResolution.xyxy;\n    \n    //vec3 rd = normalize( vec3( uv, mouser.y ) );\n    \n    vec3 ro = 4.0 * vec3( sin( tim ), mouser.y , cos( tim ) );\n    \n    //vec3 ro = vec3( 0.0, 0.0, 4.0 );\n    vec3 ww = normalize( vec3( 0.0 ) - ro );\n    vec3 uu = normalize( cross( vec3( 0.0, 1.0, 0.0 ), ww ) );\n    vec3 vv = normalize( cross( ww, uu ) );\n    vec3 rd = normalize( uv.x * uu + uv.y * vv + 1.5 * ww );\n    \n    float t = 0.0; float d = 0.0001;\n    for( int i = 0; i < 3000; ++i )\n    {\n    \n    \td = map( ro + rd * t );\n        if( d <  0.0001 || t > 100.0 ) break;\n        t += d;\n        \n    }\n    \n    vec3 col = d < 0.0001 ? shade( ro, rd, t ) : mix( vec3( 0.0 ), vec3( 0.3, 0.2, 0.4 ), length( uv ) );\n    \n    fragColor = vec4( col, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

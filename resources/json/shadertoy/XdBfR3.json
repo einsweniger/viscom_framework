@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdBfR3",
+      "date": "1501337415",
+      "viewed": 199,
+      "name": "Daily 2017-07-29",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 9,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float C,S;\n#define rot(a) mat2(C=cos(a),S=sin(a),-S,C)\n\nfloat map(vec3 p, float i) {\n    p.xy*=rot(iTime*.3-.1*i);\n    p.yz*=rot(iTime*.5-.1*i);\n    p.xz*=rot(iTime*.7-.1*i);\n    vec2 q=vec2(length(p.xz)-1.,p.y);\n  \treturn length(q)-.2;\n}\n\nfloat clr(vec2 uv, float i) {\n    vec3 ro=vec3(uv,-2.),rd=normalize(vec3(uv,1.)),mp=ro;\n    float BR = 2e-2 + i * 1e-2,\n    \tEPS=1e-3,\n    \tBRMEPS=(BR+EPS)*.5;\n    float mdmin=BR;\n    for(float f=0.;f<30.;++f){\n        float md=map(mp, i);\n        mdmin=min(md,mdmin);\n        if(md<EPS)break;\n        mp+=rd*md;\n    }\n    return max((mdmin-BR)*(EPS-mdmin)/(BRMEPS*BRMEPS),0.);\n}\n\nconst float Samples = 10.;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv-=.5;\n    uv.x*=iResolution.x/iResolution.y;\n    \n    float c=0.;\n    for (float i=0.;i<Samples;++i) {\n        vec2 center=vec2(sin(iTime*.3+.3+i*2.)*.2, sin(iTime*.5+.5+i*2.)*.2);\n        c += clr(center+(uv-center)/(1.+i*.2), i) * (1. - i/Samples);\n    }\n\tfragColor = vec4(c);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

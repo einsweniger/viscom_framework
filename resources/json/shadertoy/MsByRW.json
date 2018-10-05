@@ -1,0 +1,150 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsByRW",
+      "date": "1494542447",
+      "viewed": 265,
+      "name": "2D Gems DF",
+      "username": "aiekick",
+      "description": "2D Gems",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "for",
+        "gems"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 getPos(vec2 fragCoord)\n{\n    return (fragCoord * 2. - iResolution.xy) / iResolution.y;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    fragColor = texture(iChannel0, uv);\n    \n    uv = getPos(fragCoord);\n    vec2 mo = getPos(iMouse.xy);\n    \n    float m = 0.001/dot(uv-mo,uv-mo);\n    \n    fragColor = fragColor + m;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// generate the df from the polygon\nvec2 texelSize;\nfloat sampleSobel(in vec2 uv)\n{\n    float weight = 1.0;\n\tfloat f = texture(iChannel0, uv).a;\n    return f * weight - (weight * 0.5);\n}\n\nvec2 sobel(in vec2 uv)\n{   \n    vec2 offset = texelSize * 1.0;\n    float x = offset.x;\n    float y = offset.y;\n    \n    // |-1  0  1|\n    // |-2  0  2| \n    // |-1  0  1|\n    \n    float gX = 0.0;\n    gX += -1.0 * sampleSobel(uv + vec2(-x, -y));\n    gX += -2.0 * sampleSobel(uv + vec2(-x,  0));\n    gX += -1.0 * sampleSobel(uv + vec2(-x, +y));\n    gX += +1.0 * sampleSobel(uv + vec2(+x, -y));\n    gX += +2.0 * sampleSobel(uv + vec2(+x,  0));\n    gX += +1.0 * sampleSobel(uv + vec2(+x, +y));\n    \n    // |-1 -2 -1|\n    // | 0  0  0| \n    // | 1  2  1|\n    \n    float gY = 0.0;\n    gY += -1.0 * sampleSobel(uv + vec2(-x, -y));\n    gY += -2.0 * sampleSobel(uv + vec2( 0, -y));\n    gY += -1.0 * sampleSobel(uv + vec2(+x, -y));\n    gY += +1.0 * sampleSobel(uv + vec2(-x, +y));\n    gY += +2.0 * sampleSobel(uv + vec2( 0, +y));\n    gY += +1.0 * sampleSobel(uv + vec2(+x, +y));\n    \n\treturn vec2(sqrt(gX * gX + gY * gY), atan(-gY, -gX));\n}\n\nvec4 shapeScreenRectangle(vec2 fragCoord, float edge)\n{\n\tvec4 col = vec4(0);\n    if (fragCoord.x < edge || fragCoord.x > iResolution.x - edge\n            || fragCoord.y < edge || fragCoord.y > iResolution.y - edge)\n    {\n    \tcol = vec4(1);\n    }\n    return col;\n}\n\nvec4 shapeCircle(vec2 fragCoord, float edge)\n{\n    float e = edge / iResolution.y;\n\tvec4 col = vec4(0);\n    vec2 uv = (fragCoord*2.-iResolution.xy)/iResolution.y;\n    float y = iResolution.y / iResolution.x * .75;\n    \n    float d = abs(length(uv)-y)-e;\n    \n    return vec4(step(d,e));\n}\n\nvec4 shapeTri(vec2 fragCoord, float edge)\n{\n    float e = edge / iResolution.y;\n\tvec4 col = vec4(0);\n    vec2 uv = (fragCoord*2.-iResolution.xy)/iResolution.y;\n    float y = iResolution.y / iResolution.x * .75;\n    \n    float d = abs(max(abs(uv.x)+uv.y,-uv.y)-y)-e;\n    \n    return vec4(step(d,e));\n}\n\nvec4 shapeQuad(vec2 fragCoord, float edge)\n{\n    float e = edge / iResolution.y;\n\tvec4 col = vec4(0);\n    vec2 uv = (fragCoord*2.-iResolution.xy)/iResolution.y;\n    float y = iResolution.y / iResolution.x;\n    \n    float d = length(max(abs(uv)-y,0.)-y*0.1);\n    \n    return vec4(step(abs(d)-e,e));\n}\n\nvec4 shapeQuadRepeat(vec2 fragCoord, float edge)\n{\n    float e = edge / iResolution.y;\n\tvec4 col = vec4(0);\n    vec2 uv = (fragCoord*2.-iResolution.xy)/iResolution.y*3.;\n    float y = iResolution.y / iResolution.x;\n    uv = mod(uv,2.)-1.;\n    float d = abs(max(abs(uv.x),abs(uv.y))-y)-e;\n    \n    return vec4(step(d,e));\n}\n\nvec4 shapeFlower(vec2 fragCoord, float edge)\n{\n    float e = edge / iResolution.y;\n\tvec4 col = vec4(0);\n    vec2 uv = (fragCoord*2.-iResolution.xy)/iResolution.y;\n    float y = iResolution.y / iResolution.x;\n    \n    float a = atan(uv.x, uv.y)/3.14159*3.;\n    float d = length(uv) - mix(y,y+.5,abs(fract(a)-.5));\n    \n    return vec4(step(abs(d)-e,e));\n}\n\nvec4 cell(vec2 fragCoord, vec2 pixel)\n{\n    //pixel *= normalize(fwidth(fragCoord / iResolution.xy));\n\tvec2 uv = (fragCoord-pixel) / iResolution.xy;\n    return texture(iChannel0, uv);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    \n    if (iFrame < 60)\n    {\n        fragColor = shapeFlower(fragCoord, 1.);\n        ///fragColor = vec4(step(texture(iChannel1, uv).x,0.2));\n    }\n    else\n    {       \n        vec2 n = vec2(1,1);\n        //n = normalize(fwidth(uv));\n        //n = normalize(sobel(uv));\n        \n        // get current cell from backbuffer\n        vec4 c = cell(fragCoord, vec2(0,0)); // current cell\n        if (length(c) < 0.5)\n        {\n#if 0\n        \t// get adjacents cells from backbuffer \n        \tvec4 l = cell(fragCoord, n*vec2(-1,0)); // left cell\n        \tvec4 r = cell(fragCoord, n*vec2(1,0)); // rigt cell\n        \tvec4 t = cell(fragCoord, n*vec2(0,1)); // top cell\n        \tvec4 b = cell(fragCoord, n*vec2(0,-1)); // bottom cell\n        \tc = max(c, max(l,max(r,max(t,b))));\n#else\n            vec4 d = vec4(0);\n            for (float i = -1.; i <= 1.; i++)\n            for (float j = -1.; j <= 1.; j++)\n            {\n                c = max(c, cell(fragCoord, vec2(i,j)));\n            }\n#endif\n            c *= .98;         \n        }\n\n        fragColor = c;\n\t}\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "// blur\n\nvec3 draw(vec2 uv) {\n    return texture(iChannel0,vec2(uv.x,1.-uv.y)).rgb;   \n    //return texture(iChannel0,uv).rgb;  \n}\n\nfloat grid(float var, float size) {\n    return floor(var*size)/size;\n}\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float time = iTime;\n    vec2 uv = (fragCoord.xy / iResolution.xy);\n    \n    float bluramount = 0.007;\n    if (iMouse.w >= 1.) {\n    bluramount = (iMouse.x/iResolution.x)/10.;\n    }\n\n    //float dists = 5.;\n    vec3 blurred_image = vec3(0.);\n    #define repeats 60.\n    for (float i = 0.; i < repeats; i++) { \n        //Older:\n        //vec2 q = vec2(cos(degrees((grid(i,dists)/repeats)*360.)),sin(degrees((grid(i,dists)/repeats)*360.))) * (1./(1.+mod(i,dists)));\n        vec2 q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) *  (rand(vec2(i,uv.x+uv.y))+bluramount); \n        vec2 uv2 = uv+(q*bluramount);\n        blurred_image += draw(uv2)/2.;\n        //One more to hide the noise.\n        q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) *  (rand(vec2(i+2.,uv.x+uv.y+24.))+bluramount); \n        uv2 = uv+(q*bluramount);\n        blurred_image += draw(uv2)/2.;\n    }\n    blurred_image /= repeats;\n        \n    fragColor = vec4(blurred_image,1.0);\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "// generate the normal map from the buffer A\n\n// https://www.shadertoy.com/view/XdlGz8\nstruct C_Sample\n{\n\tvec3 vAlbedo;\n\tvec3 vNormal;\n};\n\t\nC_Sample SampleMaterial(const in vec2 vUV, sampler2D sampler,  const in vec2 vTextureSize, const in float fNormalScale)\n{\n\tC_Sample result;\n\t\n\tvec2 vInvTextureSize = vec2(1.0) / vTextureSize;\n\t\n\tvec3 cSampleNegXNegY = 1.-texture(sampler, vUV + (vec2(-1.0, -1.0)) * vInvTextureSize.xy).rgb;\n\tvec3 cSampleZerXNegY = 1.-texture(sampler, vUV + (vec2( 0.0, -1.0)) * vInvTextureSize.xy).rgb;\n\tvec3 cSamplePosXNegY = 1.-texture(sampler, vUV + (vec2( 1.0, -1.0)) * vInvTextureSize.xy).rgb;\n\t\n\tvec3 cSampleNegXZerY = 1.-texture(sampler, vUV + (vec2(-1.0, 0.0)) * vInvTextureSize.xy).rgb;\n\tvec3 cSampleZerXZerY = 1.-texture(sampler, vUV + (vec2( 0.0, 0.0)) * vInvTextureSize.xy).rgb;\n\tvec3 cSamplePosXZerY = 1.-texture(sampler, vUV + (vec2( 1.0, 0.0)) * vInvTextureSize.xy).rgb;\n\t\n\tvec3 cSampleNegXPosY = 1.-texture(sampler, vUV + (vec2(-1.0,  1.0)) * vInvTextureSize.xy).rgb;\n\tvec3 cSampleZerXPosY = 1.-texture(sampler, vUV + (vec2( 0.0,  1.0)) * vInvTextureSize.xy).rgb;\n\tvec3 cSamplePosXPosY = 1.-texture(sampler, vUV + (vec2( 1.0,  1.0)) * vInvTextureSize.xy).rgb;\n\n\t// convert to linear\t\n\tvec3 cLSampleNegXNegY = cSampleNegXNegY * cSampleNegXNegY;\n\tvec3 cLSampleZerXNegY = cSampleZerXNegY * cSampleZerXNegY;\n\tvec3 cLSamplePosXNegY = cSamplePosXNegY * cSamplePosXNegY;\n\n\tvec3 cLSampleNegXZerY = cSampleNegXZerY * cSampleNegXZerY;\n\tvec3 cLSampleZerXZerY = cSampleZerXZerY * cSampleZerXZerY;\n\tvec3 cLSamplePosXZerY = cSamplePosXZerY * cSamplePosXZerY;\n\n\tvec3 cLSampleNegXPosY = cSampleNegXPosY * cSampleNegXPosY;\n\tvec3 cLSampleZerXPosY = cSampleZerXPosY * cSampleZerXPosY;\n\tvec3 cLSamplePosXPosY = cSamplePosXPosY * cSamplePosXPosY;\n\n\t// Average samples to get albdeo colour\n\tresult.vAlbedo = ( cLSampleNegXNegY + cLSampleZerXNegY + cLSamplePosXNegY \n\t\t    \t     + cLSampleNegXZerY + cLSampleZerXZerY + cLSamplePosXZerY\n\t\t    \t     + cLSampleNegXPosY + cLSampleZerXPosY + cLSamplePosXPosY ) / 9.0;\t\n\t\n\tvec3 vScale = vec3(0.3333);\n\t\n\t#ifdef USE_LINEAR_FOR_BUMPMAP\n\t\t\n\t\tfloat fSampleNegXNegY = dot(cLSampleNegXNegY, vScale);\n\t\tfloat fSampleZerXNegY = dot(cLSampleZerXNegY, vScale);\n\t\tfloat fSamplePosXNegY = dot(cLSamplePosXNegY, vScale);\n\t\t\n\t\tfloat fSampleNegXZerY = dot(cLSampleNegXZerY, vScale);\n\t\tfloat fSampleZerXZerY = dot(cLSampleZerXZerY, vScale);\n\t\tfloat fSamplePosXZerY = dot(cLSamplePosXZerY, vScale);\n\t\t\n\t\tfloat fSampleNegXPosY = dot(cLSampleNegXPosY, vScale);\n\t\tfloat fSampleZerXPosY = dot(cLSampleZerXPosY, vScale);\n\t\tfloat fSamplePosXPosY = dot(cLSamplePosXPosY, vScale);\n\t\n\t#else\n\t\n\t\tfloat fSampleNegXNegY = dot(cSampleNegXNegY, vScale);\n\t\tfloat fSampleZerXNegY = dot(cSampleZerXNegY, vScale);\n\t\tfloat fSamplePosXNegY = dot(cSamplePosXNegY, vScale);\n\t\t\n\t\tfloat fSampleNegXZerY = dot(cSampleNegXZerY, vScale);\n\t\tfloat fSampleZerXZerY = dot(cSampleZerXZerY, vScale);\n\t\tfloat fSamplePosXZerY = dot(cSamplePosXZerY, vScale);\n\t\t\n\t\tfloat fSampleNegXPosY = dot(cSampleNegXPosY, vScale);\n\t\tfloat fSampleZerXPosY = dot(cSampleZerXPosY, vScale);\n\t\tfloat fSamplePosXPosY = dot(cSamplePosXPosY, vScale);\t\n\t\n\t#endif\n\t\n\t// Sobel operator - http://en.wikipedia.org/wiki/Sobel_operator\n\t\n\tvec2 vEdge;\n\tvEdge.x = (fSampleNegXNegY - fSamplePosXNegY) * 0.25 \n\t\t\t+ (fSampleNegXZerY - fSamplePosXZerY) * 0.5\n\t\t\t+ (fSampleNegXPosY - fSamplePosXPosY) * 0.25;\n\n\tvEdge.y = (fSampleNegXNegY - fSampleNegXPosY) * 0.25 \n\t\t\t+ (fSampleZerXNegY - fSampleZerXPosY) * 0.5\n\t\t\t+ (fSamplePosXNegY - fSamplePosXPosY) * 0.25;\n\n\tresult.vNormal = normalize(vec3(vEdge * fNormalScale, .1));\t\n\t\n\treturn result;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\t\n\tvec2 vUV = fragCoord.xy / iResolution.xy;\n\t\n\tC_Sample materialSample;\n\t\t\n\tfloat fNormalScale = 10.0;\n\tmaterialSample = SampleMaterial( vUV, iChannel0, iChannelResolution[0].xy, fNormalScale );\n\t\n\tfragColor = vec4(materialSample.vNormal * 0.5 + 0.5,1.0);\n    \n    /*float col = dot(texture(iChannel0, vUV).rgb, vec3(1));\n    float dx = dFdx(col)*iResolution.x/80.0;\n    \n    float dy = dFdy(col)*iResolution.x/80.0;\n     \n    vec3 vNormal = normalize(vec3(dx,dy,sqrt(clamp(1.0-dx*dx-dy*dy,0.0,1.0))));\n    fragColor = vec4(vNormal * 0.5 + 0.5,1.0);*/\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

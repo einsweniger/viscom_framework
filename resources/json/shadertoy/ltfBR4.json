@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltfBR4",
+      "date": "1511475632",
+      "viewed": 216,
+      "name": "Collision of planets",
+      "username": "qwertsol",
+      "description": "N-body simulation of two colliding planets. \nUse mouse to rotate.",
+      "likes": 4,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "simulation",
+        "physics",
+        "nbody"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Square root of number of samples used for super-sampling\n#define SAMPLES 1\n// Number of particles\n#define N_PLANETS 300\n\nconst float pi = 3.14159265;\nconst float fov = pi / 2.0;\nconst float epsilon = 0.0001;\nconst vec3 up = vec3(0.0, 1.0, 0.0);\nconst vec3 right = vec3(1.0, 0.0, 0.0);\nconst vec3 bakcward = vec3(0.0, 0.0, 1.0); \n\nstruct Ray \n{\n    vec3 origin;\n    vec3 direction;\n};\n\nmat4 rotation( vec3 axis, float angle ) \n{\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nmat4 translation( vec3 t ) \n{\n    return mat4(1.0, 0.0, 0.0, 0.0,\n                0.0, 1.0, 0.0, 0.0,\n                0.0, 0.0, 1.0, 0.0,\n                t.x, t.y, t.z, 1.0);\n}\n\nvoid transformRay( inout Ray ray, mat4 mat )\n{\n\tray.origin = (mat * vec4(ray.origin, 1.0)).xyz;\n    ray.direction = normalize(mat * vec4(ray.direction, 0.0)).xyz;\n}\n\nvoid transformNormal( inout vec3 normal, mat4 mat )\n{\n    normal = normalize((mat * vec4(normal, 0.0)).xyz);\n}\n\nvoid transformPosition( inout vec3 pos, mat4 mat )\n{\n    pos = (mat * vec4(pos, 1.0)).xyz;\n}   \n\nRay createRay( vec2 screenPos)\n{\n    vec2 topLeft = vec2(-iResolution.x, -iResolution.y) * .5;\n    float z = (iResolution.x * .5) / abs(tan(fov / 2.0));\n\n    return Ray(vec3(0.0), normalize(vec3(topLeft + screenPos, -z)));\n}\n\nvoid reflectRay( inout Ray ray, vec3 pos, vec3 normal )\n{\n    ray.origin = pos + normal * epsilon;\n    ray.direction = reflect(ray.direction, normal);\n}\n\nvec3 getRayPosition( Ray ray, float t )\n{\n    return ray.origin + t * ray.direction;\n}\n\nbool intersectSphere( Ray r, vec4 sphere, out float t0, out float t1 )\n{\n    vec3 dv = r.origin - sphere.xyz;\n    \n    float b = dot(r.direction, dv) * 2.0;\n    float c = dot(dv, dv) - (sphere.w * sphere.w);\n    \n    float d = b * b - 4.0 * c;\n    if (d < 0.0)\n    {\n        return false;\n    }\n    \n    d = sqrt(d);\n    \n    float ta = (-b - d) * 0.5;\n    float tb = (-b + d) * 0.5;\n    \n    t0 = min(ta, tb);\n    t1 = max(ta, tb);\n        \n    return t0 <= t1;\n}\n\nvec3 getNormal( vec4 sphere, vec3 pos )\n{\n    return normalize(pos - sphere.xyz);\n}\n\nvec3 tosRGB( vec3 color )\n{\n    return pow(color, vec3(1.0/2.2));\n}\n\nvec4 getPlanetsPositionAndRadius( int i )\n{\n    return texelFetch(iChannel0, ivec2(i, 0), 0);\n}\n\nvec3 getPlanetsVelocity( int i )\n{\n    return texelFetch(iChannel0, ivec2(i, 1), 0).rgb;\n}\n\nvec4 getPlanetsColor( int i )\n{\n    return texelFetch(iChannel0, ivec2(i, 2), 0);\n}\n\nvec3 getCenterOfMass() \n{\n    return texelFetch(iChannel0, ivec2(0, 3), 0).rgb;\n}\n\nvec2 getMousePosition()\n{\n    vec4 data = iMouse;\n    vec2 uv = data.xy / iResolution.xy;\n    \n    return uv;\n}\n\nvec3 sun;\n\nvec3 shade( vec3 color, vec3 light, vec3 position, vec3 normal )\n{\n    return vec3(1.0);\n    /*float intensity = 10.0;\n    float ambient = 0.05;\n    \n    float d = length(light - position);\n    \n    float I = intensity * max(dot(normal, light - position), 0.0) / (d * d) + ambient;\n    return color * clamp(I, 0.0, 1.0);*/\n}\n\nvec4 trace( Ray ray, mat4 transform ) \n{     \n    mat4 transformI = inverse(transform);\n    mat4 transformIT = transpose(transformI);\n    transformRay(ray, transformI);\n    \n    vec4 color = vec4(0.0);\n    \n\tint closestI = -1;\n    float closestT = 100000.0;\n    vec4 closestP = vec4(0.0);\n    \n    float t0;\n    float t1;\n    for (int i=0; i<N_PLANETS; i++)\n    {\n        vec4 planet = getPlanetsPositionAndRadius(i);\n        \n        if (intersectSphere(ray, planet, t0, t1) && t0 > 0.0 && t0 < closestT)\n        {\n            closestI = i;\n            closestT = t0;\n            closestP = planet;\n        }\n    }\n    \n    if (closestI >= 0)\n    {\n        \tvec3 position = getRayPosition(ray, closestT);\n        \tvec3 normal = getNormal(closestP, position);\n        \tcolor = vec4(shade(getPlanetsColor(closestI).rgb, sun, position, normal), 1.0);\n        \n    }\n   \n    return color;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{    \n    vec2 mouse = getMousePosition();\n    sun = getCenterOfMass();\n    \n    mat4 transform = translation(vec3(0.0, 0.0, -500.0 - (mouse.y) * 200.0));\n    transform *= rotation(up, -mouse.x * 4.0);\n    transform *= translation(-sun);\n    \n    float step = 1.0 / float(SAMPLES);\n    \n    int i = 0;\n    int j = 0;\n    vec4 outColor = vec4(0.0);\n    \n#if (SAMPLES > 1) \n    for (i=0; i<SAMPLES; i++) \n    {\n        for (j=0; j<SAMPLES; j++)\n        {\n#endif\n            vec2 coords = fragCoord + vec2(float(i) * step, float(j) * step);\n            Ray ray = createRay(coords);\n            \n            outColor += trace(ray, transform);            \n#if (SAMPLES > 1) \n        }\n    }\n#endif\n    \n    outColor /= float(SAMPLES * SAMPLES);\n    \n\tfragColor = vec4(tosRGB(outColor.rgb), 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Number of particles\n#define N_PLANETS 300\n\nconst float pi = 3.14159265;\nconst float G = 6.0;\nconst float cof = 0.2; // Coefficient of restitution\nconst float epsilon = 0.01;\nconst float speed = 100.0;\n\nfloat rand( vec2 co )\n{\n    return fract(sin(dot(co.xy, vec2(12.9898,78.233))) * 43758.5453);\n}\n\nvec3 rand3( vec2 co )\n{\n    float v0 = rand(co);\n    float v1 = rand(vec2(co.y, v0));\n    float v2 = rand(vec2(co.x, v1));\n    \n    return vec3(v0, v1, v2);\n}\n\nvec4 getPlanetsPositionAndRadius( int i )\n{\n    return texelFetch(iChannel0, ivec2(i, 0), 0);\n}\n\nvec3 getPlanetsVelocity( int i )\n{\n    return texelFetch(iChannel0, ivec2(i, 1), 0).rgb;\n}\n\nfloat mass( float radius )\n{\n    return 1.33333 * pi * pow(radius, 3.0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    \n    if (fragCoord.x < float(N_PLANETS) && fragCoord.y < 4.0)\n    {\n        if (iFrame == 0)\n        {   \n                // Planets\n        \t\tif (fragCoord.y < 1.0)\n        \t\t{\n        \t\t    // Planet position and radius\n        \t\t    fragColor = vec4((rand3(uv) - vec3(.5)) * 50.0, 3.0);\n                    \n                    if (fragCoord.x < float(N_PLANETS) / 2.0)\n                        fragColor.xyz += vec3(-500.0, 0.0, 0.0); \n                    else\n                        fragColor.xyz += vec3(500.0, 0.0, 0.0); \n        \t\t}\n            \telse if (fragCoord.x >= 1.0 && fragCoord.y < 2.0)\n        \t\t{\n        \t\t    // Planet velocity\n                    if (fragCoord.x < float(N_PLANETS) / 2.0)\n        \t\t    \tfragColor = vec4(vec3(speed, 0.0, 0.0), 5.0);\n                    else\n                        fragColor = vec4(vec3(-speed, 0.0, 0.0), 5.0);\n                    \n        \t\t    //fragColor = vec4(0.0);//vec4((rand3(uv) - vec3(.5)) * 20.0, 1.0);\n        \t\t}\n        \t\telse if (fragCoord.y >= 2.0 && fragCoord.y < 3.0)\n        \t\t{\n        \t\t    // Planet color\n        \t\t    fragColor = vec4(rand3(uv), 1.0);\n        \t\t}\n           \n        }\n        else \n        {        \n            // Simulation\n            if (fragCoord.y < 1.0)\n        \t{\n        \t    // Updating planet position\n                vec4 pr0 = texelFetch(iChannel0, ivec2(fragCoord.x, 0), 0);\n                vec3 v = texelFetch(iChannel0, ivec2(fragCoord.x, 1), 0).rgb;\n                \n        \t    pr0.xyz += v * iTimeDelta;\n                \n                // Separation\n                /*float m0 = mass(pr0.w);\n                float im0 = 1.0 / m0;\n                for (int i=0; i<N_PLANETS; i++)\n    \t\t\t{\n                    if (i == int(fragCoord.x))\n                        continue;\n                    \n                    vec4 pr1 = getPlanetsPositionAndRadius(i);\n                    \n                    vec3 d = pr1.xyz - pr0.xyz;\n                    float ld = length(d);\n                    float sr = pr0.w + pr1.w;\n                    if (ld < sr)\n                    { \n                        float m1 = mass(pr1.w);\n                        float im1  = 1.0 / m1;\n                        float m = im0 / (im0 + im1);\n                        \n                        pr0.xyz += normalize(d) * (ld - sr - epsilon) * m;\n                    }\n                }*/\n                \n                fragColor = pr0;\n        \t}\n            else if (fragCoord.y >= 1.0 && fragCoord.y < 2.0)\n        \t{\n        \t    // Updating planet velocity\n        \t    vec4 pr0 = texelFetch(iChannel0, ivec2(fragCoord.x, 0), 0);\n                vec3 v0 = texelFetch(iChannel0, ivec2(fragCoord.x, 1), 0).rgb;\n                vec3 tI = vec3(0.0);\n                float m0 = mass(pr0.w);\n                float im0 = 1.0 / m0;\n                \n                for (int i=0; i<N_PLANETS; i++)\n    \t\t\t{\n                    if (i == int(fragCoord.x))\n                        continue;\n                    \n                    vec4 pr1 = getPlanetsPositionAndRadius(i);\n                    float m1 = mass(pr1.w);\n                     \n                    // Collisions\n                    vec3 d = pr1.xyz - pr0.xyz;\n                    float r = length(d);\n                    if (r < (pr0.w + pr1.w))\n                    {                      \n                        vec3 v1 = getPlanetsVelocity(i);\n                    \t\n                    \tvec3 dv = v0 - v1;\n                    \tvec3 n = normalize(d);\n                    \t\n                    \tfloat cv = dot(dv, n);\n                    \tif (cv > 0.0)\n                    \t{\n                    \t    float im1 = 1.0 / m1;\n                            float m = im0 / (im0 + im1);\n                   \t\t\tvec3 impulse = (n * (-(1.0f + cof) * cv)) * m;\n                            \n                            tI += impulse;\n                        }\n                    } \n                    else\n                    {\n                        // Attraction\n                        vec4 pr1 = getPlanetsPositionAndRadius(i);\n                    \tfloat m1 = mass(pr1.w);\n                        \n                   \t\tvec3 f = (G * m1) / pow(r, 2.0) * normalize(d);\n                    \tfloat fl = clamp(length(f), 0.0, 10000.0);\n                    \ttI += normalize(f) * fl * iTimeDelta;\n                    }\n                }\n                v0 += tI;\n                \n                fragColor = vec4(v0, 1.0);\n        \t}\n            else if (fragCoord.y >= 3.0 && fragCoord.y < 4.0 && fragCoord.x < 1.0)\n            {\n                // Center of mass calculation\n                \n                float M = 0.0;\n                \n                vec3 com = vec3(0.0);\n                for (int i=0; i<N_PLANETS; i++)\n    \t\t\t{\n                    vec4 pr = getPlanetsPositionAndRadius(i);\n                    float m = mass(pr.w);\n                    \n                    com += m * pr.xyz;\n                    M += m;\n                }\n                \n                com /= M;\n                \n                fragColor = vec4(com, 1.0);\n            }\n        \telse\n        \t{\n        \t    fragColor = texelFetch(iChannel0, ivec2(fragCoord), 0);\n        \t}\n        }\n    }\n    else\n    {\n   \t\tfragColor = vec4(0.0);\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtjfDy",
+      "date": "1517051308",
+      "viewed": 207,
+      "name": "polar 3b ( 225 chars )",
+      "username": "FabriceNeyret2",
+      "description": "NB: #7 :     cos(  .3 * floor     for longer rainbows",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2tweets",
+        "short",
+        "golfing"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://shadertoy.com/view/lt2Bzd\n\n#define mainImage(O,u)                                           \\\n    vec2 U = u+u - iResolution.xy;                               \\\n    float T = 6.2832, l = length(U) / 30., L = ceil(l) * 6.,     \\\n          a = atan(U.x,U.y) - iTime * 2.*(fract(1e4*sin(L))-.5); \\\n    O = .6 + .4* cos( floor(fract(a/T)*L) + vec4(0,23,21,0) )    \\\n        - max(0., 9.* max( cos(T*l), cos(a*L) ) - 8. )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

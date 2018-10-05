@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ll3XR4",
+      "date": "1478358231",
+      "viewed": 224,
+      "name": "2D Metacircles",
+      "username": "jonathansty",
+      "description": "2d",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const float force = 4000.0;\n\nconst bool bDebug = false;\n\nfloat length2(vec2 d){ return dot(d,d);}\nfloat saturate(float i){ return clamp(i,0.0,1.0);}\nfloat metaball(vec2 fragcoord, vec2 pos,float f)\n{\n    return f/length2((fragcoord - pos));\n}\nfloat noise(vec2 i)\n{\n    return 1.0 + sin(0.5*i.x + 1.0)*0.25 + cos(0.25*i.y*3.14)*cos(0.25*i.y);\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\t\n    vec2 middle = iResolution.xy/2.0;\n    float r = 90.0 + sin(iTime)*25.0;\n    float b = metaball(fragCoord, vec2(middle.x + cos(iTime)*r,middle.y + sin(iTime)*r),force);\n\t\n    b += metaball(fragCoord, vec2(middle.x, middle.y),force);\n    \n    b -= metaball(fragCoord,vec2(100,0),4.0*force);\n    b -= metaball(fragCoord,middle + vec2(100,0),force*2.0);\n\tvec4 c = vec4(0);\n    if( b < 0.8)\n        c = vec4(1.0*abs(b*b*b),1.0*abs(b*b*b),abs(b)*0.2,1);\n    else\n        c = vec4(0.2*b,0.2*b,b,1.0);    \n\n    fragColor = c;\n    if(bDebug)\n    \tfragColor = vec4(abs(b),b,b,1.0);\n    fragColor *= vec4(noise(fragCoord.xy));\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dVcRc",
+      "date": "1522791665",
+      "viewed": 118,
+      "name": "diamond pattern 3",
+      "username": "FabriceNeyret2",
+      "description": "(oops, this is the real one. See ref below).\nJust a pattern I saw on a mug recently.\n",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "2tweets",
+        "short",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 15,
+            "src": "/media/a/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://shadertoy.com/view/lsVczV\n\n\n#define mainImage(O,u)                                                 \\\n    vec2 U = fract( u/iResolution.y* vec2(3,6) * mat2(1,-1,1,1) ) -.5, \\\n    V = abs( U * mat2(.9,.16,.16,.9) );                                \\\n    O += .6 - cos ( 20.*max(V.x,V.y)  + .7*texture(iChannel0,U/2.).r )\n    \n        \n        \n        \n//  U = ((fract(U) -.5) * mat2(1,1,-1,1)/vec2(1,1.4))*mat2(1,-1,1,1)/2.\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

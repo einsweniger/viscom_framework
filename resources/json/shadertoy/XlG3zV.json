@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlG3zV",
+      "date": "1475441445",
+      "viewed": 335,
+      "name": "Millisecond Timer",
+      "username": "jherico",
+      "description": "A simple tool for creating an on-screen timer that can be used with a high speed camera to count the time between frames.  Each box represents a millisecond of time, with entire grid being a tenth of a second.  ",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "utility"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "bool squared(out vec2 uv, in vec2 fragCoord) {\n    uv = fragCoord.xy / iResolution.xy;\n    float min = min(iResolution.x, iResolution.y);\n    float aspect = iResolution.x / iResolution.y;\n    uv.x *= aspect;\n    uv.x += (1.0 - aspect) / 2.0;\n    if (clamp(uv, vec2(0.0), vec2(1.0)) != uv) {\n        return false;\n    }\n    return true;\n}\n\n#define GRID_WIDTH 0.05\n#define GRID_DIM 10.0\n#define GRID_COUNT (GRID_DIM * GRID_DIM)\n\nconst vec3 ON_COLOR = vec3(24, 202, 230) / 255.0;\nconst vec3 OFF_COLOR = vec3(251, 0, 9) / 255.0;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv;\n    if (!squared(uv, fragCoord)) {\n        fragColor = vec4(0, 0, 0, 1);\n        return;\n    } \n\n    vec2 grid = uv * GRID_DIM;\n    vec2 floorGrid = floor(grid);\n    vec2 offset = grid - floorGrid;\n    if (offset != clamp(offset, vec2(GRID_WIDTH), vec2(1.0 - GRID_WIDTH))) {\n        fragColor = vec4(vec3(0.5), 1.0);\n        return;\n    }\n    \n    \n    float square = floorGrid.x + GRID_DIM * floorGrid.y;\n    float f = mod(float(iTime * 1000.0), GRID_COUNT);\n    \n    fragColor = vec4(square > f ? ON_COLOR : OFF_COLOR, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

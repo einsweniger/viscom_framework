@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsKyDG",
+      "date": "1523255788",
+      "viewed": 107,
+      "name": "decoloration",
+      "username": "shaderBeginner",
+      "description": "\u4f7f\u7eb9\u7406\u53d8\u7070\u8272",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "color"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 2,
+            "src": "/media/a/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n   // vec2 uv = fragCoord/iResolution.xy;\n\n    // Time varying pixel color\n   // vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n\n    vec2 xy = fragCoord.xy/iResolution.xy;\n    \n    vec4 texColor = texture(iChannel0,xy);\n    \n    float gray = texColor.r * 0.299 + texColor.g*0.587 + texColor.b*0.114;\n    \n    texColor.r = texColor.g = texColor.b = gray;\n    \n    // Output to screen\n    fragColor = texColor;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

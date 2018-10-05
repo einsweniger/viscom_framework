@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdSfDW",
+      "date": "1500400712",
+      "viewed": 156,
+      "name": "Iron ondulation",
+      "username": "eliemichel",
+      "description": "Wave",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "wave"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define t0 texture(iChannel0, uv\n#define t1 texture(iChannel1,\n\nvoid mainImage( out vec4 c, in vec2 co )\n{\n\tvec2 uv = co.xy / iResolution.xy;\n    vec2 xy = co.xy * .2 + (t1 uv * .1 + iTime * .005).rg - .5) * 2.;\n    c = t0 - cos(xy) * .2);\n}\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlSBDy",
+      "date": "1516969362",
+      "viewed": 187,
+      "name": "fiaeques",
+      "username": "hamoid",
+      "description": "Flat rectangles reacting to video",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 29,
+            "src": "/media/a/3405e48f74815c7baa49133bdc835142948381fbe003ad2f12f5087715731153.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, in vec2 uv1 ) {\n\tuv1 /= iResolution.xy;\n    vec2 k = floor(7. * uv1.yx);\n    vec2 uv2 = floor(k*uv1 + .5) / k;\n    float a = texture(iChannel0, vec2(uv1.x, uv2.y)).r;\n    float b = texture(iChannel0, vec2(uv2.x, uv1.y)).r;\n\tO = vec4(1., 1., 1., 1.);\n    if(a > .5) {\n        O -= vec4(.2*uv1.x, .6, 8., 0.);\n    }\n    if(b > .5) {\n        O -= vec4(.8, .4, .2*uv1.y, 0.);\n    }\n    O *= 1.-pow(length(uv1-vec2(.5,.5)), 5.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

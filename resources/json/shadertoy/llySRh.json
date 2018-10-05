@@ -1,0 +1,100 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llySRh",
+      "date": "1482751515",
+      "viewed": 1072,
+      "name": "iResolution, iMouse, iDate, etc",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 20,
+      "published": 3,
+      "flags": 16,
+      "tags": [
+        "mouse",
+        "time",
+        "textures",
+        "bug",
+        "keyboard",
+        "utils",
+        "fonts",
+        "keycode",
+        "resolution"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 13,
+            "src": "/media/a/3c33c415862bb7964d256f4749408247da6596f2167dca2c86cc38f83c244aa6.mp3",
+            "ctype": "music",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 3,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//=== original link: https://www.shadertoy.com/view/llySRh\n\n// --- access to the image of ascii code c\nvec4 char(vec2 p, int c) {\n    if (p.x<.0|| p.x>1. || p.y<0.|| p.y>1.) return vec4(0,0,0,1e5);\n    //if (p.x<.25|| p.x>.75 || p.y<0.|| p.y>1.) return vec4(0,0,0,1e5); // strange bug\n\treturn textureGrad( iChannel0, p/16. + fract( vec2(c, 15-c/16) / 16. ), \n                        dFdx(p/16.),dFdy(p/16.) );\n  //float l = log2(length(fwidth(p/16.*iResolution.xy)));\n  //return textureLod( iChannel0, p/16. + fract( vec2(c, 15-c/16) / 16. ), l);\n                   // manual MIPmap to avoid border artifact. Should be textureLod, but don't available everywhere\n}\n\n// --- display int4\nvec4 pInt(vec2 p, float n) {\n    vec4 v = vec4(0);\n    if (n < 0.) \n        v += char(p - vec2(-.5,0), 45 ),\n        n = -n;\n\n    for (float i = 3.; i>=0.; i--) \n        n /=  9.999999, // 10., // for windows :-(\n        v += char(p - .5*vec2(i,0), 48+ int(fract(n)*10.) );\n    return v;\n}\n\n// --- display float4.4\nvec4 pFloat(vec2 p, float n) {\n    vec4 v = pInt(p,floor(n)); p.x -= 2.;\n        v += char(p, 46);      p.x -= .5;\n        v += pInt(p,fract(n)*1e4);\n    return v;\n}\n\n// --- chars\nint CAPS=0;\n#define low CAPS=32;\n#define caps CAPS=0;\n#define spc  U.x-=.5;\n#define C(c) spc O+= char(U,64+CAPS+c);\n\n// --- key toggles -----------------------------------------------------\n// FYI: LEFT:37  UP:38  RIGHT:39  DOWN:40   PAGEUP:33  PAGEDOWN:34  END : 35  HOME: 36\n#define keyToggle(ascii)  ( texelFetch(iChannel3,ivec2(ascii,2),0).x > 0.)\n#define keyClick(ascii)   ( texelFetch(iChannel3,ivec2(ascii,0),0).x > 0.)\n\nvoid mainImage( out vec4 O,  vec2 uv )\n{\n    O -= O;\n    uv /= iResolution.y;    \n    vec2 U;\n    int lod = int(mod(iTime,10.));\n    \n    U = ( uv - vec2(.0,.9) ) * 16.;  caps;C(18);low;C(5);C(19);C(15);C(12);caps;C(-6); // \"Resol\"\n                             U.x-=1.; low;C(19);C(3);C(18);C(5);C(5);C(14);            // \"screen\"\n    U = ( uv - vec2(.6,.9) ) * 16.;   low;C(20);C(5);C(24);C(20);                      // \"text\"\n    U = ( uv - vec2(.85,.9) ) * 16.;  low C(12)C(15)C(4) spc C(-48+lod)                // \"lod\"\n    U = ( uv - vec2(1.15,.9) ) * 16.;  low;C(19);C(15);C(21);C(14);C(4);               // \"sound\"\n\n    U = ( uv - vec2(.0,.6) ) * 16.;  caps;C(13);low;C(15);C(21);C(19);C(5);caps;C(-6); // \"mouse\"\n    U = ( uv - vec2(.5,.6) ) * 16.;  caps;C(20);low;C(9);C(13);C(5);caps;C(-6);        // \"Time\"\n    U = ( uv - vec2(1.45,.55) ) * 16.;  caps;C(11);low;C(5);C(25);caps;C(-6);          // \"Key\"\n\n    \n    U = ( uv - vec2(.1,.8) ) * 8.;        // --- column 1\n    O += pInt(U, iResolution.x);  U.y += .8;   // window resolution\n    O += pInt(U, iResolution.y);  U.y += .8;\n    O += pFloat((U-vec2(-1,.35))*1.5, iResolution.x/iResolution.y);  U.y += .8;\n  //O += pInt(U, iResolution.z);  U.y += .8;\n    U.y += .8;\n    O += pInt(U, iMouse.x);  U.y += .8;        // mouse location\n    O += pInt(U, iMouse.y);  U.y += .8;\n    U.y += .4;\n    O += pInt(U, iMouse.z);  U.y += .8;        // last mouse-click location \n    O += pInt(U, iMouse.w);  U.y += .8;\n    \n    U = ( uv - vec2(.5,.8) ) * 8.;        // --- column 2\n\n    O += pInt(U, iChannelResolution[1].x);  U.y += .8; // texture ( video )\n    O += pInt(U, iChannelResolution[1].y);  U.y += .8; // see LOD in column 2b\n    //O += pInt(U, iChannelResolution[1].z);  U.y += .8;\n    U.y += .8;\n\n    O += pFloat(U, iTime);         U.y += .8;  // time\n    O += pInt(U, float(iFrame));   U.y += .8;  // iFrame\n    O += pFloat(U, 1./iTimeDelta); U.y += .8;  // FPS\n    \n    U.y += .8;\n\n    O += pInt(U, iDate.w/3600.);          U.x -= 2.5;\n    O += pInt(U, mod(iDate.w/60.,60.));   U.x -= 2.5;\n    O += pFloat(U, mod(iDate.w,60.));  \n\n    U = ( uv - vec2(.8,.8) ) * 8.;        // --- column 2b\n\n    ivec2 S = textureSize(iChannel1,lod);\n    O += pInt(U, float(S.x));  U.y += .8; // texture LOD\n    O += pInt(U, float(S.y));  U.y += .8;\n\n    U = ( uv - vec2(.6,.2) ) * 16.;  caps;C(8);low;C(15);C(21);C(18); // \"Hour\"\n    U = ( uv - vec2(.95,.2) ) * 16.;  caps;C(13);low;C(9);C(14);      // \"Min\"\n    U = ( uv - vec2(1.25,.2) ) * 16.;  caps;C(19);low;C(5);C(3);      // \"Sec\"\n\n    U = ( uv - vec2(1.1,.8) ) * 8.;        // --- column 3\n\n    O += pInt(U, iChannelResolution[2].x);  U.y += .8; // sound texture\n    O += pInt(U, iChannelResolution[2].y);  U.y += .8;\n    // O += pInt(U, iChannelResolution[2].z);  U.y += .8;\n\n    O += pInt(U, iSampleRate/1e4);          U.x -= 2.; // iSampleRate\n    O += pInt(U, mod(iSampleRate,1e4)); \n\n    U = ( uv - vec2(1.4,.45) ) * 8.;       // --- column 4\n    \n    bool b = false;\n    for (int i=0; i<256; i++)\n        if (keyClick(i) )  b=true, O += pInt(U, float(i));  // keypressed ascii \n    if (b==false) O += pInt(U, -1.);\n        \n    O = O.xxxx;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

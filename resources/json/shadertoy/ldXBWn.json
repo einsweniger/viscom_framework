@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldXBWn",
+      "date": "1495596635",
+      "viewed": 159,
+      "name": "14/100",
+      "username": "yahe",
+      "description": "14/100",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "distance"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define N 6\nvec2[N] c;\n\nfloat avgDistance(vec2 uv)\n{\n \tfloat d = 0.0;\n    float k = 30.+sin(iTime)+cos(iTime);\n    for(int i=0; i<N; i++)    \n     \td+= cos(k*distance(uv,c[i])); \n    return d/float(N);  \n}\n\nvec4 distToColor(float d)\n{\n    return vec4(.95,1.2-sin(d),cos(d),1.0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord.xy - iResolution.xy * .5) / iResolution.y;\n    for(int i=0; i<N; i++)\n    {\n     float fi = 2.0*3.14*float(i)/float(N);\n     c[i]= vec2(sin(fi), cos(fi))*(cos(iTime)+2.)*.1;\n    }\n\tfragColor = distToColor(avgDistance(uv));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tdGRX",
+      "date": "1470571586",
+      "viewed": 344,
+      "name": "Basic Button",
+      "username": "Imsure1200q_1UWE130",
+      "description": "Your Very Own Basic Button!",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "button"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 2,
+            "src": "/media/a/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 6,
+            "src": "/media/a/1f7dca9c22f324751f2a5a59c9b181dfe3b5564a04b724c657732d0bf09c99db.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    float btnX = iMouse.x / iResolution.x;\n    float btnY = iMouse.y / iResolution.y;\n    if(uv.x >= 0.1 && uv.x <= 0.2 && uv.y >= 0.3 && uv.y <= 0.6)\n        fragColor = texture(iChannel0, uv);\n    if(btnX >= 0.1 && btnX <= 0.2 && btnY >= 0.3 && btnY <= 0.6)\n        fragColor += texture(iChannel1, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

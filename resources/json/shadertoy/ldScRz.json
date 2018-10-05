@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldScRz",
+      "date": "1490578169",
+      "viewed": 196,
+      "name": "Psychedelic circles",
+      "username": "LaGambasse",
+      "description": "And we are going to the shader world ! Yeeaaaah",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "lol"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 21,
+            "src": "/media/a/ec8a6ea755d34600547a5353f21f0a453f9f55ff95514383b2d80b8d71283eda.mp3",
+            "ctype": "music",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \n  \tvec2 xy;\n    xy.x = ((fragCoord.x - iMouse.x)/ iResolution.y);\n    xy.y = ((fragCoord.y - iMouse.y) / iResolution.y);\n    \n  \n   \tfloat taille = 3.;\n    float dist = length(xy);\n    float colByDist = (taille/dist);   \n    \n    if(dist > 0.02)\n    {\n        float colorR = cos(colByDist + 50.*iTime);\n        float colorG = sin(colByDist + 20.*iTime);\n        float colorB = cos(colByDist + 10.*iTime);\n        fragColor = vec4(colorR, sin(4.*iTime)*colorG, cos(2.*iTime)*colorB ,1.); \n    }\n    else\n    {    \n    \tfragColor = vec4(0);\n    }\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

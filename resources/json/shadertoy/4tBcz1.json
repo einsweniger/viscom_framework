@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tBcz1",
+      "date": "1516667543",
+      "viewed": 181,
+      "name": "waves in waves",
+      "username": "public_int_i",
+      "description": "waves in waves",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "waves",
+        "in"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Ethan Alexander Shulman 2018\nvoid mainImage( out vec4 o, vec2 u )\n{\n    o -= o;\n    for (int i = 0; i < 6; i++) {\n        if (i > (iFrame/180)%6) break;\n        float fi = float(i)*.04;\n        o += abs(tan(length(mod(u*mat2(cos(vec4(u.x,u.y,-u.y,u.x)/100.))/2000.,fi)-fi*.5)*(40./(1.+fi))-mod(iDate.w*(1.+vec4(fi*.01,fi*.03+sin(iDate.w*1e-5),fi*.002,0.))+u.x*.034+cos(u.y*.03),2e3)))*.02;\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

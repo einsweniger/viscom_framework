@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsKyDR",
+      "date": "1521649068",
+      "viewed": 129,
+      "name": "hierarchy ( 111 chars )",
+      "username": "FabriceNeyret2",
+      "description": "- replace length(U) by max(U.x,U.y) for squares\n- U = abs( (U*2.5-1.) *mat2(cos( iTime + vec4(0,33,55,0))) ) for rotation ",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "kifs",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// replace length(U) by max(U.x,U.y) for squares\n// U = abs( (U*2.5-1.) *mat2(cos( iTime + vec4(0,33,55,0)))) for rotation \n\n#define mainImage(O,u)                                       \\\n    for ( vec2 R = iResolution.xy, U = abs( (u+u-R) / R.y ); \\\n          O.w++<9. && length(U)<1. ;                         \\\n          O += .12                                           \\\n        ) U = abs(U/.4-1.)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dXfzr",
+      "date": "1494536287",
+      "viewed": 204,
+      "name": "+++",
+      "username": "lennyjpg",
+      "description": "sfdgsgs",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor , in vec2 fragCoord  )\n{\n    float t = iTime * .137;\n    vec2 v = (fragCoord  / iResolution.y - .5) * 2.;  \n    float m = mod(t * -.02 - length(v) * .137,1.);\n    if(v.y < 0.) m = mod(t*.02-length(v) * .37,1.);  \n    float n = smoothstep(m, m + 1.0, 1.) ;\n    if(v.y <  0. ) n = 1. - n;   \n    fragColor  = vec4( mix( vec3(1., .337, .11), vec3(.75, .79, .72), n), 1.);   \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

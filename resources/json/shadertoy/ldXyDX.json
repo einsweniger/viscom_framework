@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldXyDX",
+      "date": "1490109338",
+      "viewed": 269,
+      "name": "Artifacts #1",
+      "username": "anticore",
+      "description": "nothing special",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define t iTime\n#define r iResolution.xy\n\nvoid mainImage (out vec4 fragColor, in vec2 fragCoord) {\n\tvec2 uv = fragCoord.xy / r;\n\tuv = uv * 2.0 - 1.0;\n\tfloat d = length(uv);\n\tfloat a = atan(uv.y, uv.x);\n\tfloat f = 2.0*cos(a*t*50.0);\n\tfloat p = 1.0 - smoothstep(f, f+0.02, d);\n\tvec3 color = vec3(p);\n\tfragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

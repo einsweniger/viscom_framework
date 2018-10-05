@@ -1,0 +1,162 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tjBDV",
+      "date": "1517256403",
+      "viewed": 150,
+      "name": "moshMallow",
+      "username": "clickbecause",
+      "description": "do not ring the bell",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "shaderclub"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    vec4 fb = texture(iChannel0, uv);\n    \n    fb.rgb = pow(fb.rgb, vec3(2.0));\n    fb.rgb = sqrt(fb.rgb);\n    fb.rgb = smoothstep(0.0, 0.9, fb.rgb);\n    fb.rgb = clamp(pow(fb.rgb, vec3(1.0/1.48)), 0.0, 1.0); //gamma correct\n    \n\tfragColor = fb;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 260,
+            "src": "/media/previz/buffer03.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float random (vec2 st) {\n    return fract(sin(dot(st.xy,\n                         vec2(12.9898,78.233)))*\n        43758.5453123);\n}\n\n\nmat2 rotate2d(float _angle){\n    return mat2(cos(_angle),-sin(_angle),\n                sin(_angle),cos(_angle));\n}\n\nvec3 rgb2hsv(vec3 c)\n{\n    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);\n    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));\n    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));\n\n    float d = q.x - min(q.w, q.y);\n    float e = 1.0e-10;\n    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);\n}\n\nvec3 hsv2rgb(vec3 c)\n{\n    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);\n    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);\n    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy;\n    \n    float d = 1.0/(iResolution.y/16.0);\n    vec2 pix = floor( (vec2(uv.x, uv.y) / d )) * d;\n    \n    pix -= vec2(0.5);\n    pix *= rotate2d(iTime*0.01);\n    pix += vec2(0.5);\n    \n    float rnd = random(pix);\n    \n    vec4 flow = texture(iChannel1, pix);\n    \n    vec3 map = rgb2hsv(flow.rgb);\n    map = (map-0.5)*2.0;\n    \n    uv += map.yx*map.z*0.024 + (rnd-0.5)*2.0*0.00024;\n    \n    vec4 fb = texture(iChannel1, uv);\n    \n    vec3 hsv = rgb2hsv(fb.rgb);\n    hsv.x += mix((rnd-0.5)*2.0*0.001*sin(iTime*0.1),  0.001, \t  0.5);\n    hsv.y *= mix((rnd-0.5)*2.0*0.100*sin(iTime*0.2) + 1.005, 1.0, 0.5);\n    hsv.z *= mix((rnd-0.5)*2.0*0.010*sin(iTime*0.3) + 1.000, 1.0, 0.5);\n    fb.rgb = hsv2rgb(hsv);\n    \n    vec4 color = vec4(0.0);\n    \n    if (iFrame <= 10 || iMouse.z > 0.0){\n        color = texture(iChannel0, uv);\n    }else {\n        if ((hsv.y - rnd*0.1) < 0.24){\n            discard;\n        }\n        \n        vec3 tex = texture(iChannel0, uv).rgb;\n        color = mix(fb, vec4(tex, 1.0), 0.002);\n    }\n    \n    fragColor = color;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 st = fragCoord.st/iResolution.st;\n    vec2 texel = 1.0/iResolution.xy;\n    \n    vec2 offset[9];\n    \n    offset[0] = vec2(-texel.x, -texel.y);\n    offset[1] = vec2(     0.0, -texel.y);\n    offset[2] = vec2( texel.x, -texel.y);\n    offset[3] = vec2(-texel.x,      0.0);\n    offset[4] = vec2(     0.0,      0.0);\n    offset[5] = vec2( texel.x,      0.0);\n    offset[6] = vec2(-texel.x,  texel.y);\n    offset[7] = vec2(     0.0,  texel.y);\n    offset[8] = vec2( texel.x,  texel.y);\n    \n    float kernel[9];\n    \n    kernel[0] = 0.0625; kernel[1] = 0.1250; kernel[2] = 0.0625;\n    kernel[3] = 0.1250; kernel[4] = 0.2500; kernel[5] = 0.1250;\n    kernel[6] = 0.0625; kernel[7] = 0.1250; kernel[8] = 0.0625;\n    \n    vec4 sum = vec4(0.0);\n    \n    for (int i = 0; i < 9; i++){\n        sum += texture(iChannel0, st + offset[i]) * kernel[i];\n    }\n    \n\tvec4 color = vec4(sum.rgb, 1.0);\n    \n    fragColor = color;\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 st = fragCoord.st/iResolution.st;\n    vec2 texel = 1.0/iResolution.xy;\n    \n    vec2 offset[9];\n    \n    offset[0] = vec2(-texel.x, -texel.y);\n    offset[1] = vec2(     0.0, -texel.y);\n    offset[2] = vec2( texel.x, -texel.y);\n    offset[3] = vec2(-texel.x,      0.0);\n    offset[4] = vec2(     0.0,      0.0);\n    offset[5] = vec2( texel.x,      0.0);\n    offset[6] = vec2(-texel.x,  texel.y);\n    offset[7] = vec2(     0.0,  texel.y);\n    offset[8] = vec2( texel.x,  texel.y);\n    \n    float kernel[9];\n    \n    kernel[0] =  0.0; kernel[1] = -0.4; kernel[2] =  0.0;\n    kernel[3] = -0.4; kernel[4] =  2.6; kernel[5] = -0.4;\n    kernel[6] =  0.0; kernel[7] = -0.4; kernel[8] =  0.0;\n    \n    vec4 sum = vec4(0.0);\n    \n    for (int i = 0; i < 9; i++){\n        sum += texture(iChannel0, st + offset[i]) * kernel[i];\n    }\n    \n    vec4 color = vec4(clamp(sum.rgb, 0.0, 1.0), 1.0);\n    \n    fragColor = color;\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

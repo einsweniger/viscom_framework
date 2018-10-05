@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsGyWc",
+      "date": "1523470558",
+      "viewed": 105,
+      "name": "PixelShader",
+      "username": "marakaci",
+      "description": "PZ1",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "pz1"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 xy = fragCoord.xy / iResolution.xy; \n    vec4 texColor = texture(iChannel0,xy); \n    texColor.r *= abs(sin(iTime));\n    texColor.g *= abs(cos(iTime));\n    texColor.b *= 0.0;\n    fragColor = texColor; \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

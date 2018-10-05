@@ -1,0 +1,43 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldKyDm",
+      "date": "1522320381",
+      "viewed": 155,
+      "name": "Satisfying sound",
+      "username": "Jamie_Pendergast",
+      "description": "Feels like the sound is scratching an itch in your ear!",
+      "likes": 1,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "sound"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 mouse;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    mouse = iMouse.xy / iResolution.xy;\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\n    // Time varying pixel color\n    vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n\n    // Output to screen\n    fragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "float bass(float time, float t) {\n\tfloat s = 1./ t;\n    s += cos(time * t) + s;\n    s += cos(s);\n    return s;\n}\n\nvec2 mainSound( float time )\n{\n    float a = bass(time,300.);\n    float b = bass(time,100.);\n    a += b;\n    b *= a;\n    a += cos(time);\n    \n    return normalize(vec2(a,b));\n}",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

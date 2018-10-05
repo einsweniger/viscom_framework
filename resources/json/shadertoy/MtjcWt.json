@@ -1,0 +1,128 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtjcWt",
+      "date": "1510645253",
+      "viewed": 278,
+      "name": "Sound Experiment 2017-11-14",
+      "username": "ttg",
+      "description": "Experiment",
+      "likes": 6,
+      "published": 3,
+      "flags": 40,
+      "tags": [
+        "sound"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Passthrough to Buf A\n\nvoid mainImage( out vec4 f, in vec2 d ) { f = texelFetch(iChannel0, ivec2(d), 0); }\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "/*\nSound Experiment\nCopyright 2017 Theron Tarigo\n*/\n\nconst float pi = 3.141592653589793;\n\nfloat pulse (float x, float mult) {\n  return ( x<0. ? 0. : sin(pi*x)*exp(-pi*x/mult) );\n}\n\nfloat note (float t, float freq, float decay) {\n    float f = 0.;\n    for (float q = 1.; q < 50.; q+=1.) {\n      float r = 1.;\n      f += 0.05*pulse( freq*t*q*r-12.8, 124./decay*pow(q, -0.4))/sqrt(q);\n    }\n    return f;\n}\n\nvec2 mainSound (float time) {\n  vec2 f = vec2(0.);\n  float s = 0.6;\n  int i = int(time*s);\n  float n0 = float[](   1.,  1.,    5./4.,   5./3.)[(i-i/8)%4];\n  float n1 = float[](3./2.,  4./3., 1.,    4./3.)[i%4];\n  f += note(mod(time-0./4./s,1./s), n0*440., 0.1);\n  f += note(mod(time-0.5/4./s,1./s), n1*440., 0.1);\n  f += note(mod(time-1./4./s,1./s), 2./n1*440., 0.1);\n  f += note(mod(time-1.5/4./s,1./s), n1*440., 0.1);\n  f += note(mod(time-3./4./s,1./s), n0*440., 0.1);\n  f += note(mod(time-2./4./s,1./s), n0*440., 0.1);\n  \n  f += vec2(1.0,0.8)*0.5*note(mod(time-1./8./s,1./s), n0*110., 0.01);\n  f += vec2(0.8,1.0)*0.5*note(mod(time-2./8./s,1./s), n1*110., 0.01);\n  f += vec2(1.0,0.2)*0.5*note(mod(time-1./8./s,1./s/4.), n0*880., 0.1);\n  f += vec2(0.2,1.0)*0.5*note(mod(time-1.5/8./s,1./s/4.), n1*880., 0.1);\n  \n  return vec2(f);\n}\n",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "/*\nSound Experiment\nCopyright 2017 Theron Tarigo\n*/\n\nconst float pi = 3.141592653589793;\n\nfloat pulse (float x, float mult) {\n  return ( x<0. ? 0. : sin(pi*x)*exp(-pi*x/mult) );\n}\n\nfloat note (float t, float freq, float decay) {\n    float f = 0.;\n    for (float q = 1.; q < 50.; q+=1.) {\n      float r = 1.;\n      f += 0.05*pulse( freq*t*q*r-12.8, 124./decay*pow(q, -0.4))/sqrt(q);\n    }\n    return f;\n}\n\nvec2 mainSound (float time) {\n  vec2 f = vec2(0.);\n  float s = 0.6;\n  int i = int(time*s);\n  float n0 = float[](   1.,  1.,    5./4.,   5./3.)[(i-i/8)%4];\n  float n1 = float[](3./2.,  4./3., 1.,    4./3.)[i%4];\n  f += note(mod(time-0./4./s,1./s), n0*440., 0.1);\n  f += note(mod(time-0.5/4./s,1./s), n1*440., 0.1);\n  f += note(mod(time-1./4./s,1./s), 2./n1*440., 0.1);\n  f += note(mod(time-1.5/4./s,1./s), n1*440., 0.1);\n  f += note(mod(time-3./4./s,1./s), n0*440., 0.1);\n  f += note(mod(time-2./4./s,1./s), n0*440., 0.1);\n  \n  f += vec2(1.0,0.8)*0.5*note(mod(time-1./8./s,1./s), n0*110., 0.01);\n  f += vec2(0.8,1.0)*0.5*note(mod(time-2./8./s,1./s), n1*110., 0.01);\n  f += vec2(1.0,0.2)*0.5*note(mod(time-1./8./s,1./s/4.), n0*880., 0.1);\n  f += vec2(0.2,1.0)*0.5*note(mod(time-1.5/8./s,1./s/4.), n1*880., 0.1);\n  \n  return vec2(f);\n}\n\n\n/*******************************/\n\n/*\nStreaming Spectrogram v.2 [Xt2yzd]\nCopyright 2017 Theron Tarigo\n*/\n\nfloat windowmax = 0.5;\n\nvec4 encode(int i) { return vec4((uvec4(i)>>ivec4(0,8,16,24))&0xFFu)/255.; }\nint decode(vec4 f) { uvec4 d = uvec4(f*255.)<<ivec4(0,8,16,24); return int(d.x|d.y|d.z|d.w); }\n\nvoid mainImage( out vec4 f, in vec2 pixf )\n{\n    f = vec4(0.);\n    ivec2 pix = ivec2(pixf);\n    ivec2 res = ivec2(iChannelResolution[0].xy);\n    int center = res.x*res.y/2;\n    int offset = int(iTime*iSampleRate) - center;\n    int index = res.x*pix.y+pix.x;\n    if (index==0) { f = encode(offset); return; }\n    int offsetlast = decode(texelFetch(iChannel0, ivec2(0), 0));\n    int cutoff = int(windowmax*iSampleRate);\n    if (abs(index-center) > cutoff) return;\n    int samp = index+offset;\n    int samplast = center+cutoff+offsetlast;\n    float time = (float(samp)-0.5)/iSampleRate;\n    \n    //#define TESTING\n    #ifdef TESTING\n    /* TESTING: ensure reuse of previously computed samples is valid.  No blue pixels should appear! */\n    vec2 newsamp = mainSound(time);\n    vec2 oldsamp = texelFetch(iChannel0, (ivec2(index+offset-offsetlast)/ivec2(1,res.x))%(res), 0).xy;\n    f.xy = newsamp;\n    if (bool(newsamp != oldsamp) == bool(samp <= offsetlast + center + cutoff)) f.z = 1.;\n    #else\n    if (samp <= offsetlast + center + cutoff) {\n        f.xy = texelFetch(iChannel0, (ivec2(index+offset-offsetlast)/ivec2(1,res.x))%(res), 0).xy;\n    } else {\n        f.xy = mainSound(time);\n    }\n    #endif\n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "// Config\n\nconst float timescale = 1./4.; // Screens per second\nconst float freqscale = 1000.;\nconst float aspect = 2.;\nconst vec2 stereomix = vec2(2.,2.);\n\n\n\n/*\nStreaming Spectrogram v.2 [Xt2yzd]\nCopyright 2017 Theron Tarigo\n*/\n\nconst float pi = 3.141592653589793;\n\nvec2 mainSound( float time )\n{\n    ivec2 res = ivec2(iResolution.xy);\n    int offset = int(iTime*iSampleRate) - res.x*res.y/2;\n    //time += 4.;\n    int samp = int(time*iSampleRate) - offset;\n    ivec2 pix = ivec2(samp%res.x, (samp/res.x));\n    return texelFetch(iChannel1, pix, 0).xy;\n}\n\nvec2 spectrogram(float windowmax, float time, float freq) {\n    vec2 sum = vec2(0.);\n    float window = windowmax;\n    float samplerate = freqscale*2.;\n    for (float trel = -window; trel <= window; trel+=1./samplerate) {\n        // Cosine window\n        float w = (0.5+0.5*cos(trel/window*pi))/samplerate/window;\n        float samp = dot(stereomix,mainSound(time+trel));\n        sum += w*vec2(cos(trel*freq*2.*pi),sin(trel*freq*2.*pi))*samp;\n    }\n    return sum;\n}\n\nvoid panImage( out vec4 f, float time, float y ) {\n    float freq = freqscale * y / iResolution.y;\n    f.rgb = 5.*vec3(10.,3.2,1.)*\n    length(spectrogram(0.1*sqrt(freq/freqscale)/aspect, time, freq));\n}\n\n//#define FRAMEDEBUGVIS\nvoid mainImage( out vec4 f, in vec2 df )\n{\n    ivec2 d = ivec2(df);\n    vec2 fsf = iResolution.xy;\n    ivec2 fs = ivec2(fsf);\n    int shift = int(fsf.x*timescale*(iTime));\n    int shiftlast = int(fsf.x*timescale*(iTime-iTimeDelta));\n    int delta = shift - shiftlast;\n    if ((fs.x-d.x) <= delta) {\n        #ifdef FRAMEDEBUGVIS\n        if (d.y<10) { f = vec4(0,iFrame%2,0,0); return; }\n        #endif\n        float time = float(shift-fs.x+d.x)/timescale/fsf.x;\n        panImage(f, time, df.y);\n    } else {\n        f = texelFetch(iChannel0,d+ivec2(delta,0),0);\n    }\n}\n",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

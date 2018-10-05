@@ -1,0 +1,45 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MstGzn",
+      "date": "1447840665",
+      "viewed": 571,
+      "name": "Water Microwave",
+      "username": "PLS",
+      "description": "Blue effect with transverse wave\n~350 chars",
+      "likes": 12,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "wave"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.y;\n    float dt = sin(mod(length((uv - vec2(0.7, 0.5)) * 5.) - iTime, 3.14));\n    float circle = (cos(mod(uv.x * 32.0, 3.14) - 1.58) *0.5) *(sin(mod(uv.y * 32.0, 3.14)) *0.5) * (1.-dt);\n\t//fragColor = vec4(2.0, 1.0, 0.0,1.0) * circle;\n\tfragColor = vec4(1,4,12,1) * circle;\n}",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

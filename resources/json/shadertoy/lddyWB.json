@@ -1,0 +1,86 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lddyWB",
+      "date": "1520113104",
+      "viewed": 158,
+      "name": "pulse 2b",
+      "username": "FabriceNeyret2",
+      "description": "pulse 2a vs 2b: switching texture vs texelFetch in Common",
+      "likes": 5,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,U) O = T(U)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "//#define T(U) texelFetch(iChannel0,ivec2(U),0)\n#define T(U) texture(iChannel0,(U)/iResolution.xy)",
+        "name": "Common",
+        "description": "",
+        "type": "common"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    vec2 C = iResolution.xy/2.;\n    float k = 1. + .01*sin(iTime);\n    \n    O = .999* T( C + k * (U-C) * mat2(cos( .1 + vec4(0,33,55,0))) );\n    \n    if (U.y-.5==floor(C.y/4.)) O += vec4(.4,1,.7,0);  // line\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

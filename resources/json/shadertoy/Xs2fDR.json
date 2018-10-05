@@ -1,0 +1,82 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xs2fDR",
+      "date": "1500066247",
+      "viewed": 366,
+      "name": "[SH17A] Fractal Feedback Wiggler",
+      "username": "cornusammonis",
+      "description": "A feedback system with a fractal character that likes to wiggle.",
+      "likes": 17,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "fractal",
+        "diffusion",
+        "feedback",
+        "reaction",
+        "wiggler"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 O,vec2 U)\n{\n    O=70.*texelFetch(iChannel0,ivec2(U),0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Similar setup to victor_shepardson's shader here: https://www.shadertoy.com/view/XsSfWR\n// but with a different feedback/distortion mechanism\n#define T(x)texture(iChannel0, fract((U+O.xy*x(i*=1.01))/iResolution.xy))\nvoid mainImage(out vec4 O, vec2 U)\n{\n    float i=.5;\n    O=U.yyxx/4e3/(iTime+.1);\n    while(i<12.)\n        O+=T(-).wxyz-T().yzwx;\n    O = mix(T(),tanh(O+.01),6e-4);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

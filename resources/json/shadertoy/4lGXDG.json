@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lGXDG",
+      "date": "1485554493",
+      "viewed": 301,
+      "name": "odd-star",
+      "username": "FabriceNeyret2",
+      "description": "polar equation of a penta-star  and others odd-hand stars\n\ncf [url]https://www.desmos.com/calculator/y40lzzbov2[/url]\nused in [url]https://www.shadertoy.com/view/llVXzd[/url]",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "star"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// cf https://www.desmos.com/calculator/y40lzzbov2\n// used here https://www.shadertoy.com/view/llVXzd\n\n#define S(s,d)  sin( mod(-atan(U.y,U.x) s 3.14, v) d )\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    U = (U+U -(O.xy=iResolution.xy)) / O.y;\n    float N = 5.+2.*(floor(U.x)+2.),\n          v = 2.*6.28/N;\n\n    if (U.y>0.) U.x-=.2;\n    U = 2.*fract(U) -1.;\n\n    O +=  step( length(U), .2 / min(max(S(+,),S(+,+v)),\n                                    max(S(-,),S(-,+v))) ) -O;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

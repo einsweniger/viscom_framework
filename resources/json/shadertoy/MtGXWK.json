@@ -1,0 +1,65 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtGXWK",
+      "date": "1485898336",
+      "viewed": 276,
+      "name": "crowded 24-c",
+      "username": "FabriceNeyret2",
+      "description": "Mouse control preempt time. (click to the the bottom-left corner to go back to auto-move)\nChange #EPS for less/more sharp.",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raytracing",
+        "spheremarching"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 2,
+            "src": "/media/a/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// using the base ray-marcher of Trisomie21: https://www.shadertoy.com/view/4tfGRB#\n// variant from: https://www.shadertoy.com/view/MtKXDG\n\n#define EPS .001 // smaller = sharper & more contrasted\n\n#define r(v,t) { float a = (t)*T, c=cos(a),s=sin(a); v*=mat2(c,s,-s,c); }\n\nvoid mainImage( out vec4 f, vec2 w ) {\n    float T = iTime+20., \n        closest = 999.;\n    vec2 R = iResolution.xy,\n         m = iMouse.xy/R;\n    vec4 p = vec4((w-.5*R)/R.y,-.5,0), d,c;      // init ray \n    p.z -= .4;                                   // view angle width / zoom\n    if (length(m)>.01)  T = 30.*m.x; // mouse control preempts.\n    r(p.xz,.13); r(p.yz,.2); r(p.xy,.1);         // camera rotations\n  //d = p;                                       // ray dir = ray0-vec3(0) \n    d = normalize(p);\n    //if (length(m)>.01) p.z = -30.*(1.-m.y), T = 30.*m.x; // mouse control preempts.\n    //else p.z -= 60.;                             // camera distance.\n    p.z = T; \n    f -= f;\n   \n    for (float i=1.; i>0.; i-=.01)  {\n        \n        vec4 //u = floor(p/18.+3.5), \n            t = p, ta;\n            c = p/p*1.2;\n\t    float x=1e9,x1=1e9,x2=1e9;\n\n#define smod(t,n)       ( mod(t+(n)/2., n) - (n)/2.  )\n#define setbox(t,h,w,d)   abs(t) / vec4(h,w,d,1)\n#define setboxU(t)        abs(t)\n#define dbox(t,r)       ( max(t.x,max(t.y,t.z)) -(r) )\n#define dsphere(t,r)    ( length((t).xyz) -(r)       )\n#define dcyl(t,r)       ( length((t).xy ) -(r)       )\n#define union(a,b)        min(a,b)\n#define sub(a,b)          max(a,-(b))\n        \n        // r(t.xz,.13); r(t.yz,.2); r(t.xy,.1);         // object rotation\n\n        // the object\n        \n        ta =  cos(t); x1 =  abs( .2+ (ta.x+ta.y+ta.z)/3.)-.005;// + smoothstep(1.,0.,p.z-T));      \n        x1 = sub(x1,dsphere(smod(t/3.14    ,.5),.25) );\n        x1 = sub(x1,dsphere(smod(t/3.14+.25,.5),.16) );\n\n        ta =  sin(t); x2 =  abs( .2+ (ta.x+ta.y+ta.z)/3.)-.005;// + smoothstep(1.,0.,p.z-T));      \n        x2 = sub(x2,dsphere(smod(t/3.14+.24,.5),.25) );\n        x2 = sub(x2,dsphere(smod(t/3.14    ,.5),.16) );\n\n        x = union(x1,x2);\n\n             \n        if(x<EPS)                           // hit ! \n            {   \n                //c = .5+.5*cos(63.3*t);\n #define sort(v)  if (abs(v.z)>abs(v.y)) v.yz=v.zy;  if (v.y>v.x) v.xy=v.yx;  if (v.z>v.y) v.yz=v.zy;               \n                if (x==x1) {\n                \tta =  abs(cos(t)); sort(ta);  \t\n                \t//c = .5+.5*cos(63.3*t.xyxy);\n                    c = texture(iChannel0,ta.xy);\n                } else {\n                \tta =  abs(sin(t)); sort(ta);\n                    c = texture(iChannel1,ta.xy);\n                }\n                x = i+.01*(1.-abs(x)/EPS);  // decrease banding\n                f = x*c; break;           // color texture + black fog \n            }\n        p -= d*x;                           // march ray\n     }\n\n     //f = sqrt(f); // bright version\n     f = pow(f, .3+.7*vec4(.5+.5*sin(iTime))); // I couldn't choose dark vs bright :-)\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

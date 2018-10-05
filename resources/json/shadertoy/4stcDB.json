@@ -1,0 +1,90 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4stcDB",
+      "date": "1520698596",
+      "viewed": 261,
+      "name": "Controlled Randomness",
+      "username": "ThePopil",
+      "description": "A little idea I had: A system where every individual component behaves randomly (or at least appears to), but the output as a whole is predictable. I don't know if there is a name for it but kind of a cool effect.",
+      "likes": 12,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "circles",
+        "random",
+        "animation",
+        "chaos"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Returns the alpha of a circle centered at 'c' with radius 'r'\nfloat drawCircle(vec2 p, vec2 c, float r)\n{\n    float f = 0.003;\n    float d = clamp(length(p-c)-r,0.,f);\n\treturn 1.-d/f;\n}\n\nfloat ease(float p)\n{\n    float f = ((2.*p)-2.);\n    return p < 0.5 ? 4.*p*p*p:0.5*f*f*f+1.; \n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.x/1.1;\n    vec2 square = uv2square(uv);\n\n    float r;\n    float g;\n    float b;\n    \n    vec4 bufferData = texture(iChannel0,square2uv(square));\n    float a = mod(iTime, MOVE_TIME * 2.0) > MOVE_TIME ? 1.0 : 0.0;\n    vec3 xlocations = vec3(square2uv(square).x);\n    vec3 ylocations = vec3(square2uv(square).y);\n\n    if(mod(square.x + square.y, 2.0) == a)\n    {\n        bufferData = texture(iChannel0,square2uv(square - bufferData.xy));\n        float anim = bufferData.a > 0. ? ease(min(1., mod(iTime, MOVE_TIME) - bufferData.a)) : 0.0;\n        vec3 mult = vec3(1.) - vec3(anim, anim*anim, anim*anim*anim);\n        \n        xlocations -= bufferData.x * mult * GRID_CELL_SIZE;\n        ylocations -= bufferData.y * mult * GRID_CELL_SIZE;\n        \n        r = drawCircle(uv, vec2(xlocations.r, ylocations.r), GRID_CELL_SIZE * CIRCLE_SIZE);\n        g = drawCircle(uv, vec2(xlocations.g, ylocations.g), GRID_CELL_SIZE * CIRCLE_SIZE);\n        b = drawCircle(uv, vec2(xlocations.b, ylocations.b), GRID_CELL_SIZE * CIRCLE_SIZE);\n    }\n    else\n    {\n        float anim = bufferData.a > 0. ? ease(min(1., mod(iTime, MOVE_TIME) - bufferData.a)) : 0.0;\n        vec3 mult = vec3(anim, anim*anim, anim*anim*anim);\n\n        xlocations += bufferData.x * mult * GRID_CELL_SIZE;\n        ylocations += bufferData.y * mult * GRID_CELL_SIZE;\n        \n        r = drawCircle(uv, vec2(xlocations.r, ylocations.r), GRID_CELL_SIZE * CIRCLE_SIZE);\n        g = drawCircle(uv, vec2(xlocations.g, ylocations.g), GRID_CELL_SIZE * CIRCLE_SIZE);\n        b = drawCircle(uv, vec2(xlocations.b, ylocations.b), GRID_CELL_SIZE * CIRCLE_SIZE);\n    }\n    \n    fragColor = vec4(r, g, b , 1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Logic for setting and clearing circle movement\n// Kind of ugly to compute inside the shader but oh well haha\n\nvec4 getBufferData(vec3 dir)\n{\n\treturn vec4(dir, max(0.0001, mod(iTime, MOVE_TIME)));\n}\n\nfloat getSeed()\n{\n\treturn pow(floor(iDate.w / MOVE_TIME), 0.1) + floor(iTime / MOVE_TIME);\n}\n\nbool shouldClear()\n{\n\treturn iFrame == 0 || mod(iTime - iTimeDelta, MOVE_TIME) > mod(iTime, MOVE_TIME);\n}\n\nfloat random(vec2 p)\n{\n    p = vec2( dot(p,vec2(15.623+getSeed(),311.7)),dot(p,vec2(269.5,183.3)));\n\treturn fract(sin(p)*43758.5453).x;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{    \n    vec2 uv = fragCoord/iResolution.xy;\n    vec2 square = uv2square(uv);\n    \n    vec4 cur = texture(iChannel0, vec2(uv.x, uv.y));\n    fragColor = cur;\n    \n    if(shouldClear())\n    {\n    \t// Clear movement\n        fragColor = vec4(UNKNOWN, -1.);\n    }\n    else if (cur.a <= 0.)\n    {   \n    \t// Need to write new data for this coord, if it's ready\n        float a = mod(iTime, MOVE_TIME * 2.0) > MOVE_TIME ? 1.0 : 0.0;\n        if(mod(square.x + square.y, 2.0) == a)\n        {\n            // Mimic circel that's moving into this\n            vec2 r = uv2square(vec2(uv.x + GRID_CELL_SIZE, uv.y));\n            vec4 r_t = texture(iChannel0, square2uv(r));\n            if (r_t.rgb == LEFT)\n            {\n            \tfragColor = getBufferData(LEFT);\n                return;\n            }\n            \n            vec2 u = uv2square(vec2(uv.x, uv.y + GRID_CELL_SIZE));\n            vec4 u_t = texture(iChannel0, square2uv(u));\n            if (u_t.rgb == DOWN)\n            {\n            \tfragColor = getBufferData(DOWN);\n                return;\n            }\n            \n            vec2 d = uv2square(vec2(uv.x, uv.y - GRID_CELL_SIZE));\n            vec4 d_t = texture(iChannel0, square2uv(d));\n            if (d_t.rgb == UP)\n            {\n            \tfragColor = getBufferData(UP);\n                return;\n            }\n            \n            vec2 l = uv2square(vec2(uv.x - GRID_CELL_SIZE, uv.y));\n            vec4 l_t = texture(iChannel0, square2uv(l));\n            if (l_t.rgb == RIGHT)\n            {\n            \tfragColor = getBufferData(RIGHT);\n                return;\n            }\n            \n            fragColor = vec4(UNKNOWN, -1.);\n        }\n        else\n        {\n            // Check dependencies\n            vec2 s1 = uv2square(vec2(uv.x - 2. * GRID_CELL_SIZE, uv.y));\n            bool d1 = s1.x < 0. || texture(iChannel0, square2uv(s1)).a > 0.;\n\n            vec2 s2 = uv2square(vec2(uv.x, uv.y - 2. * GRID_CELL_SIZE));\n            bool d2 = s2.y < 0. || texture(iChannel0, square2uv(s2)).a > 0.;\n\n            vec2 s3 = uv2square(vec2(uv.x - GRID_CELL_SIZE, uv.y + GRID_CELL_SIZE));\n            bool d3 = s3.x < 0. || uv.y + GRID_CELL_SIZE > 1. || texture(iChannel0, square2uv(s3)).a > 0.;\n\n            vec2 s4 = uv2square(vec2(uv.x - GRID_CELL_SIZE, uv.y - GRID_CELL_SIZE));\n            bool d4 = s4.x < 0. || s4.y < 0. || texture(iChannel0, square2uv(s4)).a > 0.;\n\n            if (d1 && d2 && d3 && d4)\n            {\n                // Write movement\n                \n                // If left is open, always move into it\n            \tbool l_o = uv.x - GRID_CELL_SIZE >= 0.;\n                l_o = l_o && texture(iChannel0, square2uv(s1)).rgb != RIGHT;\n                l_o = l_o && texture(iChannel0, square2uv(s3)).rgb != DOWN;\n                l_o = l_o && texture(iChannel0, square2uv(s4)).rgb != UP;\n                \n                if(l_o)\n                {\n                \tfragColor = getBufferData(LEFT);\n                }\n                else\n                {\n                    // Randomly choose one of the other directions\n                    float hit = 1.;\n                    \n            \t\tbool u_o = texture(iChannel0, square2uv(s3)).rgb != RIGHT;\n                    \n                    vec2 d = uv2square(vec2(uv.x, uv.y - GRID_CELL_SIZE));\n            \t\tbool d_o = d.y >= 0.;\n                    d_o = d_o && texture(iChannel0, square2uv(s2)).rgb != UP;\n                    d_o = d_o && texture(iChannel0, square2uv(s4)).rgb != RIGHT;\n                    \n                    if(u_o) hit++; if(d_o) hit++;\n                    float range = 1./hit;\n                    float rand = random(square + iTime);\n                    \n                    if (u_o && rand < range + 0.1)\n                        fragColor = getBufferData(UP);\n                    else if (d_o && rand > 1. - range - 0.1)\n                        fragColor = getBufferData(DOWN);\n                    else\n                        fragColor = getBufferData(RIGHT);\n                }\n            }\n            else\n            {\n                // Can't determine movement yet\n                fragColor = vec4(UNKNOWN, -1.);\n            }\n        }\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "#define GRID_CELL_SIZE 0.0505\n#define CIRCLE_SIZE 0.45\n\n#define MOVE_TIME 2.0\n\n#define LEFT  vec3(-1., 0., 0.)\n#define UP\t  vec3(0., 1., 0.)\n#define RIGHT vec3(1., 0., 0.)\n#define DOWN  vec3(0., -1., 0.)\n#define UNKNOWN vec3(1., 1., 1.)\n\nvec2 uv2square(vec2 uv)\n{\n\treturn floor(uv / GRID_CELL_SIZE);\n}\n\nvec2 square2uv(vec2 square)\n{\n    float h = GRID_CELL_SIZE * 0.5;\n\treturn vec2(square.x * GRID_CELL_SIZE + h, square.y * GRID_CELL_SIZE + h);\n}",
+        "name": "Common",
+        "description": "",
+        "type": "common"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dfcDM",
+      "date": "1488395113",
+      "viewed": 188,
+      "name": "tutorial1jcvd",
+      "username": "bhealy",
+      "description": "greenscreen on jean claude van damm??",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tutorial"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec4 makeBackground(in vec2 fragCoord, in float iTime) {\n \tvec2 xy = fragCoord.xy;\n    vec2 normxy = vec2(xy.x / iResolution.x, xy.y / iResolution.y);\n    \n    vec4 color = vec4(1.0,1.0,1.0,1.0);\n    \n    //color.r = xy.y;\n    \n    color.r = normxy.x/2.0 + normxy.y/2.0;   \n    color.g = normxy.y/1.5;\n    color.b = 2.0/normxy.x + 2.0/normxy.y;\n    \n    float amp = sin(0.5 * iTime);\n    \n    float thing = (amp* sin(0.1 * xy.x) + amp* cos(0.1 *xy.y))/2.0 + 1.0;\n    \n    color.r *= thing;\n   \tcolor.g *= thing;\n    color.b *= thing; \n    \n    return color;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 xy = fragCoord.xy/ iResolution.xy;//Condensing this into one line\n    vec4 texColor = texture(iChannel0, xy);//Get the pixel at xy from iChannel0\n    \n    vec4 bgColor = makeBackground(fragCoord, iTime);\n    \n    float avg = (texColor.r + texColor.g + texColor.b)/3.0;\n    \n    if (texColor.g > 0.6 && texColor.r < 0.3) {\n        texColor = bgColor;\n    }\n    \n    fragColor = texColor;//Set the screen pixel to that color\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

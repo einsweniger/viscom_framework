@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtffDf",
+      "date": "1513634103",
+      "viewed": 225,
+      "name": "Eyefish",
+      "username": "jakeactuallynext",
+      "description": "Eyefish try",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "2d",
+        "eyefish"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, in vec2 u ) {\n    u -= iMouse.xy;\n    \n    float a = atan(u.y / u.x);\n    float m = sqrt( dot(u, u) );\n    \n    vec2 xy = vec2(cos(a), sin(a)) * m * m / 100.0;\n    vec2 mo = mod(iMouse.xy, 200.0);\n    \n    xy = xy * sign(u.x) + mo;\n    xy = smoothstep( -0.1, 0.1, sin(xy / 10.0) );\n    \n\to = vec4(xy.x + xy.y);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

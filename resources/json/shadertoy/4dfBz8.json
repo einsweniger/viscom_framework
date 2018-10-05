@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dfBz8",
+      "date": "1494733672",
+      "viewed": 123,
+      "name": "4/100.",
+      "username": "yahe",
+      "description": "4/100",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rotate"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159265358979323846\n\nvec2 rotate2D(vec2 _st, float _angle){\n    _st -= 0.5;\n    _st =  mat2(cos(_angle),-sin(_angle),\n                sin(_angle),cos(_angle)) * _st;\n    _st += 0.5;\n    return _st;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    vec2 st = fragCoord.xy/iResolution.xy;\n    vec3 color = vec3(0.0);\n\n    st = rotate2D(st,PI*0.25*iTime*3.0);\n\n    fragColor = vec4(sin(st.x)+0.6,0.96, sin(st.y)+0.6,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

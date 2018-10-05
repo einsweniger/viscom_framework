@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sc3DN",
+      "date": "1449610403",
+      "viewed": 152,
+      "name": "sP.1 - rails",
+      "username": "patu",
+      "description": "Playing with 2d",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "simple"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 c, in vec2 f ) {\n\tvec2 \n        v = f.xy / iResolution.xy - .5,\n        m;\n    \n    c *= 0.;\n    \n    v.y = pow(.75 + v.y, 2.5);\n    v.x = v.y * abs(v.x) * 2.;\n    \n    m = mod(v + vec2(0., iTime / 9.), .1);\n    \n    if (\n        m.x < .005 ||\n        m.y < .005\n    ) c = (1. - m.x * 22.) * abs(sin(1.8 * v.y)) * vec4(1., .0, .5, 1.) ;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

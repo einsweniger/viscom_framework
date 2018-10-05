@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dtXWN",
+      "date": "1459405931",
+      "viewed": 387,
+      "name": "Noise Effect",
+      "username": "Lawliet",
+      "description": "reference:http://blog.csdn.net/stalendp/article/details/30989295",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "effect"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11,
+            "src": "/media/a/c3a071ecf273428bc72fc72b2dd972671de8da420a2d4f917b75d20e1c24b34c.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 15,
+            "src": "/media/a/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//#define COLOR vec4(0.0,0.8,0.4,1.0);\n#define COLOR vec4(0.0,0.737,1.0,1.0);\n#define FLUCTUATE 2.0\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    vec4 noise = texture(iChannel1,uv + iTime / 10.0);\n    \n    vec4 col = texture(iChannel0,uv + noise.xy * 0.01 * FLUCTUATE);\n    \n    //float gray = col.r*0.299 + col.g*0.587 + col.b*0.114;\n    \n    fragColor = col * 1.5 * COLOR;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

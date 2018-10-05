@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdXfRr",
+      "date": "1494529767",
+      "viewed": 187,
+      "name": "Shepards IDW",
+      "username": "tjlaxs",
+      "description": "Trying to pretend to have a Shepards IDW",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "idw"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const vec3 u_samples[] = vec3[](\n    vec3(0.1, 0.1, 17.0),\n    vec3(0.9, 0.5, 13.0),\n    vec3(0.7, 0.3, 9.0),\n    vec3(0.1, 0.9, 19.0),\n    vec3(0.4, 0.2, 9.0),\n    vec3(0.3, 0.5, 29.0),\n    vec3(0.4, 0.4, 39.0),\n    vec3(0.5, 0.7, 12.0)\n);\n\nfloat w_i(vec2 x_i, vec2 x, float p) {\n    return 1.0 / pow(distance(x, x_i), p);\n}\n\nfloat u(vec2 x, float p) {\n    for(int i = 0; i < u_samples.length(); i++) {\n        if(distance(x, u_samples[i].xy * iResolution.xy) <= 1.0) {\n            return u_samples[i].z;\n        }\n    }\n    float tmp1 = 0.0;\n    float tmp2 = 0.0;\n    for(int i = 0; i < u_samples.length(); i++) {\n        float wi = w_i(u_samples[i].xy * iResolution.xy, x, p);\n        tmp1 += (wi * u_samples[i].z);\n        tmp2 += wi;\n    }\n    return tmp1 / tmp2;\n}\n\nfloat sampleValueMax() {\n    float m = 0.0;\n    for(int i = 0; i < u_samples.length(); i++) {\n        if(m < u_samples[i].z) {\n            m = u_samples[i].z;\n        }\n    }\n    return m;\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n\tfloat uv = u(fragCoord, 9.0+7.0*sin(iTime));\n    float maxValue = sampleValueMax();\n\tfragColor = vec4(uv/maxValue * 0.9, uv/maxValue * 0.6, 1.0 - 0.9*uv/maxValue, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

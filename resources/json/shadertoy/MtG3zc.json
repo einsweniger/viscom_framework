@@ -1,0 +1,92 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtG3zc",
+      "date": "1475839432",
+      "viewed": 231,
+      "name": "simple feedback",
+      "username": "b34npour",
+      "description": "simple feedback buffer test",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "enfos1337"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec3 a = vec3(texture(iChannel0, uv).xyz);\n    \n    fragColor = vec4(a,1.0);\n\t//fragColor = vec4(uv,0.5+0.5*sin(iTime),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    vec3 a = vec3(texture(iChannel0, uv * 1.001).xyz);\n    \n    \n    if(iFrame<10) {\n        fragColor = texture(iChannel1, uv);\n    } else {\n        fragColor = vec4(a,1.0);\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

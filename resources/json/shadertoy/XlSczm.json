@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlSczm",
+      "date": "1507841077",
+      "viewed": 181,
+      "name": "(not so)BleakWispy",
+      "username": "csmnt",
+      "description": "Getting to grips & messing around with bits to an obnoxious degree.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14\n\nmat2 rot(float x)\n{\n\treturn mat2(cos(x), -sin(x), sin(x), cos(x));\n}\n\nfloat circle(in vec2 _st, in float _radius)\n{\n    vec2 dist = _st-vec2(0.5);\n\treturn 1.-smoothstep(_radius-(2.0/iResolution.y),\n                         _radius+(2.0/iResolution.y),\n                         dot(dist,dist)*4.0);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = fragCoord / iResolution.xy;\n\n\tvec2 uvCopy = uv;\n\t//uvCopy = rotate_x2d(uvCopy,C);\n    uvCopy *= rot(exp(-sin(iTime) + uv.x));\n\tuvCopy *= 2.0;\n\tuvCopy = fract(uvCopy); \n\n    vec2 uvCopy2 = uv;\n\tuvCopy2 *= rot(exp(sin(iTime) + uv.x));\n\tuvCopy2 *= 2.0;\n\tuvCopy2 = fract(uvCopy2); \n\n    uvCopy /= uvCopy2;\n\n    vec4 messOutput = vec4(circle(uvCopy, PI), circle(uvCopy, PI),0.5+0.5*sin(iTime),1.0);\n    \n    vec3 crcl = vec3(circle(uv,mix(0.65,1.0,sin(iTime))));\n    vec4 circleClip = vec4(crcl,1.0);\n\n    circleClip -= messOutput;\n\n    circleClip = fract(circleClip) * sin(iTime) + 0.5;\n\n    circleClip *= circleClip + vec4(0.5*sin(iTime),0,0,0);\n\n    fragColor = normalize(circleClip);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

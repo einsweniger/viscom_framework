@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sBfzw",
+      "date": "1499857954",
+      "viewed": 251,
+      "name": "[SH17A]Hippy!",
+      "username": "Nesvi7",
+      "description": "It looks like an old psychedelic screensaver :D",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "psychedelic",
+        "onetweet",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//by Nestor Vina :D\n\n//---Original version\n/*\n#define s(t) sin(iTime+t*10.0)*0.5+ 0.5\nvoid mainImage( out vec4 c, vec2 f )\n{\n\tc = texture(iChannel0,f*0.001);\n    c = vec4( s(c.r),s(c.g),s(c.b),1.0);\n}\n*/\n\n//---Reduced version (thanks to FabriceNeyret2)\nvoid mainImage( out vec4 c, vec2 f )\n{    \n    c =  sin( iTime + texture(iChannel0, f/1e3) * 10. ) * .5 + .5;   \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

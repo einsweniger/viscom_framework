@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldcGWM",
+      "date": "1449970751",
+      "viewed": 157,
+      "name": "\u266b sA.4 - Trans Europe Express",
+      "username": "patu",
+      "description": "Trans Europe Express",
+      "likes": 2,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "2d",
+        "trans",
+        "europe",
+        "express"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 427,
+            "src": "https://soundcloud.com/jonathanysp/trans-europe-express-kraftwerk",
+            "ctype": "musicstream",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage (out vec4 c, in vec2 f) {\n\tvec2\tv = (f.xy / iResolution.y) * 2. - 1.,\n       \t\tq = v, \n        \to;\n    \n    c -= c; //mac\n    \n    o.x = v.x - .5;\n    o.y = abs(v.y);\n    \n    for (float i = 0.; i < 18.; i++) {\n        v = o;\n        \n        v.y = .12 / v.y;\n\t\tv.x *= v.y;\n        v.y += iTime * 1.75;\n        v.x += -.1 + sin(v.y / i / 4. + i) * i * 2.; \n        \n        for (float j = .1 ; j < .3; j += .1) \n    \t\tif ((v.x += j) > -.1  && v.x < .1) \n                c += max(-.7, 2.2 - pow((abs(v.x - .05)) * 64., 0.4) * 2.2);\n    }\n    \n    c += fract(v.y) < .02 ? .2 : 0.;\n    if (q.y > 0.) c = .3 - clamp(c, 0., 1.)  - q.y / 1.5;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

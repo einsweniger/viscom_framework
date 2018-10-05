@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtV3zG",
+      "date": "1475244232",
+      "viewed": 275,
+      "name": "Another 2D Pattern Variation ",
+      "username": "aiekick",
+      "description": "Another, 2D, Pattern, Variation",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "another",
+        "variation"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//* 159c\nvoid mainImage(out vec4 f,vec2 g)\n{\n    f = iDate;\n    g /= dot(g=g/iResolution.y-.5, g);\n    g.y += mod( ceil(g.x+= f.w), 4.)*sin(f.w);\n    g = abs( fract(g) - .5 );\n    f -= f - max(g.x*1.8-g.y*.4,g.y);\n}/**/\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

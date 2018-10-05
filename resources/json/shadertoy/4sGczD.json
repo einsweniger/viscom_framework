@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sGczD",
+      "date": "1521144171",
+      "viewed": 145,
+      "name": "simple_checkerboard",
+      "username": "snickerbockers",
+      "description": "it's a simple pattern of squares with alternating colors, like a checker or chess board.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "checkerboard"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const vec2 GRID_DIMS = vec2(50, 50);\nconst vec4 COL_EVEN = vec4(1.0, 1.0, 1.0, 1.0);\nconst vec4 COL_ODD = vec4(0.0, 0.0, 0.0, 1.0);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 m = mod(fragCoord, 2.0 * GRID_DIMS);\n\tif (m.x < GRID_DIMS.x && m.y < GRID_DIMS.y ||\n        m.x >= GRID_DIMS.x && m.y >= GRID_DIMS.y)\n        fragColor = COL_EVEN;\n    else\n        fragColor = COL_ODD;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

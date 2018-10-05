@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsVyRz",
+      "date": "1520852615",
+      "viewed": 167,
+      "name": "saddleback circles",
+      "username": "benhardy",
+      "description": "inspired by topographical maps",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "circles"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    float aspect = iResolution.y /iResolution.x;\n    vec2 uv = fragCoord/iResolution.xy;\n    uv.y *= aspect;\n    vec2 center = vec2(0.5 + 0.4 * sin(iTime), \n                       0.5 + 0.4 * cos(iTime*1.18));\n    vec2 c2 = vec2(0.5 + 0.4 * sin(iTime * 1.37), \n                       0.3 + 0.2 * cos(iTime*1.0));\n    float cdist = length(center-c2);\n    float dist_1 = length(uv - center);\n    float dist_2 = length(uv - c2);\n    float tdist = dist_1 + dist_2 - length(vec2(dist_1, dist_2));\n    float level = floor(fract((tdist) * 40.0) * 20.0);;\n    fragColor = vec4(level, level, level, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

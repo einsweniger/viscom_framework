@@ -1,0 +1,41 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Ms2cRd",
+      "date": "1493543137",
+      "viewed": 196,
+      "name": "70s Flashback",
+      "username": "fermion",
+      "description": "A colorful visual effect I made while playing around with sine waves. I've extracted many of the parameters of the waves into their own variables so anyone can mess with them easily. You can make some pretty crazy effects with those parameters.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "waves",
+        "retro",
+        "psychedelic",
+        "animation",
+        "sine",
+        "trippy",
+        "layers"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\t//coordinate system\n    vec2 pixel = fragCoord.xy / iResolution.y;\n    \n    //wave parameters\n    vec2 dotFrequency = vec2(12.0, 7.0) * PI;\n    \n    vec2 offsetAmplitude = vec2(2.0 * sin(iTime));\n    vec2 offsetFrequency= vec2(2.0) * PI;\n    vec2 offsetVelocity= vec2(1.0);\n    \n    //offset equation\n    vec2 offset= offsetAmplitude * sin( offsetFrequency * pixel + (offsetVelocity * iTime));\n    \n    \n    //y-component of visual\n    float value= sin( pixel.y * dotFrequency.y + offset.x) / 2.;\n    \n    //x-component of visual\n    value+= sin( pixel.x * dotFrequency.x + offset.y) /2.;\n    \n    //boundary parameters\n    float threshold= 1.3 * sin((0.5 * iTime) + ( 0.5 * pixel.x));\n    float epsilon= 0.3;\n    \n    vec3 color;\n    \n    if (value > threshold + epsilon) {\n        color= vec3( 0.5 , 0.5 + sin(iTime ) / 2.0, 0.0);\n    }\n    else if (value < threshold - epsilon) {\n        color= vec3(0.5 + sin(iTime) / -2.0, 1.0 , 0.5 + sin(iTime) / 2.0);\n    }\n    else {\n        color= vec3(0.5 + sin(iTime) / -2.0, 0.0 , 0.5);\n    }\n    \n\tfragColor = vec4( color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

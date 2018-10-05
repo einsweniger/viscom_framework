@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsV3Dm",
+      "date": "1454926799",
+      "viewed": 278,
+      "name": "Perlin flow",
+      "username": "s23b",
+      "description": "Just an interesting effect I came across while learning about noise",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise",
+        "clouds",
+        "fbm",
+        "perlin"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float hash(vec2 uv) {\n    float f = fract(cos(sin(dot(uv, vec2(.009123898, .00231233))) * 48.512353) * 11111.5452313);\n    return f;\n}\n\nfloat noise(vec2 uv) {\n    vec2 fuv = floor(uv);\n    vec4 cell = vec4(\n        hash(fuv + vec2(0, 0)),\n        hash(fuv + vec2(0, 1)),\n        hash(fuv + vec2(1, 0)),\n        hash(fuv + vec2(1, 1))\n    );\n    vec2 axis = mix(cell.xz, cell.yw, fract(uv.y));\n    return mix(axis.x, axis.y, fract(uv.x));\n}\n\nfloat fbm(vec2 uv) {\n    float f = 0.;\n    float r = 1.;\n    for (int i = 0; i < 8; ++i) {\n        f += noise((uv += iTime / 4.) * r) / (r *= 2.);\n    }\n    return f / (1. - 1. / r);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy * 2. - 1.;\n    uv.x *= iResolution.x / iResolution.y;\n    uv *= 2.;\n\t\n//    fragColor = vec4(vec3(fbm(uv)), 1);\n    fragColor = vec4(fbm(uv), fbm(uv + 1.), fbm(uv + 2.), 1);\n    \n    fragColor = floor(fragColor * 8.) / 8.;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

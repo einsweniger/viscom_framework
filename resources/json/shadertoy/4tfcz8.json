@@ -1,0 +1,44 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tfcz8",
+      "date": "1503297650",
+      "viewed": 198,
+      "name": "Image and sound 62ch",
+      "username": "coyote",
+      "description": "Shortest shader with non-black image and sound.\nHighly dependable on shadertoy's code, of course.",
+      "likes": 1,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "short",
+        "halftweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage color.rg=",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "#define mainSound vec2(sin(1e3*t));",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

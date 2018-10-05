@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tGGzt",
+      "date": "1476053737",
+      "viewed": 252,
+      "name": "Bounce Waves (163c)",
+      "username": "aiekick",
+      "description": "Bounce Waves",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "waves",
+        "bounce"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, vec2 g )\n{\n    f.xyz = iResolution; \n\tg = (g+g-f.xy)/f.y * 5.;\n    float t = iTime + 220., r = length(g);\n\tg += r * vec2(cos(r - t * 2.),sin(r * t * .03));\n\tf -= f - .1/dot(g,g);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

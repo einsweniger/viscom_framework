@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltSyDR",
+      "date": "1508174740",
+      "viewed": 228,
+      "name": "Cubemap Reflection Example",
+      "username": "Txoka",
+      "description": "cubemap reflection example",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "reflection",
+        "cubemap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 24,
+            "src": "/media/a/488bd40303a2e2b9a71987e48c66ef41f5e937174bf316d3ed0e86410784b919.jpg",
+            "ctype": "cubemap",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define REFLECTION\n#define r(a) mat2(C=cos(a),S=sin(a),-S,C)\n\nvoid mainImage( out vec4 O, vec2 U) {\n    float S,C;\n\tvec2 R = iResolution.xy,\n\tm = iMouse.xy / R * 2. - 1.;\n\n\tvec3 d = vec3(U - R/2.,  R.y);\n\td.yz *= r( 1.57075 * m.y);\n\td.xz *= r( 3.1415 * m.x);\n    \n\tO = texture(iChannel0, d);\n\tfloat bn = (O.r+O.g+O.b)/3.;\n    \n\t#ifdef REFLECTION\n\t\td.y = abs(d.y);\n\t\tO = mix( O, texture(iChannel0,d), smoothstep(0.,1.8,bn) );\n\t#endif\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dSBzW",
+      "date": "1506019574",
+      "viewed": 274,
+      "name": "movement and collision",
+      "username": "abje",
+      "description": "i was inspired by another shader: [url]https://www.shadertoy.com/view/XtXyW4[/url]\nthe shading sucks, the collisions is ok, it only works on high walls though.\npress e to shoot black holes.",
+      "likes": 1,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "3d",
+        "input"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec4 getbuffer(ivec2 coord) {\n    return texelFetch(iChannel0,coord,0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tfragColor = getbuffer(ivec2(fragCoord));\n    if (abs(length(fragCoord-iResolution.xy*0.5)-10.0) < 2.0) {\n        fragColor = vec4(1.0)-fragColor;\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "\n/*\n      ^\n      |\n     38\n <--37 39-->\n     40\n      |\n      v\n*/\n\n\n\n#define rot(spin) mat2(cos(spin),sin(spin),-sin(spin),cos(spin))\n\n//keyboard keys\n#define KEY_UP 38\n#define KEY_DOWN 40\n#define KEY_RIGHT 39\n#define KEY_LEFT 37\n#define KEY_E 69\n\n//bottom pixels indexes\n#define INDEX_HEAD 0\n#define INDEX_MOUSE 1\n#define INDEX_ROT 2\n#define INDEX_LOADED 3\n//this occupies all pixels on the bottom line from A to B\n#define INDEX_DECAL_INDEX 4\n#define INDEX_DECAL_A 5\n#define INDEX_DECAL_B 30\n\n//other numbers\n#define HALF_PI 1.5\n#define DIST_THIRDPERSON 4.0\n\n//body part position relative to head\n#define BODY_FEET vec3(0.0,-2.0,0.0)\n\n//distance field, rendering and collision detection\nfloat map(vec3 p) {\n    vec2 p2 = mod(p.xz,10.0)-5.0;\n    return (min(floor(sin(p.x)+sin(p.z))*0.5+p.y,length(p2)-1.0));\n}\n\nvec4 getbuffer(ivec2 coord) {\n    return texelFetch(iChannel0,coord,0);\n}\n\nvec4 getbuffer(int x, int y) {\n    return texelFetch(iChannel0,ivec2(x,y),0);\n}\n\nvec4 getkey(int x, int y) {\n    return texelFetch(iChannel1,ivec2(x,y),0);\n}\n\n//\nvec3 rotatecam(vec3 dir) {\n    \n    vec4 rotation = getbuffer(INDEX_ROT,0);\n    \n    //dir.xy *= rot(rotation.y);\n    dir.yz *= rot(rotation.y);\n    dir.xz *= rot(rotation.x);\n    \n    return dir;\n}\n\nfloat castray(vec3 pos, vec3 dir) {\n    \n    float dist = 0.0;\n    float len;\n    \n    for (int i = 0; i < 500; i++) {\n        len = map(pos);\n        dist += len;\n        pos += dir*len;\n        if (dist > 100.0 || len < 0.01) break;\n    }\n    return dist;\n}\n\nvec3 calcnormal(vec3 p) {\n    vec2 eps = vec2(0.01, 0.0);\n    \n    vec3 normal = normalize(vec3(map(p+eps.xyy),\n                                 map(p+eps.yxy),\n                                 map(p+eps.yyx)));\n    return normal;\n}\n\nvec4 castrayrender(vec3 pos, vec3 dir, vec3 head) {\n    \n    float dist = 0.0;\n    float len;\n    \n    for (int i = 0; i < 100; i++) {\n        len = min(map(pos), length(vec3(pos.xz-(head.xz+BODY_FEET.xz   ),\n                                        pos.y -(head.y +BODY_FEET.y*0.5)\n                                 -clamp(pos.y -(head.y +BODY_FEET.y*0.5),-1.0,1.0)))-0.5);\n        dist += len;\n        pos += dir*len;\n        if (dist > 100.0 || len < 0.01) break;\n    }\n    return vec4(pos,dist);\n}\n\nvec4 setvariables(int index) {\n    bool bufferloaded = all(equal(getbuffer(INDEX_LOADED,0),vec4(1.0)));\n    vec4 fragColor;\n    if (index == INDEX_HEAD) {\n        if (!bufferloaded) {\n            fragColor = vec4(0.0,10.0,0.0,1.0);\n            return fragColor;\n        }\n        fragColor = getbuffer(0,0);\n\n        vec3 head = fragColor.xyz;\n\n        head.y -= clamp(map(head+BODY_FEET)-0.5,-0.1,0.1);\n        \n        vec2 movement = vec2(getkey(KEY_RIGHT,0).x-getkey(KEY_LEFT,0).x,\n                        \t getkey(KEY_UP,0).x-getkey(KEY_DOWN,0).x);\n        \n        if (dot(movement,movement)>0.1) movement = normalize(movement)*iTimeDelta*3.0;\n        \n    \tvec4 rotation = getbuffer(INDEX_ROT,0);\n        mat2 dir2 = rot(rotation.x);\n        \n        movement *= dir2;\n        \n        vec3 collider = vec3(movement,0.0).xzy;\n        \n        float collision = map(head+collider);\n        \n        if (!(collision>0.5)) {\n            vec2 eps = vec2(0.01,0.0);\n            vec2 normal = normalize(vec2(map(head+collider+eps.xyy)-collision,\n                                         map(head+collider+eps.yyx)-collision))*iTimeDelta*3.0;\n            \n            head.xz += normal;\n        }\n        head.xz += movement;\n        \n        fragColor.xyz = head;\n        return fragColor;\n    }\n    \n    if (index == INDEX_MOUSE) {\n        fragColor = iMouse/iResolution.xyxy;\n        return fragColor;\n    }\n    \n    if (index == INDEX_ROT) {\n        if (!bufferloaded) {\n            fragColor = vec4(0);\n            return fragColor;\n        }\n        fragColor = getbuffer(INDEX_ROT,0);\n        \n    \tvec4 lastiMouse = getbuffer(INDEX_MOUSE,0)*iResolution.xyxy;\n        vec4 mousedelta = vec4(0.0);\n        if (all(greaterThan(min(lastiMouse,iMouse),vec4(0.0)))) {\n            mousedelta = iMouse-lastiMouse;\n        }\n        fragColor.x += mousedelta.x*0.02;\n        fragColor.y = clamp(fragColor.y+mousedelta.y*0.01,-HALF_PI,HALF_PI);\n        return fragColor;\n    }\n    \n    if (index == INDEX_LOADED) {\n        fragColor = vec4(1.0);\n        return fragColor;\n    }\n    \n    if (index == INDEX_DECAL_INDEX) {\n        if (!bufferloaded) {\n            fragColor = vec4(INDEX_DECAL_A,0,0,0);\n            return fragColor;\n        }\n        vec4 decalindex = getbuffer(INDEX_DECAL_INDEX,0);\n        fragColor.y = getkey(KEY_E,0).x;\n        if (fragColor.y > 0.5 && decalindex.y < 0.5) {\n            fragColor.z = 1.0;\n            fragColor.x = float((int(decalindex.x)-INDEX_DECAL_A+1)%(INDEX_DECAL_B-INDEX_DECAL_A)+INDEX_DECAL_A);\n        } else {\n        \tfragColor.x = decalindex.x;\n        }\n        return fragColor;\n    }\n    \n    if (index >= INDEX_DECAL_A && index < INDEX_DECAL_B) {\n        if (!bufferloaded) {\n            fragColor = vec4(-1000000.0);\n            return fragColor;\n        }\n        \n        vec4 decalindex = getbuffer(INDEX_DECAL_INDEX,0);\n        \n        if (index == int(decalindex.x) && decalindex.z > 0.5) {\n            vec3 dir = rotatecam(vec3(0.0,0.0,1.0));\n            vec3 pos = getbuffer(INDEX_HEAD,0).xyz+vec3(0.0,1.0,0.0)-dir*DIST_THIRDPERSON;\n\n            float dist = castray(pos,dir);\n            \n            fragColor.xyz = pos+dir*dist;\n            return fragColor;\n            \n        } else {\n            fragColor = getbuffer(index,0);\n            return fragColor;\n        }\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \n    \n    bool bufferloaded = all(equal(getbuffer(6,0),vec4(1.0)));\n    \n    if (fragCoord.y < 1.0) {\n        fragColor = setvariables(int(fragCoord.x));\n    } else {\n        vec2 uv = (fragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;\n\n        vec3 pos = getbuffer(INDEX_HEAD,0).xyz;\n\n        vec3 dir = normalize(vec3(uv,1.0));\n        //dir *= matrix;\n    \tdir = rotatecam(dir);\n        \n        vec4 posdist = castrayrender(pos - rotatecam(vec3(0.0,0.0,1.0))*DIST_THIRDPERSON+vec3(0.0,1.0,0.0), dir, pos);\n        pos = posdist.xyz;\n        float dist = posdist.w;\n        \n        if (dist < 100.0) {\n            fragColor = vec4(sin(pos)*0.5+0.5,1.0);\n            for (int i = INDEX_DECAL_A; i < INDEX_DECAL_B; i++) {\n                fragColor *= min(1.0,length(pos-getbuffer(i,0).xyz));\n            }\n        }\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

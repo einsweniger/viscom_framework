@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltscD4",
+      "date": "1519905228",
+      "viewed": 18,
+      "name": "Resonance Through a Glass Screen",
+      "username": "nightfox",
+      "description": "Beautiful things can be made with only a few lines of code.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 19,
+            "src": "/media/a/a6a1cf7a09adfed8c362492c88c30d74fb3d2f4f7ba180ba34b98556660fada1.mp3",
+            "ctype": "music",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n   \n    vec2 sampleUV = uv;\n    sampleUV /= 2.0;\n    uv -= 0.5;\n    uv *= 2.0;\n     uv.x *= iResolution.x/iResolution.y;\n    \n    vec3 color = vec3(sin(iTime)+0.5,0.5,0.0);\n     \n    float fft = texture(iChannel0,sampleUV).r;\n    color *= fft;\n    float d = length(uv);\n    \n    color /= fract(d*sin(iTime+fft));\n\tfragColor = vec4(color,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

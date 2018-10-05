@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4s2cWW",
+      "date": "1492138352",
+      "viewed": 197,
+      "name": "spun texture offset",
+      "username": "aferriss",
+      "description": "Spin spin spin --badly needs some antialiasing",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rings",
+        "spin",
+        "offset"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const float rings = 20.0;\nconst float spin = 0.3;\n\nvec2 rotate (vec2 coord, float angle){\n    float sin_factor = sin(angle);\n    float cos_factor = cos(angle);\n\tvec2 c = vec2((coord.x - 0.5) * (iResolution.x / iResolution.y), coord.y - 0.5) * mat2(cos_factor, sin_factor, -sin_factor, cos_factor);\n    c += 0.5;\n    return c;\n}\n\n\nfloat rand(float co){\n    return fract(sin(co * 12.9898) * 43758.5453);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 res = iResolution.xy;\n\tvec2 uv = fragCoord.xy ;\n    vec2 tc = uv / res;\n    float aspect = res.x / res.y;\n    \n    tc.y = 1.0 - tc.y;\n    \n    float d =  floor(distance(vec2(0.5 * aspect, 0.5),vec2(tc.x * aspect, tc.y))*rings)/rings;\n    d += 0.001;\n\tvec4 t = texture(iChannel0, rotate(tc,   d*spin + iTime*0.1 * rand(d)));\n   \n    \n\tfragColor =  t;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

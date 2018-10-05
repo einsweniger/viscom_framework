@@ -1,0 +1,79 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MslfDf",
+      "date": "1498656653",
+      "viewed": 505,
+      "name": "Poisson-disc",
+      "username": "FabriceNeyret2",
+      "description": "Generate Poisson-disc distribution by simulated repulsive springs between particles.\n\nsee Vorono\u00ef version on comments.\nsee spectrum (and tilable version) in [url]https://www.shadertoy.com/view/MssfDf[/url]",
+      "likes": 17,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "sampling",
+        "bluenoise"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Generate Poisson-disc distribution by simulated repulsive springs between particles.\n// see spectrum (and tilable version) in https://www.shadertoy.com/view/MssfDf\n\n#define zoom 10.\n\n#define P(i,j)  ( floor(U/zoom)+vec2(i,j)+ texelFetch(iChannel0, ivec2(U/zoom)+ivec2(i,j), 0).xy ) \n\n//#define N 30\n//#define P(i,j)  ( vec2(i,j) + texelFetch(iChannel0, ivec2(i,j), 0).xy )  // for 0..N loops\n\n\n/**/\nvoid mainImage( out vec4 O, vec2 U )\n{   \n    O -= O; \n \n    for (int j=-3; j<=3; j++)\n        for (int i=-3; i<=3; i++) \n            O += smoothstep(2.,0., length( P(i,j) *zoom - U ) );\n}\n/**/\n\n\n\n\n/**  // Voronoi version\n\nvoid mainImage( out vec4 O, vec2 U )\n{   \n    float v, l = 1e9,_l;\n    \n    for (int j=-3; j<=3; j++)\n        for (int i=-3; i<=3; i++) {\n            v = length( P(i,j) *zoom - U );\n            if (v<l) _l=l, l=v;\n        }\n    \n    O = .1* vec4(_l-l);  \n    //O = .1*vec4(l,0,_l-l,0);\n}\n/**/\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Poisson disk : repealing particles.\n\n#define rnd(U)  ( 2. * fract(4567.89*sin(4567.89*U*mat2(1,-13.17,377.1,-78.73))) - 1. )\n \n#define T(i,j)  texture(iChannel0, fract( ( U + vec2(i,j) ) / iResolution.xy ) ).xy\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    if (iFrame==0) {\n        O.xy = .2*rnd(U);                   // particles location = vec2(i,j) + stored perturb\n        return;                             // start with jittered grid (rough approx of Poisson disc)\n    }\n    \n    vec2 U0 = T(0,0), D, F = vec2(0);\n    \n    for (int j=-4; j<=4; j++)               // look in the neighborhood\n        for (int i=-4; i<=4; i++)           // with [-3,3]^2, a leak occurs at ~100\"+resize\n            if ( vec2(i,j) != vec2(0) ) {\n                D = vec2(i,j)+T(i,j) - U0;  // distance vector to particle (i,j)\n                float l = length(D);\n                F += D / l * max(2.-l,0.);  // simulates a spring (only repealing, otherwise clamped)\n            }\n    \n    O.xy = U0 - .1* F;                      // displace particle proportionaly to force\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

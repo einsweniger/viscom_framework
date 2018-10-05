@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtG3zm",
+      "date": "1473811223",
+      "viewed": 443,
+      "name": "gridnoise",
+      "username": "seani",
+      "description": "Used this to make my last shader.  Figure i'd throw this up in case someone else might find it useful.  Variables to play with are at the top of the file.  Uncomment line 37 for angle modulation.",
+      "likes": 14,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "noise"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//By Sean Irby\n//sean.t.irby@gmail.com\n#define round(x) floor(x+0.5);\n\nfloat widthRange = 0.04;\nfloat scale = 20.0;\nfloat alpha = 1.0;\n\nfloat square(vec2 r, vec2 center, float width, float a){\n    r = abs( mat2(cos(a),-sin(a),sin(a),cos(a)) *(r - center) );    \n    return alpha*smoothstep(0.05, -0.05, max(r.x, r.y)-width/2.);\n}\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nfloat grid(vec2 r, float scale)\n{\n    vec2 rr;\n    \n    float angle = 0.0;\n    float mask = 0.0;\n    float widthFreq;\n    float widthPhase;\n    float squareWidth;\n    \n    //iterate the 3x3 grid surrounding r\n    //see if im in any of the boxes\n    for(int i = -1; i < 2; ++i)\n    {\n        for(float j = -1.0; j < 2.0; ++j)\n        {\n            rr = round(r*scale + vec2(i,j));\n            \n            //Uncomment this for angle modulation\n            //angle = 3.0*(rand(vec2(rr + 0.1)) - 1.0)*iTime/3.0;\n            widthPhase = rand(vec2(rr + 0.2));\n            widthFreq = 5.0*rand(vec2(rr + 0.3));\n            squareWidth = rand(vec2(rr))*scale*(widthRange + widthRange*sin(iTime*widthFreq + widthPhase));\n            \n            mask += square(r*scale, rr, squareWidth, angle);\n        }\n    }\n    \n    \n    return mask;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 r =vec2(2.*fragCoord - iResolution.xy)/iResolution.y;\n\n\tfragColor = vec4(grid(r, scale));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

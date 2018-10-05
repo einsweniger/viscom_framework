@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lsBDs",
+      "date": "1513989473",
+      "viewed": 253,
+      "name": "hl2.exe is broken (open to see)",
+      "username": "Zabidon",
+      "description": "Van Damme extraction idea is taken from here: https://www.shadertoy.com/view/4lX3Rf\n\nhl2.exe\nOK Go - WTF?",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tweet",
+        "vandamme",
+        "hl2"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// License: Do What The F**k You Want To But It's Not My Fault Public License v1 (WTFNMFPL-1.0)\n// Created by Osipov Kirill --- zabidon, KirillD503\n\n// You can change magic numbers on 8 line\n#define mainImage(c, u) \\\n\tvec2 U = u / iResolution.xy; \\\n    c = texture(iChannel0, U); \\\n    if ((c.g - c.r) * 3. > .5) \\\n        discard;\\\n    U.x = c.g; \\\n    c.g = min(c.g, c.r * .8); \\\n    c += (U.x - c.g) / 2.",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tfGRS",
+      "date": "1422722123",
+      "viewed": 793,
+      "name": "DumbTest",
+      "username": "jplorandi",
+      "description": "Just a test",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "test"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(uv,0.5+0.5*sin(iTime),1.0);\n}",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

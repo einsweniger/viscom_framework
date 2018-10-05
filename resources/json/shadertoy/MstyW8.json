@@ -1,0 +1,66 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MstyW8",
+      "date": "1518728784",
+      "viewed": 192,
+      "name": "Starting Point",
+      "username": "BeardThings",
+      "description": "A simple starting point shader for sdf raymarching",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "simple",
+        "sdf",
+        "starting"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 24,
+            "src": "/media/a/488bd40303a2e2b9a71987e48c66ef41f5e937174bf316d3ed0e86410784b919.jpg",
+            "ctype": "cubemap",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 25,
+            "src": "/media/a/550a8cce1bf403869fde66dddf6028dd171f1852f4a704a465e1b80d23955663.png",
+            "ctype": "cubemap",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Links:\n// http://iquilezles.org/www/articles/distfunctions/distfunctions.htm\n\n// Visualize the distances made by the sdf\n#define VISUALIZE_SDF 0\n\n// White is many steps, notice how there's a lot of steps near edges of objects\n#define VISUALIZE_STEPS 0\n\n#define VISUALIZE_NORMALS 0\n\nvec3 Translate(in vec3 p, in vec3 t)\n{\n    return p - t;\n}\n\nfloat Sphere(in vec3 p, in float r)\n{\n    return length(p) - r;\n}\n\n// Add two shapes together\nfloat Append(in float l, in float r)\n{\n    return min(l, r);\n}\n\n// This is where the magic happens\nfloat SDF(in vec3 p)\n{\n    vec3 lp = Translate(p, vec3(-0.25, 0, 1.0));\n    vec3 rp = Translate(p, vec3(0.25, 0, 1.0));\n    return Append(Sphere(lp, 0.5), Sphere(rp, 0.5 + sin(iTime) * 0.1));\n}\n\nvec3 Norm(in vec3 p)\n{\n    // Calculate the normal by calculating the gradient of the SDF\n    const float E = 0.01;\n    return normalize(vec3(\n        SDF(p + vec3(E, 0, 0)) - SDF(p - vec3(E, 0, 0)),\n        SDF(p + vec3(0, E, 0)) - SDF(p - vec3(0, E, 0)),\n        SDF(p + vec3(0, 0, E)) - SDF(p - vec3(0, 0, E))));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 screenSpace = uv * 2.0 - 1.0;\n    \n    // Origin, move this around for fun ^.^\n    vec3 o = vec3(0, 0, -1.0);\n    \n    // Create your view basis vectors however you'd like\n    vec3 f = vec3(0,0, 1.0);\n    vec3 u = vec3(0, 1.0, 0);\n    vec3 r = vec3(1.0, 0, 0);\n    \n    float aspect = iResolution.y / iResolution.x;\n    float aperture = 1.0;\n    \n    // Have our forward with an aperture at 1.0 \n    // and transform our vector by it's space on the screen\n    vec3 dir = f * aperture + r * screenSpace.x + u * screenSpace.y * aspect;\n    \n    // Max step of 16 is fine for a sphere, can be higher for complex scenes\n    const int MaxSteps = 32;\n    \n    // Our final color\n    vec3 fc = texture(iChannel0, dir).xyz;\n    \n    float dist = 0.0;\n    for(int i = 0; i < MaxSteps; ++i)\n    {\n        vec3 p = o + dir * dist;\n        float sdf = SDF(p);\n        \n        // If we're close enough to the surface, then count it as \"reached\"\n        const float E = 0.001;\n        if(sdf < E)\n        {\n#if VISUALIZE_SDF\n            fc = vec3(dist / 2.0);\n            break;\n#endif\n            \n#if VISUALIZE_STEPS\n            fc = vec3(float(i) / float(MaxSteps));\n            break;\n#endif\n            \n#if VISUALIZE_NORMALS\n            fc = Norm(p);\n            break;\n#endif\n            \n            // Rotating light weeeee\n            vec3 DirLight = normalize(vec3(cos(iTime), 0.3, sin(iTime)));\n            \n            // Blue sphere because why not\n            vec3 norm = Norm(p);\n            float l = max(dot(norm, DirLight), 0.0);\n            \n            vec3 a = texture(iChannel1, norm).xyz;\n            \n            // Some basic diffuse + ambient\n            fc = vec3(0.1, 0.5, 0.7) * l + a * 0.2;\n            break;\n        }\n        dist += sdf;\n    }\n    \n    fragColor = vec4(fc, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlcXzM",
+      "date": "1478608942",
+      "viewed": 79,
+      "name": "Fast Fourward [ Transform ]",
+      "username": "Nimajamin",
+      "description": "A very simple spectrograph display of a soundcloud textures frequency data.\n\nSoundtrack: https://soundcloud.com/ngc4244/fft         by N-e-b-u-l-o-u-s [ ngc4244 ]",
+      "likes": 0,
+      "published": 3,
+      "flags": 96,
+      "tags": [
+        "procedural",
+        "audio",
+        "soundcloud"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    fragColor = texture( iChannel0, uv );\n}\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 12582,
+            "src": "https://soundcloud.com/ngc4244/fft",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 pixelSize = 1.0 / iResolution.xy;\n    vec2 uv = fragCoord.xy * pixelSize;\n    \n    vec4 tmp;\n    \n    if ( uv.x > 1.0 - pixelSize.x )\n    {\n    \ttmp = texture( iChannel0, uv.yx * vec2(1.,-1.) + vec2(0.,1.) );\n    }\n    else\n    {\n        tmp = texture( iChannel1, uv + vec2(4.0,0) * pixelSize );\n    }\n    \n    fragColor = tmp;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

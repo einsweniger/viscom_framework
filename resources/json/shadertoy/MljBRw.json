@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MljBRw",
+      "date": "1515124892",
+      "viewed": 216,
+      "name": "Halftonex",
+      "username": "smkgames",
+      "description": "Halftone",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "circle",
+        "halftone"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float PI = 3.14159265359;\n    \n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\nvec2 p = (2.*fragCoord -iResolution.xy ) / iResolution.y; \n\n        vec3 n = vec3(p, sqrt(dot(p, p)));\n        vec2 s = vec2(acos(n.z), atan(n.y, n.x))/PI;\n        vec2 uv = fract(s * vec2(30.0, 30.0));\n        float r = ceil(s.x * 30.0) / 17.0*abs(sin(iTime));\n        fragColor =  vec4(1.)*step(length(uv - 0.5),r);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

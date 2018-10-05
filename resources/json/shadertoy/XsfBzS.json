@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsfBzS",
+      "date": "1496611048",
+      "viewed": 181,
+      "name": "Daily 2017-06-04",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define rand(x) fract(sin(x)*1e4)\n#define rand2(x) fract(sin(dot(x,vec2(12.9898,78.233)))*43758.5453123)\n#define rot(a) mat2(C=cos(a),S=sin(a),-S,C)\nfloat C,S;\n\nfloat noise(vec2 uv) {\n    vec2 i=floor(uv),f=smoothstep(0.,1.,fract(uv)),oi=vec2(0.,1.);\n    return mix(\n        mix(rand2(i),rand2(i+oi.yx),f.x),\n        mix(rand2(i+oi.xy),rand2(i+oi.yy),f.x),\n        f.y);\n}\n\nvec2 noise2(vec2 uv) {\n    return vec2(noise(uv),noise(uv+10.));\n}\n\nvec3 ck(vec2 uv) {\n    vec3 c=texture(iChannel0,uv).rgb;\n    float l=length(c-vec3(.188,.510,.090));\n    return mix(vec3(0.),smoothstep(0.,1.,c)*1.5,min(1.,l*2.));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 st=uv;\n    st.x*=iResolution.x/iResolution.y;\n    st*=iResolution.x*10.*rot(.1);\n    vec4 c=vec4(1.);\n    for(int i=0;i<3;++i) {\n        st+=vec2(.3);\n        vec2 ist=floor(st),fst=fract(st),wp=ist+step(.5,fst),bp=ist+.5,\n            o=(noise2(vec2(i,float(i)*.2+iTime*5.))-.5)*.1;\n        float wl=length(st-wp),bl=length(st-bp);\n        float clr=step(wl/(wl+bl),ck(uv+o)[i]);\n        c[i]=clr;\n    }\n    c.rgb*=ck(uv);\n\tfragColor = c;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

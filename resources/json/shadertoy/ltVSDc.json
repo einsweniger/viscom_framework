@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltVSDc",
+      "date": "1486305695",
+      "viewed": 193,
+      "name": "Ukrainian flag",
+      "username": "klk",
+      "description": "Ukrainian flag",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "flag",
+        "ukraine"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tfragColor = fragCoord.y<iResolution.y/2.0?vec4(1,0.84,0,1):vec4(0,0.34,0.72,1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

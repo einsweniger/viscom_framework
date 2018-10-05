@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsKGWy",
+      "date": "1456273358",
+      "viewed": 159,
+      "name": "Shiny Stones",
+      "username": "KylBlz",
+      "description": "My first shader on here",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 timeoffset = vec2(iTime * 0.1, 0.);\n    vec4 displacement = texture(iChannel1, uv + timeoffset) - 0.5;\n    float magnitude = 0.3 * length(displacement);\n    vec4 distortColor = texture(iChannel0, uv + magnitude * displacement.xy);\n    float brightness = length(displacement.gb + 0.5) * 1.5;\n    fragColor = mix(displacement + 0.6, displacement + distortColor, brightness) * (brightness * 0.8 + 0.2);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

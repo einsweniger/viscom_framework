@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsjBWz",
+      "date": "1500132901",
+      "viewed": 153,
+      "name": "[SH17A]Small",
+      "username": "Nesvi7",
+      "description": "Something small.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 c, vec2 f )\n{\n    c-=c;\n\tc.g = sin(dot(f,f));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

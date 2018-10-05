@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldKyRK",
+      "date": "1522670882",
+      "viewed": 160,
+      "name": "Ink on paper",
+      "username": "funstep",
+      "description": "Make any image looks like ink on paper",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "ink",
+        "notebook"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// thikness of border\nfloat _thikness = 0.001;\n\nint _coubSize = 20;\n\nvec4 paperColor(in vec2 fragCoord) {\n    int x = int(fragCoord.x);\n    int y = int(fragCoord.y);\n    if (x % _coubSize == 0 || y % _coubSize == 0) {\n        return vec4(0.639, 0.78, 0.933, 1.0);\n    }\n    \n    return vec4(1.0, 1.0, 1.0, 1.0);\n}\n\nbool isObject(in vec2 uv, in float thikness) {\n    vec4 tex = texture(iChannel0, uv);\n    \n    vec4 beforeX = texture(iChannel0, vec2(uv.x - thikness/2.0, uv.y));\n    vec4 beforeY = texture(iChannel0, vec2(uv.x, uv.y - thikness/2.0));\n    \n\tif (abs(tex.r - beforeX.r) > 0.01 || abs(tex.r - beforeY.r) > 0.01) {\n        return true;\n    }\n    \n    return false;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n    \n    fragColor = paperColor(fragCoord);\n    \n\tif (isObject(uv, _thikness)) {\n        vec4 tex = texture(iChannel0, uv);\n        \n        float blue = tex.r * 0.737;\n        if (blue < 0.5) {\n            blue = 0.5;\n        }\n        \n        fragColor = vec4(0.035, 0.2196, blue, 1.0);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

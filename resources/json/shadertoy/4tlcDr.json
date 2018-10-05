@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tlcDr",
+      "date": "1504388491",
+      "viewed": 429,
+      "name": "Iss",
+      "username": "iq",
+      "description": "The International Space Station is not in \"space\" as much as you might think... it's just floating right above hour head, a mere 20 Mount Everest's high. I made it 200km wide in the shader to it could be visible in the viewport.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "iss"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Created by inigo quilez - iq/2017\n// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\nconst float sc = 10000.0; // height of the viewport, it covers 20,000 km \n\nconst float earthRad = 6356.8; // km\nconst float issElev = 435.0;   // km\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 p = sc * (-iResolution.xy+2.0*fragCoord) / iResolution.y;\n    float px = sc*2.0/iResolution.y;\n\n    // background\n    vec3 col = vec3(0.0);\n    \n    // earth\n    float d = length(p)-earthRad;\n    col = mix( col, vec3(0.4,0.5,0.7), 1.0-smoothstep(-px,px,d ) );\n\n    // iss (made it 100km radius so it'd be visible)\n    vec2 iss = (earthRad+issElev) * vec2(sin(iTime),cos(iTime));\n    d = length(p-iss)-100.0;\n    if( d<0.0 )\n        col = vec3(1.0);\n\n\tfragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

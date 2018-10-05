@@ -1,0 +1,95 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdfcR2",
+      "date": "1488902323",
+      "viewed": 459,
+      "name": "Buffering with Rainbow",
+      "username": "pthextract",
+      "description": "Buffer, random, bounce, particles\n\nRainbow code:\n[url]https://www.shadertoy.com/view/MdSBWV[/url]\n\n",
+      "likes": 2,
+      "published": 3,
+      "flags": 96,
+      "tags": [
+        "random",
+        "particles",
+        "bounce",
+        "buffer"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 11807,
+            "src": "https://soundcloud.com/fred-durst-to-last/double-dragon-neon-mission-10-neon-fortress",
+            "ctype": "musicstream",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Visualisation\n//Created by pthextract in 2017-Mar-7\n\n\n\n// Rainbowcode after golfing here----> https://www.shadertoy.com/view/MdSBWV\nvec4 Rainbow(vec2 U ) {\n    vec4 O;\n    U.x = -.5*pow(cos(iTime),1.)+length(U=U/iResolution.xy-vec2(.5,.3)); \n    O.rgb = 2.*(U.y+.1)*(vec3(1.-3.*clamp(abs(.2-U.x),.02,.1),.7,.4)\n           -4.*clamp(abs(vec3(.42,.35,.28)-U.x),.03,.2));\n   O.r += O.g*.5;\n    O.b+=.2;\n    float slide=pow(cos(.2*iTime),2.);\n    return slide*(1.-O)+O*(1.-slide);\n}\n\n\n\n#define get(x,y) texture(iChannel0,(vec2(x,y)+.5)/ir)\n\nfloat hash(int x,int y)\n{\n    return fract(412.1*sin(387.*float(x*x+y*(y+734))));\n}\n\nvoid mainImage( out vec4 o,  vec2 i )\n{\n    vec4 getbow=Rainbow(i);\n    vec2 ir=iResolution.xy;\n     i/=ir;\n  \n      //o = .7* texture(iChannel1,i).ggrr;\n    \n    //o=.8*cos(iDate.w)*getbow;\n    //o-=vec4(0,.5,0,1);\n    //o+=vec4(0,0,.2,1);\n   \t//o-=o;\n     \n    for (int y=1;y<15;y++)\n    for (int x=1;x<10;x++)\n    {\n     float le=(length(get(x,y).xy-i));\n        if (le\n            <.05*float(x*y))\n        {\n            o.r+=getbow.r*hash(x*3,y*7)/(le/=.005);\n            o.g+=getbow.g*hash(x*8,y*1)/le;\n            o.b+=getbow.b*hash(x*7,y*2)/le;\n            //o+=.001;\n              //o.g+=hash(x*8,y*1);\n            \n            };\n            \n    \n    } \n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "//Data & control buffer\nfloat hash(float x)\n{\n    return fract(412.1*sin(387.*float(x*x)));\n}\nfloat hash(int x,int y)\n{\n    return fract(412.1*sin(387.*float(x*x+y*(y+734))));\n}\n\nvoid mainImage( out vec4 o,  vec2 i )\n{\n   float ig=iTime/3.;\n    int x=int(i.x);int y=int(i.y);\n    vec2 ir=iResolution.xy;\n\to =  texture(iChannel0,i/ir);\n      if (ig<1.1)\n        {o-=o;\n         o.x+=hash(x,y);o.y+=hash(x-100,y-10);\n            // o.z=0.;o.a=0.;\n        ;}\n   \n  \n            o.x+=.01*(hash(ig+float(x*3+y*2))-.5);\n            o.y+=.004*ig*(hash(ig+float(x+y*7))-.5);\n            o.y+=o.a;o.a-=1e-3;\n            if (o.y<.0)o.a=-o.a*.99;\n            //if (abs(iTime-10.2)<.01)o.z-=.02;\n       \n    \n}\n\n //if (x==25 && y==0)o.r++;//set value;\n    //if (x==27) o=texture(iChannel0,(vec2(25,0)+.5)/ir);//get and set;    \n    // if (x<300 && y<300)",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

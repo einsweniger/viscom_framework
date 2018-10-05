@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsSczz",
+      "date": "1490608152",
+      "viewed": 188,
+      "name": "Random Colors",
+      "username": "anticore",
+      "description": "Nothing special",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "random"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define t iTime\n#define r iResolution.xy\n#define m iMouse.xy\n\nvec2 nc (in vec2 uv) {\n\treturn (uv / r) * 2. - 1.;\n}\n\nfloat random (in vec2 uv, in vec3 seed) {\n\treturn fract(sin(dot(uv.xy, vec2(seed.x,seed.y))) * seed.z);\n}\n\nvoid mainImage (out vec4 fragColor, in vec2 fragCoord) {\n\tvec2 uv = fragCoord.xy / r;\n\tvec2 uv2 = nc(fragCoord.xy) * 10.0;\n\tvec2 ipos = floor(uv2);\n\n\tvec3 color1 = vec3(uv.x, uv.y, abs(sin(t)));\n\tvec3 color2 = vec3(random(ipos, vec3(12.843, 78.324, 252332.0 + t)));\n\tvec3 color = mix(color1, color2, vec3(0.5, 0.5, 0.5));\n\tfragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

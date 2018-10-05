@@ -1,0 +1,79 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xs2BWR",
+      "date": "1500050310",
+      "viewed": 258,
+      "name": "[SH17A] Particles 3",
+      "username": "aiekick",
+      "description": "[SH17A] Particles 3",
+      "likes": 8,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "particles",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, vec2 g )\n{\n\tf = texelFetch(iChannel0, ivec2(g),0); // thanks to dave hoskins\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, vec2 g )\n{\n    f.xyz = iResolution;\n    vec2 v = (g+g-f.xy)/f.y*3.,k;\n    f *= texture(iChannel0, g/f.xy) / length(f);\n   \tg = vec2(iFrame);\n    f += 1e-2 / dot(\n        k = v - sin(g + vec2(1.6,0)) * fract(iTime*.1+4.52*sin(g*6.5))*3.,\n        k);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

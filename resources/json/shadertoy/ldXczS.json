@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldXczS",
+      "date": "1488653842",
+      "viewed": 297,
+      "name": "Drive Crazy",
+      "username": "ocb",
+      "description": "To set on a large wall in your living room...",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "distancefield",
+        "tutorial",
+        "random",
+        "bookofshader"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Author: ocb\n// Title: Drive crazy\n// Modified code from the BookOfShader (Patricio Gonzalez Vivo)\n\n\n// 2D Random\nfloat random (in vec2 st) { \n    return fract(sin(dot(st.xy,\n                         vec2(12.9898,79.255666)))\n                 * (iTime/10.+100000.));\n}\n\n// 2D Noise based on Morgan McGuire @morgan3d\n// https://www.shadertoy.com/view/4dS3Wd\nfloat noise (in vec2 st) {\n    vec2 i = floor(st);\n    vec2 f = fract(st);\n\n    // Four corners in 2D of a tile\n    float a = random(i);\n    float b = random(i + vec2(1.0, 0.0));\n    float c = random(i + vec2(0.0, 1.0));\n    float d = random(i + vec2(1.0, 1.0));\n    \n    vec2 u = smoothstep(0.,1.,f);\n\n    // Mix 4 coorners porcentages\n    return mix(a, b,u.x) +\n            (c - a)* u.y * (1.0 - u.x) + \n            (d - b) * u.x * u.y;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    // Scale the coordinate system to see\n    // some noise in action\n    vec2 pos = vec2(uv*30.0);\n\n    // Use the noise function\n    float n = noise(pos);\n\n\tfragColor = vec4(vec3(fract(n*10.*(sin(iTime/6.)+1.)),fract(n*10.*(sin(iTime/8.)+1.)),fract(n*10.*(sin(iTime/4.)+1.))), 1.0);\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

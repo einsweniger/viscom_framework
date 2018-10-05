@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtSfWK",
+      "date": "1517122259",
+      "viewed": 192,
+      "name": "spin spin spin",
+      "username": "DJDoomz",
+      "description": "I'm dizzy",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float sceil(float n)\n{   \n    n = pow((fract(n)*2.-1.),9.)/2.+ceil(n);\n \treturn n;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (2.*fragCoord.xy-iResolution.xy) / iResolution.y;\n    \n    float layer = 5.-ceil(length(uv)*8.)*.3;\n    \n\tfragColor = vec4(smoothstep(-.1,.1, cos(atan(uv.x,uv.y)*4.+iTime*layer)));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

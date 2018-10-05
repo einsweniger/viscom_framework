@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sKyR1",
+      "date": "1521034043",
+      "viewed": 166,
+      "name": "cycling texture",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "short",
+        "cycling"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,U) \\\n    O += .5+.5*sin(10.*( length(texture(iChannel0,U/iResolution.xy).rgb) + iTime))",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

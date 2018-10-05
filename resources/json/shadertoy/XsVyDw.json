@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsVyDw",
+      "date": "1522257468",
+      "viewed": 138,
+      "name": "colors and symmetry",
+      "username": "DJDoomz",
+      "description": "///////////////",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = (fragCoord-iResolution.xy/2.)/iResolution.y;\n    \n    uv = vec2(length(uv)*(8.+2.*sin(iTime*.1)), sin(atan(uv.x,uv.y)*floor(5.+mod(iTime*.2,6.)) + iTime*.3) );\n    \n    vec3 col = vec3(0);\n    \n    uv+=sin(uv.yx*(sin(iTime*.3)*2.)+iTime*.6*vec2(1,.9));\n    \n    col += 1.-smoothstep(0.1,.2, length(uv-vec2(uv.x,0)));\n    col += 1.-smoothstep(0.2,.3, length(uv-vec2(floor(uv.x+.5),uv.y)));\n\n    col *= .5+.5*cos(6.28*vec3(0,.33,.66)+uv.y+iTime + col*2. );\n    \n    // Output to screen\n    fragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lslfR2",
+      "date": "1497080289",
+      "viewed": 201,
+      "name": "31/100",
+      "username": "yahe",
+      "description": "Cellular Noise",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 random2( vec2 p ) {\n    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    vec2 st = fragCoord.xy/iResolution.xy;\n    st.x *= iResolution.x/iResolution.y;\n    vec3 color = vec3(.3+sin(iTime/5.), .1 + cos(iTime/7.), .3 + cos(iTime/2.));\n    \n    // Scale \n    st *= 10.;\n    \n    // Tile the space\n    vec2 i_st = floor(st);\n    vec2 f_st = fract(st);\n\n    float m_dist = 1.;  // minimun distance\n    \n    for (int y= -1; y <= 1; y++) {\n        for (int x= -1; x <= 1; x++) {\n            // Neighbor place in the grid\n            vec2 neighbor = vec2(float(x),float(y));\n            \n            // Random position from current + neighbor place in the grid\n            vec2 point = random2(i_st + neighbor);\n\n\t\t\t// Animate the point\n            point = 0.5 + 0.5*sin(iTime + 6.2831*point);\n            \n\t\t\t// Vector between the pixel and the point\n            vec2 diff = neighbor + point;\n            \n            // Distance to the point\n            float dist = length(diff);\n\n            // Keep the closer distance\n            m_dist = min(m_dist, dist);\n        }\n    }\n\n    // Draw the min distance (distance field)\n    color += m_dist;\n    \n    fragColor = vec4(color,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

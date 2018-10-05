@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtlcWX",
+      "date": "1506673411",
+      "viewed": 310,
+      "name": "array of threads - 149 chars",
+      "username": "FabriceNeyret2",
+      "description": "modern version of [url]https://www.shadertoy.com/view/llsXWr[/url]",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "2tweets",
+        "short",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/**/ // 149 chars\n     // NB: the for is a loop that step twice each i value. fract(-U) is doing both the original fract and nexts U=1.-U\n\n#define mainImage( O, u )                        \\\n    vec2 R = iResolution.xy,                     \\\n         U = abs( u+u-R ) / R.y;                 \\\n    for( float i=0.,d=.1; i<=2.; i += d = .1-d ) \\\n        U = fract(-U),                           \\\n        O += (i*i-i+.5) / 2e2 / abs( i* (U-U.y-i) + i - U ).x\n\n/**/\n\n        \n\n/** // 162 chars         \n\n#define L(O)                        \\\n    U = fract(-U);                  \\\n    for( float i=0.; i<=2.; i+=.1)  \\\n        O += (i*i-i+.5) / 2e2 / abs( i* (U-U.y-i) + i - U ).x\n \n#define mainImage( O, u )           \\\n    vec2 R = iResolution.xy,        \\\n         U = abs( u+u-R ) / R.y;    \\\n    L(O); L(O)\n\n/**/\n      \n\n\n// old golfing was 175 chars: cf https://www.shadertoy.com/view/llsXWr",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

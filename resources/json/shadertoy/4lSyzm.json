@@ -1,0 +1,42 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lSyzm",
+      "date": "1507841138",
+      "viewed": 208,
+      "name": "paper latern analysis",
+      "username": "ollj",
+      "description": "fork of \nhttps://www.shadertoy.com/view/Md3XDB\nsimplified, asin, textures removed.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sss",
+        "glow",
+        "scattering",
+        "polar",
+        "paper",
+        "latitude",
+        "lantern",
+        "longidude"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//parent: https://www.shadertoy.com/view/Md3XDB\n// Paper Lantern created by SeongWan Kim (kaswan / twitter @idgmatrix)\n// Thanks to iq and @kevinroast \n// shadow and glow effect codes from http://www.kevs3d.co.uk/dev/shaders/distancefield6.html\n\n//heuristic epsilon tolerance\n#define eps .005\n//iterate raymarching\n#define iterGd 256.\n//iterate ambient occlusion\n#define iterAO 4.\n//iterate SubSurfaceScatter\n#define iterSss 5.\n//iterate shadow \n#define iterShadow 32.\n\n//hard shadows do not work here. illusion fails\n#define doSoftShadow\n\n#define lightColor vec3(1.2,1.,.5)\n#define sssColor vec3(1.9 + 0.1 * abs(sin(iTime * 6.0)), 1.3, 0.5)\n\n\nmat2 r2(float r){float c=cos(r),s=sin(r);return mat2(c,s,-s,c);}\n//above performed much slower than below:\nvec2 r2(vec2 p,float a){return p=cos(a)*p+sin(a)*vec2(p.y,-p.x);}\n\n\nfloat sphere(vec3 u)\n{float t=iTime*.5//spin speed\n;vec2 rims=vec2(5,8)//number ofscafold-hoops.\n;u.xz=r2(u.xz,t)//spin axis\n;float d=length(u)\n;vec2 l=abs(sin(vec2(atan(u.z,u.x),asin(u.y/d))*rims)*.15)\n;return d+l.x*l.y-1.;}\n\nfloat cylinder(vec3 u,vec3 c){return length(u.xz-c.xy)-c.z;}\n\nfloat paperLantern(vec3 u)\n{return max(sphere(u), -cylinder(u, vec3(0,0,.45)));}\n\n//endless plane and its matrial BHV\nfloat plane(vec3 pos, vec4 n,inout bool p)\n{float d=dot(pos,n.xyz)-n.w\n;if(d<eps)p=true\n;return d;}\n\nfloat gd(vec3 pos,out bool p){p=false\n;float d=paperLantern(pos)\n;d=min(d,plane(pos,vec4( 0,1, 0,-1.2),p))\n;d=min(d,plane(pos,vec4( 0,0,-1,-9.),p))\n//p is broken on above plane. no clue why.\n;d=min(d,plane(pos,vec4( 1,0, 0, -6.),p))\n;d=min(d,plane(pos,vec4(-1,0, 0, -6.),p))\n;return d;}\n\nfloat calcAO(vec3 u,vec3 n)\n{float r=.0,w=1.;bool p=false//if material is off the ball plane\n;for(float i=1.;i<iterAO;i++\n){float d=float(i)*.2;r+=w*(d-gd(u+n*d,p));w*=.5;\n}return 1.-clamp(r,.0,1.);}\n\nfloat calcSSS(vec3 u,vec3 t){float r=.0,w=.5//accumulator,weights\n;for(float i=1.;i<iterSss;i++){float d=pow(float(i),2.5)*eps*32.\n ;r -=w*min(.0,sphere(u+t*d));w*=.9;}return clamp(r, 0.0, 1.0);}\n\n#ifdef doSoftShadow\n//LightSource,LightDirection,ShadowHardness\nfloat shadow(vec3 u,vec3 t,float h){bool b=false\n;float a=1.,w=.12//accumulator,weights\n;for(float i=.0;i<iterShadow;i++\n){float d= gd(u+t*w,b); a=min(a,h*d/w);w+=d;if(w>5.)break; \n}return clamp(a,.0,1.);}\n#else\nfloat shadow(vec3 u, vec3 t,float h){bool b=false;\n;vec3 p=u+t*.12\n;for(float i =.0;i<iterShadow;i++\n){float d=gd(p,b)\n ;if (d<eps)return .0;p+=t*d;}return 1.;}\n#endif\n\nvoid mainImage(out vec4 o,vec2 u)\n{u=u.xy/iResolution.xy\n;u=u*2.-1.\n;u.x*=iResolution.x/iResolution.y\n;vec3 t=normalize(vec3(u,-2.)-vec3(0,0,-5))\n;vec3 s=-2.*vec3(sin(iTime*.5),-1.5,cos(iTime*.5))\n//;vec3 s = vec3(-2.0, 3.0, -2.0)\n;vec3 p = vec3(0,0,-5.)\n;float d\n;bool b=false\n//oh no, this is bad style, a return in the mainImage loop.\n;for (float i=.0;i<iterGd;i++\n){d=gd(p,b)\n ;if(d<eps//hit surface\n ){vec2 e= vec2(eps,0)\n  ;vec3 n=normalize(vec3(gd(p+e.xyy,b)-gd(p-e.xyy,b)\n  ,gd(p+e.yxy,b)-gd(p-e.yxy,b),gd(p+e.yyx,b)-gd(p-e.yyx,b)))\n  ;vec3 l=normalize(s-p)//light direction\n  ;vec3 c=max(dot(n,l),.0)*lightColor*.5\n      \n      //texturing disabled, and also sligly damaged.\n  //;if (b) {\n  ;if (true) {//same texture for all,\n       // ;vec4 tex\n                //because i sligthly broke the textureID code here.\n            \t//vec4 c;\n\t\t\t\t//tex = texture(iChannel0, u.yz * 0.2) * abs(n.x);\n            \t//tex += texture(iChannel0, u.zx * 0.2) * abs(n.y);\n            \t//tex += texture(iChannel0, u.xy * 0.2) * abs(n.z);\n                \n                c *= vec3(1.0, 0.45, 0.1);\n  }else{\n       // ;vec4 tex\n                //vec2 u = vec2(longitude, latitude); \n\t\t\t\t//tex = texture(iChannel1, u * 1.0);\n                \n                c += 0.08;\n  }\n  ;c*=shadow(p,l,8.)*1.5\n  ;c=mix(c,sssColor,calcSSS(p,t))\n  //;c =mix(l,sssColor,calcSSS(p,t))//silly one\n  ;c+=calcAO(p,n)*.3\n  ;o=vec4(c,1.)\n  ;return;//bad style to have a return in [void MainImage]\n  }\n  p+=d*t;\n }o=vec4(1,.2,0,1);}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

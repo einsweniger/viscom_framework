@@ -1,0 +1,78 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sdyWl",
+      "date": "1520586618",
+      "viewed": 145,
+      "name": "mix3textures",
+      "username": "Reymenta",
+      "description": "mix 3 textures with weight function of mouse position \nmouse controlled vignette",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "mix"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 48,
+            "src": "/media/a/8979352a182bde7c3c651ba2b2f4e0615de819585cc37b7175bcefbca15a6683.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n \tvec2 uv = fragCoord.xy / iResolution.xy;\n\t\n  \tvec4 final_color = vec4(0.);  \n \tfloat weight0 = iMouse.x/iResolution.x;\n\tfloat weight1 = iMouse.y/iResolution.y;\n\tfloat weight2 = 1.0 - weight0 - weight1;\n\tfinal_color = texture(iChannel0,   uv) * weight0 +\n        texture(iChannel1, uv) * weight1 +\n        texture(iChannel2, uv) * weight2;   \n    float dist = distance(uv, vec2(0.5)),\n    falloff = iMouse.y < 0.01 ? 0.1 : iMouse.y / iResolution.y,\n    amount = iMouse.x < 0.01 ? 1.0 : iMouse.x / iResolution.x; \n    final_color *= smoothstep(0.8, falloff * 0.8, dist * (amount + falloff));    \n    \n\tfragColor = final_color;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdfBzS",
+      "date": "1496602444",
+      "viewed": 176,
+      "name": "Musical Star by Ncortiz",
+      "username": "ncortiz",
+      "description": "My 1st project. ",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "2d",
+        "mouse",
+        "interactive",
+        "music",
+        "star",
+        "space",
+        "planets",
+        "render"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 34,
+            "src": "/media/a/d96b229eeb7a08d53adfcf1ff89e54c9ffeebed193d317d1a01cc8125c0f5cca.mp3",
+            "ctype": "music",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/* BSD-3-Clause\nCopyright (c) 2017 Nicolas Ortiz Sommerfeld\n\nRedistribution and use in source and binary forms, \nwith or without modification, are permitted provided \nthat the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice, \nthis list of conditions and the following disclaimer.\n\n2. Redistributions in binary form must reproduce the above copyright \nnotice, this list of conditions and the following disclaimer in the \ndocumentation and/or other materials provided with the distribution.\n\n3. Neither the name of the copyright holder nor the names of its \ncontributors may be used to endorse or promote products derived \nfrom this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT \nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT \nHOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, \nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED \nTO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR \nPROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF \nLIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE \nOR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN \nIF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n*/\n\n//Linear interpolation from v0 to v1 by t\nfloat lerp(float v0, float v1, float t) {\n  return v0 + t * (v1 - v0);\n}\n\n//Trace-Star \nvec4 traceStar(in vec2 fragCoord, vec2 lightpos, vec3 coreColor, vec3 outerColor, vec3 backgroundColor,\n               float totalRadius, float centerRadius, float surfaceRadius) {  \n    //Distance from fragCoord to the star's position\n    float xdist = (lightpos.x-fragCoord.x)*(lightpos.x-fragCoord.x);\n    float ydist = (lightpos.y-fragCoord.y)*(lightpos.y-fragCoord.y);\n    \n    //Distance from the star's center position\n    float distFromCenter = sqrt(xdist+ydist);\n    \n    //Attenuation depending on the distance from the star's surface\n    float attenuation = 1.0f-clamp(distFromCenter/totalRadius, 0.0f, 1.0f);\n\n    //Gradient from core-colour to outer-color\n    coreColor.x = lerp(coreColor.x, outerColor.x, attenuation/(distFromCenter*(1.0f/surfaceRadius)));\n    coreColor.y = lerp(coreColor.y, outerColor.y, attenuation/(distFromCenter*(1.0f/surfaceRadius)));\n    coreColor.z = lerp(coreColor.z, outerColor.z, attenuation/(distFromCenter*(1.0f/surfaceRadius)));\n    \n    //Gradient from outer-color to bg-color\n    coreColor.x = lerp(backgroundColor.x, coreColor.x, attenuation/(distFromCenter*(1.0f/centerRadius)));\n    coreColor.y = lerp(backgroundColor.y, coreColor.y, attenuation/(distFromCenter*(1.0f/centerRadius)));\n    coreColor.z = lerp(backgroundColor.z, coreColor.z, attenuation/(distFromCenter*(1.0f/centerRadius)));\n    \n    //Return result\n\treturn vec4(coreColor, 0.0f);   \n}\n\n//Main function\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord) {     \n    //Settings for big-star\n    float freq = texture( iChannel0, vec2( 0.01, 0.25 ) ).x;\n    float scale = lerp(0.3f, 0.7f, sin(iTime*(freq/100.0f)));  \n    \n    float totalRadius = 4000.0f*scale;\n    float centerRadius = 120.0f*scale;\n    float surfaceRadius = 100.0f*scale;\n        \n    vec3 originalColor = vec3(1.0f, 0.5f, 0.3f);\n    vec3 outerColor = vec3(1.0f, 1.0f, 0.7f);\n    vec3 backgroundColor = vec3(0.0f, 0.0f, 0.0f);\n\n    //Big star\n    fragColor = traceStar(fragCoord, iMouse.xy, originalColor, outerColor, backgroundColor, \n                          totalRadius, centerRadius, surfaceRadius);\n    \n    //Small stars\n    fragColor +=traceStar(fragCoord, vec2(200.0f, 200.0f), originalColor, outerColor, backgroundColor, \n                          40.0f, 1.2f, 1.0f);\n    fragColor +=traceStar(fragCoord, vec2(340.0f, 800.0f), originalColor, outerColor, backgroundColor, \n                          40.0f, 1.2f, 1.0f);\n    fragColor +=traceStar(fragCoord, vec2(267.0f, 560.0f), originalColor, outerColor, backgroundColor, \n                          40.0f, 1.2f, 1.0f);\n    fragColor +=traceStar(fragCoord, vec2(780.0f, 330.0f), originalColor, outerColor, backgroundColor, \n                          40.0f, 1.2f, 1.0f);\n    fragColor +=traceStar(fragCoord, vec2(980.0f, 130.0f), originalColor, outerColor, backgroundColor, \n                          40.0f, 1.2f, 1.0f);\n    fragColor +=traceStar(fragCoord, vec2(850.0f, 630.0f), originalColor, outerColor, backgroundColor, \n                          40.0f, 1.2f, 1.0f);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

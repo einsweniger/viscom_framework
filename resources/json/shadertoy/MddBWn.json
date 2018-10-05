@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MddBWn",
+      "date": "1524746006",
+      "viewed": 14,
+      "name": "fokkkus",
+      "username": "lennyjpg",
+      "description": "cam filter",
+      "likes": 0,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "webcam"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy-0.5;\n    uv *= 0.7 - mod(uv.x+uv.y,uv.x*0.5)*1.5;\n    fragColor = texture(iChannel0,uv+0.5);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

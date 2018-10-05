@@ -1,0 +1,219 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldscWr",
+      "date": "1487786251",
+      "viewed": 366,
+      "name": "You and WTF is this army.",
+      "username": "CaptCM74",
+      "description": "Wat\n\n-----------------------\n\nNyan cat sampling stuff\nhttps://www.shadertoy.com/view/lsX3Rr\n\nThe green screen filtering from\nhttps://www.shadertoy.com/view/llBGWc\n\nScreen rotation from\nhttps://www.shadertoy.com/view/XlsGWf",
+      "likes": 4,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "trippy"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 260,
+            "src": "/media/previz/buffer03.png",
+            "ctype": "buffer",
+            "channel": 3,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//How many shots of imbecile syringe did you had?\n#define man_debris 8.\n\n//Render Background only?\n#define BG_only false\n\nvec4 SHIT(vec2 uv,sampler2D image,float time)\n{\n    vec2 uvorig = uv;\n    \n    float angle = radians(sin(time*0.25+cos(time*0.3)*2.5)*32.);\n    float zoom = (sin(time*0.78)+1.8)/2.;\n    \n    vec2 offset = vec2(cos(time*0.15)*0.2,sin(time)*0.17);\n    vec2 pixel_size = 1. / iResolution.xy;\n    //Zoom in\n    \n    vec2 uv2 = 0.5 + (uvorig-0.5)*zoom;\n    \n    //Rotate\n    uv2 -= 0.5;\n    \n    mat2 m = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));\n    \n    uv2 *= m;\n    uv2 *= pixel_size*500.;\n    \n    uv2 += 0.5;\n    \n    uv2 += offset;\n    \n    return texture(image,uv2);\n    \n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec4 finalcolor = vec4(1.);\n    float time = iTime * 10.;\n    \n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 guy = SHIT(uv,iChannel0,time);\n    vec4 guy2 = SHIT(uv+vec2(-0.1,0.1),iChannel0,time);\n    \n    vec4 guybrush;\n    \n    vec2 count;\n    \n    \n    \n\tvec4 trip = SHIT(uv,iChannel2,time);\n    vec4 background = texture(iChannel3,uv);\n    \n    //Shadow color\n    guy2.xyz = vec3(0.2,0.35,0.43);\n    //RAINBOWWWWW\n    guy.xyz += vec3(sin(time*0.5)*0.7,cos(time*0.5)*0.8,cos(time*0.3+sin(time))*0.83);\n    \n    \n    \n    finalcolor = background;\n    \n    if (!BG_only)\n    {\n    \n    \n    \n    \n    for (float i=0.;i<man_debris;i+=1.)\n    {\n    count += vec2((cos(i+time)+0.)*0.2,cos(i*2.+time)*0.4);\n    //Flying mann-debris shadow.\n    guybrush = SHIT(uv+vec2(count.x,count.y)+vec2(-0.1,0.1),iChannel0,time);\n    \n    guybrush.xyz = vec3(0.2,0.35,0.43);\n        \n    finalcolor = mix(finalcolor,guybrush,guybrush.a);\n    }\n    \n    \n    \n    count = vec2(0.);\n    \n    for (float i=0.;i<man_debris;i+=1.)\n    {\n    count += vec2((cos(i+time)+0.)*0.2,cos(i*2.+time)*0.4);\n    //Flying mann-debris.\n    guybrush = SHIT(uv+vec2(count.x,count.y),iChannel0,time);\n    \n    guybrush.xyz += vec3(sin(i+time)+0.7,cos(i+time)+0.3,sin(i+3.145436435435+time)+0.6);\n        \n    finalcolor = mix(finalcolor,guybrush,guybrush.a);\n    }\n    \n    finalcolor = mix(finalcolor,trip,trip.a);    \n    finalcolor = mix(finalcolor,guy2,guy2.a);\n    \n        \n    for (float i=0.;i<4.;i+=1.)\n    {\n    guybrush = SHIT(uv+vec2(i*0.01-0.015,0.),iChannel0,time);    \n    guybrush.xyz = vec3(1.0);    \n        \n    finalcolor = mix(finalcolor,guybrush,guybrush.a);  \n    }\n    for (float i=0.;i<4.;i+=1.)\n    {\n    guybrush = SHIT(uv+vec2(0.,i*0.01-0.015),iChannel0,time);    \n    guybrush.xyz = vec3(1.0);    \n        \n    finalcolor = mix(finalcolor,guybrush,guybrush.a);  \n    }    \n        \n    finalcolor = mix(finalcolor,guy,guy.a);\n    \n    \n    }\n    \n    \n    \n    //finalcolor = mix();\n    \n\tfragColor = finalcolor;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "/* \nRenders That action guy.\n\nThe original green screen from\nhttps://www.shadertoy.com/view/llBGWc\n*/\n\n#define threshold 0.6\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n\n    vec4 greenScreen = vec4(0.,1.,0.,1.);\n    vec4 color = texture(iChannel0, uv);\n    \n    vec3 diff = color.xyz - greenScreen.xyz;\n    \n    if(dot(diff, diff) < threshold) {\n     \n        color.a = 0.;\n        \n    }\n    \n    fragColor = color;\n    \n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "#define iteration 32.\n#define spread 0.01\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nvec4 image_at(vec2 uv,sampler2D image)\n{\n    return texture(image,uv);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float time = iTime*10.;\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    /*\n    float angle = radians(sin(time*0.5)*22.);\n    float zoom = (sin(time*0.78)+1.5)/2.;\n    \n    vec2 offset = vec2(cos(time*0.15)*0.2,sin(time)*0.17);\n    \n    //Zoom in\n    \n    vec2 uv = 0.5 + (uvorig-0.5)*zoom;\n    \n    //Rotate\n    uv -= 0.5;\n    \n    mat2 m = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));\n    \n    uv *= m;\n    \n    uv += 0.5;*/\n    \n    vec4 final;\n    vec4 original = image_at(uv,iChannel0);\n    \n    vec4 final_old;\n    vec4 temp;\n    \n    for (float i=iteration;i>0.;i-=1.)\n    {\n    temp = vec4(rand(vec2(0.,i)),rand(vec2(sin(i),cos(i))),rand(vec2(i,0.)),0.) + image_at(uv+vec2(cos(i+time+mod(i,2.)+sin(i*time*0.5))*0.2*(i*spread),sin(i+time+mod(i,2.)+sin(i*time*0.5))*0.2*(i*spread)),iChannel0);\n    \n    final_old = mix(final_old,temp,temp.a);\n    }\n    final_old = mix(final_old,original,original.a);\n    \n    final = final_old;\n    \n    fragColor = final;\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "/*\nNow let's bleed the image, shall we?\n*/\nvec4 image_at(vec2 uv,sampler2D image)\n{\n    return texture(image,uv);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 uv2 = 0.5 + (uv-0.5)*0.7 + vec2(0.,iTime*0.00001);\n    \n    \n    \n    vec4 final = image_at(uv2,iChannel1);\n    \n    final += image_at(uv,iChannel0) * 0.1;\n    \n    final.xyz *= 0.9;\n    final.a *= 0.9;\n    \n    fragColor = final;\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 14,
+            "src": "/media/a/cbcbb5a6cfb55c36f8f021fbb0e3f69ac96339a39fa85cd96f2017a2192821b5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 260,
+            "channel": 0
+          }
+        ],
+        "code": "/*\n\n\tThe BG\n\n*/\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    /*\n\n\tYEAAAAAAAAAAAAH COLOOOORs\n\n\t*/\n    vec3 vaporwave_a = vec3(246.0 / 255.0,163.0 / 255.0,1.0);\n    vec3 vaporwave_b = vec3(0.24,0.51,0.74);\n    vec3 checkie_a = vec3(0.2,0.45,0.32);\n    vec3 checkie_b = vec3(0.8,0.75,0.54);\n    \n    /* End of color thing */\n    \n    /*\n\n\tYEAAAAAAAAAAAAAH TEXTURES\n\n\t*/\n    \n    //Kitty from here\n    //https://www.shadertoy.com/view/lsX3Rr\n    \n    vec2 p = fragCoord.xy / iResolution.xy;\n    vec2 kitty_pos = vec2(sin(iTime*8.)*0.3+0.25,clamp(cos(iTime*8.),-0.5,1.)*0.5);\n    \n    float sprite_incl = 40./256.;\n    \n    vec2 kitty_uv = (p - kitty_pos) / (vec2(1.0,0.88) - vec2(0.5,0.15));\n    \n    /*\n\t\tRotate\n\t*/\n    \n    float kitty_angle = radians(sin(iTime*8.+cos(iTime*8.))*45.);\n    \n    kitty_uv -= 0.5;\n    \n    mat2 m = mat2(cos(kitty_angle), -sin(kitty_angle), sin(kitty_angle), cos(kitty_angle));\n    \n    kitty_uv *= m;\n    \n    kitty_uv += 0.5;\n    \n    /*\n\t\tDone\n\t*/\n    \n    kitty_uv = clamp( kitty_uv, 0.0, 1.0 );\n    float frame = iTime*1.2;\n    \n    float ofx = floor( mod( frame, 6.0 ) );\n\tkitty_uv.x = clamp( kitty_uv.x*sprite_incl + ofx*sprite_incl, 0.0, 1.0 );\n    \n    //Kitty needs some frame stuff.\n    //Kitty's Texture - 256 x 32\n    vec4 kitty = texture(iChannel0,kitty_uv);\n    \n    \n    /* End of texture thing */\n    //time re-scaling for A E S T H E T I C stuff\n    float time = iTime * 0.55;\n    \n    vec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 pixel_size = 1. / iResolution.xy;\n    \n    float checker_scale = 2.;\n    \n    \n    checker_scale = sin(time*(0.2*clamp(0.,1.,cos(time*0.25)*0.1) ))+6.;\n    \n    vec2 offset = vec2(sin(time*2.5+cos(time * 0.75)*2.)*0.35,cos(time)*0.2+sin(time * 0.325)*0.6974);\n    \n    vec4 final = vec4(1.);\n    float angle = radians(time*10. + sin(time) * 23.);\n    \n    uv += offset;\n    \n    //Rotate\n    uv -= 0.5;\n    \n     m = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));\n    \n    uv *= m;\n    uv *= pixel_size*1000.;\n    \n    uv += 0.5;\n    \n    uv *= sin(p.y*2.)*2.0+0.5;\n    \n   \tfloat h_dist = (0.5 - p.y); \n    float wobble_y = p.y+sin(p.x*10.+time*10.)*sin(time+sin(time*10.))*0.1 + clamp(0.,1.,sin(time*10.)* 0.1);\n        \n    if (mod(uv.y,40.*pixel_size.y*checker_scale) < 20.*pixel_size.y*checker_scale ^^ mod(uv.x,40.*pixel_size.x*checker_scale) < 20.*pixel_size.x*checker_scale)\n    {\n        final.xyz = mix(vec3(0.),mix(checkie_a,checkie_b,abs(sin(time*1.2))),p.y);\n    }\n    \n    //Yay KITTY\n    final = mix(final,kitty,kitty.a);\n    \n    if (wobble_y <= 0.18)\n    {\n        if (mod(wobble_y+time*0.3+clamp(0.,1.,sin(time*10.)* 0.1-0.2),30. * pixel_size.y) < 2.5 * pixel_size.y)\n        {\n     \tfinal.xyz = mix(vaporwave_a,vaporwave_b,clamp(0.,1.,sin(time*1.5)));\n        }\n        else\n        {\n        final.xyz = vec3(0.);\n        }\n        //if (mod((p.x)-0.5,(60. - (wobble_y*300.)) * pixel_size.x) < 2.5 * pixel_size.x)\n        if (mod(p.x-0.5,(60. - (wobble_y*300.)) * pixel_size.x) < 2.5 * pixel_size.x)\n        {\n     \tfinal.xyz = mix(vaporwave_a,vaporwave_b,clamp(0.,1.,sin(time*1.5)));\n        }\n        \n        final.xyz = mix(final.xyz, mix(vaporwave_a,vaporwave_b,clamp(0.,1.,sin(time*1.5))) , (wobble_y-0.1)*10.);\n    }\n    else\n    {\n        final.xyz = mix(final.xyz, mix(vaporwave_a,vaporwave_b,clamp(0.,1.,sin(time*1.5))) , 1.-mix((wobble_y),(wobble_y+0.5),p.y));\n    }\n    \n    \n    fragColor = final;\n}",
+        "name": "Buf D",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdsBWr",
+      "date": "1495716525",
+      "viewed": 274,
+      "name": "pen & ink Sun",
+      "username": "FabriceNeyret2",
+      "description": "Uncomment for variants",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    vec2 R = iResolution.xy;\n\tU = (U+U - R ) / R.y; U.y -= .3;\n    float l = length(U), a = atan(U.y,U.x), \n          k = 6.283 / (floor(l*4.)*R.y/8.);   \n//        k = 6.283 / (floor(exp2(floor(log2(l*6.))))*R.y/8.);  // exp \n//        k = 6.283 / (floor(pow(l,1.5)*6.)*R.y/8.);            // darker\n\n    O = vec4(1) - smoothstep(3./R.y, 0., abs( mod(a,k) -.5*k ) *l );\n//  O = vec4(1) - smoothstep(3./R.y, 0., abs( mod(a+.5*k,k) -.5*k ) *l );               // aligned\n//  O = vec4(1) - smoothstep(3./R.y, 0., abs( mod(a,k) -.5*k*(1.+.1*sin(60.*l)) ) *l ); // wooble\n\n                                                                // --- colored variants\n//  O = .15*vec4(6,3,1,1)/l - smoothstep(3./R.y, 0., abs(mod(a,k)-.5*k)*l);\n//  O = 1. - smoothstep(3./R.y, 0., abs(mod(a,k)-.5*k)*l) * vec4(0,1,2,0)*l;\n//  O = smoothstep(3./R.y, 0., abs(mod(a,k)-.5*k)*l) * min( vec4(2,1,.5,0)/l, 1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdycRD",
+      "date": "1521208050",
+      "viewed": 126,
+      "name": "Spiral in one equation",
+      "username": "ABizard",
+      "description": "Sorry for your eyes if you came here.",
+      "likes": 0,
+      "published": 3,
+      "flags": 16,
+      "tags": [
+        "spiral"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define SMOOTH(V,A) smoothstep(1.5,0.,abs(V) / min(1.,length(vec2(dFdx(V),dFdy(V)))) - A)\n\n#define PI 3.141593\n\n#define keyPress(K) (texelFetch(iChannel1, ivec2(K, 0), 0).x > 0.)\n\n#define BLACK\t\tvec3(0)\n#define WHITE\t\tvec3(1)\n#define BLUE \t\tvec3(0,0,1)\n\n#define POW2(A) ((A)*(A))\n\n#define DEF_N 3\n#define MAX_N 9\n\n#define R iResolution\n\n#define MESH 4.\n\nvoid mainImage( out vec4 o, vec2 u )\n{\n    vec3 color = BLACK;\n    \n    // Centered normalized coordinates in [-1,1]\n    vec2 pixel = 2.*(u-floor(R.xy/4.)*2.) / R.y;\n    \n    // Polar coords\n\tfloat rho = length(pixel),\n          theta = atan(-pixel.y,pixel.x); // theta in [-PI,PI]\n    \n    \n    // Parameters of the spiral\n    float beta,\t\t// warp\n    \t  gamma;\t// rotation\n    int\t  n;\t\t// number of arms\n    \n    // Tuning of the parameters\n    vec2 p = vec2(.5*cos(iTime*.3),sqrt(2.*sin(iTime*.2)+2.)-2.);\n    beta  =\t1. + POW2(p.y + .15)*3.;\n    gamma =\t(p.x)*2.*PI;\n    \n    n = DEF_N;\n    for(int i=1;i<=MAX_N;i++)\t// Num keys to change n\n        if(keyPress(48+i) || keyPress(96+i))\n            n = i;\n    \n    float m = 2.*PI/float(n);\n    #define DRAW_SPIRAL(COLOR,BETA,M)\\\n    \t\t\tcolor = mix(color,COLOR,\\\n                \t\t\tSMOOTH(mod(theta,M) - mod(log(rho/(pow(BETA,gamma)))/log(BETA),M),.03/rho));\n    \n    DRAW_SPIRAL(WHITE,beta,m/MESH);\n    DRAW_SPIRAL(WHITE,exp(-1./log(beta)),m/MESH);\n    DRAW_SPIRAL(BLUE,beta,m);\n    o = vec4(color,1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

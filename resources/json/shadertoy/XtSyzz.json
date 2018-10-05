@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtSyzz",
+      "date": "1507109494",
+      "viewed": 242,
+      "name": "dFdx bug ?",
+      "username": "FabriceNeyret2",
+      "description": "on linux I see black circles on the right half.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "glsl",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/**/ // original test case :\nvoid mainImage( out vec4 O, vec2 U )\n{\n\tvec2 R = iResolution.xy;\n    U = ( U+U-R)/R.y;\n    float l = length(U),d;\n    for( float i=0.; i<10.; i++) {\n        d = dFdx(l);\n     // d = length(vec2(dFdx(l),dFdy(l)));  // constant 1 \n        if ( i/10. > l ) break;\n    }\n    if (U.x<0.) d = dFdx(l); // for comparison, on left side\n\tO = vec4(abs(d)*R.y/2.);\n}\n/**/\n\n\n\n/**  // even simpler test case : (for ARB assembly generation)\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n\tvec2 R = iResolution.xy;\n    U = ( U+U-R)/R.y;\n    float l = length(U),d;\n    for( float i=0.; i<3.; i++) {\n        d = dFdx(l);\n        if ( i > l ) break;\n    }\n   // if (U.x<0.) d = dFdx(l);\n\tO = vec4(abs(d)*R.y/2.);\n} \n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

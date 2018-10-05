@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdXfW4",
+      "date": "1496125753",
+      "viewed": 232,
+      "name": "Flowing Mist - 183 chars",
+      "username": "GregRostami",
+      "description": "This was inspired by public_int_i's shader:\n[url]https://www.shadertoy.com/view/lssBWH[/url]\nI was going for a 3D tornado vortex effect, but this is what I got.\nI think if I play with the offsets in the rotation matrix, I can create volumetric tornado.",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "cloud",
+        "short",
+        "2tc"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 4,
+            "src": "/media/a/e6e5631ce1237ae4c05b3563eda686400a401df4548d0f9fad40ecac1659c46c.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,U)\t\t\t\t\\\nvec2 u = U / iResolution.x - .4;\t\\\nfor (float i = 1.; i < 4.; i += .1)\t\\\no += .02*texture( iChannel0, i+mat2(cos(.03*iTime + .8*vec4(6,0,0,2)))*fract(.5+.1*vec2(u.x,1)/(u.y-=.02)))* -u.y*6.",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

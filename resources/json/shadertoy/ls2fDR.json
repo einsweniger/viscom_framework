@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ls2fDR",
+      "date": "1500130198",
+      "viewed": 228,
+      "name": "[SH17A]Point lights",
+      "username": "Nesvi7",
+      "description": "5 animated point lights. It could be 6 but with 5 is better.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "light",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 45,
+            "src": "/media/a/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define i ++m; d = normalize(vec3(f/iResolution.x,1)-.5); p = d*(-1./d.y);l=vec3(0,-.5,3)+sin(vec3(1,2,.3)*iTime+m)*vec3(1,.2,1); c += texture(iChannel0,p.xz)*pow(max(1.5-length(l-p),0.),3.)+pow(dot(l,d)/length(l),1e4);\nvoid mainImage( out vec4 c, vec2 f )\n{\n    c-=c;\n    float m;\n    vec3 d,p,l;\n    \n\ti i i i i \n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

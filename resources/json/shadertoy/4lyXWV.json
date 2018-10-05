@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lyXWV",
+      "date": "1485887023",
+      "viewed": 260,
+      "name": "shortest color mix ( 136 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "color",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define C  length(U/O.y -.3* cos(2.*++O.a +vec2(1.6,0))) < .5     // length(U-.3*sincos(k.2pi/3))\n//#define C  1./length(U/O.y -.3* cos(2.*++O.a +vec2(1.6,0))) -1. // smooth variant +3\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    O = iResolution.xyzz;\n\tU += U -O.xy;\n\tO = vec4(C,C,C,1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

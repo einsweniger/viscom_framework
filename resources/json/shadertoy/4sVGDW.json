@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sVGDW",
+      "date": "1454560680",
+      "viewed": 323,
+      "name": "LPM 2016",
+      "username": "Reymenta",
+      "description": "from the code of the LPM 2016 ",
+      "likes": 0,
+      "published": 3,
+      "flags": 4,
+      "tags": [
+        "lpm"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 32,
+            "src": "/presets/mic.png",
+            "ctype": "mic",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 48,
+            "src": "/media/a/8979352a182bde7c3c651ba2b2f4e0615de819585cc37b7175bcefbca15a6683.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define t iTime\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    float a = texture(iChannel0, uv).y;\n\tvec2 uv2 = 2.  * uv + a;\n    float col = texture(iChannel0, uv).x * .3;\n    uv2.x += sin(t * a *10. );\n    col += abs(.5/uv2.x * col );\n\tfragColor = vec4(vec3(col),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

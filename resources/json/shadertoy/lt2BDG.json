@@ -1,0 +1,79 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lt2BDG",
+      "date": "1517086441",
+      "viewed": 209,
+      "name": "Spirograph in the wish dasher",
+      "username": "hamoid",
+      "description": "I just was just wondering how hard it would be to draw a growing line...",
+      "likes": 3,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "slow"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, in vec2 uv ){\n    uv /= iResolution.xy;    \n    vec4 old = texture(iChannel1, uv); // buffer           \n\n    float d = .3 + .15 * sin(iTime * 3.);\n    float t2 = iTime * 2. + sin(iTime * .03 + 2.);\n    vec2 pen = vec2(\n        d * cos(t2) * iResolution.y/iResolution.x,\n    \td * sin(t2)\n    ) + .5;\n    \n    float dis = distance(uv, pen) / .2;\n    if(dis < 1.) {\n      \tO = old + pow(1.-dis, 20.) * .05;\n    } else {\n        O = old;\n    }\n    //clear\n    //O = vec4(0.);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

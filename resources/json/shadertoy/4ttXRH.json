@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4ttXRH",
+      "date": "1478139271",
+      "viewed": 256,
+      "name": "Anamorphic distortion",
+      "username": "kellyegan",
+      "description": "Distorts images into cylindrical anamorphic image. Works best with 360 images.",
+      "likes": 8,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "anamorphic"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 29,
+            "src": "/media/a/3405e48f74815c7baa49133bdc835142948381fbe003ad2f12f5087715731153.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI acos(-1.)\n\nfloat innerRadius = 0.1;\nfloat outerRadius = 0.49;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    vec2 uv = (fragCoord.xy*2. - iResolution.xy)/iResolution.y * .5 ;  //Thanks aiekick\n    \n    float theta = atan( uv.y, uv.x );\n    float dist = length( uv );\n    \n    //Make center circle and edge black\n   \tfloat a = smoothstep( innerRadius - 0.001, innerRadius + 0.001, dist );\n    a *= 1.0 - smoothstep( outerRadius - 0.001, outerRadius + 0.001, dist );\n    \n    uv = vec2((theta + PI) / (PI * 2.0),\n    \t\t  (dist - innerRadius) / (outerRadius - innerRadius)\n             );\n   \n\tfragColor = texture(iChannel0 , uv) * a;\n}\n\n\n\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

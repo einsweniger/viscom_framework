@@ -1,0 +1,96 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mt2yWW",
+      "date": "1508674157",
+      "viewed": 79,
+      "name": "Mandelbrot & Julia",
+      "username": "semplar2007",
+      "description": "Arrow keys: navigate.\nZ, X: zoom in, zoom out.\n-\nIf you zoom deep enough, Julia set becomes similar to Mandelbrot set.",
+      "likes": 3,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "2d",
+        "fractal",
+        "julia",
+        "mandelbrot",
+        "interactive"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\n * This is a demo on how Mandelbrot and Julia sets are related to each other.\n * Click left mouse button on some Mandelbrot set point and you'll see\n * a related Julia set on the right that is very similar to a Mandelbrot set\n * near that point.\n */\n\n#define ITERATIONS 1000\n#define COLOR_STEP (1.5 / float(ITERATIONS))\n#define CROSSHAIR_RADIUS 0.03\n#define CROSSHAIR_WIDTH 4.0\n#define PI 3.141592653589793\n#define COLOR_POWER 0.8\n#define LIMIT 2.0\n\n// offsets of pixels in buffer to read inter-frame variables\nconst ivec2 centerXY_Tex = ivec2(0,0);\nconst ivec2 relativeCenterXY_Tex = ivec2(1,0);\nconst ivec2 scaleY_Tex = ivec2(2,0);\n\n// The idea of function is: 0.5 in range [0.0, 1.0] remapped to [-5, 5] range becomes 0\n// I haven't found range-to-range remapping functions here, so impl is:\nfloat remap(float a, float min1, float max1, float min2, float max2) {\n    return min2 + (max2-min2) * (a-min1) / (max1-min1);\n}\n\nvec2 remap(vec2 a, vec2 min1, vec2 max1, vec2 min2, vec2 max2) {\n    return min2 + (max2-min2) * (a-min1) / (max1-min1);\n}\n\n// Double emulation based on GLSL Mandelbrot Shader by Henry Thasler (www.thasler.org/blog)\n//\n// Emulation based on Fortran-90 double-single package. See http://crd.lbl.gov/~dhbailey/mpdist/\n\n#pragma optionNV(fastmath off)\n#pragma optionNV(fastprecision off)\n\nvec2 add (vec2 dsa, vec2 dsb)\n{\n\tvec2 dsc;\n\tfloat t1, t2, e;\n\t\n\tt1 = dsa.x + dsb.x;\n\te = t1 - dsa.x;\n\tt2 = ((dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y + dsb.y;\n\t\n\tdsc.x = t1 + t2;\n\tdsc.y = t2 - (dsc.x - t1);\n\treturn dsc;\n}\n\n// Substract: res = ds_sub(a, b) => res = a - b\nvec2 sub (vec2 dsa, vec2 dsb)\n{\n\tvec2 dsc;\n\tfloat e, t1, t2;\n\t\n\tt1 = dsa.x - dsb.x;\n\te = t1 - dsa.x;\n\tt2 = ((-dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y - dsb.y;\n\t\n\tdsc.x = t1 + t2;\n\tdsc.y = t2 - (dsc.x - t1);\n\treturn dsc;\n}\n\n// Compare: res = -1 if a < b\n//              = 0 if a == b\n//              = 1 if a > b\nfloat cmp(vec2 dsa, vec2 dsb) {\n  if (dsa.x < dsb.x) return -1.;\n  if (dsa.x > dsb.x) return 1.;\n  if (dsa.y < dsb.y) return -1.;\n  if (dsa.y > dsb.y) return 1.;\n  return 0.;\n}\n\n// Multiply: res = ds_mul(a, b) => res = a * b\nvec2 mul (vec2 dsa, vec2 dsb) {\n\tvec2 dsc;\n\tfloat c11, c21, c2, e, t1, t2;\n\tfloat a1, a2, b1, b2, cona, conb, split = 8193.;\n\t\n\tcona = dsa.x * split;\n\tconb = dsb.x * split;\n\ta1 = cona - (cona - dsa.x);\n\tb1 = conb - (conb - dsb.x);\n\ta2 = dsa.x - a1;\n\tb2 = dsb.x - b1;\n\t\n\tc11 = dsa.x * dsb.x;\n\tc21 = a2 * b2 + (a2 * b1 + (a1 * b2 + (a1 * b1 - c11)));\n\t\n\tc2 = dsa.x * dsb.y + dsa.y * dsb.x;\n\t\n\tt1 = c11 + c2;\n\te = t1 - c11;\n\tt2 = dsa.y * dsb.y + ((c2 - e) + (c11 - (t1 - e))) + c21;\n\t\n\tdsc.x = t1 + t2;\n\tdsc.y = t2 - (dsc.x - t1);\n\t\n\treturn dsc;\n}\n\n// Divide: res = ds_div(a, b) => res = a / b\nvec2 div (vec2 dsa, vec2 dsb) {\n\tvec2 dsc;\n\tfloat a1, a2, b1, b2, cona, conb, split = 8193.;\n\tfloat c11, c21, c2, e, t1, t2, s1, s2;\n\tfloat t11, t12, t21, t22;\n\t\n\ts1 = dsa.x / dsb.x;\n\tcona = s1 * split;\n\tconb = dsb.x * split;\n\ta1 = cona - (cona - s1);\n\tb1 = conb - (conb - dsb.x);\n\ta2 = s1 - a1;\n\tb2 = dsb.x - b1;\n\t\n\tc11 = s1 * dsb.x;\n\tc21 = (((a1 * b1 - c11) + a1 * b2) + a2 * b1) + a2 * b2;\n\t\n\tc2 = s1 * dsb.y;\n\t\n\tt1 = c11 + c2;\n\te = t1 - c11;\n\tt2 = ((c2 - e) + (c11 - (t1 - e))) + c21;\n\t\n\tt12 = t1 + t2;\n\tt22 = t2 - (t12 - t1);\n\t\n\tt11 = dsa.x - t12;\n\te = t11 - dsa.x;\n\tt21 = ((-t12 - e) + (dsa.x - (t11 - e))) + dsa.y - t22;\n\t\n\ts2 = (t11 + t21) / dsb.x;\n\t\n\tdsc.x = s1 + s2;\n\tdsc.y = s2 - (dsc.x - s1);\n\t\n\treturn dsc;\n}\n\nvec4 add(vec4 a, vec4 b) {\n  return vec4(add(a.xy, b.xy), add(a.zw, b.zw));\n}\n\nvec4 sub(vec4 a, vec4 b) {\n  return vec4(sub(a.xy, b.xy), sub(a.zw, b.zw));\n}\n\nvec4 mul(vec4 a, vec4 b) {\n  return vec4(mul(a.xy, b.xy), mul(a.zw, b.zw));\n}\n\nvec4 mul(vec4 a, vec2 b) {\n  return vec4(mul(a.xy, b), mul(a.zw, b));\n}\n\nvec4 div(vec4 a, vec4 b) {\n  return vec4(div(a.xy, b.xy), div(a.zw, b.zw));\n}\n\n// create double-single number from float\nvec2 set(float a) {\n  return vec2(a, 0.0);\n}\n\nvec2 modd(vec2 a, vec2 b) {\n  return sub(a, mul(set(float(floor(div(a,b).x))),b));\n}\n\nvec2 complexMul(vec2 a, vec2 b) {\n  return vec2(a.x*b.x -  a.y*b.y,a.x*b.y + a.y * b.x);\n}\n\n// double complex multiplication\nvec4 dcMul(vec4 a, vec4 b) {\n  return vec4(sub(mul(a.xy,b.xy),mul(a.zw,b.zw)),add(mul(a.xy,b.zw),mul(a.zw,b.xy)));\n}\n\nvec4 dcAdd(vec4 a, vec4 b) {\n  return vec4(add(a.xy,b.xy),add(a.zw,b.zw));\n}\n\n// Length of double complex\nvec2 dcLength(vec4 a) {\n  return add(mul(a.xy,a.xy),mul(a.zw,a.zw));\n}\n\nvec4 dcSet(vec2 a) {\n  return vec4(a.x,0.,a.y,0.);\n}\n\n// Multiply double-complex with double\nvec4 dcMul(vec4 a, vec2 b) {\n  return vec4(mul(a.xy,b),mul(a.zw,b));\n}\n\n// Z^2 -- the squared value of complex number\nvec2 csqr(vec2 Z) {\n    return mat2(Z, -Z.y, Z.x) * Z;\n}\n\nvec4 remap(vec4 a, vec4 min1, vec4 max1, vec4 min2, vec4 max2) {\n    return add(min2, div(mul(sub(max2,min2), sub(a,min1)), sub(max1,min1)));\n}\n\n// Common function for calculating Mandelbrot or Julia\n// parameter Z: initial complex number\n// parameter C: addent for each step\nfloat mandel(in vec2 Z, in vec2 C) {\n    int steps = 0;\n    for (;;) {\n        if (steps >= ITERATIONS) return 0.0;\n        if (dot(Z,Z) > LIMIT * LIMIT) break;\n        // Z^2+C\n        Z = csqr(Z) + C;\n        steps ++;\n    }\n    return float(steps) + 1.0 - log(log(length(Z))) / log(LIMIT);\n}\n\n// Common function for calculating Mandelbrot or Julia\n// parameter Z: initial complex number\n// parameter C: addent for each step\nfloat mandelD(in vec4 Zd, in vec4 Cd) {\n    int steps = 0;\n    for (;;) {\n        if (steps >= ITERATIONS) return 0.0;\n        if (cmp(dcLength(Zd),set(LIMIT*LIMIT)) > 0.0) break;\n        // Z^2+C\n        Zd = dcAdd(dcMul(Zd,Zd), Cd);\n        steps ++;\n    }\n    return float(steps) + 1.0 - log(log(dcLength(Zd).x)) / log(LIMIT);\n}\n\nvec4 scaleXYd; // a (X;Y) vector on Mandelbrot plane,\n               // X is calculated from Y based on window resolution\nvec4 centerXYd; // a (X;Y) point on Mandelbrot plane\nvec4 relativeCenterXYd; // a (X;Y) vector on Mandelbrot plane, offset for centerXY\n                        // to avoid acne\n\nvec4 loadValue(in ivec2 re) {\n    return texelFetch(iChannel0, re, 0);\n}\n\n// returns true if given pixel coordinate is within crosshair shape bounds\nbool isCrossHair(vec2 screenPos) {\n    screenPos.x *= float(iResolution.x) / float(iResolution.y);\n    if (sqrt(dot(screenPos, screenPos)) >= CROSSHAIR_RADIUS) return false;\n    float rad = atan(screenPos.y, screenPos.x) * 360.0 / (PI * 2.0);\n    if (rad < 0.0) rad += 360.0;\n    rad = mod(rad, 90.0);\n    if (rad < CROSSHAIR_WIDTH) return true;\n    if (rad > 90.0 - CROSSHAIR_WIDTH) return true;\n    return false;\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    // load state from buffer\n\tcenterXYd = loadValue(centerXY_Tex);\n\trelativeCenterXYd = loadValue(relativeCenterXY_Tex);\n\tscaleXYd = loadValue(scaleY_Tex);\n    \n    scaleXYd.xy = mul(scaleXYd.zw, set(float(iResolution.x) / float(iResolution.y)));\n    scaleXYd.xy = mul(scaleXYd.xy, set(0.5));\n    // align relativeCenterXY to pixel position to reduce Mandelbrot acne during UDLR move\n    // will not work for Julia set because durign UDLR move it constantly changes\n    relativeCenterXYd.xy = sub(relativeCenterXYd.xy, modd(relativeCenterXYd.xy, mul(scaleXYd.xy, set(4.0 / iResolution.x))));\n    relativeCenterXYd.zw = sub(relativeCenterXYd.zw, modd(relativeCenterXYd.zw, mul(scaleXYd.zw, set(4.0 / iResolution.y))));\n    centerXYd = add(centerXYd, relativeCenterXYd);\n    vec4 scaleXYd4 = mul(scaleXYd, set(4.0));\n    \n    // calculate number of steps for current pixel\n    vec2 fragmentPos = fragCoord.xy / iResolution.xy;\n    float resultSteps;\n    if (fragmentPos.x < 0.5) {\n        // draw Mandelbrot set\n        vec4 mandelPoint = remap(vec4(set(fragmentPos.x), set(fragmentPos.y)),\n                                 vec4(set(0.0), set(0.0)), vec4(set(0.5), set(1.0)),\n                                 sub(centerXYd, scaleXYd), add(centerXYd, scaleXYd));\n        resultSteps = mandelD(vec4(set(0.0), set(0.0)), mandelPoint);\n//        resultSteps = mandel(vec2(0.0, 0.0), mandelPoint.xz);\n    } else {\n        // draw Julia set for current selected mousePoint coordinate\n        // find selected julia point on selected mandelbrot set\n        vec4 mousePoint = remap(vec4(set(0.25), set(0.5)),\n                                vec4(set(0.0), set(0.0)), vec4(set(0.5), set(1.0)),\n                                sub(centerXYd, scaleXYd), add(centerXYd, scaleXYd));\n        vec4 juliaPoint = remap(vec4(set(fragmentPos.x), set(fragmentPos.y)),\n                                vec4(set(0.5), set(0.0)), vec4(set(1.0), set(1.0)),\n                                sub(centerXYd, scaleXYd4), add(centerXYd, scaleXYd4));\n        resultSteps = mandel(juliaPoint.xz, mousePoint.xz);\n//        resultSteps = mandelD(juliaPoint, mousePoint);\n    }\n    \n    // Mandelbrot steps to color\n    float resultColor = clamp(resultSteps * COLOR_STEP, 0.0, 1.0);\n    // white crosshair if current pixel is part of it\n    if (isCrossHair(fragmentPos - vec2(0.25, 0.5))) resultColor = 1.0;\n    \n    resultColor = pow(resultColor, COLOR_POWER); // make color a little bit lighter\n    fragColor = vec4(resultColor);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 3,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Buffer for storing inter-frame variables\n// Also, processes keyboard events\nconst float MOVE_SPEED = 2.0; // units per second\nconst float ZOOM_SPEED = 2.0; // log units per second\n\nconst int KEY_LEFT  = 37;\nconst int KEY_UP    = 38;\nconst int KEY_RIGHT = 39;\nconst int KEY_DOWN  = 40;\nconst int KEY_Z     = 90;\nconst int KEY_X     = 88;\n\n// offsets of pixels in buffer to read inter-frame variables\nconst ivec2 centerXY_Tex = ivec2(0,0);\nconst ivec2 relativeCenterXY_Tex = ivec2(1,0);\nconst ivec2 scaleY_Tex = ivec2(2,0);\n\nvec4 loadValue(in ivec2 re) {\n    return texelFetch(iChannel0, re, 0);\n}\n\nvoid storeValue( in ivec2 re, in vec4 va, inout vec4 fragColor, in ivec2 fragCoord ) {\n    if (re.x == fragCoord.x && re.y == fragCoord.y) fragColor = va;\n}\n\nbool isKeyDown(int key) {\n    return texelFetch(iChannel3, ivec2(key,0), 0).x > 0.0;\n}\n\n// Double emulation based on GLSL Mandelbrot Shader by Henry Thasler (www.thasler.org/blog)\n//\n// Emulation based on Fortran-90 double-single package. See http://crd.lbl.gov/~dhbailey/mpdist/\n\n// Add: res = ds_add(a, b) => res = a + b\nvec2 add (vec2 dsa, vec2 dsb)\n{\n\tvec2 dsc;\n\tfloat t1, t2, e;\n\t\n\tt1 = dsa.x + dsb.x;\n\te = t1 - dsa.x;\n\tt2 = ((dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y + dsb.y;\n\t\n\tdsc.x = t1 + t2;\n\tdsc.y = t2 - (dsc.x - t1);\n\treturn dsc;\n}\n\n// Multiply: res = ds_mul(a, b) => res = a * b\nvec2 mul (vec2 dsa, vec2 dsb)\n{\n\tvec2 dsc;\n\tfloat c11, c21, c2, e, t1, t2;\n\tfloat a1, a2, b1, b2, cona, conb, split = 8193.;\n\t\n\tcona = dsa.x * split;\n\tconb = dsb.x * split;\n\ta1 = cona - (cona - dsa.x);\n\tb1 = conb - (conb - dsb.x);\n\ta2 = dsa.x - a1;\n\tb2 = dsb.x - b1;\n\t\n\tc11 = dsa.x * dsb.x;\n\tc21 = a2 * b2 + (a2 * b1 + (a1 * b2 + (a1 * b1 - c11)));\n\t\n\tc2 = dsa.x * dsb.y + dsa.y * dsb.x;\n\t\n\tt1 = c11 + c2;\n\te = t1 - c11;\n\tt2 = dsa.y * dsb.y + ((c2 - e) + (c11 - (t1 - e))) + c21;\n\t\n\tdsc.x = t1 + t2;\n\tdsc.y = t2 - (dsc.x - t1);\n\t\n\treturn dsc;\n}\n\n// create double-single number from float\nvec2 set(float a) {\n  return vec2(a, 0.0);\n}\n\nvec4 centerXYd;\nvec4 relativeCenterXYd;\nvec4 scaleXYd;\n\nvec4 add(vec4 a, vec4 b) {\n  return vec4(add(a.xy, b.xy), add(a.zw, b.zw));\n}\n\nvec4 mul(vec4 a, vec4 b) {\n  return vec4(mul(a.xy,b.xy),mul(a.zw,b.zw));\n}\n\nvec4 mul(vec4 a, vec2 b) {\n  return vec4(mul(a.xy,b),mul(a.zw,b));\n}\n\nvoid handleInput() {\n    vec4 moveChange = vec4(set(0.0), set(0.0));\n    if (isKeyDown(KEY_UP)) moveChange.zw = add(moveChange.zw, set(1.0));\n    if (isKeyDown(KEY_DOWN)) moveChange.zw = add(moveChange.zw, set(-1.0));\n    if (isKeyDown(KEY_RIGHT)) moveChange.xy = add(moveChange.xy, set(1.0));\n    if (isKeyDown(KEY_LEFT)) moveChange.xy = add(moveChange.xy, set(-1.0));\n    relativeCenterXYd = add(relativeCenterXYd, mul(scaleXYd, mul(moveChange, set(MOVE_SPEED * iTimeDelta))));\n    // scale\n    if (isKeyDown(KEY_Z)) {\n        centerXYd = add(centerXYd, relativeCenterXYd);\n        relativeCenterXYd = vec4(set(0.0), set(0.0));\n        scaleXYd = mul(scaleXYd, set(pow(2.0, -iTimeDelta * ZOOM_SPEED)));\n    }\n    if (isKeyDown(KEY_X)) {\n        centerXYd = add(centerXYd, relativeCenterXYd);\n        relativeCenterXYd = vec4(set(0.0), set(0.0));\n        scaleXYd = mul(scaleXYd, set(pow(2.0, iTimeDelta * ZOOM_SPEED)));\n    }\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    // load data\n\tcenterXYd = loadValue(centerXY_Tex); // a (X;Y) point on Mandelbrot plane\n\trelativeCenterXYd = loadValue(relativeCenterXY_Tex); // a (X;Y) point on Mandelbrot plane\n\tscaleXYd = loadValue(scaleY_Tex); // a (X;Y) point on Mandelbrot plane\n    scaleXYd.xy = mul(scaleXYd.zw, set(float(iResolution.x) / float(iResolution.y)));\n    scaleXYd.xy = mul(scaleXYd.xy, set(0.5));\n    \n    handleInput();\n    if (scaleXYd.zw == set(0.0)) scaleXYd.zw = set(1.0); // initial value\n    \n    // store data\n    fragColor = vec4(0.0, 0.0, 0.0, 0.0);\n    ivec2 ifragCoord = ivec2(fragCoord - 0.5);\n    storeValue(centerXY_Tex, centerXYd, fragColor, ifragCoord);\n    storeValue(relativeCenterXY_Tex, relativeCenterXYd, fragColor, ifragCoord);\n    storeValue(scaleY_Tex, scaleXYd, fragColor, ifragCoord);\n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

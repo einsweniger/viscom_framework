@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xtfczr",
+      "date": "1503021030",
+      "viewed": 177,
+      "name": "Polar Coordinate Visualizer",
+      "username": "ThePopil",
+      "description": "Playing around and learning shader code, this loops an animation that draws given polar equations. Code could probably use a little clean up though heh.",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "spiral",
+        "curves",
+        "visualizer",
+        "polarcoordinate"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const float \tPI = 3.1415;\nconst float \tROT = 6.2830; // Double PI\nconst float \tLINE_WIDTH = 0.01;\nconst float \tFALLOFF = 0.8;\n\n// Polar Coordinates stored as vec2(radius, angle)\n\n\n//-----------------------------------------------------------\n//\tHelper functions\n//-------------------------\n\n\n// Convert a cartesian coord to a polar coord\nvec2 CartesianToPolar(vec2 cart)\n{\n\treturn vec2(length(cart), atan(cart.y, cart.x));\n}\n\n// Convert RGB values into their float representation\nvec3 RGB(float r, float g, float b)\n{\n\treturn vec3(r / 255.0, g / 255.0, b / 255.0);\n}\n\n\n//-----------------------------------------------------------\n//\tPolar equation functions\n//-------------------------\n\nconst int numEquations = 4;\nconst float lifeCycleSum = 29.0;\nfloat solveEquation(int polarIndex, float angle)\n{   \n    if(mod(float(polarIndex), 2.0) == 1.0)\n        angle += mod(iTime, lifeCycleSum) * 0.5;\n    else\n        angle -= mod(iTime, lifeCycleSum) * 0.5;\n    \n    if(polarIndex == 1)\n        return (2.0 + pow(sin(2.4 * angle), 3.0)) / 3.0;\n    if(polarIndex == 2)\n        return sin(8.0 * angle / 5.0);\n    if(polarIndex == 3)\n        return pow(sin(2.5 * angle), 3.0) + pow(cos(2.5 * angle), 3.0);\n    if(polarIndex == 4)\n    \treturn (1.0 - cos(4.0 * angle / 5.0) * sin(7.0 * angle / 5.0)) / 2.0;      \n}\n// Each equation takes lifeCycle + 3 seconds\n// 1 for pausing after drawing\n// 1 for fading into the background\n// 1 for pausing before the next equation starts drawing\nfloat getLifeCycle(int polarIndex)\n{\n    if(polarIndex == 1)\n    \treturn 5.0;\n    if(polarIndex == 2)\n        return 5.0;\n    if(polarIndex == 3)\n        return 2.0;\n    if(polarIndex == 4)\n        return 5.0;\n}\nfloat getEquationStart(int polarIndex)\n{\n\tif(polarIndex == 1)\n    \treturn 0.0;\n    if(polarIndex == 2)\n        return 8.0;\n    if(polarIndex == 3)\n        return 16.0;\n    if(polarIndex == 4)\n        return 21.0;\n}\nint getCurrentEquation(float time)\n{\n    if(time < 8.0)\n        return 1;\n    if(time < 16.0)\n        return 2;\n    if(time < 21.0)\n        return 3;\n    if(time < 29.0)\n        return 4;\n}\nbool useExponentialWidth(int polarIndex)\n{\n    if(polarIndex == 1)\n    \treturn false;\n    if(polarIndex == 2)\n        return true;\n    if(polarIndex == 3)\n        return true;\n    if(polarIndex == 4)\n        return false;\n}\n\nvec4 getEquationColor(int polarIndex)\n{\n    if(mod(float(polarIndex), 2.0) == 0.0)\n    {\n        return vec4(0.0 ,0.0, 0.0, 1.0);\n    }\n    else\n    {\n    \treturn vec4(1.0 ,1.0, 1.0, 1.0);\n    }\n}\n\nvec4 liesOnCurrentPolar(int polarIndex, vec2 point, float drawTime)\n{\n    float fillTime = 0.0;\n    if(drawTime > getLifeCycle(polarIndex) + 1.0)\n    {\n        fillTime = drawTime - (getLifeCycle(polarIndex) + 1.0);\n    }\n\n    float dist = 99999.0;\n    float angle = point.y;\n    float angleCap;\n    float angleFloor = -PI;\n        \n    for (int i = 0; i <= int(getLifeCycle(polarIndex)); i++) \n    {\n        // Determine how many rotations we've already drawn\n        angleCap = ROT * float(int(drawTime)) - PI;\n        \n        // Determine how much to draw in our current rotation\n        angleCap += mod(drawTime, 1.0) * ROT;\n        \n        // Polar coordinates can be represented in two different ways, \n        // At an angle with a positive radius, or the 180 degress away with a negative radius.\n        // This section accounts for both scenarios.\n        angle -= PI;\n        if(i == 0 && angle > angleFloor && angle < angleCap)\n        {\n        \tdist = min(dist, abs(point.x - (-1.0 * solveEquation(polarIndex, angle))));\n        }\n        angle += PI;\n        if(angle < angleCap)\n        {\n        \tdist = min(dist, abs(point.x - solveEquation(polarIndex, angle)));\n            if(angle < angleFloor + 0.1)\n            {\n            \tdist *= pow(0.1 / (angle - angleFloor), 0.5);\n            }\n        }\n        angle += PI;\n        if(angle < angleCap)\n        {\n            dist = min(dist, abs(point.x - (-1.0 * solveEquation(polarIndex, angle))));\n        }\n        angle += PI;\n        angleCap += ROT;\n\t}\n    \n    float mult = (point.x > 1.0 || !useExponentialWidth(polarIndex)) ? 1.0 : 1.0 / point.x;\n    float lineDist = (LINE_WIDTH + fillTime) * mult;\n\n    if(dist < lineDist)\n    {\n    \treturn getEquationColor(polarIndex);\n    }\n    else\n    {\n        vec4 outline = getEquationColor(polarIndex);\n        outline.a = pow((lineDist / dist), FALLOFF);\n    \treturn outline;\n    }\n}\n\n//-----------------------------------------------------------\n//\tmainImage\n//-------------------------\nvec4 getBackground(int polarIndex)\n{\n    if(polarIndex == 1)\n    {\n    \treturn getEquationColor(numEquations);\n    }\n    else\n    {\n    \treturn getEquationColor(polarIndex - 1);\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float x = 2.0 * (fragCoord.x - iResolution.x / 2.0) / iResolution.y;\n    float y = 2.0 * (fragCoord.y - iResolution.y / 2.0) / iResolution.y;\n\tvec2 uv = vec2(x, y);\n    \n    int equation = getCurrentEquation(mod(iTime, lifeCycleSum));\n    float lifeCycle = mod(iTime, lifeCycleSum) - getEquationStart(equation);\n\n    // Background layer\n\tvec4 layer1 = getBackground(equation);\n\tvec4 layer2 = liesOnCurrentPolar(equation, CartesianToPolar(uv), lifeCycle);\n\t\n\t// Blend the two\n    fragColor = mix(layer1, layer2, layer2.a);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

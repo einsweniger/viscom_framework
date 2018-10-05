@@ -1,0 +1,106 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dKyDd",
+      "date": "1523868259",
+      "viewed": 168,
+      "name": "Kleinian Limit Set",
+      "username": "mla",
+      "description": "[url]https://www.shadertoy.com/user/soma_arc[/url] has some nice realizations of Kleinian Limit Sets:\n\n[url]https://en.wikipedia.org/wiki/Indra%27s_Pearls_(book)[/url]\n\nHere's my version, based on his code - more transformations and more interactivity.",
+      "likes": 9,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "kleinian"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\nOriginally created by soma_arc - 2016\nModified by Matthew Arcus, 2018\nThis work is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported.\n\nDerived from: https://www.shadertoy.com/view/Xtt3DN\n\nShow Kleinian limit set derived from 6 octahedrally symmetric Mobius transformation.\nEach Mobius transformation is composed of inversion in a sphere, reflection down\nthe inversion axis (ie. reflection in the plane normal to the vector to the sphere\ncentre), and optionally a rotation about the inversion axis.\n\nI've also added a periodic \"hyperbolic translation\", ie. a final unit-ball preserving\ninversion, also optionally combined with a rotation.\n\nControls:\n<mouse> : orientation\n<up>,<down>: zoom\nr: rotate figure\ns: add rotation to Mobius inversions\nt: translate in H3\nu: post-translation rotation\n*/\n\n#define NOKEYS (__VERSION__ < 300)\n//#define NOKEYS 1\n\n//#define DEBUG\n\n#if !defined DEBUG\n#define assert(x) 0\n#else\n// Simple indications of when things are amiss.\n// A point with an assertion failure is red (so here\n// most failures are global so the entire screen is\n// red). Could use colours to indicate which assertion\n// has failed.\nbool alert = false;\nvoid assert(bool test) {\n  if (!test) alert = true;\n}\n#endif\n\nbool dorotate = true;\nbool dotranslate = true;\nbool dorotate1 = true;\nbool dorotate2 = true;\nbool dorotate3 = true;\nconst float PI = 3.14159;\n\nmat3 rotationMatrix(vec3 axis, float angle) {\n  axis = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  return mat3(axis.x * axis.x * r + c,\n              axis.y * axis.x * r + axis.z * s,\n              axis.z * axis.x * r - axis.y * s,\n              axis.x * axis.y * r - axis.z * s,\n              axis.y * axis.y * r + c,\n              axis.z * axis.y * r + axis.x * s,\n              axis.x * axis.z * r + axis.y * s,\n              axis.y * axis.z * r - axis.x * s,\n              axis.z * axis.z * r + c);\n}\n\n// Invert p in sphere (C,s2)\nvec3 invert(vec3 p, vec3 C, float s2) {\n  p -= C;\n  p *= s2/dot(p,p);\n  p += C;\n  return p;\n}\n\nvec3 AXIS = normalize(vec3(0.1, 1, 0.5));\nmat3 rmat = mat3(1);\n\nvec3 translate(vec3 p, inout float scale) {\n  float t = 0.2*iTime;\n  float x0 = 0.5*sin(t)+0.01;\n  float s0 = 0.5*(1.0-x0*x0)/x0;\n  p.x -= x0 + s0;\n  float k = s0*s0/dot(p,p);\n  scale *= k;\n  p *= k;\n  p.x += x0 + s0;\n  return p;\n}\n\n// Sphere radius\nconst float R2 = 1.0;\nconst int NSPHERES = 6;\nstruct SphereData {\n  vec3 pos;\n  vec3 dir;\n  mat3 m;\n} sphereData[NSPHERES];\n\nvoid initSphereData(float theta) {\n  const float X = 1.0;\n  const float Y = 1.0;\n  sphereData[0].pos = vec3(X, Y, 0);\n  sphereData[1].pos = vec3(X, -Y, 0);\n  sphereData[2].pos = vec3(-X, Y, 0);\n  sphereData[3].pos = vec3(-X, -Y, 0);\n  sphereData[4].pos = vec3(0, 0, 1.41421);\n  sphereData[5].pos = vec3(0, 0, -1.41421);\n  //sphereData[6].pos = vec3(1.0 + sqrt(3.0), 0, 0);\n  //sphereData[7].pos = vec3(-1.0-sqrt(3.0), 0, 0);\n  for (int i = 0; i < NSPHERES; i++) {\n    sphereData[i].dir = normalize(sphereData[i].pos);\n    sphereData[i].m = rotationMatrix(sphereData[i].dir,theta);\n  }\n}\n\nfloat distance2(vec3 p, vec3 q) {\n  return dot(p-q,p-q);\n}\n\nconst int MAX_KLEIN_ITERATION = 30;\n\nvec2 rotate(in vec2 p, in float t) {\n  return p * cos(-t) + vec2(p.y, -p.x) * sin(-t);\n}\n\nint orbit  = 0; // Used for coloring, so global for now.\n\nvec3 sphereInvert(vec3 pos, vec3 circlePos, float r2){\n  return ((pos - circlePos) * r2)/(dot(pos-circlePos,pos-circlePos)) + circlePos;\n}\n\nfloat distKlein(vec3 pos) {\n  float dr = 1.0;\n  if (dotranslate) pos = translate(pos,dr);\n  if (dorotate1) pos *= rmat;\n  for (int loopNum = 0; loopNum < MAX_KLEIN_ITERATION; loopNum++) {\n    int i;\n    float d2;\n    SphereData s;\n    bool found = false;\n    for (int i = 0; i < NSPHERES; i++) {\n      s = sphereData[i];\n      d2 = distance2(pos, s.pos); \n        if (d2 < R2) {\n            found = true;\n            break;\n        }\n    }\n      if (!found) {\n          orbit = loopNum;\n          break;\n      }\n    float k = R2 / d2;\n    dr *= k;\n    pos = k*(pos-s.pos)+s.pos;\n    pos = reflect(pos,s.dir);\n    if (dorotate2) pos *= s.m;\n  }\n  \n  float kleinSphereR = 0.41421;\n\n#if 0\n  float f = (length(pos) - 0.414) / dr;\n  dr *= 1.0/dot(pos, pos);\n  pos = sphereInvert(pos, vec3(0),1.0);\n  return min(f,(length(pos) - kleinSphereR) / dr);\n  return (length(pos) - kleinSphereR) /dr;\n  return f;\n#else\n  //dr *= 1.0/dot(pos, pos);\n  //pos = sphereInvert(pos, vec3(0), 1.0);\n  return (length(pos) - kleinSphereR)/dr;\n#endif\n}\n\nconst vec4 K = vec4(1.0, .666, .333, 3.0);\nvec3 hsv2rgb(const vec3 c){\n  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);\n  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n}\n\nfloat distFunc(vec3 p){\n  //p = mod(p+1.5,3.0)-1.5;\n  //return max(distKlein(p),p.z);\n  return distKlein(p);\n}\n\nvec3 getNormal(const vec3 p){\n  const vec2 d = vec2(0.001, 0);\n  return normalize(vec3(distFunc(p + d.xyy) - distFunc(p - d.xyy),\n                        distFunc(p + d.yxy) - distFunc(p - d.yxy),\n                        distFunc(p + d.yyx) - distFunc(p - d.yyx)));\n}\n\nvec3 diffuseLighting(const vec3 p, const vec3 n, const vec3 diffuseColor,\n                     const vec3 lightDir){\n  float k = dot(n, lightDir);\n  return max(k,0.1) * diffuseColor;\n}\n\nconst int MAX_MARCHING_LOOP = 500;\nfloat march(const vec3 origin, const vec3 ray, const float threshold){\n  float rayLength = 0.0;\n#if 1\n  // Advance ray to unit sphere\n  // dot(p + kr,p + kr) == 1\n  // p.p + 2kp.r + k^2r.r - 1 = 0\n  // float A = dot(ray,ray) = 1;\n  float B = dot(origin,ray);\n  float C = dot(origin,origin)-1.0;\n  float D = B*B-C;\n  if (D < 0.0) return 1e8;\n  rayLength = max(-B-sqrt(D),0.0);\n  assert(length(origin+rayLength*ray) - 1.0 < 1e-3);\n#endif\n  assert(rayLength >= 0.0);\n  float dist;\n  for(int i = 0 ; i < MAX_MARCHING_LOOP ; i++){\n    vec3 rayPos = origin+rayLength*ray;\n    float dist = distFunc(rayPos);\n    if (dist < threshold) return rayLength;\n    dist *= 0.5;\n    dist = min(dist,0.1);\n    rayLength += dist;\n    if (rayLength > 10.0) break;\n  }\n  return 1e8;\n}\n\nvec3 lightDir = vec3(1, 4, 2);\n\nvec3 calcColor(vec3 eye, vec3 ray){\n  vec3 col = vec3(0);\n  float eps = 0.0001;\n  float rayLength = march(eye, ray, eps);\n  if (rayLength < 1e8) {\n    vec3 intersection = eye + ray * rayLength;\n    vec3 matColor = vec3(0);\n    vec3 normal = getNormal(intersection);\n    matColor = hsv2rgb(vec3(0.1 + float(orbit) * 0.1 , 1., 1.));\n    col += diffuseLighting(intersection, normal, matColor, lightDir);\n    float specular = pow(max(0.0,dot(reflect(lightDir,normal),ray)),4.0);\n    col += 0.3*specular*vec3(1);\n  }\n  return col;\n}\n\nvec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,\n              const float width, const float height, const vec2 coord){\n  float imagePlane = (height * .5) / tan(fov * .5);\n  vec3 v = normalize(target - eye);\n  vec3 xaxis = normalize(cross(v, up));\n  vec3 yaxis =  normalize(cross(v, xaxis));\n  vec3 center = v * imagePlane;\n  vec3 origin = center - (xaxis * (width  *.5)) - (yaxis * (height * .5));\n  vec3 ray = origin + (xaxis * coord.x) + (yaxis * (height - coord.y));\n  return ray;\n}\n\nconst float DISPLAY_GAMMA_COEFF = 1. / 2.2;\nvec3 gammaCorrect(vec3 rgb) {\n  return vec3((min(pow(rgb.r, DISPLAY_GAMMA_COEFF), 1.)),\n              (min(pow(rgb.g, DISPLAY_GAMMA_COEFF), 1.)),\n              (min(pow(rgb.b, DISPLAY_GAMMA_COEFF), 1.)));\n}\n\nconst vec3 target = vec3(0, 0, 0);\nconst vec3 up = vec3(0, 1, 0);\nfloat fov = radians(45.0);\n\nvec3 transform(in vec3 p) {\n  if (iMouse.x > 0.0) {\n    float theta = -(2.0*iMouse.y-iResolution.y)/iResolution.y*PI;\n    float phi = -(2.0*iMouse.x-iResolution.x)/iResolution.x*PI;\n    p.yz = rotate(p.yz,-theta);\n    p.zx = rotate(p.zx,phi);\n  }\n  if (dorotate) {\n    float t = iTime;\n    p.zx = rotate(p.zx,t * 0.2);\n  }\n  return p;\n}\n\nconst int CHAR_I = 73;\nconst int CHAR_J = 74;\nconst int CHAR_R = 82;\nconst int CHAR_S = 83;\nconst int CHAR_T = 84;\nconst int CHAR_U = 85;\nconst int KEY_UP = 38;\nconst int KEY_DOWN = 40;\n\n#if NOKEYS\nbool keypress(int code) {\n  return false;\n}\n\nint keycount(int key) {\n  return 0;\n}\n#else\nbool keypress(int code) {\n    return texelFetch(iChannel0, ivec2(code,2),0).x != 0.0;\n}\n\nvec4 store(int i,int j) {\n  return texelFetch(iChannel1, ivec2(i,j),0);\n}\n\nint keycount(int key) {\n  return int(store(0,key).x);\n}\n#endif\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n  dorotate = !keypress(CHAR_R);\n  dorotate1 = !keypress(CHAR_S);\n  dotranslate = !keypress(CHAR_T);\n  dorotate2 = !keypress(CHAR_U);\n  rmat = rotationMatrix(AXIS,0.1618*iTime);\n  initSphereData(0.2*iTime);\n  vec3 eye = vec3(0,0,2.75);\n  eye.z *= 0.1*float(10+keycount(KEY_DOWN)-keycount(KEY_UP));\n  const vec2 coordOffset = vec2(0.5);\n  vec3 ray = calcRay(eye, target, up, fov,\n                     iResolution.x, iResolution.y,\n                     gl_FragCoord.xy /*+ coordOffset*/);\n  eye = transform(eye);\n  ray = transform(ray);\n  ray = normalize(ray);\n  lightDir = transform(lightDir);\n  lightDir = normalize(lightDir);\n  fragColor = vec4(gammaCorrect(calcColor(eye, ray)), 1.0);\n#if defined DEBUG\n  if (alert) fragColor = vec4(1,0,0,1);\n#endif\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define keystate(k,n) ( texelFetch(iChannel0,ivec2(k,n),0) )\n\nvoid mainImage(out vec4 t, vec2 uv) {\n#if __VERSION__ < 300\n    t = vec4(0);\n#else\n    \n    int i = int(uv.x);\n    int j = int(uv.y);\n    if ( iFrame == 0 ) {\n        t = vec4(0);\n    } else {\n        t = texelFetch(iChannel1,ivec2(i,j),0); // Get current state   \n    }  \n    if (i == 0) {\n        float w1 = keystate(j,2).x;\n        if (w1 != t.w) {\n            t.w = w1;\n            t.x++;\n        }\n    }     \n        \n#endif           \n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

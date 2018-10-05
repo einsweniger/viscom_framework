@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlGSWD",
+      "date": "1484333911",
+      "viewed": 267,
+      "name": "Deform Fly - 144 chars",
+      "username": "GregRostami",
+      "description": "This is a reduction of iq's Deform - fly shader:\n[url]https://www.shadertoy.com/view/XsX3Rn[/url]\nPlease help me get it down to one-tweet.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "short",
+        "2tc",
+        "codegolf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,U)\t\t\t\t\t\t\\\nvec2 u=U/iResolution.y-.5;\t\t\t\t\t\\\nu=mat2(cos(iTime*.1+.8*vec4(6,0,0,2)))*u;\t\\\no=texture(iChannel0,iTime+vec2(u.x,1)/(u=abs(u)).y)*u.y\n\n// 155 chars - iq used black magic to eradicate 4 chars!!\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    u = mat2(cos(iTime*.1 + .8*vec4(6,0,0,2)))*(u/iResolution.y-.5);\n    o = texture(iChannel0,iTime+vec2(u.x,1)/(u=abs(u)).y)*u.y;\n}\n/**/\n\n// 162 chars - Original reduced shader.\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    float t = iDate.w , y;\n    u = (u/iResolution.y-.5) * mat2(cos(t*.1 + 1.6*vec4(3,0,0,1)));\n\to = texture(iChannel0,vec2(u.x,1)/(y = abs(u.y)) + t)*y;\n}\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

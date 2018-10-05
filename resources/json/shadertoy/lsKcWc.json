@@ -1,0 +1,173 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsKcWc",
+      "date": "1524141110",
+      "viewed": 132,
+      "name": "Spiral linearization",
+      "username": "ABizard",
+      "description": "Linearizing spirals to observe galaxy dust clouds, in a research context. No aestheticism intended :)\n\nSee comments for galaxy texture !\n\nFullscreen -> Higher resolution\n\nC : linearize (Z : zoom)\nP : freeze image, ruler w/ mouse (R : ruler type)\nM : mesh",
+      "likes": 4,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "spiral",
+        "galaxy",
+        "linearize",
+        "logspiral"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 3,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*/\n/*\n/* This shader purpose is to linearize spirals to observe galaxy dust clouds,\n/* in a research context. No particular aestheticism intended :)\n/*\n/*/\n\n/*\n\n##\u00a0To be pasted in js console (press F12) for galaxy texture :\n\n -> Set GALAXY in Common\n\n######\n# M51\n\n# Low Res :\ngShaderToy.SetTexture(0, {mSrc:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Messier51_sRGB.jpg/1280px-Messier51_sRGB.jpg', mType:'texture', mID:1, mSampler:{ filter: 'mipmap', wrap: 'clamp', vflip:'true', srgb:'false', internal:'byte' }});\n\n# High Res :\n\ngShaderToy.SetTexture(0, {mSrc:'https://upload.wikimedia.org/wikipedia/commons/d/db/Messier51_sRGB.jpg', mType:'texture', mID:1, mSampler:{ filter: 'mipmap', wrap: 'clamp', vflip:'true', srgb:'false', internal:'byte' }});\n\n#\n######\n\n######\n# M101\n\n# Low Res :\n\ngShaderToy.SetTexture(0, {mSrc:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/M101_hires_STScI-PRC2006-10a.jpg/1280px-M101_hires_STScI-PRC2006-10a.jpg', mType:'texture', mID:1, mSampler:{ filter: 'mipmap', wrap: 'clamp', vflip:'true', srgb:'false', internal:'byte' }});\n\n# High Res :\n\ngShaderToy.SetTexture(0, {mSrc:'https://upload.wikimedia.org/wikipedia/commons/c/c5/M101_hires_STScI-PRC2006-10a.jpg', mType:'texture', mID:1, mSampler:{ filter: 'mipmap', wrap: 'clamp', vflip:'true', srgb:'false', internal:'byte' }});\n\n#\n######\n*/\n\n#define keyState(K) (texture(iChannel2,vec2(float(K)/256.)).xy)\n#define keyToggle(K) (keyState(K).x > .5)\n#define keyPress(K) (keyState(K).y > .5)\n#define frozenMousePos (texture(iChannel2,vec2(0)).zw)\n\n/////////////////////////////////////////////////////\n// Keyboard controls\n\n// 'C' : switch display : linearized / spiral\n#define LINEARIZE\t\t\t keyToggle(67)\n// 'D' : debug display\n#define DISP_PARAMS\t\t\t keyToggle(68)\n// 'M' : toggle mesh\n#define DRAW_MESH\t\t\t!keyToggle(77)\n// 'P' : freeze image, display ruler\n#define DISP_RULER\t\t\t keyToggle(80)\n// 'R' : switch ruler type\n#define CUSTOM_RULER_MODE\t!keyToggle(82)\n// 'Z' : zoom\n#define ZOOM\t\t\t\t!keyToggle(90)\n#define ZOOM_FACTOR\t3.\n\n#define INCR_CONTRAST(COL) smoothstep(0.,1.,COL)\n#define CONTRAST 1\n// 'I' : invert colors\n#define INVERT_COLORS\t\t keyToggle(73)\n\n\n// Access the texture of the galaxy at iChannel0\n// Distorts it if necessary.\n// Result a-channel is set to 0 if out of texture, 1 otherwise\nvec4 galaxyTexture(vec2 uv){\n    float a = 1.;\n    vec3 color;\n    vec2 u = uv;\n    bool out_of_tex = false;\n    \n    // Galaxy photo distortion to get a nice, not distorted spiral\n    float screen_ratio = (R.x/R.y)/(640./360.);\n    vec2 img_compr = GALAXY_DISTORTION*vec2(screen_ratio,1);\n    u *= img_compr;\n    u += GALAXY_CENTER;\n    u -= vec2(.5)*img_compr;\n    if(CLOCKWISE)\n    \tu.y = 1.-u.y;\n    color = texture(iChannel0,u).rgb;\n    out_of_tex = any(greaterThan(abs(2.*u-1.),vec2(.99)));\n    if(GALAXY==M51 && u.x>.700)\n        out_of_tex = true;\n    \n    \n    out_of_tex = out_of_tex\n        \t\t|| any(greaterThan(abs(2.*uv-1.),vec2(.99)));\n    \n    if(out_of_tex)\n        a = 0.;\n    \n    /**\n    if(any(lessThan(abs(uv-.5),1./R.xy)))\n        color = WHITE;\n\t/**/\n    \n    return vec4(color,a);\n}\n\n//////////////////////////////////////////////\n///////////////////  MAIN  ///////////////////\n//////////////////////////////////////////////\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 color = BLACK;\n    \n    // Centered normalized coordinates in [-1,1]\n    vec2 pixel = 2.*(fragCoord-floor(R.xy/4.)*2.) / R.y;\n    \n    // Polar coords\n\tfloat rho = length(pixel),\n          theta = atan(pixel.y,pixel.x); // theta in [-PI,PI]\n    \n    \n    // Parameters of the spiral\n    float beta,\t\t// warp\n    \t  gamma;\t// rotation\n    int\t  n;\t\t// number of arms\n    \n    ///////////////////////\n    // Tuning of the parameters\n    \n    vec2 mouse = iMouse.xy;\n    beta  =\tBETA;\n    gamma =\tGAMMA;\n    n = N_GALAXY;\n\n    ///////////////////////\n    // Parameter for the orthogonal spirals\n    float beta_orth = exp(-1./log(beta));\n    \n    // Number of spirals in the orthogonal mesh\n    int n_orth = int(round(float(n)*1./log(beta)));\n    \n    // Find the inverse parametrization\n    vec2 xy;\n    \n    if(LINEARIZE){\n        vec2 mouse_offset =\n            ((DISP_RULER ? frozenMousePos : iMouse.xy/R.xy) + vec2(2,1.5))*vec2(4,2);\n        \n        xy = vec2(fragCoord/R.y - mouse_offset).yx * float(n)\n            \t* vec2(ZOOM ? 1. : ZOOM_FACTOR);\n        \n        float theta_inv = (2.*PI)/float(n_orth) * (xy.y*log(beta_orth) - xy.x) / (log(beta) - log(beta_orth));\n        float rho_inv = pow(beta,theta_inv+2.*PI*xy.x/float(n));\n        \n        xy = polarToCartesian(vec2(rho_inv,theta_inv));\n    }\n    else{\n        xy = pixel;\n    }\n    \n    \n    vec2 uv_tex = (xy/2.*R.y)/R.xy+.5;\n    \n    if(DRAW_MESH)\n    \tcolor = texture(iChannel1,uv_tex).rgb;\n    \n    vec4 galaxy_tex;\n    galaxy_tex = galaxyTexture(uv_tex);\n    \n    if(galaxy_tex.a == 1.)\n    \tcolor = mix(galaxy_tex.rgb,color,POW2(length(color)));\n    else{\n        // We're outside the texture\n        color = GREY(.2);\n        \n        //vec2 u = fragCoord/R.xy;\n        //float w = 0.06;\n        //color = LINEARIZE ? BLACK : mod(u.x+u.y,w)<w/2. ? GREY(.4) : GREY(.8);\n    }\n    \n    #define tex iChannel3\n\n    #define NextLine nextLine(uv,pos,scale)\n    #define WriteChar(char,char_color) writeNormalChar(char,char_color,uv,tex,color)\n    #define WriteWord(word,word_color) writeWord(word,word_color,uv,tex,color)\n    #define WriteNumber(number,min_int_digits,dec_digits,number_color) writeNumber(number,min_int_digits,dec_digits,number_color,uv,tex,color)\n\n    // Rulers\n    if(DISP_RULER){\n        \n        // Dynamic ruler\n        if(CUSTOM_RULER_MODE){\n            \n            vec2 pos = vec2(150,335);\n            float scale = 1./30.;\n            vec2 uv = setDisplayUV(pos,scale);\n            int[] disp_dist = int[](_DELTA,_EQ);\n            WriteWord(disp_dist,TURQUOISE);\n            \n            vec2 pixel_custom_ruler = fragCoord/R.y;\n            vec2 p1 = iMouse.zw/R.y;\n            vec2 p2 = iMouse.xy/R.y;\n            float dist_to_p1 = length(pixel_custom_ruler - p1);\n            float dist_to_p2 = length(pixel_custom_ruler - p2);\n            float dist_p1_p2 = length(p1 - p2);\n            bool mouse_is_pressed = (p1.x >= 0.);\n            \n            float dist_to_line;\n            #define DRAW_LINE(P,P1,P2,WIDTH)\\\n                \t\tdist_to_line = distPointToLine(P,lineFrom2Points(P1,P2)),\\\n                        color = mix(WHITE,color,\\\n                                   smoothstep((WIDTH-1.)/R.y,\\\n                                              (WIDTH+1.)/R.y,\\\n                                              dist_to_line));\n            \n            if(mouse_is_pressed){\n                float line_width = 1.;\n                if(\t dist_to_p1 < dist_p1_p2\n                  && dist_to_p2 < dist_p1_p2)\n                    DRAW_LINE(pixel_custom_ruler,p1,p2,line_width);\n\t\t\t\t\n                WriteNumber(dist_p1_p2*100.\n                            *(ZOOM ? 1. : ZOOM_FACTOR) ,1,1,TURQUOISE);\n        \t}\n            NextLine;\n            int[] disp_angle = int[](_theta,_EQ);\n            WriteWord(disp_angle,TURQUOISE);\n            if(mouse_is_pressed){\n                \n                // Angle display\n                #define ANGLE(P1,P2,D) (D==0. ? 0. : atan(abs(P1.y-P2.y),abs(P1.x-P2.x)))\n                float point_angle = ANGLE(p1,p2,dist_p1_p2);\n                float angle_display_size = .06;\n                if(dist_p1_p2>angle_display_size){\n                    float line_width = .5;\n                    float point_side = sign(p1.x-p2.x);\n                    float pixel_side = sign(p1.x - pixel_custom_ruler.x);\n                    if(point_side == pixel_side || p1.x==p2.x){\n                        if(dist_to_p1<angle_display_size)\n                    \t\tDRAW_LINE(pixel_custom_ruler,p1,p1+vec2(1,0),line_width);\n                        float pixel_angle = ANGLE(p1,pixel_custom_ruler,dist_to_p1);\n                        if(pixel_angle<=point_angle &&\n                           \t(sign(p1.y-p2.y) == sign(p1.y - pixel_custom_ruler.y) || p1.y==p2.y))\n                            color = mix(WHITE,color,smoothstep((line_width-1.)/R.y,\n                                                               (line_width+1.)/R.y,\n                                                               abs(dist_to_p1-angle_display_size*.8)));\n                    }\n                }\n                \n                WriteNumber(radToDeg(point_angle),1,1,TURQUOISE);\n        \t\tWriteChar(_DEG,TURQUOISE);\n                \n                \n                float circle_radius = 4.;\n                \n                color = mix(TURQUOISE,color,\n                            smoothstep((circle_radius-1.)/R.y,\n                                       (circle_radius+1.)/R.y,\n                                       dist_to_p1));\n                color = mix(LAGOON,color,\n                            smoothstep((circle_radius-1.)/R.y,\n                                       (circle_radius+1.)/R.y,\n                                       dist_to_p2));\n            }\n        }\n        // Static ruler\n        else{\n            vec2 ruler_pos = iMouse.xy/R.y;\n            vec2 pixel_ruler = fragCoord/R.y;\n            float dist_to_line;\n            #define DRAW_RULER(XY,YX)\\\n                    dist_to_line = abs(pixel_ruler.XY-ruler_pos.XY)*R.y;\\\n                    if(dist_to_line<1.)\\\n                        color = WHITE;\\\n                    if(dist_to_line<5. && mod(pixel_ruler.YX-ruler_pos.YX,.1/(ZOOM ? 1. : ZOOM_FACTOR))<.002)\\\n                        color = WHITE;\n            DRAW_RULER(x,y);\n            DRAW_RULER(y,x);\n        }\n        \n    }\n    \n    \n    // Debug display\n    if(DISP_PARAMS){\n        \n        vec2 pos = vec2(10,325);\n        float scale = 1./20.;\n        vec2 uv = setDisplayUV(pos,scale);\n\n        int[] disp_b = int[](_beta,_EQ);\n        WriteWord(disp_b,LIGHT_BLUE);\n        WriteNumber(beta,1,2,LIGHT_BLUE);\n        NextLine;\n\n        int[] disp_g = int[](_gamma,_EQ);\n        WriteWord(disp_g,LIGHT_BLUE);\n        WriteNumber(gamma,1,2,LIGHT_BLUE);\n    }\n    \n    //color = texture(iChannel2,fragCoord/R.xy).rgb;\n    \n    //if(any(lessThan(abs(fragCoord-R.xy/2.),vec2(1))))\n    //    color = WHITE;\n    \n    \n    \n    for(int i=0; i<CONTRAST; i++)\n    \tcolor = INCR_CONTRAST(color);\n    \n    if(INVERT_COLORS)\n    \tcolor = 1.-color;\n    \n    fragColor = vec4(color,1);\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "\n///////\n// Parameters for galaxies :\n#define M51    \t51\n#define M101   \t101\n#define M74_1  \t741\n#define M74_2  \t742\n#define NGC3344\t3344\n\n#define GALAXY M51\n\n/////////\n// M51 //\n/////////\n#if GALAXY==M51\n    // Warp\n    #define BETA_GALAXY 1.38\n    // Rotation\n    #define GAMMA_GALAXY 0.38\n    // Number of spiral arms\n    #define N_GALAXY 2\n\n\t#define GALAXY_CENTER (vec2(250,175)/vec2(640,360))\n\t#define GALAXY_DISTORTION vec2(1.3,1)\n\n\t#define CLOCKWISE true\n//////////\n// M101 //\n//////////\n#elif GALAXY==M101\n    #define BETA_GALAXY 1.52\n    #define GAMMA_GALAXY 0.75\n    #define N_GALAXY 4\n\n\t#define GALAXY_CENTER (vec2(315,185)/vec2(640,360))\n\t#define GALAXY_DISTORTION vec2(1.4,1)\n\n\t#define CLOCKWISE true\n/////////\n// M74 //\n/////////\n#elif GALAXY==M74_1\n    #define BETA_GALAXY 1.32\n    #define GAMMA_GALAXY 0.06\n    #define N_GALAXY 2\n\n\t#define GALAXY_CENTER (vec2(310,183)/vec2(640,360))\n\t#define GALAXY_DISTORTION vec2(1.6,1)\n\n\t#define CLOCKWISE false\n/////////\n// M74 //\n/////////\n#elif GALAXY==M74_2\n    #define BETA_GALAXY 1.32\n    #define GAMMA_GALAXY 0.06\n    #define N_GALAXY 2\n\n\t#define GALAXY_CENTER (vec2(205,205)/vec2(640,360))\n\t#define GALAXY_DISTORTION vec2(1.6,1)\n\n\t#define CLOCKWISE false\n/////////////\n// NGC3344 //\n/////////////\n#elif GALAXY==NGC3344\n    #define BETA_GALAXY 1.22\n    #define GAMMA_GALAXY 0.02\n    #define N_GALAXY 2\n\n\t#define RMat(A) mat2(cos(A),-sin(A),sin(A),cos(A))\n\n\t#define GALAXY_CENTER (vec2(333,195)/vec2(640,360))\n\t#define GALAXY_DISTORTION vec2(1.5,1)\n\n\t#define CLOCKWISE false\n#endif\n\n////////////////////////////////\n// Final parameters\n\n#define MANUAL false\n\n#define BETA (MANUAL ? BETA_FROM_MOUSE : BETA_GALAXY)\n#define GAMMA (MANUAL ? GAMMA_FROM_MOUSE : GAMMA_GALAXY)\n\n////////////////////////////////\n// Spiral parameters from mouse\n\n#define BETA_FROM_MOUSE exp(POW3(iMouse.y/R.y)+.08)\n#define GAMMA_FROM_MOUSE ((iMouse.x/R.x)*2.*PI)\n\n\n///////////////////////////////////\n// Various utils\n\n#define POW2(A) ((A)*(A))\n#define POW3(A) ((A)*(A)*(A))\n\n#define PI 3.141593\n#define E 2.718282\n\n#define BLACK\t\tvec3(0)\n#define WHITE\t\tvec3(1)\n#define GREY(A)\t\tvec3(A)\n#define RED  \t\tvec3(1,0,0)\n#define GREEN\t\tvec3(0,1,0)\n#define BLUE \t\tvec3(0,0,1)\n#define TURQUOISE \tvec3(0,1,1)\n#define PURPLE\t\tvec3(1,0,1)\n#define YELLOW \t\tvec3(1,1,0)\n#define VIOLET \t\tvec3(.5,0,1)\n#define LIGHT_BLUE\tvec3(0,.5,1)\n#define LIGHT_GREEN\tvec3(.5,1,0)\n#define LAGOON\t\tvec3(0,1,.5)\n#define ORANGE\t\tvec3(1,.5,0)\n#define MAGENTA\t\tvec3(1,0,.5)\n#define PINK\t\tvec3(1,.3,.7)\n\n#define R iResolution\n\nfloat logBase(float base, float x){\n    return log(x)/log(base);\n}\n\nint intLogBase(float base, float x){\n    if(x<1.) return 0;\n    int res = 0;\n    while(x>=base){\n        res++;\n        x = floor(x/base);\n    }\n    return res;\n}\n\n// Periodic function __|__|__|__|__\n// s : dirac compression\nfloat periodicDirac(float x, float period, float s){\n\treturn pow(abs(cos(x*(PI/period))),s);\n}\n\nvec2 polarToCartesian(vec2 p){\n    return p.x*vec2(cos(p.y),sin(p.y));\n}\n\nvec2 cartesianToPolar(vec2 c){\n    return vec2(length(c),atan(c.y,c.x));\n}\n\n// Distance between a point p and a line of equation aX+bY+c=0\nfloat distPointToLine(vec2 p, vec3 abc){\n    return abs(abc.x*p.x + abc.y*p.y + abc.z)/sqrt(POW2(abc.x)+POW2(abc.y));\n}\n\n// Line equation aX+bY+c=0 from two points on the line.\n// Returns vec3(a,b,c)\nvec3 lineFrom2Points(vec2 p1, vec2 p2){\n    float x = p2.x - p1.x;\n    if(x == 0.){\n        return vec3(1,0,-p1.x);\n    }\n    else{\n        float a = (p2.y - p1.y)/x;\n        float c = p1.y - a*p1.x;\n        return vec3(a,-1,c);\n    }\n}\n\nfloat degToRad(float a){\n    return a/360.*2.*PI;\n}\n\nfloat radToDeg(float a){\n    return a/2./PI*360.;\n}\n\n\n///////////////////////////////////////////////////////////////\n// Font display\n\nconst int\t_=32,\n\t\t\t_EXCL=33,\t\t// !\n\t\t\t_QUOTE=34,\t\t// \"\n\t\t\t_SHARP=35,\t\t// #\n\t\t\t_DOLLAR=36,\t\t// $\n\t\t\t_PERCENT=37,\t// %\n\t\t\t_AMPER=38,\t\t// &\n\t\t\t_SQUOTE=39,\t\t// '\n\t\t\t_LPAR=40,\t\t// (\n\t\t\t_RPAR=41,\t\t// )\n\t\t\t_ASTERISK=42,\t// *\n\t\t\t_PLUS=43,\t\t// +\n\t\t\t_COMMA=44,\t\t// ,\n\t\t\t_MINUS=45,\t\t// -\n\t\t\t_DOT=46,\t\t// .\n\t\t\t_SLASH=47,\t\t// /\n\t\t\t_0=48,\t_1=49,\t_2=50,\t_3=51,\t_4=52,\n    \t\t_5=53,\t_6=54,\t_7=55,\t_8=56,\t_9=57,\n    \t\t_COLON=58,\t\t// :\n    \t\t_SEMICOLON=59,\t// ;\n    \t\t_LT=60,\t\t\t// <\n    \t\t_EQ=61,\t\t\t// =\n    \t\t_GT=62,\t\t\t// >\n    \t\t_QUEST=63,\t\t// ?\n    \t\t_AT=64,\t\t\t// @\n\t\t\t_A=65,\t_B=66,\t_C=67,\t_D=68,\t_E=69,\n\t\t\t_F=70,\t_G=71,\t_H=72,\t_I=73,\t_J=74,\n\t\t\t_K=75,\t_L=76,\t_M=77,\t_N=78,\t_O=79,\n\t\t\t_P=80,\t_Q=81,\t_R=82,\t_S=83,\t_T=84,\n\t\t\t_U=85,\t_V=86,\t_W=87,\t_X=88,\t_Y=89,\n\t\t\t_Z=90,\n\t\t\t_a=97,\t_b=98,\t_c=99,\t_d=100,\t_e=101,\n\t\t\t_f=102,\t_g=103,\t_h=104,\t_i=105,\t_j=106,\n\t\t\t_k=107,\t_l=108,\t_m=109,\t_n=110,\t_o=111,\n\t\t\t_p=112,\t_q=113,\t_r=114,\t_s=115,\t_t=116,\n\t\t\t_u=117,\t_v=118,\t_w=119,\t_x=120,\t_y=121,\n\t\t\t_z=122,\n    \t\t_alpha=128,\t\t_beta=129,\t_gamma=130,\t\t_delta=131,\n    \t\t_epsilon=132,\t_theta=133,\t_lambda=134,\t_mu=135,\n    \t\t_xi=136,\t\t_pi=137,\t_rho=138,\t\t_sigma=139,\n    \t\t_tau=140,\t\t_phi=141,\t_psi=142,\t\t_omega=143,\n    \t\t_GAMMA=144,\t\t_DELTA=145,\t_THETA=146,\t\t_LAMBDA=147,\n    \t\t_PI=148,\t\t_SIGMA=149,\t_PHI=150,\t\t_PSI=151,\n    \t\t_OMEGA=152,\n    \t\t_INF=153,\n    \t\t_DEG=176;\n\n\n#define setDisplayUV(pos,scale) ((fragCoord-pos*(R.xy/vec2(640,360)))/(scale*R.x))\n#define nextLine(uv,pos,scale)\tpos = vec2(pos.x,pos.y-scale*500.),\\\n\t\t\t\t\t\t\t\tuv = setDisplayUV(pos,scale);\n\n#define DEF_CHAR_WIDTH .8\n#define DEF_CHAR_HEIGHT 1.\n#define DEF_CHAR_OFFSET .3\n\nvoid writeChar(int char, vec3 char_color,\n               float w, float h, float x_offset, // Dimensions of the bbox of the char\n               inout vec2 uv, sampler2D font_tex, inout vec3 color){\n    \t#define getFont(uv,char) texture(font_tex, (uv+vec2(mod(char,16.),15.-floor(char/16.)))/16.).r\n\t\tuv.x += x_offset;\n    \tif(uv.x>0. && uv.x<w && uv.y<h && uv.y>0.)\n            // We are inside the bbox, display the char\n            color = mix(color,char_color, getFont(uv,float(char)) );\n\t\tuv.x -= w; // move uv for next char\n}\n\n#define writeNormalChar(char, char_color, uv, font_tex, color)\\\n    \twriteChar(char,char_color,DEF_CHAR_WIDTH,DEF_CHAR_HEIGHT,DEF_CHAR_OFFSET,uv,font_tex,color)\n\n#define writeWord(word, word_color, uv, font_tex, color)\\\n\tfor(int i=0;i<word.length();i++)\\\n        writeNormalChar(word[i],word_color,uv,font_tex,color);\n\nvoid writeNumber(float number, int min_int_digits, int dec_digits, vec3 num_color,\n                 inout vec2 uv, sampler2D font_tex, inout vec3 color){\n\n    if(isnan(number)){\n    \tint[] nan = int[](_N,_a,_N);\n        writeWord(nan,RED,uv,font_tex,color);\n    }\n    else if(isinf(number)){\n    \tint[] inf = int[](_I,_n,_f);\n        writeWord(inf,RED,uv,font_tex,color);\n    }\n    else{\n        float x;\n        #define WRITE_INTEGER_NUMBER(NUMBER)\\\n        \tx = pow(10.,digits-1.);\\\n            while(digits>0.){\\\n                writeNormalChar(48+int(floor(NUMBER/x)),num_color,uv,font_tex,color);\\\n                NUMBER=mod(NUMBER,x);\\\n                digits--;\\\n                x /= 10.;\\\n            }\n        bool neg = number<0.;\n        number = abs(number);\n        float p = floor(number);\n        float f = fract(number);\n        \n        // Display the sign\n        if(neg)\n            writeNormalChar(_MINUS,num_color,uv,font_tex,color);\n        \n        // Round the number to the right number of decimal digits\n        float decimal_digits_factor = pow(10.,float(dec_digits));\n        f = round(f*decimal_digits_factor);\n        if(f == decimal_digits_factor){\n            f = 0.;\n            p += 1.;\n        }\n        \n        // Display the integer part\n        float digits = float(intLogBase(10.,p)+1);\n        \t// Fill with zeros to match min digits\n        for(int i=0;i<min_int_digits-int(digits);i++)\n            writeNormalChar(_0,num_color,uv,font_tex,color);\n        WRITE_INTEGER_NUMBER(p);\n        \n        if(dec_digits>0){\n        \t// Display the dot\n        \twriteChar(_DOT,num_color,.65,1.,.45,uv,font_tex,color);\n            \n            // Display the decimal part\n            digits = float(dec_digits);\n            WRITE_INTEGER_NUMBER(f);\n        }\n    }\n        \n}",
+        "name": "Common",
+        "description": "",
+        "type": "common"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "#define keyToggleRaw(K) (texture(iChannel1,vec2((.5 + float(K))/256.,0.75)).x > 0.)\n#define keyPressRaw(K) (texelFetch(iChannel1, ivec2(K, 0), 0).x > 0.)\n\n/*\n    Utils buffer :\n- o.x is keyToggle\n- o.y is keyPressed\n- o.z is mouse.x when P was toggled\n- o.w is mouse.y when P was toggled\n*/\nvoid mainImage( out vec4 o, in vec2 fragCoord )\n{\n    bool key_toggled = keyToggleRaw((fragCoord.x*256.)/R.x);\n    bool key_pressed = keyPressRaw((fragCoord.x*256.)/R.x);\n    bool p_toggled = keyToggleRaw(80);\n    o = vec4((key_toggled ? 1. : 0.),\n             (key_pressed ? 1. : 0.),\n             (p_toggled ? texture(iChannel0,vec2(0)).z : iMouse.x/R.x),\n             (p_toggled ? texture(iChannel0,vec2(0)).w : iMouse.y/R.y));\n\t\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "/*/\n/*\n/*  Spiral display buffer\n/*\n/*/\n\n#define keyToggle(K) (texture(iChannel2,vec2(float(K)/256.)).x > .5)\n#define keyPress(K) (texture(iChannel2,vec2(float(K)/256.)).y > .5)\n\n// Display a spiral centered on (0,0)\nvec3 Spiral( vec2 xy, float beta, float gamma, int n, vec3 col1, vec3 col2, inout vec3 color)\n{\n    \n    float rho = length(xy),\n          theta = atan(xy.y,xy.x);\n\n    ///////////////////////\n    // Parameter for the orthogonal spirals\n    float beta_orth = exp(-1./log(beta));\n    \n    // Number of spirals in the orthogonal mesh\n    int n_orth = int(round(float(n)*1./log(beta)));\n    \n    // Find the parametrization\n    vec2 uv_param;\n\t#define PARAM(RHO,THETA,BETA,N,OFFSET) logBase(BETA,RHO/(pow(BETA,THETA+OFFSET)))*float(N)/(2.*PI)\n    #define COMPUTE_CONTINUOUS_PARAM(RHO,THETA,OUT_UV)\\\n    \t\t\t\t\t\t\t\tOUT_UV.x = PARAM(RHO,THETA,beta,n,gamma);\\\n    \t\t\t\t\t\t\t\tOUT_UV.y = PARAM(RHO,THETA,beta_orth,n_orth,0.);\\\n                                    OUT_UV.y += float(n_orth)*abs(floor(OUT_UV.x/float(n)));\\\n                                    OUT_UV.x = mod(OUT_UV.x,float(n));\n    \n    COMPUTE_CONTINUOUS_PARAM(rho,theta,uv_param);\n\n    \n    #define ggg(x) 1.-abs(mod(x,1.)-.5)*rho\n    #define g(x) clamp(ggg(x)*300.*1./POW2(1.+rho),0.,1.)\n    \n    color = mix(color,col2,smoothstep(0.,.8,g(uv_param.y)));\n    color = mix(color,col1,smoothstep(0.,.8,g(uv_param.x)));\n    \n    return color;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 color = BLACK;\n    \n    // Centered normalized coordinates in [-1,1]\n    vec2 pixel = 2.*(fragCoord-floor(R.xy/4.)*2.) / R.y;\n    \n    // Parameters of the spiral\n    float beta,\t\t// warp\n    \t  gamma;\t// rotation\n    int\t  n;\t\t// number of arms\n    \n    ///////////////////////\n    // Tuning of the parameters\n    \n    vec2 mouse = iMouse.xy;\n    beta  =\tBETA;\n    gamma =\tGAMMA;\n    n = N_GALAXY;\n    \n    //color = Spiral(pixel,beta,gamma,n*3,WHITE,WHITE,color);\n    \n    #define TRANSPARENT color\n    vec3[] colors = vec3[](RED,ORANGE,YELLOW,GREEN,TURQUOISE,BLUE);\n    for(int arm=1; arm<=min(n,6); arm++)\n    \tcolor = Spiral(pixel,beta,\n                       gamma+float(arm)/float(n)*2.*PI+PI/float(n),\n                       1,colors[arm-1],TRANSPARENT,color);\n    \n    color = mix(BLACK,color,min(length(pixel)*30.,1.));\n    \n    fragColor = vec4(color,length(color)>.5 ? length(color) : 0.);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

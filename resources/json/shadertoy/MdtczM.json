@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdtczM",
+      "date": "1518288159",
+      "viewed": 252,
+      "name": "pixel collapse",
+      "username": "WillKirkby",
+      "description": "why are tags and descriptions mandatory again?",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tags"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PIXEL_SNAP 0\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n#if PIXEL_SNAP\n    fragCoord-=mod(fragCoord-iResolution.xy*.5,floor(pow(2.,iTime*.2)));\n#else\n    fragCoord-=mod(fragCoord-iResolution.xy*.5,pow(2.,iTime*.2));\n#endif\n    \n    vec2 uv = fragCoord/iResolution.xy-.5;\n    uv.x*=iResolution.x/iResolution.y;\n    fragColor = texture(iChannel0,uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

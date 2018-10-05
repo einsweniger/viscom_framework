@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltXfRl",
+      "date": "1512858531",
+      "viewed": 211,
+      "name": "@R4_Unit Dither Pattern",
+      "username": "demofox",
+      "description": "From this twitter conversation:\nhttps://twitter.com/R4_Unit/status/939584462425268225?s=03",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float value = (float((9*int(fragCoord.x)+5*int(fragCoord.y))%11) + 0.5) / 11.0;\n    fragColor = vec4(value, value, value, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

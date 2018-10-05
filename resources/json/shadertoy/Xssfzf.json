@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xssfzf",
+      "date": "1497308403",
+      "viewed": 194,
+      "name": "Crappy edge detection",
+      "username": "cacheflowe",
+      "description": "There are tons of examples of this effect, but I wanted to write one from scratch.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "edgedetection"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define stepH 0.1\n#define stepV 0.1\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // current location & color\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 curColor = texture(iChannel0, uv);\n    \n  \t// get samples around pixel\n\tvec4 colors[8];\n    float stepX = stepH/iResolution.x;\n    float stepY = stepV/iResolution.y;\n\tcolors[0] = texture(iChannel0, uv + vec2(-stepX, stepY));\n\tcolors[1] = texture(iChannel0, uv + vec2(0, stepY));\n\tcolors[2] = texture(iChannel0, uv + vec2(stepX, stepY));\n\tcolors[3] = texture(iChannel0, uv + vec2(-stepX, 0));\n\tcolors[4] = texture(iChannel0, uv + vec2(stepX, 0));\n\tcolors[5] = texture(iChannel0, uv + vec2(-stepX, -stepY));\n\tcolors[6] = texture(iChannel0, uv + vec2(0, -stepY));\n\tcolors[7] = texture(iChannel0, uv + vec2(stepX, -stepY));\n    \n\t// sum color distance from neighbors \n    float colorDistance = 0.;\n\tfor (int i = 0; i < 8; i++) {\n\t\tcolorDistance += distance(curColor, colors[i]);\n\t}\n    \n    // tweak lines stength\n    colorDistance *= 6.0;\n    colorDistance = smoothstep(0.02, 0.98, colorDistance);\n    \n    // draw \n\tfragColor = vec4(vec3(colorDistance), 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

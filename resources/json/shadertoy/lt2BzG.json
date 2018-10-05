@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lt2BzG",
+      "date": "1516356006",
+      "viewed": 130,
+      "name": "Tiles & Palette",
+      "username": "hamoid",
+      "description": "Experiment with a color palette and sampling tiles out of a video texture, based on colors from the video itself.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "palette",
+        "tiling"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 29,
+            "src": "/media/a/3405e48f74815c7baa49133bdc835142948381fbe003ad2f12f5087715731153.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const vec4 colors[5] = vec4[5](\n    vec4(0.247059, 0.721569, 0.686275, 1.0),\n    vec4(0.498039, 0.780392, 0.686275, 1.0),\n    vec4(0.854902, 0.847059, 0.654902, 1.0),\n    vec4(1.000000, 0.619608, 0.615686, 1.0),\n    vec4(1.000000, 0.239216, 0.498039, 1.0)\n);\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 parts = vec2(24.0, 14.0);\n    vec2 uv2 = floor(uv * parts) / parts;  \n    vec4 c = texture(iChannel0, uv2);\n    c = texture(iChannel0, mod(vec2(c.r, sin(c.r))+uv, 1.0));\n    \n\tfragColor = colors[int(c.r * 5.0)];\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

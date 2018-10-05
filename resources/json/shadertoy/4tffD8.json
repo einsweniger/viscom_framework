@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tffD8",
+      "date": "1511691424",
+      "viewed": 191,
+      "name": " shortest heart  2 (169 chars)",
+      "username": "FabriceNeyret2",
+      "description": "variant of [url] https://shadertoy.com/view/4tXfW8[/url]\ninspired from [url]https://www.shadertoy.com/view/XlsfDr[/url]",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "2tweets",
+        "short",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of  https://shadertoy.com/view/4tXfW8\n// inspired from https://www.shadertoy.com/view/XlsfDr\n\n\n/**/ // -10 by coyote \n\n#define D(a) ( U -1.2 + .5*dot( vec4(a+13,5,a-2,1), cos( asin( pow( abs(U.x)/8., .33) ) * vec4(1,2,3,4) )) )\n\n#define mainImage(O,u)                   \\\n    vec2 R =  iResolution.xy,            \\\n         U = 9.5*( u+u - R ) / R.y;      \\\n    O.ar = - D( - ) * D( )\n\n             \n/**/\n             \n             \n             \n             \n/** // original: 179 chars    \n\n#define D(a,b)  .5* ( U.y -2.4 + dot( vec4(a 13,5,b 2,1), cos( asin( pow( abs(U.x)/16., .33) ) * vec4(1,2,3,4) )) ) \n\n#define mainImage(O,u)                   \\\n    vec2 R =  iResolution.xy,            \\\n         U = 19.* ( u+u - R.xy ) / R.y;  \\\n    O.r =  - D( - , ) * D( , - )\n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

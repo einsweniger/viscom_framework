@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lstcD2",
+      "date": "1520312182",
+      "viewed": 223,
+      "name": "Trying REAL Super Sampling",
+      "username": "GregRostami",
+      "description": "This is the first time that I'm trying to write a shader with REAL anti-aliasing.\nThe results look wrong.\nI can't figure out what I'm doing wrong. Please help. Thank you.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "subpixel",
+        "learn"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// My first attempt at real anti-aliasing using a box filter.\n// I know that I'm doing something wrong, but I just can't figure it out. Please help.\n/**/\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o-=o;\n    u = u/iResolution.y-.5;\n    \n    float AA = 5.,  // Set the level of Anti-Aliasing \n          x,y,\n        stp = 1./AA;\n    \nfor (y=-.5; y < .5; y+=stp)\n             for (x=-.5; x < .5; x+=stp)\n                o += length (u+2.*vec2(x,y)/iResolution.y)<.4 ? 1. : 0.;\n    o/=(AA*AA); // divide the final pixel value by the total number of samples (25)\n                // I know the final pixel value must be gamma corrected for best results.\n}\n/**/\n\n// o += 5.*abs(sin(9.*u.y))*length (sin(u*20.+iTime))<.8 ? 1. : 0.;",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdySRh",
+      "date": "1462671897",
+      "viewed": 479,
+      "name": "2 sample normal",
+      "username": "KylBlz",
+      "description": "This is pretty much a directional sobel filter. The top row is a 4 tap normal, the bottom row is the 2 tap normal. For lighting calculations the vector cross(view, normal) is not usually relevant, so why not ignore it?",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "normalmap",
+        "heightmap",
+        "sample",
+        "comparison",
+        "two"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 4,
+            "src": "/media/a/e6e5631ce1237ae4c05b3563eda686400a401df4548d0f9fad40ecac1659c46c.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 7,
+            "src": "/media/a/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//The pebbles mipmap texture is broken, so it needs to be in linear mode (windows, nvidia, firefox)\n\n//  this code uses just 2 samples of a heightmap along the light vector to give a '2D normal'\n//  from the perspective of the vector. There is still one dimension of ambiguity.\n//  best case is where the entire object falls under a small slice of light (directional light)\n//\tworst case is this shader; a point light close to objects. \n\nvec2 norm2(sampler2D iChannel, vec3 px, vec2 uv, vec2 dir) {\n    vec2 d = px.xy * dir;\n    float m = texture(iChannel, uv - d).r;\n    vec2 n = vec2((texture(iChannel, uv + d).r - m) * iResolution.y*0.02, m);\n    return n;\n}\n\nvec4 norm4(sampler2D iChannel, vec3 px, vec2 uv) {\n    float w = texture(iChannel, uv + px.xz).r;\n    vec3 n = vec3(\n\t\t(texture(iChannel, uv - px.xz).r - w) * iResolution.x * 0.02,\n        (texture(iChannel, uv - px.zy).r - texture(iChannel, uv + px.zy).r) * iResolution.y * 0.02,\n  \t  \t1.0);\n    return vec4(normalize(n), w);\n}\n\nvoid mainImage( out vec4 color, in vec2 coord ) {\n    vec3 px = vec3(1.0 / iResolution.yy, 0.);\n    vec2 uv = coord.xy / iResolution.y,\n    \t mouse = (uv - (iMouse.xy / iResolution.y)) * 0.5,\n         dir = normalize(mouse);\n    \t     \n    //split screen into quarters\n    if (coord.x / iResolution.x > 0.5) {\n        //view normals\n        if (coord.y / iResolution.y < 0.5) {\n            vec2 res = norm2(iChannel0, px, uv, dir);\n            //for visualizing\n   \t\t\tfloat tmp = clamp(res.x*res.x,0.,1.);\n\t\t    vec3 norm = normalize(mix(vec3(0.,0.,0.5),vec3(abs(dir), 0.0), sqrt(tmp)));\n\t\t    color = vec4(norm, 1.0);\n        } else {\n            vec4 norm = norm4(iChannel0, px, uv);\n            norm.z *= 0.5;\n            color = vec4(abs(normalize(norm.rgb)), 1.0);\n        }\n    } else {\n        vec3 stoneColor = 0.5 + texture(iChannel1, uv * 4.0).rgb;\n        \n        //view shading\n        if (coord.y / iResolution.y < 0.5) {\n            vec2 res = norm2(iChannel0, px, uv, dir);\n    \t\t//res.x is kinda diffuse, res.y is kinda AO, length of mouse is light power\n    \t\tfloat shading = 0.9;\n            if (res.y > 0.2) {\n                shading = clamp(res.x + res.y - length(mouse) * 1.5 + 0.5, 0.0, 1.0);\n            } else {\n                vec2 gnorm = norm2(iChannel2, px, uv, dir);\n                gnorm.x = (1.0-gnorm.x) * 0.25 + 1.;\n                shading = clamp(gnorm.x * res.x + gnorm.y + res.y - length(mouse) * 1.75 + 0.5, 0.0, 1.0);\n                stoneColor = texture(iChannel2, uv).rgb * 1.5;\n            }\n        \tcolor = vec4(stoneColor * shading, 1.0);\n        } else {\n            vec4 norm = norm4(iChannel0, px, uv);\n            float shading = 0.5;\n            if (norm.w > 0.2) {\n                shading = reflect(vec3(dir, 0.),norm.xyz).z * 0.5 + 0.5 - length(mouse) * 1.5 + 0.4;\n            } else {\n                vec4 gnorm = norm4(iChannel2, px, uv);\n                shading = reflect(vec3(dir, 0.), normalize((norm.xyz + gnorm.xyz * 0.5) * vec3(1.0,1.0,0.5))).z * 0.5 + 0.5 - length(mouse) * 1.2 + 0.5;\n                stoneColor = texture(iChannel2, uv).rgb * 1.25;\n            }\n        \tcolor = vec4(stoneColor * shading, 1.0);\n        }\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

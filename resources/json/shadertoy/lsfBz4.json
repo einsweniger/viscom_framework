@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsfBz4",
+      "date": "1495023009",
+      "viewed": 201,
+      "name": "Daily 2017-05-17",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float rand(float x){return fract(sin(x*1e4));}\n\nfloat pattern(vec2 uv){\n    return 1.+sin((uv.y+rand(uv.x+iTime)*.02)*100.+iTime*100.)*.2;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 st=uv;\n    st.x+=(rand(uv.y+iTime)-.5)*abs(rand(floor(iTime)))*.05;\n    st.x=(st.x-.5)*1.2+.5;\n    st.x+=step(.8,fract(iTime))*sin(iTime*20.+uv.y*10.)*.02;\n    st.y=fract(uv.y+sin(floor(iTime)*1e4)*iTime);\n    vec3 c=texture(iChannel0,st).rgb;\n    c*=step(0.,st.x)-step(1.,st.x);\n    vec2 offset = vec2(0.2,0.1);\n    c.r*=pattern(uv+offset);\n    c.g*=pattern(uv);\n    c.b*=pattern(uv-offset);\n    fragColor=vec4(c,1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

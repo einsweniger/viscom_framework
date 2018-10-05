@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlVSRz",
+      "date": "1482515768",
+      "viewed": 332,
+      "name": "starry night",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "stars",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\n\tO = texture(iChannel0, U / iResolution.xy);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define rnd(U) fract(1e5*sin(dot(U,vec2(1,77.321))))\n\n#define T(i,j) texture(iChannel0, ( U +vec2(i,j) ) / iResolution.xy);\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n\tO = .95* T(0,1);\n    \n    if (rnd(U-9.*iTime)>.9992) O++;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

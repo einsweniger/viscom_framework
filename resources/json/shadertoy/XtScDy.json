@@ -1,0 +1,120 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtScDy",
+      "date": "1509967191",
+      "viewed": 157,
+      "name": "HO_raymarch",
+      "username": "hiogawa",
+      "description": "Nothing fancy. Basic raymarch example with basic interaction.\nScene and geometry's signed distance field are from https://github.com/bkaradzic/bgfx/tree/master/examples/03-raymarch",
+      "likes": 0,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "raymarch"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = texelFetch(iChannel0, ivec2(fragCoord), 0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Raymarch geometries\n\n#define M_PI 3.14\n\n// Fetch state from Buffer B (even code is from Buf B)\n#define MOUSE_POS_COORD vec2(1.0, 3.0)\n#define CAMERA_LOOK_AT_POS_COORD vec2(1.0, 4.0)\n#define CAMERA_PAN_COORD vec2(1.0, 5.0)\n\nvec2 mouse_pos_init = vec2(0.0, 0.0);\nvec3 camera_look_at_pos_init = vec3(0.0, 0.0, 0.0);\nvec2 camera_pan_init = vec2(-0.3, -0.1); // azimuth, altitude\n\nvec2 GetMousePos()\n{\n    return mix(mouse_pos_init, texelFetch(iChannel1, ivec2(MOUSE_POS_COORD), 0).xy,\n               step(1.0, float(iFrame)));\n}\n\nvec3 GetCameraLookAtPos()\n{\n    return mix(camera_look_at_pos_init, texelFetch(iChannel1, ivec2(CAMERA_LOOK_AT_POS_COORD), 0).xyz,\n               step(1.0, float(iFrame)));    \n}\n\nvec2 GetCameraPan()\n{\n    return mix(camera_pan_init, texelFetch(iChannel1, ivec2(CAMERA_PAN_COORD), 0).xy,\n               step(1.0, float(iFrame)));\n}\n\nmat3 GetCameraRot()\n{\n    vec2 p = GetCameraPan();\n    mat3 mtrx = mat3(1.0, 0.0, 0.0,\n                     0.0, 1.0, 0.0,\n                     0.0, 0.0, 1.0);\n    mtrx = mtrx * mat3(cos(p.x),  sin(p.x), 0.0,\n                       -sin(p.x), cos(p.x),  0.0,\n                       0.0,      0.0,       1.0);\n    mtrx = mtrx * mat3(1.0,     0.0,        0.0,\n                       0.0, cos(p.y), -sin(p.y),\n                       0.0, sin(p.y),  cos(p.y));\n\n    return mtrx;\n}\n\nfloat camera_look_distance = 10.0;\n\nvec3 GetCameraPos()\n{\n    vec2 p = GetCameraPan();\n    mat3 mtrx = GetCameraRot();\n    return mtrx * vec3(0.0, camera_look_distance, 0.0) + GetCameraLookAtPos();\n}\n\n\n// Basic geometry's signed distance field\n\nfloat sdSphere(vec3 _pos, float _radius)\n{\n\treturn length(_pos) - _radius;\n}\n\n\nfloat udRoundBox(vec3 _pos, vec3 _extents, float r)\n{\n\treturn length(max(abs(_pos) - _extents, 0.0) ) - r;\n}\n\n\n// Scene definition\n\nfloat sceneDist(vec3 _pos)\n{\n\tfloat d1 = udRoundBox(_pos, vec3(2.5, 2.5, 2.5), 0.5);\n\tfloat d2 = sdSphere(_pos + vec3( 4.0, 0.0, 0.0), 1.0);\n\tfloat d3 = sdSphere(_pos + vec3(-4.0, 0.0, 0.0), 1.0);\n\tfloat d4 = sdSphere(_pos + vec3( 0.0, 4.0, 0.0), 1.0);\n\tfloat d5 = sdSphere(_pos + vec3( 0.0,-4.0, 0.0), 1.0);\n\tfloat d6 = sdSphere(_pos + vec3( 0.0, 0.0, 4.0), 1.0);\n\tfloat d7 = sdSphere(_pos + vec3( 0.0, 0.0,-4.0), 1.0);\n\tfloat dist = min(min(min(min(min(min(d1, d2), d3), d4), d5), d6), d7);\n\treturn dist;\n}\n\n\n// Scene geometry distance tracing\n\nfloat trace(vec3 _ray, vec3 _dir, float _maxd)\n{\n\tfloat tt = 0.0;\n\tfloat epsilon = 0.001;\n\n\tfor (int ii = 0; ii < 64; ii++)\n\t{\n\t\tfloat dist = sceneDist(_ray + _dir*tt);\n\t\tif (dist > epsilon)\n\t\t{\n\t\t\ttt += dist;\n\t\t}\n\t}\n\treturn tt < _maxd ? tt : 0.0;\n}\n\nvec3 calcNormal(vec3 _pos)\n{\n\tconst vec2 delta = vec2(0.002, 0.0);\n\tfloat nx = sceneDist(_pos + delta.xyy) - sceneDist(_pos - delta.xyy);\n\tfloat ny = sceneDist(_pos + delta.yxy) - sceneDist(_pos - delta.yxy);\n\tfloat nz = sceneDist(_pos + delta.yyx) - sceneDist(_pos - delta.yyx);\n\treturn normalize(vec3(nx, ny, nz) );\n}\n\n\n// Main\n\nfloat fov = M_PI / 2.0;\nvec3 bg_color = vec3(0.3, 0.3, 0.3);\nvec3 base_color = vec3(0.0, 1.0, 1.0);\nvec3 light_dir = normalize(vec3(1.0, -1.0, -1.0));\nvec3 light_color = vec3(1.0, 1.0, 1.0);\nvec3 ambient_light = vec3(0.1, 0.1, 0.1);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // ray (camera) setup\n    float aspect_ratio = iResolution.x / iResolution.y;\n    vec2 uv = fragCoord.xy / iResolution.xy * 2.0 - 1.0;\n    uv.x *= aspect_ratio;\n    vec3 ray_origin_pos = GetCameraPos();\n    float screen_depth = aspect_ratio / 2.0 / sin(fov / 2.0);\n    vec3 ray_dir = normalize(vec3(uv.x, -screen_depth, uv.y));\n    ray_dir = GetCameraRot() * ray_dir;\n    \n    // ray trace geometry\n    float dist = trace(ray_origin_pos, ray_dir, 20.0);\n    \n    if (dist > 0.01) {\n        \n        // Simple lighting\n        vec3 hit_pos = ray_origin_pos + ray_dir * dist;\n        vec3 normal = calcNormal(hit_pos);\n        vec3 reflected_light_dir = reflect(light_dir, normal);\n        \n        float NoL = clamp(dot(normal, -light_dir), 0.0, 1.0);\n        float NoH = clamp(dot(normal, -normalize(light_dir + ray_dir)), 0.0, 1.0);\n\n        vec3 diffuse_lambert = light_color * base_color * NoL;\n        vec3 specular_blinn = light_color * pow(NoH, 16.0);\n        \n        fragColor = vec4(diffuse_lambert +\n                         specular_blinn +\n                         ambient_light * base_color,\n                         1.0);\n    } else {\n        fragColor = vec4(bg_color, 1.0);\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "// Handle interaction state (rotation, ..)\n\n#define M_PI 3.14\n\n#define MOUSE_POS_COORD vec2(1.0, 3.0)\n#define CAMERA_LOOK_AT_POS_COORD vec2(1.0, 4.0)\n#define CAMERA_PAN_COORD vec2(1.0, 5.0)\n\nvec2 mouse_pos_init = vec2(0.0, 0.0);\nvec3 camera_look_at_pos_init = vec3(0.0, 0.0, 0.0);\nvec2 camera_pan_init = vec2(-0.3, -0.1); // azimuth, altitude\n\nvec2 GetMousePos()\n{\n    return mix(mouse_pos_init, texelFetch(iChannel1, ivec2(MOUSE_POS_COORD), 0).xy,\n               step(1.0, float(iFrame)));\n}\n\nvec3 GetCameraLookAtPos()\n{\n    return mix(camera_look_at_pos_init, texelFetch(iChannel1, ivec2(CAMERA_LOOK_AT_POS_COORD), 0).xyz,\n               step(1.0, float(iFrame)));    \n}\n\nvec2 GetCameraPan()\n{\n    return mix(camera_pan_init, texelFetch(iChannel1, ivec2(CAMERA_PAN_COORD), 0).xy,\n               step(1.0, float(iFrame)));\n}\n\nmat3 GetCameraRot()\n{\n    vec2 p = GetCameraPan();\n    mat3 mtrx = mat3(1.0, 0.0, 0.0,\n                     0.0, 1.0, 0.0,\n                     0.0, 0.0, 1.0);\n    mtrx = mtrx * mat3(cos(p.x), -sin(p.x), 0.0,\n                       sin(p.x), cos(p.x),  0.0,\n                       0.0,      0.0,       1.0);\n    mtrx = mtrx * mat3(1.0,     0.0,        0.0,\n                       0.0, cos(p.y), -sin(p.y),\n                       0.0, sin(p.y),  cos(p.y));\n\n    return mtrx;\n}\n\nfloat camera_look_distance = 10.0;\n\nvec3 GetCameraPos()\n{\n    vec2 p = GetCameraPan();\n    mat3 mtrx = GetCameraRot();\n    return mtrx * vec3(0.0, camera_look_distance, 0.0) + GetCameraLookAtPos();\n}\n\nfloat mouse_sensitivity = 0.01;\nfloat keyboard_sensitivity = 0.1;\n\n// key code list from https://www.shadertoy.com/view/ldyGzW\nconst int Key_A = 65; const int Key_B = 66; const int Key_C = 67; const int Key_D = 68; const int Key_E = 69;\nconst int Key_F = 70; const int Key_G = 71; const int Key_H = 72; const int Key_I = 73; const int Key_J = 74;\nconst int Key_K = 75; const int Key_L = 76; const int Key_M = 77; const int Key_N = 78; const int Key_O = 79;\nconst int Key_P = 80; const int Key_Q = 81; const int Key_R = 82; const int Key_S = 83; const int Key_T = 84;\nconst int Key_U = 85; const int Key_V = 86; const int Key_W = 87; const int Key_X = 88; const int Key_Y = 89;\nconst int Key_Z = 90;\nconst int Key_0 = 48; const int Key_1 = 49; const int Key_2 = 50; const int Key_3 = 51; const int Key_4 = 52;\nconst int Key_5 = 53; const int Key_6 = 54; const int Key_7 = 55; const int Key_8 = 56; const int Key_9 = 57;\nconst int Key_Space = 32;\n\n    \nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // get previous (or initial) states\n    vec2 mouse_pos = GetMousePos();\n    vec3 camera_look_at_pos = GetCameraLookAtPos();\n\tvec2 camera_pan = GetCameraPan();\n    \n    // handle mouse movement\n    if (iMouse.z >= 1.0) {\n        if (mouse_pos.x >= 1.0 && mouse_pos.y >= 1.0) {\n            vec2 movement = (iMouse.xy - mouse_pos) * mouse_sensitivity;\n            camera_pan += movement;\n        }\n        mouse_pos = iMouse.xy;\n    } else {\n        mouse_pos = vec2(0.0, 0.0);\n    }\n    \n    // handle keyboard input (w, a, s, d)\n    if (texelFetch(iChannel2, ivec2(Key_W, 0), 0).x > 0.0) {\n       \tcamera_look_at_pos.y -= keyboard_sensitivity;\n    }\n    if (texelFetch(iChannel2, ivec2(Key_A, 0), 0).x > 0.0) {\n       \tcamera_look_at_pos.x -= keyboard_sensitivity;\n    }\n    if (texelFetch(iChannel2, ivec2(Key_S, 0), 0).x > 0.0) {\n       \tcamera_look_at_pos.y += keyboard_sensitivity;\n    }\n    if (texelFetch(iChannel2, ivec2(Key_D, 0), 0).x > 0.0) {\n       \tcamera_look_at_pos.x += keyboard_sensitivity;\n    }\n\n    // save states\n    fragCoord = vec2(ivec2(fragCoord));\n    fragColor.xy = mix(mouse_pos, fragColor.xy, step(1.0, distance(fragCoord, MOUSE_POS_COORD)));\n    fragColor.xyz = mix(camera_look_at_pos, fragColor.xyz, step(1.0, distance(fragCoord, CAMERA_LOOK_AT_POS_COORD)));\n    fragColor.xy = mix(camera_pan, fragColor.xy, step(1.0, distance(fragCoord, CAMERA_PAN_COORD)));\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

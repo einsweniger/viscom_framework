@@ -1,0 +1,56 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtlfWS",
+      "date": "1513146649",
+      "viewed": 159,
+      "name": "Black & White (Basic)",
+      "username": "lakhdeep92",
+      "description": "Black & White Shader .",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "film",
+        "blackwhite",
+        "white",
+        "black",
+        "oldfilm",
+        "whiteblack",
+        "grayimage"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\t//fragColor = vec4(uv,0.5+0.5*sin(iTime),1.0);\n    \n    vec4 color = texture(iChannel0, uv);\n\n    float avg = (color.r + color.g + color.b)/3.0 ;\n        \n    color.r  = avg ;\n    color.g  = avg ;\n    color.b  = avg ;\n    \n    fragColor = color;\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdBfDR",
+      "date": "1499986498",
+      "viewed": 187,
+      "name": "[SH17A] Particles 2",
+      "username": "aiekick",
+      "description": "reduced version of [url=https://www.shadertoy.com/view/XsV3RD]2D Radial Repeat Particles 277c[/url]",
+      "likes": 4,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "particles",
+        "2",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, vec2 g )\n{\n\tf = texelFetch(iChannel0, ivec2(g),0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, vec2 g )\n{\n    f.xyz = iResolution;\n    vec2 v = (g+g-f.xy)/f.y, r;\n    f *= texture(iChannel0, g/f.xy) / length(f);\n    r.x = iTime;\n    r.y = length(v) * 5. + sin(r.x*.5) * 9.;\n    r.x += atan(v.x, v.y) * 5., \n    f += .001/dot(\n        r = fract(r)-.5,\n        r);\n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlXfDf",
+      "date": "1513628602",
+      "viewed": 255,
+      "name": "bug: fract(mouseX) = .5 sometime",
+      "username": "FabriceNeyret2",
+      "description": "Shadertoy bug.\nTry various browser window size, even without changing render size 640x480,\nand click in the window.\n- Yellow: all good. (bottom: ref yellow)\n- Green: fract(mouseX) = .5  <<<<\n- Orange:  fract(mouseY) = .5\n- Dark Yellow: fract(both) = .5",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "test",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n\t\n\tO = vec4(1.-fract(iMouse.xy),0,0);\n    if (U.y<30.) O = vec4(1,1,0,0);      // reference yellow\n\t//O = vec4(1.-fract(U),0,0);\n    //O = vec4(U-.5 == floor(iMouse.xy));\n    //O = vec4(fract(iMouse.xy)*1e3,0,0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

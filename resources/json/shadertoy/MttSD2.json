@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MttSD2",
+      "date": "1481727630",
+      "viewed": 157,
+      "name": "Soleil et Mer",
+      "username": "Boduan",
+      "description": "La mer et le soleil qui passe au-dessus",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "programmationpierre"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 color, in vec2 pixCoords) {\n    \n    color = vec4(0.4, 0.4, 1.0, 1.0);\n    \n    float SunX = iResolution.x /10.0;\n    float SunY = iResolution.y /10.0;\n        \n    float distanceToSun = sqrt(pow(SunX - pixCoords.x, 2.0) + pow(SunY - pixCoords.y, 2.0));\n    float rayon = iResolution.x/9.0;\n    \n                               \n    if (distanceToSun < rayon ) {\n        color = vec4(1.0, 1.0, 0.0, 1.0);\n        if (pixCoords.y <= iResolution.y/4.0) {\n        color = vec4(0.0, 0.0, 1.0, 1.0);\n    }\n    }\n         \n    \n    else if (pixCoords.y <= iResolution.y/4.0) {\n        color = vec4(0.0, 0.0, 1.0, 1.0);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsSfzt",
+      "date": "1501662415",
+      "viewed": 310,
+      "name": "font texture",
+      "username": "FabriceNeyret2",
+      "description": "Because I often need to check it to get the codes. \nReminder: 16x16 blocks of 64*64. \nA pretty short access code here: [url]https://www.shadertoy.com/view/MdSfzt[/url]",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fonts"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,U) O = texture(iChannel0, U/iResolution.xy)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

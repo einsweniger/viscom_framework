@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdtyRs",
+      "date": "1519839622",
+      "viewed": 266,
+      "name": " Tiny Clouds (247 chars)",
+      "username": "FabriceNeyret2",
+      "description": "re-golfing [url]https://shadertoy.com/view/lsBfDz[/url] that was 280 chars reinterpretation of iq's iconic clouds shader [url]https://www.shadertoy.com/view/XslGRr[/url].\n\nusing 3D texture, #define, etc.   -33 chars.   201 chars without color & jittering.",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "clouds",
+        "2tweets",
+        "short",
+        "volumerendering",
+        "golfing"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 40,
+            "src": "/media/a/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+            "ctype": "volume",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// re-golfing 280 chars https://shadertoy.com/view/lsBfDz\n\n\n#define T texture( iChannel0, f*p.xzw/3. ).y / ( f += f )\n\n#define mainImage(O,U)                                             \\\n    vec4 p, d = vec4(.8,0,U/iResolution.y-.8),c = vec4(.6,.7,d);   \\\n    O = c - d.w;                                                   \\\n    for( float f, t = 2e2+sin(dot(U,U)) ; --t > 0. ; p = .05*t*d ) \\\n        p.xz += iTime,                                             \\\n        f = .5, f = T+T+T+T -p.w-1. ,                              \\\n    \tf > 0. ? O += ( 1.-O - f*c.zyxw ) *f*.4 : O",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

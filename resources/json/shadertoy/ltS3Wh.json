@@ -1,0 +1,30 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltS3Wh",
+      "date": "1508867626",
+      "viewed": 197,
+      "name": "Simple Stereogram",
+      "username": "Glyph",
+      "description": "A very simple stereogram. Cross your eyes until the two sets of circles overlap. They should appear at different depths with the middle circle oscillating closer and farther from the screen. ",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "stereo"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "vec3 odot(vec2 uv, vec2 t,float osc){\n\treturn( vec3(smoothstep(.1*osc,.15*osc ,length(uv-t))));\n}\n\nvec3 ring(vec2 uv, vec2 t,float r, float w){\n\treturn(vec3(step(r,length(uv-t)) + step(length(uv-t),r-w)));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float ar = iResolution.y/iResolution.x;\n\tvec2 uv = fragCoord.xy/iResolution.xy;\n\tvec2 t = iMouse.xy/iResolution.xy;\n\tvec2 sqt = vec2(t.x, t.y *ar);\n\tvec2\tsquv = vec2(uv.x,uv.y*ar);\n\tfloat osc = abs(cos(iTime*.8));\n\tfloat oss = abs(sin(iTime*.8));\n\t//vec3 col = mix(odot(squv,sqt,osc),odot(squv,vec2(.5,.5*ar),osc),0.5);\n\tfloat boff =  .08;\n\tvec2 cent = vec2(.5, .5*ar);\n\tvec3 col = ring(squv-vec2(boff,.0),cent,.06,.004) * ring(squv+vec2(boff,0.0),cent,.06,.004);\n\tcol *= ring(squv-vec2(boff-.002*cos(iTime*.8),.0),cent,.03,.002) *\n    \tring(squv+vec2(boff-.002*cos(iTime*.8),0.0),cent,.03,.002);\n\tcol *= ring(squv-vec2(boff-.001,.0),cent,.04,.004) * ring(squv+vec2(boff-.003,0.0),cent,.04,.004);\n\tfragColor = vec4( col, 1.0 );\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

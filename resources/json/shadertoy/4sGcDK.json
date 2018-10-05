@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sGcDK",
+      "date": "1523342461",
+      "viewed": 104,
+      "name": "Still not so equal",
+      "username": "mla",
+      "description": "Derived from [url]https://www.shadertoy.com/view/XdSGDt[/url]\n\nExtra bits appearing in computations on some platforms - if the line isn't white, something odd is going on.\n\nOn my laptop, line is a mix of red, green, yellow and blue. YMMV.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "bug",
+        "weird"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// A weird thing: take two values, check if they are equal, \n// if so, multiply by a common constant and take the \n// difference, which we would expect to be 0, but isn't\n// (at least on some platforms). Difference is small, just\n// a single ULP maybe (see last line).\n    \n// Possible explanation is the calculation being done with\n// some extra precision, eg. an extra guard bit, which is\n// then sometimes kept and sometimes discarded in later\n// computation.\n\n// On some platforms, including lines 21 & 22 \"fixes\" problem.\n\n// Showing problem:\n// Firefox, Chrome, Ubuntu 16.04, Acer, Intel Graphics\n// Firefox, Chrome, Edge, Windows 10, Lenovo, Intel Graphics\n//\n// Not showing problem:\n// Firefox, Chrome, Ubuntu 18.04, Lenovo, Intel Graphics\n// Samsung A5 2017, latest Android.\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n\tfloat x = fragCoord.x-0.5;\n    float y = fragCoord.y-0.5;\n    fragColor = vec4(0);\n\tif (x == y){\n\t\tx *= 1.0001;\n        y *= 1.0001;\n#if 0\n        float z = x*y;\n        if (z == 3456.0) fragColor.xyz = vec3(1,1,0);\n#endif\n        float k = abs(x-y);\n        if (k == 0.0) fragColor.xyz = vec3(1);\n        if (k > 1e-6) fragColor.xyz = vec3(1,0,0);\n        if (k > 2e-6) fragColor.xyz = vec3(0,1,0);\n        if (k > 4e-6) fragColor.xyz = vec3(0,0,1);\n        if (k != 0.0 && x + 2.0*k == x) fragColor.xyz = vec3(1,1,0);\n   \t}\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

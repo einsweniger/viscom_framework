@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lljfzW",
+      "date": "1514907237",
+      "viewed": 204,
+      "name": "Sun and Moon",
+      "username": "thedev1l1",
+      "description": "Sun and Moon",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "simplelearning2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float lastDegree;\n\nconst vec3 colorSun = vec3(1,1,0);\nconst vec3 colorMoon = vec3(0.8,0.8,1);\n\nfloat Circle(vec2 uv, vec2 p , float r, float blur)\n{\n    float d = length(uv - p);\n    float c = smoothstep(r, r-blur, d);\n    return c;\n}\n\nvec3 ColorByDegree(float degree)\n{\n    float d = float(int(degree + 180.0) % 360);\n    d -= 180.0;\n    if(d < 0.0) d = - d;\n    return clamp(vec3(d / 180.0), colorSun, colorMoon); \n}\n\nvec3 timerCircle(float degreePerSec, vec2 uv, vec2 p , float r, float blur)\n{\n    float degree = iTime * degreePerSec;\n    return Circle(uv, vec2(p.x + sin(radians(degree)) * 0.5, p.y + (cos(radians(degree)) * 0.5) - 0.0), r ,blur) * ColorByDegree(degree);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv -= .5;\n    uv.x *= iResolution.x / iResolution.y;\n    \n\tfragColor = vec4(timerCircle(30.0,uv, vec2(0,0) , .4, .05) ,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

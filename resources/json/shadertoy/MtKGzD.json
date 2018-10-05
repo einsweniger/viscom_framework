@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtKGzD",
+      "date": "1473669337",
+      "viewed": 362,
+      "name": "diagonal illusion",
+      "username": "FabriceNeyret2",
+      "description": "There is indeed no white line at diagonals, as show by the isovalue in red.",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "illusion",
+        "2tweets",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    U = U*.6/iResolution.y - .27;\n    U = fract( U*mat2(1,-1,1,1) ) -.5;\n    O +=  8.*( min( min(abs(U.x),abs(U.y)) , \n                                    min(abs(U.x+U.y),abs(U.x-U.y))*.7 )) -O ;\n\t\n    // draw isovalues in red.\n    O +=  .2* step(abs(.5+.49*sin(iDate.w)-O.x) , .02 ) *vec4(1,-1,-1,1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

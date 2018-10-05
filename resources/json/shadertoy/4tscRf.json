@@ -1,0 +1,47 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tscRf",
+      "date": "1505800524",
+      "viewed": 461,
+      "name": "Compositing Digital Images",
+      "username": "ollj",
+      "description": "mouse moves one circle.\nThe thing that opengl is known to suck at, transparency: alpha-composition , despite being  solved in 1984\nhttps://en.wikipedia.org/wiki/Alpha_compositing\nfor\nhttps://www.shadertoy.com/view/XtsyzX",
+      "likes": 9,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "blur",
+        "compositing",
+        "ssaa",
+        "alpha",
+        "composite",
+        "bound",
+        "compositioning",
+        "champlaincollege",
+        "clippig",
+        "porter",
+        "duff",
+        "porterduff",
+        "compose"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\nGENERAL alpha composition:\n based on [Poeter-Duff], \"Compositing Digital Images\", siggraph 1984;\n https://doc.qt.io/archives/qq/qq17-compositionmodes.html\n https://en.wikipedia.org/wiki/Alpha_compositing\n https://keithp.com/~keithp/porterduff/\n\nThis generalizes a lot. a simpler ease-in special fork is:\n iq:   https://www.shadertoy.com/view/Xlsyzf\nThis explores its own generalized permuting possibility space, poorly;\n self: https://www.shadertoy.com/view/4tscRf\n*/\n\n//modes:\n\n//mix the circles with Xor\n//comment out to do the overlay thing\n#define pdXor\n//the overlay thing defeats other things.\n//#define pdOver\n//spraypaint on top of painted and cut out paper.\n//#define pdAtop\n\n//turn circles into rings\n#define rings\n\n//show invisible pink unicors, arranged in a checkerboard tiling.\n#define ExplicitBackground\n\n//gritty  reboot please? have some inverse do_gamma\n#define do_gritty\n//my eyes, the googles do nothing!\n#define do_gamma\n\n//View.Zoom\n#define ViewZoom 2.\n//View.blurryness of screen-space-anti-aliasing \n#define SSAAblur 99.*u5(cos(iTime*1.61))*ViewZoom\n//[*2.] nicely  precision loss of Dfdx() Dfdy(), half screenspace respolution.\n//view Frame==2d camera\n#define fra(u) (u-.5*iResolution.xy)*ViewZoom/iResolution.y\n\n//static.lbrary:\n#define dd(a) dot(a,a)\n#define u5(a) ((a)*.5+.5)\n#define u2(a) ((a)*2.-1.)\n#define ss(a,u) smoothstep(a,-a,u)\n#define v0 float\n#define v1 vec2\n#define v2 vec3\n#define v3 vec4\nv0 suv(v3 a){return dot(v3(1),a);}v0 suv(v2 a){return dot(v2(1),a);}\nv0 suv(v1 a){return a.x+a.y;}//sum of vector\nv0 mav(v1 a){return max(a.y,a.x);}\nv0 mav(v2 a){return max(a.z,mav(a.xy));}\nv0 mav(v3 a){return max(mav(a.zw),mav(a.xy));}\n#define miv(a) -mav(-a)\n\nfloat checkerBool2(vec2 h){h=fract(h);\n bvec2 b=greaterThan(h,vec2(.5));return float(b.x==b.y);}\n//https://www.shadertoy.com/view/Mty3z1\n\n//general [Poeter-Duff] \"Compositing Digital Images\" siggraph 1984;\n// https://en.wikipedia.org/wiki/Alpha_compositing\n// https://doc.qt.io/archives/qq/qq17-compositionmodes.html    \n\n//#define pdC(a,b,c,d,m,f) mix(a,b,m.w)*c*d*f+pdCx(a,b,c,d,m)\nvec3 pdC(vec3 a, vec3 b, float c, float d,vec4 m,float f){\n return mix(a,b,m.w)*f*c*d\n  +b*m.z*(1.-c)\n  +a*m.y*(1.-d);}//many contextual simplifications possible.\n#define pdA(c,d,m) suv(m*vec3(c*d,c*(1.-d),d*(1.-c)))\n//#define pdA(c,d,m) m.x*c*d+m.y*c*(1.-d)+m.z*d*(1.-c)\nvec4 pd(vec4 a,vec4 b,vec4 m,float f){\n vec4 r=vec4(pdC(a.rgb,b.rgb,a.w,b.w,m,f),1);//ceneral case color\n r.w   =pdA(a.w,b.w,m.rgb);//general case alpha is sometimes neglible.\n return r;}\n//pd() above is a  generalized function that contains\n//   sOver(vec4 a,vec4 b){return a*a.w+b*b.w*(1.-a.w);}\n//                                      with the parameters;\n//                                  ...,vec4(1,1,1,0),1.);}\nvec4 sOver(vec4 a,vec4 b){return pd(a,b,vec4(1,1,1,0),1.);}\nvec4 sAtop(vec4 a,vec4 b){return pd(a,b,vec4(1,0,1,0),1.);}\nvec4 sIn  (vec4 a,vec4 b){return pd(a,b,vec4(1,0,0,1),1.);}\nvec4 sXor (vec4 a,vec4 b){return pd(a,b,vec4(0,1,1,1),0.);}\nvec4 sOut (vec4 a,vec4 b){return pd(a,b,vec4(0,0,1,0),0.);}\nvec4 sCut (vec4 a,vec4 b){return pd(a,b,vec4(0,0,1,1),0.);}\n//sCut() seems to be novel and useful, similar to sOut?\n\n/*\n Generaliging thoughts:\n Style is kept general, with #define variants, \n  Special cases reduce A LOT: https://www.shadertoy.com/view/Xlsyzf\n\n sXor, sOut, sCut are generally simpler,\n  if(last parameter==0.)first parameter is irrelevant.\n   for multiplying a linear interpolation (first parameter); mix()*.0+...;\n   Is Likely worth making it a subroutine of pdC withut the mix();\n if(any(equals(vec2(a,w,b.w),vec2(0)) first parameter is irrelevant.\n  This is then the same shortcut as for sXor,sOur,sCut, within pd()\n  This can be a useful [Bounding volume] inside of pd(), \n  to paint shapes faster on older hardware.\n \n #define pdC0(a,b,c,d,m) m.y*a*(1.-d)+m.z*b*(1.-c)\n vec3 pdC0(vec3 a,vec3 b,float c,float d){return a*d+b*c;}\n\n pow(2,5) address space for 5 parameters for 6 functions \n  seems wastefull.\n There is either a lot of hidden nonsense or hidden symmetry.\n It appears there is a ot of mirror symmetry to be reduced here!\n Because all the permutations that I tested are rather useless.\n Or maybe they are just black due to complex number space?\n Simpler symmetry reduces to only 6 above special cases \n  with more utility. I need to sleep over this.\n\n//vec4 sTest (vec4 a,vec4 b){return pd(a,b,vec4(1,0,0,0),0.);}\n\n Screw all the \"destination*\" functions though.,\n  These are are all identical to \"source*\" with swapped inputs!.\n*/\n\nvoid mainImage( out vec4 O, in vec2 U ){\n vec2 u=fra(U);//frame uv\n vec2 m=fra(iMouse.xy);//frame mouse\n u.x-=.5;m.x-=.5;//adjust center\n if(iMouse.z<.0)m=-vec2(.5);//while(mouse up) simulate mouse down.\n    \n vec2 s=-vec2(1.,sin(iTime));//vector moves over time.\n vec3 e=vec3(dd(u)\n            ,dd(u-m)\n            ,dd(u-s));//eucliden distance projection.\n e=sqrt(e);//delayed square root\n e-=.5;//circle radius\n #ifdef rings\n e=abs(e)-.1;//turn cirlce into ring\n #endif\n #ifdef pdAtop\n  e-=.2;//more surface to paint on\n #endif\n float SSAA=SSAAblur/min(iResolution.x,iResolution.y);//screen-space-anti-aliasing\n e=ss(SSAA,e);//smoothstep\n //e=clamp(e,.0,1.);\n vec3 g=vec3(.96,.25,.05);//color ramp equals cheap colorblind mode.\n vec4 c0=vec4(g    ,e.x);\n vec4 c1=vec4(g.yzx,e.y);\n vec4 c2=vec4(g.zxy,e.z);//some colors with e.rgb as alpha channel.\n #ifdef do_gritty\n c0.rgb=pow(c0.rgb,vec3(2.2));\n c1.rgb=pow(c1.rgb,vec3(2.2));\n c2.rgb=pow(c2.rgb,vec3(2.2));\n #endif\n      \n c0.rgb*=c0.w;\n c1.rgb*=c1.w;//general form scales .rgb by alpha,\n c2.rgb*=c2.w;//... this acoids some division by 0 cases\n    /**/\n #ifdef pdXor\n O=sXor (c0,c1);O=sXor (O,c2);    \n #endif\n #ifdef pdAtop\n O=sAtop(c0,c1);O=sAtop(O,c2);\n #endif\n #ifdef pdOver\n O=sOver(c0,c1);O=sOver(O,c2);\n #endif\n\n //O=sTest(c0,c1);O=sTest(O,c2);\n    \n vec4 bg=vec4(vec3((checkerBool2(u)*.2+.7)),u5(u.y));\n #ifdef do_gamma\n  bg.rgb=pow(bg.rgb,vec3(2.2));\n #endif\n #ifdef ExplicitBackground\n  \n  if(O.w!=0.)O.rgb/=O.w;\n    O=sAtop(O,bg);//optional explicit background\n #endif\n #ifdef do_gamma   \n  O.rgb=pow(O.rgb,vec3(1./2.2));\n #endif\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

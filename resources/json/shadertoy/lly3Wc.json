@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lly3Wc",
+      "date": "1477097538",
+      "viewed": 236,
+      "name": "My Noise",
+      "username": "VoidChicken",
+      "description": "A noise generation algorithm I made. Use the \"noise\" function for whatever you want. (Please put a link back here).",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "noise",
+        "chicken"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Creative Commons 4.0 Attribution License VoidChicken\nfloat noise (vec2 v) {\n    v=fract(v);\n    v+=.1;\n    v*=.9;\n    v=fract(fract(v)-(v.x)/342.);\n    \n    float vc = abs(v*tan(v)).x+abs(v*tan(v)).y;\n    v*=12359352.2423643563465;\n    \n    float v2 = fract((vc*3.14))*512.0;\n    float v3 = fract(cos(tan(v.x-v.y)*4.*(v.x+v.y)));\n    v*=vec2(5., -5.);\n    v=mod(v, 12359352.2423643563465);\n    float v45 = fract(cos(tan(v.x-v.y)*4.*(v.x+v.y)))/fract((vc*3.14))*512.0;\n    float fr = v2/v3<1.?v45:fract(cos(tan(v.x-v.y)*4.*(v.x+v.y))*fract((vc*3.14))*512.0);\n    return sqrt(fr);\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord / iResolution.xy;\n\tfragColor = vec4(noise(uv/exp2(iTime*2.)));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

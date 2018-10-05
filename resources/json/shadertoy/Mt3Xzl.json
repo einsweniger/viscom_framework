@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mt3Xzl",
+      "date": "1481112850",
+      "viewed": 222,
+      "name": "New text shader",
+      "username": "KylBlz",
+      "description": "Just screwing around with the new texture. Designed while thinking about the old state based OpenGL API.",
+      "likes": 10,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "text"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Simple text example. Thanks Otavio Good and team Beautypi\n//It'd be less effort and space to reference letters in 1D (y*16+x) but oh well, the long part is the #define's anyway\n\n//////////////////////////////////////////// Ignore all this ////////////////////////////////////////////\nvec3 _col, _cur, _sz, _rto;\nfloat _italic = 0., _underline = 0., _strike;\n//upper case\nvec2 cA = vec2(1., 11.), cB = vec2(2., 11.), cC = vec2(3., 11.), cD = vec2(4., 11.), cE = vec2(5., 11.), cF = vec2(6., 11.),\n\t cG = vec2(7., 11.), cH = vec2(8., 11.), cI = vec2(9., 11.), cJ = vec2(10., 11.),cK = vec2(11., 11.),cL = vec2(12., 11.),\n\t cM = vec2(13., 11.),cN = vec2(14., 11.),cO = vec2(15., 11.),cP = vec2(0., 10.), cQ = vec2(1., 10.), cR = vec2(2., 10.),\n\t cS = vec2(3., 10.), cT = vec2(4., 10.), cU = vec2(5., 10.), cV = vec2(6., 10.), cW = vec2(7., 10.), cX = vec2(8., 10.),\n\t cY = vec2(9., 10.), cZ = vec2(10., 10.),\n//lower case\n\t ca = vec2(1., 9.), cb = vec2(2., 9.), cc = vec2(3., 9.), cd = vec2(4., 9.), ce = vec2(5., 9.), cf = vec2(6., 9.),\n\t cg = vec2(7., 9.), ch = vec2(8., 9.), ci = vec2(9., 9.), cj = vec2(10., 9.),ck = vec2(11., 9.),cl = vec2(12., 9.),\n\t cm = vec2(13., 9.),cn = vec2(14., 9.),co = vec2(15., 9.),cp = vec2(0., 8.), cq = vec2(1., 8.), cr = vec2(2., 8.),\n\t cs = vec2(3., 8.), ct = vec2(4., 8.), cu = vec2(5., 8.), cv = vec2(6., 8.), cw = vec2(7., 8.), cx = vec2(8., 8.),\n\t cy = vec2(9., 8.), cz = vec2(10., 8.),\n//special\n\t ccrlf = vec2(0., 5.), csp = vec2(0., 13.), ctab = vec2(15., 8.);\nbool inRange(vec2 uv, vec2 mn, vec2 mx) { return all(greaterThan(uv, mn)) && all(lessThan(uv, mx)); }\nfloat inRange(float mn, float val, float mx) { return step(mn, val) * step(val, mx); }\n//could this get better?\nfloat pl(vec2 ltr, vec2 uv) {\n    if (ltr == ccrlf) _cur.xy = vec2(_cur.z, _cur.y-_sz.y); else if (ltr == ctab) _cur.x += _sz.x*2.; else _cur.x += _sz.z;\n    if (inRange(uv, _cur.xy, _cur.xy+_sz.xy)) { \n        vec2 dlta = uv-_cur.xy, smp = (((dlta-_italic*vec2(.16*dlta.y, 0.))/_sz.xy)+ltr)*_rto.xy; float dysy = dlta.y/_sz.y;\n        return 1. - (texture(iChannel0, smp).r + inRange(.1, dysy, .15) * _underline + inRange(.45, dysy, .5) * _strike);\n    }   return 1.;\n}\n/*yes, thanks to Fabrice\nvec4 char(vec2 pos, float c) { // c = ascii code\n    pos = clamp(pos,0.,1.);\n\treturn texture( iChannel0, pos/16. + fract( floor(vec2(c, 15.999-c/16.)) / 16. ) );\n}*/\n\n/////////////////////////////////////////// Use all these ///////////////////////////////////////////\n#define _a res *= pl(ca, uv);\n#define _b res *= pl(cb, uv);\n#define _c res *= pl(cc, uv);\n#define _d res *= pl(cd, uv);\n#define _e res *= pl(ce, uv);\n#define _f res *= pl(cf, uv);\n#define _g res *= pl(cg, uv);\n#define _h res *= pl(ch, uv);\n#define _i res *= pl(ci, uv);\n#define _j res *= pl(cj, uv);\n#define _k res *= pl(ck, uv);\n#define _l res *= pl(cl, uv);\n#define _m res *= pl(cm, uv);\n#define _n res *= pl(cn, uv);\n#define _o res *= pl(co, uv);\n#define _p res *= pl(cp, uv);\n#define _q res *= pl(cq, uv);\n#define _r res *= pl(cr, uv);\n#define _s res *= pl(cs, uv);\n#define _t res *= pl(ct, uv);\n#define _u res *= pl(cu, uv);\n#define _v res *= pl(cv, uv);\n#define _w res *= pl(cw, uv);\n#define _x res *= pl(cx, uv);\n#define _y res *= pl(cy, uv);\n#define _z res *= pl(cz, uv);\n//upper case\n#define _A res *= pl(cA, uv);\n#define _B res *= pl(cB, uv);\n#define _C res *= pl(cC, uv);\n#define _D res *= pl(cD, uv);\n#define _E res *= pl(cE, uv);\n#define _F res *= pl(cF, uv);\n#define _G res *= pl(cG, uv);\n#define _H res *= pl(cH, uv);\n#define _I res *= pl(cI, uv);\n#define _J res *= pl(cJ, uv);\n#define _K res *= pl(cK, uv);\n#define _L res *= pl(cL, uv);\n#define _M res *= pl(cM, uv);\n#define _N res *= pl(cN, uv);\n#define _O res *= pl(cO, uv);\n#define _P res *= pl(cP, uv);\n#define _Q res *= pl(cQ, uv);\n#define _R res *= pl(cR, uv);\n#define _S res *= pl(cS, uv);\n#define _T res *= pl(cT, uv);\n#define _U res *= pl(cU, uv);\n#define _V res *= pl(cV, uv);\n#define _W res *= pl(cW, uv);\n#define _X res *= pl(cX, uv);\n#define _Y res *= pl(cY, uv);\n#define _Z res *= pl(cZ, uv);\n//special\n#define _crlf res *= pl(ccrlf, uv);\n#define _sp   res *= pl(csp, uv);\n#define _tab  res *= pl(ctab, uv);\n\n/////////////////////////////////////////// Use all these ///////////////////////////////////////////\nvoid setCursor(vec2 cur) { _cur = vec3(cur.xyx); }\nvoid setColor(vec3 col) { _col = col; }\nvoid setSize(vec2 sz) { _sz = vec3(sz,sz.x*.5); _rto = vec3(1./16.); }\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0, uv)*vec4(.2, .1, .1, 1.);\n    \n    //this needs to exist\n    vec3 res = vec3(1.);\n    //this is all the options\n    setCursor(vec2(.2, .5));\n    setColor(vec3(0., .5, 1.));\n    setSize(vec2(1./8., 1./4.));\n    _italic = 0.; \t //range -1. - 1. (slant)\n    _underline = 0.; //range 0. - 1. (opacity)\n    _strike = 0.; \t //range 0. - 1. (opacity)\n    \n    //message:\n    _K _y _l _B _l _z\n    //end message\n    fragColor.rgb = mix(fragColor.rgb, _col, vec3(1.-res));\n    \n    //another message\n    res = vec3(1.);\n    setCursor(vec2(.1, .2));\n    setColor(vec3(1.));\n    setSize(vec2(1./16., 1./8.));\n    \n    _italic = -1.;\n    _underline = 1.;\n    _strike = 1.;\n    \n    _S _i _m _p _l _e\n    \n    _italic = -.5;\n    _underline = 1.;\n    _strike = 0.;\n    \n    _sp _s _t _a _t _e\n    \n\t_italic = .5;\n    _underline = 0.;\n    _strike = 0.;\n    \n    _sp _b _a _s _e _d\n    \n    _italic = 1.;\n    _underline = 0.;\n    _strike = 0.;\n    \n    _sp _t _e _x _t\n        \n    fragColor.rgb = mix(fragColor.rgb, _col, vec3(1.-res));\n    \n} //channel0 is new TEXTure\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

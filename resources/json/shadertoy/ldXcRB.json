@@ -1,0 +1,65 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldXcRB",
+      "date": "1488671108",
+      "viewed": 344,
+      "name": "Water Experiment 2",
+      "username": "Saltallica",
+      "description": "A water effect, made from someone else's water effect!",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "displacement",
+        "water"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const float waterSpeed = 0.1;\nconst float waterHeight = 0.02;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\t\n    vec2 offsetUV = uv * 0.5;\n\toffsetUV.y -= iTime * waterSpeed;\n    offsetUV.x += sin(iTime * 0.3) * 2.0 * waterSpeed + cos(iTime);\n    \n\t\n\tvec2 offset = (texture(iChannel1,offsetUV).ag);\n\tuv += (offset * waterHeight);\n\tfragColor = texture(iChannel0,uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

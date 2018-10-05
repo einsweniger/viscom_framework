@@ -1,0 +1,79 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lSBWw",
+      "date": "1515913448",
+      "viewed": 177,
+      "name": "test resize buffer",
+      "username": "FabriceNeyret2",
+      "description": "try fullscreen and back.\nAt resolution change, we might like to be able to resize buffer data.\nAlas, buffers are clamped/resized at once at frame start, rather than after rewrite by the shader pass buffN.\nWhen resolution decrease, no way to save data. :-(",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "buffer",
+        "resize"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U ) \n{   O = texelFetch(iChannel0,ivec2(U),0);  }",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n   vec2 R = iResolution.xy, \n       R0 = texelFetch(iChannel0,ivec2(0),0).xy;\n    \n   if (iFrame<001) {\n        float l = 1. - 2.*length(U/R - 1./2.); \n        O = vec4(fract(4321.*sin(1234.7*(U.x+17.31*U.y))) < l ); // init draw \n        if (U==vec2(.5)) { O.xy = R; return; }      // save resolution\n        return;\n    }\n    \n    if (U==vec2(.5)) { O.xy = R; return; }          // save resolution\n\n    if ( R0 == R )  \n\t    O = texelFetch(iChannel0,ivec2(U), 0);\n    else\n    { U = U/R*R0.xy; O = texelFetch(iChannel0,ivec2(U),0); }\n    \n    if (R != vec2(textureSize(iChannel0,0))) O.x++; // never happen\n }",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

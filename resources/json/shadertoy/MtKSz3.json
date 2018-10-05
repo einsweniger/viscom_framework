@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtKSz3",
+      "date": "1485292684",
+      "viewed": 248,
+      "name": "Funnier checkboard 5",
+      "username": "FabriceNeyret2",
+      "description": "B&W checkboards of these days are so saaaad ! :-p",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "short",
+        "checkboard"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define S smoothstep\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n\tvec2  V = floor( U *= 10./ iResolution.y );\n          U = 2.*fract(U)-1.;\n    float g = mod(V.x+V.y, 2.),\n          a = atan(U.y,U.x),\n          l = length(U),\n          d = S(.9,.8,l) ;\n\tO = cos(3.14*(g\n                   +d\n                   +S(.1,.0,abs(l-.5)) *step(a,0.) \n                   +S(.3,.2,length(vec2(abs(U.x)-.3,U.y-.4)))\n             )) \n        - vec4(0,1.-g,g,0) * d;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

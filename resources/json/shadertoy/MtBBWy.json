@@ -1,0 +1,78 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtBBWy",
+      "date": "1517008022",
+      "viewed": 223,
+      "name": "gamma flash",
+      "username": "FabriceNeyret2",
+      "description": "R,B,G gamma fitted (use mouse) when no longer blinking and all same-color bars merge\nfat bars = 2 vs 2.5 .    target sRGB = 2.2\n\nBlinking color might be biased by \"too smart\" LCD regulators.",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "gamma"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 u) {\n    vec2 R = iResolution.xy, \n         U = u/R, V = 3.*U, F = fract(V); \n    int c = int(V);                                // band id\n    vec4 T = texture(iChannel0,U-U);               // cursors value\n    O += step(length(u-vec2((float(c)+.5)/3.,T[c])*R),10.) -O; // draw cursors\n    \n    if (min(fract(V*5.),F).y > 15./R.y)            // else black line\n        O[c] += (iFrame%2==0 || F.x>.2 && F.x<.3 ) && !(F.x>.1 && F.x<.2)                    \n            ?  pow(.5,1./(1.5+1.5*T[c]))           // value^gamma\n            :  mod(u.x+u.y,2.);                    // checker\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// store Mouse.y for each 3 band in O[band] \n\nvoid mainImage( out vec4 O, vec2 U) \n{\n    vec2 R = iResolution.xy,\n         M = iMouse.xy/R;\n    \n    O = iFrame==0 \n        ? vec4(.47)            // gamma 2.2\n        : texture(iChannel0,U/R);  \n    \n    if (iMouse.z>0.) \n        O[int(3.*M)] = M.y;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

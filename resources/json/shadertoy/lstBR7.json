@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lstBR7",
+      "date": "1524569569",
+      "viewed": 46,
+      "name": "reflector",
+      "username": "lennyjpg",
+      "description": "test 12 ",
+      "likes": 0,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "sdfgsd"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 a = vec3(2.0,52.0,56.0)/255.0;\nvec3 b = vec3(230.0,61.0,76.0)/255.0;\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv =  fragCoord / iResolution.xy;\n    uv.x+=0.5;\n    vec3 n = texture( iChannel0,  uv).xyz;   \n    n*= uv.x>1.0 ? a:b;\n    fragColor = vec4(n,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

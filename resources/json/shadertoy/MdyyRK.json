@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdyyRK",
+      "date": "1522583819",
+      "viewed": 115,
+      "name": "Mandelbrot Mania",
+      "username": "nightfox",
+      "description": "Today is the day I understood the Mandelbrot set. Thanks to The Art of Code on YouTube.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal",
+        "mandelbrot"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\tuv -= .4;\n    uv *= 2.;\n    uv.x *= iResolution.x/iResolution.y;\n    \n    uv *= 1.+sin(-iTime/10.);\n    float it = 0.;\n    \n    uv.x -= .745;\n    uv.y += .1;\n    \n    const int MAX_STEPS = 1000;\n    \n    vec2 c = uv;\n    vec2 z = c;\n    \n    for (int i = 0; i < MAX_STEPS; i++) {\n        float x = pow(z.x, 2.) - pow(z.y, 2.);\n        float y = 2. * z.x * z.y;\n     \tz = vec2(x, y) + c;\n            \n        if (length(z) > 2.) break;\n        it++;\n    }\n    \n    // Time varying pixel color\n    vec3 col = vec3(0.5 + 0.5*cos(iTime+it));\n    col.g = 1.-sin(it);\n    col.b = cos(it);\n\n    // Output to screen\n    fragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

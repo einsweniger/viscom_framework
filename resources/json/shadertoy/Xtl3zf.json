@@ -1,0 +1,65 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xtl3zf",
+      "date": "1490852568",
+      "viewed": 4534,
+      "name": "Texture variation V",
+      "username": "iq",
+      "description": "Avoiding texture repetition. A small texture can be used to generate infinite variety instead of tiled repetition. This method does filter (to something ugly but at least not-aliased). It uses two texture lookups, plus one very cache-friendly lookup.",
+      "likes": 79,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "texture"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// The MIT License\n// Copyright \u00a9 2017 Inigo Quilez\n// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n// One way to avoid texture tile repetition one using one small texture to cover a huge area.\n// Basically, it creates 8 different offsets for the texture and picks two to interpolate\n// between.\n//\n// Unlike previous methods that tile space (https://www.shadertoy.com/view/lt2GDd or\n// https://www.shadertoy.com/view/4tsGzf), this one uses a random low frequency texture\n// (cache friendly) to pick the actual texture's offset.\n//\n// Also, this one mipmaps to something (ugly, but that's better than not having mipmaps\n// at all like in previous methods)\n//\n// More info here: http://www.iquilezles.org/www/articles/texturerepetition/texturerepetition.htm\n\nfloat sum( vec3 v ) { return v.x+v.y+v.z; }\n\nvec3 textureNoTile( in vec2 x, float v )\n{\n    float k = texture( iChannel1, 0.005*x ).x; // cheap (cache friendly) lookup\n    \n    vec2 duvdx = dFdx( x );\n    vec2 duvdy = dFdx( x );\n    \n    float l = k*8.0;\n    float i = floor( l );\n    float f = fract( l );\n    \n    vec2 offa = sin(vec2(3.0,7.0)*(i+0.0)); // can replace with any other hash\n    vec2 offb = sin(vec2(3.0,7.0)*(i+1.0)); // can replace with any other hash\n\n    vec3 cola = textureGrad( iChannel0, x + v*offa, duvdx, duvdy ).xyz;\n    vec3 colb = textureGrad( iChannel0, x + v*offb, duvdx, duvdy ).xyz;\n    \n    return mix( cola, colb, smoothstep(0.2,0.8,f-0.1*sum(cola-colb)) );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xx;\n\t\n\tfloat f = smoothstep( 0.4, 0.6, sin(iTime    ) );\n    float s = smoothstep( 0.4, 0.6, sin(iTime*0.5) );\n        \n\tvec3 col = textureNoTile( (4.0 + 6.0*s)*uv, f );\n\t\n\tfragColor = vec4( col, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

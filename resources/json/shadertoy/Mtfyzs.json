@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mtfyzs",
+      "date": "1505980831",
+      "viewed": 205,
+      "name": "test texture wrap",
+      "username": "FabriceNeyret2",
+      "description": "test whether a texture is tilable\n\nnot tilable:  organic1, wood, (& London, of course)",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "utils",
+        "tilable"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, in vec2 U )\n{\n\tO = texture(iChannel0, .4*iTime + U / iResolution.xy ).rrrr;\n    //if (iChannelResolution[0].z == 1.) O = O.rrrr;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

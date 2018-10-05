@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdlcRf",
+      "date": "1489238097",
+      "viewed": 580,
+      "name": "Crappy VHS shader",
+      "username": "CaptCM74",
+      "description": "A E S T H E T I C vapor-bootleg Shader.\n.... Created with full-of-love.\n\n[EDIT #1 : Added random white lines which appears by some intervals]",
+      "likes": 16,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "video",
+        "vhs",
+        "aesthetic",
+        "tape"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 29,
+            "src": "/media/a/3405e48f74815c7baa49133bdc835142948381fbe003ad2f12f5087715731153.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define scanline true\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nfloat brightness (vec3 color)\n{\n \treturn (0.2126*color.r + 0.7152*color.g + 0.0722*color.b);   \n}\n\nvec4 get_lum(sampler2D sampler , vec2 uv)\n{\n    vec4 col = vec4(1.);\n    vec4 sampled = texture(sampler,uv);\n    \n    float lumiosity = brightness(sampled.xyz);\n    \n    col.a = sampled.a;\n    col.xyz = vec3(lumiosity);\n    \n    return col;\n}\n\nvec4 VHS_bleed( sampler2D sampler, vec2 uv , int blurness)\n{\n    vec4 col = vec4(1.);\n    vec4 sampled = texture(sampler,uv);\n    \n    col = get_lum(sampler,uv);\n    float lum = brightness(col.xyz);\n    \n    float multiplier = lum+1.*15.;\n    float j=0.;\n\n    for (int i = 0;i<blurness;i++)\n    {\n        col += (get_lum(sampler,uv + vec2( float(i) * 0.0001 * multiplier * (col.x + 1.2), 0. ) ) / (vec4(blurness * 4)/(multiplier*0.11))) * vec4(j / float(blurness)/2. * 4. );\n        col += (get_lum(sampler,uv + vec2( float(i) * -0.0001 * multiplier * (col.x + 1.2), 0. ) ) / (vec4(blurness * 4)/(multiplier*0.11))) * vec4(j / float(blurness)/2. * 4. );\n\n        j+=1.;\n    }\n\n    \n    return col;\n}\n\nvec4 get_VHS( sampler2D sampler, vec2 uv , float time)\n{\n   \tvec2 rOffset = vec2(-0.005,0.005);\n    vec2 gOffset = vec2(0.,-0.005);\n    vec2 bOffset = vec2(0.005,0.005);\n    \n    float global_time = time * 1.2 + sin(time*0.2)*10.;\n    vec2 uv2 = uv;\n    uv2.x += sin(uv.y*20.+time)*0.01 * (1. - uv.y)*1.2;\n    \n    vec4 col = vec4(0.);\n    vec4 sample_tex = texture(sampler,uv2);\n    \n    float lum = brightness(col.xyz);\n    \n    col = VHS_bleed(sampler,uv,64);\n   \t//col.xyz *= texture(sampler,uv2).xyz;\n    \n    /*\n\t\tChromatic abberation base from\n\t\thttp://gamedev.stackexchange.com/questions/58408/how-would-you-implement-chromatic-aberration\n\t*/\n    \n    vec4 rValue = texture(sampler, uv2 - rOffset*rand(uv/2.+time)*1.2*(lum+1.6)*1.2);\n    vec4 gValue = texture(sampler, uv2 - gOffset*rand(uv/2.+time)*1.3*(lum+1.5)*1.2);\n    vec4 bValue = texture(sampler, uv2 - bOffset*rand(uv/2.+time)*1.2*(lum+1.7)*1.2);\n    \n    col.x *= rValue.r;\n    col.y *= gValue.g;\n    col.z *= bValue.b;\n    \n    col.x += (col.x*0.28 + rand(uv+time)*0.05 + sin(uv.y*2.2+1.7)*1.32) * ((lum+1.)*0.1);\n    col.y += (col.y*0.15 + rand(uv+time)*0.05) * (lum*0.01);\n    col.z += (col.z*0.28 + rand(uv+time)*0.05 + sin(uv.y*2.2+1.85)*1.65) * ((lum+1.)*0.1);\n    \n    /* Scan line thing */\n    if (scanline && mod(uv.y + time*0.01 + rand(uv)*0.1,1.5) > 0.5 && mod(uv.y + time*0.01 + rand(uv)*0.1,1.5) < 0.6)\n    {\n        col.xyz *= vec3(0.57,0.54,0.56);\n    }\n    \n    /* Square Noise */\n    if (rand(mod(uv*0.1+time,1.)) >= 0.7)\n    {\n        col.xyz *= vec3(0.57,0.54,0.56) + sin(rand(mod(uv*0.1+time,1.))*2.)*0.5;\n    }\n    \n    /* Random white line */\n    if (uv.y < 0.25 && mod(uv.y+time * 0.1,0.01)*9.-uv.y*0.3 > 0.02 && rand(uv+time * 0.1) >= 0.5)\n    {\n        col.xyz = vec3(1.);\n    }\n    \n    if ((mod(time,20.) > 3. && mod(time,20.) < 5.) && mod(uv.y,0.5) > 0.02+rand(vec2(time))*0.5 && mod(uv.y,0.5) < 0.03+rand(vec2(time))*0.5 )\n    {\n        col.xyz = vec3(1.);\n    }\n    \n    \n    return col;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    /*\n\t\tInitalize some variables\n\t*/\n    vec2 uv_scr = fragCoord.xy / iResolution.xy;\n    vec4 final_col = vec4(0.);\n    \n    /*\n\t\tDefine some ichannels\n\t*/    \n    \n    /*\n\t\n\t\tNow process color\n\t\n\t*/\n    final_col = get_VHS(iChannel0,uv_scr,iTime*100.);\n    \n\tfragColor = final_col;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

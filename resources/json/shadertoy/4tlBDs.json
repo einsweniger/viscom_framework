@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tlBDs",
+      "date": "1513985462",
+      "viewed": 296,
+      "name": "Parallelogram - intersection",
+      "username": "iq",
+      "description": "Intersection of an arbitrary parallelogram and a ray (a parallelogram is a quad with two pairs of parallel lines)",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "intersection",
+        "parallelogram"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 6,
+            "src": "/media/a/1f7dca9c22f324751f2a5a59c9b181dfe3b5564a04b724c657732d0bf09c99db.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// The MIT License\n// Copyright \u00a9 2017 Inigo Quilez\n// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n\n\n\nvec3 parallelogramIntersect( in vec3 ro, in vec3 rd, in vec3 v0, in vec3 v1, in vec3 v2 )\n{\n    vec3 a = v0 - v1;\n    vec3 b = v2 - v0;\n    vec3 p = v0 - ro;\n    \n    vec3 n = cross( a, b );\n    vec3 q = cross( rd, p );\n    \n    float i = 1.0/dot( rd, n );\n    \n    float u = dot( q, a )*i;\n    float v = dot( q, b )*i;\n    float t = dot( n, p )*i;\n\n    if( u<0.0 || u>1.0 || v<0.0 || v>1.0 ) return vec3(-1.0);\n    \n    return vec3( t, u, v );\n}\n\n//=====================================================\n\nfloat sphIntersect( in vec3 ro, in vec3 rd, in vec4 sph )\n{\n\tvec3 oc = ro - sph.xyz;\n\tfloat b = dot( oc, rd );\n\tfloat c = dot( oc, oc ) - sph.w*sph.w;\n\tfloat h = b*b - c;\n\tif( h<0.0 ) return -1.0;\n\treturn -b - sqrt( h );\n}\n\nvec3 v0, v1, v2, v3;\n\nvec4 intersect( in vec3 ro, in vec3 rd )\n{\n    float tmin = 100000.0;\n    float obj = -1.0;\n    vec2  uv = vec2(-1.0);\n    \n    float t = (-1.0-ro.y)/rd.y;\n    if( t>0.0 && t<tmin )\n    {\n        tmin = t;\n    \tobj = 1.0;    \n    }\n    vec3 tuv = parallelogramIntersect( ro, rd, v0, v1, v2 );\n    if( tuv.x>0.0 && tuv.x<tmin )\n    {\n        tmin = tuv.x;\n        obj = 2.0;\n        uv = tuv.yz;\n    }\n    t = sphIntersect( ro, rd, vec4(v0,0.1) );\n    if( t>0.0 && t<tmin )\n    {\n        tmin = t;\n        obj = 3.0;\n    }\n    t = sphIntersect( ro, rd, vec4(v1,0.1) );\n    if( t>0.0 && t<tmin )\n    {\n        tmin = t;\n        obj = 4.0;\n    }\n    t = sphIntersect( ro, rd, vec4(v2,0.1) );\n    if( t>0.0 && t<tmin )\n    {\n        tmin = t;\n        obj = 5.0;\n    }\n    t = sphIntersect( ro, rd, vec4(v3,0.1) );\n    if( t>0.0 && t<tmin )\n    {\n        tmin = t;\n        obj = 6.0;\n    }\n    \n    return vec4(tmin,obj,uv);\n}\n\nvec3 calcNormal( in vec3 pos, float obj )\n{\n    if( obj<1.5 )\n        return vec3(0.0,1.0,0.0);\n    else if( obj<2.5 )\n    \treturn normalize( cross(v2-v1,v1-v3) );\n    else if( obj<3.5 )\n\t\treturn normalize( pos-v0 );        \n    else if( obj<4.5 )\n\t\treturn normalize( pos-v1 );        \n    else if( obj<5.5 )\n\t\treturn normalize( pos-v2 );        \n    else// if( obj<6.5 )\n\t\treturn normalize( pos-v3 );        \n}\n\nfloat calcShadow( in vec3 ro, in vec3 rd, float k )\n{\n\treturn step(intersect(ro,rd).y,0.0);\n}\n\n\nvec3 lig = normalize(vec3(1.0,0.9,0.7));\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tv0 = 1.5*cos( iTime*1.1 + vec3(0.0,1.0,1.0) + 0.0 );\n\tv1 = 1.0*cos( iTime*1.2 + vec3(0.0,2.0,3.0) + 2.0 );\n\tv2 = 1.0*cos( iTime*1.3 + vec3(0.0,3.0,5.0) + 4.0 );\n    v3 = v1 + v2 - v0;\n    \n    vec2 p = (-iResolution.xy + 2.0*fragCoord)/iResolution.y;\n\n\tvec3 ro = vec3(0.0, 0.25, 2.0 );\n\tvec3 rd = normalize( vec3(p,-1.0) );\n\t\n\tvec3 col = vec3(0.0);\n\n    vec4 res = intersect(ro,rd);\n    float t = res.x;\n    float o = res.y;\n    vec2  uv = res.zw;\n    if( o>0.0 )\n    {\n        vec3 pos = ro + t*rd;\n        vec3 nor = calcNormal(pos, o);\n        nor = faceforward( nor, rd, nor );\n\t\tfloat sha = calcShadow( pos + nor*0.01, lig, 32.0 );\n\n        col = (abs(o-2.0)<0.1) ? pow(texture(iChannel0,uv).xyz,vec3(1.5)) :\n                                 vec3(1.0);\n        \n        vec3 lin = vec3(0.0);\n        lin =  vec3(0.9,0.6,0.3)*clamp( dot( nor, lig ), 0.0, 1.0 ) * sha;\n\t\tlin += vec3(0.5,0.6,0.7)*clamp( nor.y, 0.0, 1.0 );\n        lin += 0.03;\n        \n        col = col*lin;\n        \n\t\tcol *= exp( -0.2*t );\n        col *= 1.0 - smoothstep( 5.0, 10.0, t );\n}\n\n\tcol = pow( clamp(col,0.0,1.0), vec3(0.45) );\n\t   \n    fragColor = vec4( col, 1.0 );\n}\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

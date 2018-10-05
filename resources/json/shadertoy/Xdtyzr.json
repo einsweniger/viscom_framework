@@ -1,0 +1,78 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xdtyzr",
+      "date": "1517797473",
+      "viewed": 240,
+      "name": "graffeedyBack",
+      "username": "clickbecause",
+      "description": "i made this",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "shaderclub"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy;\n\n    vec4 tex = texture(iChannel0, uv);\n\n    fragColor = tex;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159265359\n#define TWO_PI 6.28318530718\n\nfloat random (vec2 st) {\n    return fract(sin(dot(st.xy,\n                         vec2(12.9898,78.233)))*\n        43758.5453123);\n}\n\nvec2 correctAspect(in vec2 _uv){\n    _uv -= vec2(0.5);\n    _uv.x *= iResolution.x/iResolution.y;\n    _uv += vec2(0.5);\n    \n    return _uv;\n}\n\nvec2 tile(vec2 _uv, float _zoom){\n    _uv *= _zoom;\n    return fract(_uv);\n}\n\nmat2 rotate2d(float _angle){\n    return mat2(cos(_angle),-sin(_angle),\n                sin(_angle),cos(_angle));\n}\n\nfloat circle(in vec2 _uv, in vec2 _pos, in float _radius, float _gradient){\n    vec2 dist = _uv - _pos;\n\treturn 1.-smoothstep(_radius-(_radius*_gradient),\n                         _radius+(_radius*_gradient),\n                         dot(dist,dist)*4.0);\n}\n\nfloat box(vec2 _uv, vec2 _size, float _smoothEdges){\n    _size = vec2(0.5)-_size*0.5;\n    vec2 aa = vec2(_smoothEdges*0.5);\n    vec2 uv = smoothstep(_size,_size+aa,_uv);\n    uv *= smoothstep(_size,_size+aa,vec2(1.0)-_uv);\n    return uv.x*uv.y;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy;\n    \n    float interval = iTime*4.0;\n    vec2 intervali = vec2(floor(interval));\n    \n    vec2 walk = vec2((fract(interval) - 0.5)*2.0, (fract(interval) - 0.5)*2.0);\n    walk.y += sin(uv.x * 16.0 + iTime)*0.1;\n    walk *= (random(intervali) - 0.5) * 2.0 * 0.24;\n    \n    vec2 drawCoord = correctAspect(uv);\n    \n    // grid //////////////////////////////////////////////////////////////////\n    vec2 tiledCoord = drawCoord;\n    \n    tiledCoord -= vec2(0.5);\n    \n    tiledCoord *= mat2(0.5, 0.0, 0.0, 0.5);\n    \n    float angle = (random(intervali) - 0.5) * 2.0;\n    tiledCoord *= rotate2d(angle);\n    \n    tiledCoord += vec2(0.5);\n    \n    tiledCoord = tile(tiledCoord,12.);\n    \n    vec3 grid = vec3( box(tiledCoord,vec2(0.92),0.01) );\n    grid = 1.0 - grid;\n    \n    // circle //////////////////////////////////////////////////////////////////\n    float cx = random(intervali*1.0) + walk.x;\n    float cy = random(intervali*2.0) + walk.y;\n    vec2 cpos = vec2(cx, cy);\n    \n    float r = random(intervali*3.0);\n    \n    float c = circle(drawCoord, cpos, r, 0.1);\n\t\n    vec3 col = cos(iTime*4.0+drawCoord.xyx+vec3(0,2,4));\n    col *= vec3(c);\n    \n    // triangle && co //////////////////////////////////////////////////////////\n    vec2 triCoord = drawCoord * 2.0-1.0;\n    \n    triCoord -= vec2(0.5);\n    \n    float s = (random(intervali) - 0.5) * 2.0;\n    triCoord *= mat2(1.0+s, 0.0, 0.0, 1.0+s);\n    \n    triCoord *= rotate2d(random(intervali));\n    \n    triCoord += vec2(0.5);\n    \n    float tx = random(intervali*3.0);\n    float ty = random(intervali*4.0);\n    \n    vec2 tpos = vec2(tx, ty);\n    tpos = (tpos-0.5)*2.0;\n    \n    triCoord += tpos;\n\n    int N = int(random(intervali)*6.0);\n    float a = atan(triCoord.x, triCoord.y)+PI;\n    float rt = TWO_PI/float(N);\n    float d = cos(floor(.5+a/rt)*rt-a)*length(triCoord);\n    vec3 tri = (1.0-cos(iTime+uv.xyx+vec3(0,2,4))) * vec3(1.0-smoothstep(.4,.41,d));\n    \n    // feedback //////////////////////////////////////////////////////////////////\n    vec2 texel = 1.0/iResolution.xy;\n    \n    float cd = 1.0-distance(drawCoord, cpos);\n    cd = smoothstep(r, 1.0, cd);\n    vec2 cwalk = walk*cd;\n    \n    uv += cwalk*0.5;\n    vec2 texCoord = uv;\n    \n    texCoord.x += cos(texCoord.y * 12.0 + iTime*4.0)*texel.y*0.1;\n    texCoord.y += texel.y*2.0 + sin(texCoord.x * 12.0 + iTime*4.0)*texel.y;\n    \n    vec4 fb = texture(iChannel0, texCoord);\n    \n    if(fract(interval*0.1) < 0.1){\n        col += grid;\n    }\n    \n    if(fract(interval*0.75) < 0.1){\n        col -= tri;\n    }\n    \n    //col *= 0.1;\n    //col = normalize(col);\n    \n    fb.rgb *= 0.98;\n    fb.rgb += col;\n    \n    fragColor = fb;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

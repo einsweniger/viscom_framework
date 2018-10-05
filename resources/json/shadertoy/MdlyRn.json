@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdlyRn",
+      "date": "1486761142",
+      "viewed": 247,
+      "name": "2D Star (139c)",
+      "username": "aiekick",
+      "description": "2D Star",
+      "likes": 6,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2dstar"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, vec2 g )\n{\n    f.xyz = iResolution;\n\tg += g-f.xy;\n    f -= f-.1/dot(\n        g = g/f.y + sin(atan(g.x,g.y)*4.+vec2(1.6,0))*.1*sin(iDate.w*3.)\n        ,g);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

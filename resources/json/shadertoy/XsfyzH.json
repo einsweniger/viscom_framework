@@ -1,0 +1,106 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsfyzH",
+      "date": "1486920662",
+      "viewed": 335,
+      "name": "hot Britney",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 6,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "flow"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n\tO = texture( iChannel0, U / iResolution.xy);\n  //O = pow(vec4(1.6, 1.1, 1.1, 1)*dot(O, vec4(.299, .587, .114, 0)), vec4(1, 2.5, 12, 1)); // shane's hot CMap\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    vec2 R = iResolution.xy, V;\n    float t = iTime, a = 3.*t, c=cos(a), s=sin(a);\n\n    V = 2.* texture(iChannel1, U/R.y +vec2(0,-.3*t) ).xy -1.;\n    //V = normalize(V);\n    V *= mat2(c,-s,s,c);\n    O =  .9*texture(iChannel0, U/R + 5./R.y*V )\n       + .1*texture(iChannel2,fract( U/R+.0*iTime ));\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

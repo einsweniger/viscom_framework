@@ -1,0 +1,107 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lV3RG",
+      "date": "1475203340",
+      "viewed": 323,
+      "name": "watercolor filter",
+      "username": "mds2",
+      "description": "Use a video source for both color and fluid flow.",
+      "likes": 4,
+      "published": 3,
+      "flags": 34,
+      "tags": [
+        "video",
+        "fluid"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture (iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 blend_uv = fragCoord.xy / iResolution.xy;\n    vec2 uv = vec2(1.0 - blend_uv.x, blend_uv.y);\n    vec3 intensity = 1.0 - texture(iChannel1, uv).rgb;\n    \n    float vidSample = dot(vec3(1.0), texture(iChannel1, uv).rgb);\n    float delta = 0.005;\n    float vidSampleDx = dot(vec3(1.0),\n                            texture(iChannel1, uv + vec2(delta, 0.0)).rgb);\n    float vidSampleDy = dot(vec3(1.0),\n                            texture(iChannel1, uv + vec2(0.0, delta)).rgb);\n    \n    vec2 flow = delta * vec2 (vidSampleDy - vidSample, vidSample - vidSampleDx);\n    \n    intensity = 0.005 * intensity + 0.995 *\n        (1.0 - texture(iChannel0,\n               \t               blend_uv + vec2(-1.0, 1.0) * flow).rgb);\n    fragColor = vec4(1.0 - intensity,1.0);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

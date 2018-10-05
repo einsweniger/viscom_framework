@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lffzs",
+      "date": "1512850819",
+      "viewed": 242,
+      "name": "1-to-1 pixel is already aliasing",
+      "username": "FabriceNeyret2",
+      "description": "Artists want to paint textures with details up to the minute pixel. But doing this is causing aliasing.\nHint: \"if the look change even at translation or rotation, you are in aliasing range\".\nShannon-Nyquist says: shortest possible wavelength = 2 pixels.",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "texture",
+        "aliasing",
+        "nyquist",
+        "signal"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    float y = U.y;\n    U -=  4.*iTime;\n    if (fract(iTime/6.)<.5) U /= 2.1;  // at zoom = 2, we are just on Nyquist limit.\n\tO = y>iResolution.y/3.\n        ? texture( iChannel0, U   / iChannelResolution[0].xy )\n        : texture( iChannel0, U.x / iChannelResolution[0].xy ).rrrr;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

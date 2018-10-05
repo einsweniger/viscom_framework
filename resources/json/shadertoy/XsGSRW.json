@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsGSRW",
+      "date": "1463008102",
+      "viewed": 131,
+      "name": "Light Frequency",
+      "username": "KylBlz",
+      "description": "This isnt realistic, just fun",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "spectrum",
+        "light",
+        "rainbow"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//todo: make spectrum take inputs from 0-1\n#define PI4 12.566368\n\nvec3 spectrum(float x) {\n    x = x * 2.1 - 0.555;\n    vec4 v = vec4(clamp(x, -.6, 0.6),\n                  clamp(x, 0.05, 1.05),\n                  clamp(x, 0.65, 1.55),\n                  clamp(x, 1.16, 1.55));\n    v += vec4(0.0, -0.55, -1.1, -1.35);\n    v *= vec4(0.8, 1.0, 1.1, 2.5);\n    v = (cos(v * v * PI4) * 0.5 + 0.5);\n    v.r += v.a * 0.25;\n    return v.rgb;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    if (uv.y > 0.5)\n \t    fragColor = vec4(uv.xxx, 1.0);\n    else\n        fragColor = vec4(spectrum(uv.x).rgb, 1.0);\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

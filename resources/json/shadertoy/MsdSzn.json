@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsdSzn",
+      "date": "1506545617",
+      "viewed": 95,
+      "name": "testing blobs",
+      "username": "csmnt",
+      "description": "testing things, initially from 2016, nothing that impressive",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float map(vec3 p)\n{\n    vec3 q = fract(p) * 2.0 - 1.0;\n    return length(q) - 0.95;\n}\n\nfloat trace(vec3 o, vec3 r)\n{\n    float t = 0.0;\n    for(int i = 0; i < 32; ++i){\n    \tvec3 p = o + r *t;\n        float d = map(p);\n        t+= d * 0.5;\n    }\n    return t;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord / iResolution.xy;\n    \n    uv =  uv * 2.0 - 1.0;\n    \n    uv.x *= iResolution.x / iResolution.y;\n    \n    vec3 r = normalize(vec3(uv, 1.0));\n    \n    vec3 o = vec3(-iTime, 0.0 , -iTime);\n    \n    float the = iTime * 0.5;\n    r.xz *= mat2(-cos(the), -sin(the), sin(the), -cos(the));\n    \n    float t = trace(o,r);\n    \n    float fog = 1.0 / (1.0 + t * t * 0.1);\n    \n    vec3 fc = vec3(fog);\n    \n    fc *= vec3(sin(iTime),mix(0.75, 1.0, sin(iTime)),-sin(iTime));\n    \n\tfragColor = vec4(fc,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

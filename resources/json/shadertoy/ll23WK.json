@@ -1,0 +1,31 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ll23WK",
+      "date": "1497972121",
+      "viewed": 147,
+      "name": "wavey rays",
+      "username": "public_int_i",
+      "description": "wavey rays",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rays",
+        "wavey"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "\nvoid mainImage(out vec4 o, vec2 u) {\n    u -= iResolution.xy*.5;\n    #define a fract(atan(u.y,u.x)*3.18\n    o += max(a)-.5,\n             a+cos(length(u*.1))*.2+1.)-.5)-o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

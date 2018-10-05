@@ -1,0 +1,93 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dSfWD",
+      "date": "1500379610",
+      "viewed": 252,
+      "name": "[SH17A] Lawnmower Game",
+      "username": "TekF",
+      "description": "Try to mow the whole field!\nControls: cursors.",
+      "likes": 0,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "game",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,u) { o *= .0; o.y = .6; if ( iFrame > 0 && length(u-1e2-texelFetch(iChannel0,ivec2(o/=.7),0).xy) > 6. ) discard; }",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define K(a) texelFetch(iChannel1,ivec2(a,0),0).x\n\nvoid mainImage( out vec4 o, vec2 u )\n{\n    o = texelFetch(iChannel0,ivec2(0),0) + vec4(K(39)-K(37),K(38)-K(40),0,0);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

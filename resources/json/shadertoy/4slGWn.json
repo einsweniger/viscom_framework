@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4slGWn",
+      "date": "1367370970",
+      "viewed": 4801,
+      "name": "Texture - LOD",
+      "username": "iq",
+      "description": "This shows how to select a mip level in a texture. Besides having advanced uses in sampling artifacts avoidance, it can also be used as a cheap way to get a textures box-blurred for free (useful for fake depth of field effects, for example).",
+      "likes": 49,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "texture",
+        "lod",
+        "mipmap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Created by inigo quilez - iq/2013\n// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n// The texture() call accepts a mip level offset as an optional parameter, which\n// allows one to sample from different LODs of the texture. Besides being handy in\n// some special situations, it also allows you to fake (box) blur of textures without\n// having to perform a blur youtself. This has been traditionally used in demos and\n// games to fake deph ot field and other similar effects in a very cheap way.\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\t\n\tfloat lod = (5.0 + 5.0*sin( iTime ))*step( uv.x, 0.5 );\n\t\n\tvec3 col = texture( iChannel0, vec2(uv.x,1.0-uv.y), lod ).xyz;\n\t\n\tfragColor = vec4( col, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sfyRr",
+      "date": "1486630652",
+      "viewed": 258,
+      "name": "RGB Grid - 115 chars",
+      "username": "GregRostami",
+      "description": "There has to be a way to get this shader down to one tweet.\nI've been playing with several ideas, but I need some help. Thank you.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "grid",
+        "video",
+        "rgb",
+        "short",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,U)\t\t\\\nvec2 u=U*2./iResolution.xy;\t\\\no=texture(iChannel0,fract(u))*vec4(u.x>1.==u.y<1.,u.x>1.,u.y<1.,1)\n\n// 121 chars - Thank you Fabrice for this amazing solution.\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o = texture(iChannel0,fract(u*=2./iResolution.xy))\n        * vec4(u.x>1.==u.y<1., u.x>1., u.y<1., 1);\n}\n/**/\n\n// 181 chars\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o = texture(iChannel0,fract(2.*(u/=iResolution.xy)));\n    u.x>.5 && u.y<.5 ? o :\n    o = vec4(u.y>.5 && u.x<.5 ? o.r : 0.,\n             u.x>.5 && u.y>.5 ? o.g : 0.,\n             u.x<.5 && u.y<.5 ? o.b : 0.,\n             1);\n}\n/**/\n\n// 185 chars\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o = texture(iChannel0,fract(2.*(u/=iResolution.xy)));\n    o = u.y>.5 && u.x<.5 ? vec4(o.r,0,0,1) :\n        u.x>.5 && u.y>.5 ? vec4(0,o.g,0,1) :\n        u.x<.5 && u.y<.5 ? vec4(0,0,o.b,1) :\n        o;\n}\n/**/\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

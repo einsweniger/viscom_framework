@@ -1,0 +1,94 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldsyRn",
+      "date": "1486763040",
+      "viewed": 287,
+      "name": "sleet feedback",
+      "username": "aferriss",
+      "description": "Some feedback by getting the difference between texture offsets. Click to restart",
+      "likes": 6,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "colormap",
+        "blue",
+        "feedback"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float colormap_red(float x) {\n    return 1.61361058036781E+00 * x - 1.55391688559828E+02;\n}\n\nfloat colormap_green(float x) {\n    return 9.99817607003891E-01 * x + 1.01544260700389E+00;\n}\n\nfloat colormap_blue(float x) {\n    return 3.44167852062589E+00 * x - 6.19885917496444E+02;\n}\n\nvec4 colormap(float x) {\n    float t = x * 255.0;\n    float r = clamp(colormap_red(t) / 255.0, 0.0, 1.0);\n    float g = clamp(colormap_green(t) / 255.0, 0.0, 1.0);\n    float b = clamp(colormap_blue(t) / 255.0, 0.0, 1.0);\n    return vec4(r, g, b, 1.0);\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 res = iResolution.xy;\n    vec2 uv = fragCoord.xy / res;\n     \n    \n\tfragColor =  colormap( texture(iChannel0, uv).r);\n    fragColor = fragColor.rgga;\n    fragColor.g -= 0.05;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float diff(vec2 t, vec2 b){\n \tvec3 t1 = texture(iChannel0, t).xyz;\n    vec3 t2 = texture(iChannel0, b).xyz;\n    return dot(t1, vec3(1.0)) - dot(t2, vec3(1.0));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 res = iResolution.xy;\n    vec2 uv = fragCoord.xy / res;\n\n    \n    vec2 step = vec2(0.5 / res);\n    vec2 top, bottom;\n    top = uv - step;\n    bottom = uv + step;\n    \n    float gradient = diff(bottom, top);\n    vec4 fc = vec4(length(gradient)*1.13);\n    \n    if(iFrame < 30 || iMouse.z >0.0){\n        fragColor = texture(iChannel1, uv);\n    } else {\n        vec4 old = texture(iChannel0, uv);\n        fc.rgba = (fc.rgba * fc.a) + (old*(1.0 - fc.a));\n    \tfragColor = clamp(fc, vec4(0.0), vec4(1.0));\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsXBzr",
+      "date": "1494587788",
+      "viewed": 192,
+      "name": "sixpack",
+      "username": "lennyjpg",
+      "description": "color value store",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "colors"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 orange = vec3(.871,.331,.112);\nvec3 skin   = vec3(.925,.662,.61);\nvec3 sofa   = vec3(.709,.466,.415);\n\nvec3 night  = vec3(.051,.037,.123);\nvec3 sky    = vec3(.0,.5,.7);\nvec3 milk   = vec3(.999,.999,.89);\n\nvec3 gurk   = vec3(.1,.9,.2);\nvec3 oldg   = vec3(.3,.8,.2);\nvec3 gras   = vec3(.2,.9,.1);\n\n\nvoid mainImage( out vec4 O, in vec2 U )\n{\n\tvec2 uv = U.xy / iResolution.xy;\n    \n    vec3 c = vec3(1.,1.,1.);\n    \n    float t = 0.0;\n    if(uv.x > 0.37){\n        \n      if( uv.y > .1 ) c = orange;\n      if( uv.y > .2 ) c = skin;\n      if( uv.y > .3 ) c = sofa;\n        \n      if( uv.y > .4 ) c = night;\n      if( uv.y > .5 ) c = sky;\n      if( uv.y > .6 ) c = milk;\n\n      if( uv.y > .7 ) c = gurk;\n      if( uv.y > .8 ) c = oldg;\n      if( uv.y > .9 ) c = gras;\n        \n   \n        \n    }else{\n        \n      c = mix(sofa, skin, uv.y);\n        \n    }\n    \n    O = vec4(c,1.0);\n}\n\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lssfWX",
+      "date": "1498650011",
+      "viewed": 197,
+      "name": "random direction uniformity test",
+      "username": "public_int_i",
+      "description": "renders random directions as points over time, a good uniform random direction will look like a transparent sphere",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "test",
+        "direction",
+        "randon",
+        "uniformity"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tfragColor = texture(iChannel0, fragCoord/iResolution.xy)*100.;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "\nfloat hash(vec2 p) {\n    return fract(dot(p+vec2(.36834,.723), normalize(fract(p.yx*73.91374)+1e-4))*7.38734);\n}\n\nvec3 nonUniformRandomDirection(vec2 s) {\n    vec3 r = vec3(hash(s),hash(s*.8723),hash(s*.9574))*2.-1.;\n    return normalize(r);\n}\n\nvec3 uniformRandomDirection(vec2 s) {\n    vec3 r = vec3(hash(s),hash(s*.8723),hash(s*.9574))*2.-1.;\n    return normalize(r/cos(r));\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    if (iFrame < 120) {\n        fragColor = vec4(0.);\n        return;\n    }\n    \n    vec3 dir = uniformRandomDirection(fragCoord+mod(iTime*.01,4096.)*27.4723);\n    \n    vec2 uv = (fragCoord*2.-iResolution.xy)/iResolution.x;\n    fragColor = mix(texture(iChannel0, fragCoord/iResolution.xy),\n                    vec4(max(1.-length(uv*2.-dir.xy/(2.+dir.z))*10.,0.)),\n                    .01);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

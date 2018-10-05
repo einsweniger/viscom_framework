@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlsfDj",
+      "date": "1513436243",
+      "viewed": 229,
+      "name": "bug: -1 % n = who knows (2)",
+      "username": "FabriceNeyret2",
+      "description": "-x % y \nindeed, (y-x) % y so that at least the top-left window triangle be correct.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "glsl",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://www.shadertoy.com/view/MtlfWj\n\nvoid mainImage( out vec4 O, vec2 u )\n{\n    ivec2 U = ivec2(u);\n    O = vec4( (U.y-U.x) % U.y ) / float(U.y);\n // O = vec4( (0xFFFFFFFF+U.y-U.x+1) % U.y ) / float(U.y);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

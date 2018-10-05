@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dsBzB",
+      "date": "1496766673",
+      "viewed": 233,
+      "name": "its all an illusion",
+      "username": "public_int_i",
+      "description": "its all an illusion https://youtu.be/9TNcvfTPX0g?t=439",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "illusion",
+        "an",
+        "all",
+        "its"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, in vec2 u )\n{\n    vec2 p = u/4e2-.5;\n    #define a texture(iChannel0, p+iDate.w*.1\n\to = min(a), a-p*length(p)*.1));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

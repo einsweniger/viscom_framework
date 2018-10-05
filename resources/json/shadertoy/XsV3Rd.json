@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsV3Rd",
+      "date": "1455913872",
+      "viewed": 467,
+      "name": "Black & White Shader",
+      "username": "doubleoseven1",
+      "description": "Turns a picture or video black and white. ",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "blackwhite"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11,
+            "src": "/media/a/c3a071ecf273428bc72fc72b2dd972671de8da420a2d4f917b75d20e1c24b34c.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// This code is run for each pixel\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Make the fragCoordinate within the range of 0 and 1\n\tvec2 xy = fragCoord.xy / iResolution.xy;\n   \n    // Rrutrn the color of the texture in Channel0\n    vec4 texColor = texture(iChannel0, xy);\n    \n \t// Initialize the variables\n    vec4 white = vec4(1, 1, 1, 1);\n    vec4 black = vec4(0, 0, 0, 1);\n    \n    // Average the color out\n\tfloat average = texColor.r + texColor.g + texColor.b/3.0;\n    \n    // Check if it's closer to white or black\n    if (average <= 0.5)\n    {\n        texColor = black;\n    }\n    else \n        texColor = white;\n\n  \t// sets the pixels color\n    fragColor = texColor;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

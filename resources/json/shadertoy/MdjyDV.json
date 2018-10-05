@@ -1,0 +1,138 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdjyDV",
+      "date": "1493930159",
+      "viewed": 55,
+      "name": "XY channel packing",
+      "username": "aferriss",
+      "description": "Testing out packing floats.\nXY pack from http://nullprogram.com/blog/2014/06/29/\nEncoding and decoding functions from http://aras-p.info/blog/2009/07/30/encoding-floats-to-rgba-the-final/\n\niq's vers. https://www.shadertoy.com/view/ldj3zG\n\n",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "packing",
+        "encoding",
+        "decoding",
+        "channelpacking",
+        "unpacking"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const float BASE = 255.0;\n\nfloat decode(vec2 channels) {\n    return dot(channels, vec2(BASE, BASE * BASE) );\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    vec4 rg = texture(iChannel0, uv);    \n    float r = decode(rg.rg);\n    float g = decode(rg.ba);\n    float b = decode(texture(iChannel1, uv).rg);\n    \n   // vec4 t = texture(iChannel2, uv);\n\tfragColor =  vec4(r,g,b, 1.0) ;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "/*\nvec2 encode( float value){\n    vec2 enc = vec2(1.0, 255.0) * value;\n    enc = fract(enc);\n    enc -= enc.yy * vec2(1.0/255.0, 1.0/255.0);\n    return enc;\n}\n*/\n\nconst float BASE = 255.0;\n\n\nvec2 encode(float value) {\n    float x = mod(value, BASE);\n    float y = floor(value / BASE);\n    return vec2(x, y) / BASE;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n   \tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 tex = texture(iChannel0, uv);\n\tvec2 r = encode(tex.r);\n    vec2 g = encode(tex.g);\n    \n    fragColor = vec4(r, g);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "/*\nvec2 encode( float value){\n    vec2 enc = vec2(1.0, 255.0) * value;\n    enc = fract(enc);\n    enc -= enc.yy * vec2(1.0/255.0, 1.0/255.0);\n    return enc;\n}\n*/\n\nconst float BASE = 255.0;\n\n\nvec2 encode(float value) {\n    float x = mod(value, BASE);\n    float y = floor(value / BASE);\n    return vec2(x, y) / BASE;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n   \tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 tex = texture(iChannel0, uv);\n\tvec2 b = encode(tex.b);\n\n    fragColor = vec4(b, 0.0,1.0);\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

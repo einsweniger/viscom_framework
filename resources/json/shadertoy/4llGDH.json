@@ -1,0 +1,48 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4llGDH",
+      "date": "1422171887",
+      "viewed": 1205,
+      "name": "[2TC 15] Metasin",
+      "username": "poljere",
+      "description": "Metaballs moving through a lovely sin in 252 chars.",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "metaballs",
+        "sin",
+        "2tc15"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "void mainImage( out vec4 f, vec2 w )\n{\n\tvec4 q = vec4(w,iTime*.15,1.) / iResolution.xyzx;\n    for(float i=1.; i<30.; i++)\n        q.w += smoothstep( .15, .0, length(q.xy - vec2(i/30. + sin(i + q.z), .5 + .3 * sin(q.x * 9. * sin(q.z) + q.z))));\n    f = vec4(1. - q.w) * 4.*sqrt(q.x*q.y*(1.-q.x)*(1.-q.y));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

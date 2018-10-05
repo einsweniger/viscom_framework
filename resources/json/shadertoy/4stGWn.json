@@ -1,0 +1,47 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4stGWn",
+      "date": "1448995934",
+      "viewed": 384,
+      "name": "Warp Experiment 7",
+      "username": "aiekick",
+      "description": "Warp Experiment 7",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "experiment",
+        "warp",
+        "7"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "#define Arms 2.*sin(iTime*.2)\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (2.*fragCoord - iResolution.xy)/iResolution.y;\n    \n\tfloat a = atan(uv.x, uv.y) * 0.4779 * floor(Arms)/3.;\n    \n\tuv = vec2(length(uv) + a);\n    \n\tvec2 vv = vec2(mod(iTime, 10.)*.1, 0.);\n    \n\tfragColor = texture(iChannel0, uv - vv);\n}\n",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

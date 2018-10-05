@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XddcWS",
+      "date": "1520027357",
+      "viewed": 211,
+      "name": " Tiny Clouds - filamenty 3",
+      "username": "FabriceNeyret2",
+      "description": "variant of [url]https://shadertoy.com/view/XdtyRs[/url]  with filamenty multiplicative pseudo-Perlin\n",
+      "likes": 9,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "clouds",
+        "2tweets",
+        "short",
+        "volumerendering",
+        "golfing"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 40,
+            "src": "/media/a/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+            "ctype": "volume",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// fork of https://shadertoy.com/view/Xddczs\n// variant of https://shadertoy.com/view/XdtyRs\n\n\n//#define T texture( iChannel0, ( f += f ) * p.xzw/16. ).y\n#define T ( 1.- abs( 1. - 2.* texture( iChannel0, ( f += f ) * p.xzw/16. -.02*iTime).y ))\n\n#define mainImage(O,U)                                          \\\n    vec4 p, d = vec4(.8,0,U/iResolution.y-.8);                  \\\n    O = vec4(.8,1,1,0)-d.w;                                     \\\n    for( float f, t = 8e2 ; --t > 0. ; p = .01*t*d )            \\\n        p.xz += .3*iTime,                                       \\\n        f = .5, f = T*T*T*4. -p.w-2.9 ,                         \\\n    \tf > 0. ? O += ( (1.-O)*vec4(.8,.9,1,0) - .7*f ) *f *.4: O",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

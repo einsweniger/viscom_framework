@@ -1,0 +1,68 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llByRd",
+      "date": "1509899043",
+      "viewed": 168,
+      "name": "AV Tiling",
+      "username": "csmnt",
+      "description": "Getting to grips with more AV stuff. Some image/video manipulation. Reacts nicely with low freq heavy sound channels.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sound",
+        "video",
+        "tiling",
+        "vj",
+        "imagemanipulation"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 29,
+            "src": "/media/a/3405e48f74815c7baa49133bdc835142948381fbe003ad2f12f5087715731153.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 35,
+            "src": "/media/a/48e2d9ef22ca6673330b8c38a260c87694d2bbc94c19fec9dfa4a1222c364a99.mp3",
+            "ctype": "music",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Chnnl 0: texture (videos best muted)\n//Chnnl 1: Sound\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    //define timer\n    float tmr = sin(iTime);\n    \n    float scl = 3.14; //PI does nothing special, i just like it\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    //get sound manipulation\n    float tx = texelFetch(iChannel1, ivec2(uv.x+1.0,uv.y), 0).x;\n    float t = float(uv.x*(scl+sin(tx)));\n    float nt = float(uv.x*(scl+cos(tx)));\n    \n    //various image tiling - reacts to sound t & nt\n    vec4 video = texture(iChannel0, vec2(fract(uv.x*t) - sin(iTime),uv.y*t));\n    vec4 vidCopy = texture(iChannel0,fract(uv*nt) - cos(iTime));\n   \n    video = normalize((vidCopy+video))*scl;\n    \n    vec4 grad = vec4(uv,0.5+0.5*sin(tx),1.0);\n    \n    vec4 gradVid = normalize(video/grad);\n    vec4 gradVid2 = normalize(grad+video)*scl;\n    \n    //switch vids\n    if(tmr > 0.0)\n    \tfragColor = gradVid;\n    else\n        fragColor = gradVid2;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

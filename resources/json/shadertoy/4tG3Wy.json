@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tG3Wy",
+      "date": "1476365569",
+      "viewed": 730,
+      "name": "perception of change",
+      "username": "FabriceNeyret2",
+      "description": "Mouse.y : amount of grey transition. -> pure Black-or-white (bottom)  vs grey-level noise.\nFor B-or-W, we see islands of black and rivers of white appearing. \nBut with just a thin grey transition, the zoomed pattern seems continuous.",
+      "likes": 37,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise",
+        "perlin",
+        "perception",
+        "short",
+        "artefact"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// based on https://www.shadertoy.com/view/ltjXWW\n\n#define L  20.\n#define R(a) mat2(C=cos(a),S=sin(a),-S,C)\nfloat C,S,v, T;\n\nfloat N(vec2 u) { // infinite perlin noise with constant image-space spectrum (like Shepard scale)\n\tmat2 M = R(1.7);\n    float v = 0., t = 0.;\n\tfor (float i=0.; i<L; i++)\n\t{   float k = i-T,\n\t\t      a = 1.-cos(6.28*k/L),\n\t\t      s = exp2(mod(k,L));\n\t\tv += a/s* ( 1. - abs( 2.* texture(iChannel0, M*u*s/1e3 ).r - 1.) ); \n\t\tt += a/s;  M *= M;\n\t}\n    return v/t;\n}\n\nvoid mainImage( out vec4 O, vec2 U ) {\n\tvec2  R = iResolution.xy; \n          U = (U-.5*R)/R.y;\n    T = 1.5*iTime;\n    float e = .5*iMouse.y/R.y;\n  //float e = U.x < 0. ? 0. : .03;\n    \n    O = vec4 ( sqrt(smoothstep(.7-e,.7+e, N(U) )) );  // NB: sqrt approximates gamma 1./2.2\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

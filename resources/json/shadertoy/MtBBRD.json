@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtBBRD",
+      "date": "1514789278",
+      "viewed": 246,
+      "name": "2018 fractal",
+      "username": "gleurop",
+      "description": "Written in the 10 minutes preceding 2018",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 hsv(float h,float s,float v) { //las\n\treturn mix(vec3(1.),clamp((abs(fract(h+vec3(3.,2.,1.)/3.)*6.-3.)-1.),0.,1.),s)*v;\n}\n    \nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy *4.5 - 1.0;\n    float c = 1.0;\n    vec3 z = vec3(0);\n    for (float i=0.; i < 15. ; i++) {\n        uv = abs(uv-1.3);\n        uv /= clamp(length(uv), 0.27, 0.6);\n        vec2 p = vec2(i/15.0+sin(i*iMouse.x+i), sin(iTime*0.2+sin(i)));\n\t\tc = min(c, distance(p, uv));\n       \tz = sin(z+hsv(c, max(uv.x,uv.y), c*0.3)); \n    }\n    \n\tfragColor = vec4(z*0.5+0.5,1.0);}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

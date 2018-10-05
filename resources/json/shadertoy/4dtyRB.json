@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dtyRB",
+      "date": "1519389488",
+      "viewed": 183,
+      "name": "Function graficator",
+      "username": "Txoka",
+      "description": "graficator",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "function",
+        "grafiyng",
+        "graficator"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define zoom 3.\n\n#define S(v) smoothstep(pixels,0.,v)\nfloat f(float x){\n\treturn sin(x);\n}\nfloat df(float x){\n\treturn (f(x+0.001)-f(x-0.001))*500.;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    vec2 R=iResolution.xy,\n\tuv=zoom*(2.*fragCoord-R)/R.y,\n    m=zoom*(2.*iMouse.xy-R)/R.y;\n    \n    float pixels=3./R.y*(zoom);\n    \n\tvec3 col=vec3(0,0,1)*S(abs(f(uv.x)-uv.y));\n\tcol+=vec3(1,0,0)*S(abs((uv.x-m.x)*df(m.x)+f(m.x)-uv.y));\n\tcol+=0.3*S(abs(uv.x));\n    col+=0.3*S(abs(uv.y));\n\tcol+=0.2*S(abs(fract(abs(uv.x)-0.5)-0.5));\n    col+=0.2*S(abs(fract(abs(uv.y)-0.5)-0.5));\n    col+=0.1*S(abs(fract(abs(uv.x)*10.-0.5)-0.5)/10.);\n    col+=0.1*S(abs(fract(abs(uv.y)*10.-0.5)-0.5)/10.);\n    fragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llGSD3",
+      "date": "1486136544",
+      "viewed": 263,
+      "name": "Scanlines--moving",
+      "username": "agconti",
+      "description": "Simple scanline implementation ",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "scanline"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec3 col = vec3(0.0);\n    float scanlineIntesnsity = 0.125;\n    float scanlineCount = 800.0;\n    float scanlineYDelta = sin(iTime / 200.0);\n    \n\tfloat scanline = sin((uv.y - scanlineYDelta) * scanlineCount) * scanlineIntesnsity;\n\n\tcol -= scanline;\n\tfragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

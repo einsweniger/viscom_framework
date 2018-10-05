@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlsBRM",
+      "date": "1511454703",
+      "viewed": 161,
+      "name": "Ripple music",
+      "username": "JuliaPoo",
+      "description": "Wanted to make water simulator\nbut here we are",
+      "likes": 1,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "refractionwatersimulator"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 1,
+            "src": "/media/a/10eb4fe0ac8a7dc348a2cc282ca5df1759ab8bf680117e4047728100969e7b43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 12555,
+            "src": "https://soundcloud.com/aznbobby/soukai-rock-silent-siren-guitar-cover",
+            "ctype": "musicstream",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float SpD = 0.01;\nfloat NR = 0.66;\nfloat Int = 0.66;\nvec2 pos = vec2(0.5,0.5);\nfloat speed = 10.0;\n\n\nfloat Watershape(vec2 XY, float Time) {\n    float H = sin(10.0*sqrt(XY.x*XY.x + XY.y*XY.y) - Time)/(20.0*sqrt(XY.x*XY.x + XY.y*XY.y) + 1.0) + 1.0;\n    return H;\n}\n\n\nfloat DerivWatX(vec2 XY, float Time){\n\tfloat H = (Watershape(XY, Time) - Watershape(XY + vec2(SpD, 0), Time))/SpD;\n    return H;\n}\nfloat DerivWatY(vec2 XY, float Time){\n\tfloat H = (Watershape(XY, Time) - Watershape(XY + vec2(0, SpD), Time))/SpD;\n    return H;\n}\n\nfloat Ci(vec2 XY, float Time){\n    float H = 1.0/sqrt(1.0 + DerivWatX(XY, Time)*DerivWatX(XY, Time) + DerivWatY(XY, Time)*DerivWatY(XY, Time));\n\treturn H;\n}\n\nfloat Si(vec2 XY, float Time){\n    float H = sqrt(1.0 - Ci(XY, Time)*Ci(XY, Time));\n    return H;\n}\n\nfloat Sr(vec2 XY, float Time){\n    float H = Si(XY,Time)*NR;\n    return H;\n}\n\nfloat Cr(vec2 XY, float Time){\n    float H = sqrt(1.0 - Sr(XY,Time)*Sr(XY,Time));\n    return H;\n}\n\nfloat K(vec2 XY, float Time){\n    float H = Ci(XY,Time)*Ci(XY,Time)-NR/Cr(XY,Time) * Ci(XY,Time)*Ci(XY,Time)*Ci(XY,Time);\n    return H;\n}\n\nfloat f(vec2 XY, float Time){\n    float H = K(XY, Time)*DerivWatX(XY, Time);\n    return H;\n}\n\nfloat g(vec2 XY, float Time){\n    float H = K(XY, Time)*DerivWatY(XY, Time);\n    return H;\n}\n\nfloat h(vec2 XY, float Time){\n    float H = -K(XY, Time) - NR*Ci(XY, Time)/Cr(XY, Time);\n    return H;\n}\n\nfloat tt(vec2 XY, float Time){\n    float H = -Watershape(XY, Time)/h(XY, Time);\n    return H;\n}\n\nfloat Intense(vec2 XY, float Time){\n    float H = ((Ci(XY, Time) - Int*Cr(XY, Time))/(Ci(XY, Time) + Int*Cr(XY, Time)))*((Ci(XY, Time) - Int*Cr(XY, Time))/(Ci(XY, Time) + Int*Cr(XY, Time)));\n    return H;\n}\n\nfloat Intenserefract(vec2 XY, float Time){\n    float H = Intense(XY - vec2(f(XY,Time)*tt(XY,Time),g(XY,Time)*tt(XY,Time)), Time);\n\treturn H;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 xy = vec2(fragCoord.x/iResolution.y, fragCoord.y/iResolution.y) - pos;\n    vec4 background = vec4(texture(iChannel0, uv).xyz,1.0) -vec4(0.2,0.2,0.2,1.0);\n    fragColor = background + 5.0*((texture(iChannel1,vec2(0.1,1.0))).x)*Intenserefract(xy,speed*iTime) * vec4(1.0,1.0,1.0,1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MssBWj",
+      "date": "1498302421",
+      "viewed": 326,
+      "name": "falling rain drops",
+      "username": "public_int_i",
+      "description": "falling rain drops",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rain",
+        "falling",
+        "drops"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 o, vec2 u )\n{\n    o += 1.-fract((u.y*.02+u.x*.4)*fract(u.x*.61)+iDate.w)*7.-o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdBfzm",
+      "date": "1499905155",
+      "viewed": 299,
+      "name": "[SH17A] Black Hole",
+      "username": "ssell",
+      "description": "First time code-golfing a shader. Was a fun challenge.",
+      "likes": 10,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "2d",
+        "2tweet",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11039,
+            "src": "https://soundcloud.com/wirrzbow/01-outer-space-gemini-suite-side-a",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/**\n * Created by Steven Sell (ssell) / 2017\n * License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n *\n * Contest entry for [SH17A] https://www.shadertoy.com/view/MsjBRD\n * Two-Tweet Challenge (<= 280 Characters)\n */\n\n#define P(A) vec2(cos(A - iTime * s) * r, sin(A - iTime * s) * r)\n\nvoid mainImage(out vec4 o, vec2 d)\n{\n\td  = (d - .5 * (o.xy = iResolution.xy)) / o.y;\n    o -= o;\n    \n    float r, s = .1, a = s;\n    \n    for(; a < 6.3; a += s)                                                         // Iterate angle around circle\n        for(r = s; r < 1.; r += s)                                                 // Iterate circle radius\n        {    \n            vec2 p = d - P(a),                                                     // One point on the infinite line\n                 b = P(a + s) - P(a);                                              // Another point on the line\n            \n            o += \n                smoothstep(.003, -.004, length(p - b * dot(p, b) / dot(b, b))) *   // Draw the tangent line\n                (1. - length(d));                                                  // Darken as we move away from the center\n        }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

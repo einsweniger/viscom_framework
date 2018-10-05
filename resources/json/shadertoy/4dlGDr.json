@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dlGDr",
+      "date": "1367623355",
+      "viewed": 397,
+      "name": "Filter: Box Blur",
+      "username": "4rknova",
+      "description": "A simple box blur filter.",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "blur",
+        "box"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define RADIUS  0.03\n#define SAMPLES 20\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec3 sum = vec3(0);\n\t\t\n\tfor (int i = -SAMPLES; i < SAMPLES; i++) {\n\t\tfor (int j = -SAMPLES; j < SAMPLES; j++) {\n\t\t\tsum += texture(iChannel0, uv + vec2(i, j) * (RADIUS/float(SAMPLES))).xyz\n\t\t\t\t / pow(float(SAMPLES) * 2., 2.);\n\t\t}\n    }\n\t\n\tfragColor = vec4(sum, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

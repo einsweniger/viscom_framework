@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldXfz2",
+      "date": "1512823107",
+      "viewed": 169,
+      "name": "Arrow2d",
+      "username": "mdonahoe",
+      "description": "Just draw an arrow to the mouse",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec4 drawArrow(vec2 pixel, vec2 origin, vec2 arrow, float head) {\n    vec2 p = pixel - origin;\n    vec2 v = normalize(arrow);\n    float projection = dot(p, v);\n    if (projection < 0.0) {\n        return vec4(0, 0, 0, 1);\n    }\n    vec2 offset = p - projection * v;\n    float body = max(0.0, length(arrow) - head);\n    float l = length(p);\n    float w = 0.0;\n    if (l < body) {\n        w = 2.0;\n    } else if (l < body + head) {\n    \tw = body + head - l;\n    }\n    if (length(offset) < w) {\n    \treturn vec4(1, 1, 1, 1);\n    } else {\n    \treturn vec4(0, 0, 0, 1);\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\t\n    fragColor = drawArrow(fragCoord.xy, iResolution.xy / 2.0, iMouse.xy - iResolution.xy / 2.0, 10.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

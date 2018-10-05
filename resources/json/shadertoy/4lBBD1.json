@@ -1,0 +1,78 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lBBD1",
+      "date": "1519426629",
+      "viewed": 236,
+      "name": "3D Terrain",
+      "username": "Txoka",
+      "description": ":",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "3d",
+        "terrain"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define time float(iFrame)/30.\n#define pos iMouse.z<0.?vec3(sin(time),cos(time),sin(time*2.)/7.+0.6):vec3(mouse,0.54)\n#define zResolution 700.\n#define col texture(iChannel1,vec2(uv.x,i))\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    vec2 mouse = iMouse.xy/iResolution.xy*2.-1.;\n\tmouse.x*=iResolution.x/iResolution.y;\n\tvec2 uv2 = fragCoord.xy / iResolution.xy;\n    vec2 uv = uv2*2.-1.;\n    uv.x*=iResolution.x/iResolution.y;\n\tuv/=10.;\n\tuv+=0.18;\n    float g = 1./(zResolution);\n    for(float i=0.;i<1.;i+=g) {\n        uv*=1.+g/4.; //3 or 4 not sure.\n\t\tfloat a=texture(iChannel0,vec2(uv.x,i)).r/20.;\n\t\ta+=0.4;\n        if(a<0.5-uv.y+i/5.){\n            fragColor=col*(1.-i*1.4); //1.5 or 2 (testing) (2 better)\n            break;\n        }\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float rand(vec2 n) { \n\treturn fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);\n}\nfloat noise(vec2 n) {\n\tconst vec2 d = vec2(0.0, 1.0);\n  vec2 b = floor(n), f = smoothstep(vec2(0.0), vec2(1.0), fract(n));\n\treturn mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);\n}\n\nfloat fbm(vec2 p,float iter){\n\tfloat f;\n    for(float i=0.;i<iter;i++){\n\t\tf+=noise(p)/iter;\n\t\tp*=2.+i/100.;\n    }\n\treturn f;\n}\nvoid mainImage(out vec4 fragColor, in vec2 uv){\n\tfragColor = vec4(fbm(uv/1000.,8.));\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

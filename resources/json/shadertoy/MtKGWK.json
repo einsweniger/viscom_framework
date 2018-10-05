@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtKGWK",
+      "date": "1476896825",
+      "viewed": 435,
+      "name": " cosine map / logistic map",
+      "username": "FabriceNeyret2",
+      "description": " how this formula is connected to the chaotic logistic curve ? [url] http://www2.geog.ucl.ac.uk/~mdisney/teaching/GEOGG121/diff/prac/ [/url] ?",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal",
+        "curve",
+        "chaos",
+        "logistic",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant from https://www.shadertoy.com/view/XlKGDK\n// focussing around xdaimon  proposal: v = cos(7.*U.x*v)\n \n\n/**/     // cornusammonis clearer version\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    O -= O;\n\tU /= iResolution.xy;\n    float v = U.x *= 3.1415926; // v=0. is ok too :-)\n    \n    for (int i=0; i<1000; i++) { \n        v = cos(U.x*v);\n      //v = exp(-U.x*v*2.);\n        O += i < 125 ? vec4(0) : .1 * exp(-5.*O.x) * vec4(smoothstep(.005,.0,abs(2.1*U.y-1.05 - v)));\n    }\n}\n/**/\n\n/**     // my/xdaimon original version\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n\tU /= iResolution.xy;\n    float v = U.x*12.6;\n    \n    O -= O;\n    \n    for (int i=0; i<60; i++)\n     // v = sin(v),        \n     // v = cos(7.*U.x*v),                         // recursion\n        v = cos(3.14159*U.x*v) *.9,\n     // v = cos(7.*iMouse.y/iResolution.y*v),\n\t    O = smoothstep(.02,.0,abs(2.*U.y-1. - v)) + O*vec4(.99,.98,.97,1); // curve + relaxation\n}\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

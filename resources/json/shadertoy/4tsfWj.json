@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tsfWj",
+      "date": "1513354006",
+      "viewed": 214,
+      "name": "contrast illusion (96 chars)",
+      "username": "FabriceNeyret2",
+      "description": "the grey bar is constant grey.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "perception",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/**                                // golfed version: 96 chars\n#define mainImage( O, u )  \\\n    vec2 U = u/iResolution.xy, V = vec2( 1.2*U.x-.1 , 5.*U.y-2. ); \\\n\tO += fract(V)==V ? .5 : U.x\n/**/\n        \n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    U /= iResolution.xy;\n    O = vec4(U.x);\n    U = vec2( 1.2*U.x-.1 , (U.y-.4)*5. );\n\tif (fract(U)==U) O = vec4(.5);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

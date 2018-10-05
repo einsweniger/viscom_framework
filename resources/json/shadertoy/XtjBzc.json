@@ -1,0 +1,232 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtjBzc",
+      "date": "1516736986",
+      "viewed": 93,
+      "name": "skittles",
+      "username": "clickbecause",
+      "description": "..tasjaranbow..\nhsv feedback system with broken phong lighting",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "shaderclub"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 260,
+            "src": "/media/previz/buffer03.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Feedback loop:\n//Buf A (hsv) --> Buf B (blur) --> Buf C (sharp)\n\n//Buf D is for bump mapping and per-fragment phong lighting\n\n//Image:\n//this step is weird and just serves to get a desired look\n//instead of sending the previous step (phong + color) to fragColor,\n//i bring that texture in here and add it to the original.\n//but first i blur the phong texture (to combat the terrible aliasing),\n//attenuate the unlit feedback, and add some grain (again, for aliasing)\n//i also perform the gamma correction a second time, which is probably weird\n//but it looks aight\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // blur ////////////////////////////////////////\n    \n    vec2 st = fragCoord.st/iResolution.st;\n    vec2 texel = 1.0/iResolution.xy;\n    \n    vec2 offset[9];\n    \n    offset[0] = vec2(-texel.x, -texel.y);\n    offset[1] = vec2(     0.0, -texel.y);\n    offset[2] = vec2( texel.x, -texel.y);\n    offset[3] = vec2(-texel.x,      0.0);\n    offset[4] = vec2(     0.0,      0.0);\n    offset[5] = vec2( texel.x,      0.0);\n    offset[6] = vec2(-texel.x,  texel.y);\n    offset[7] = vec2(     0.0,  texel.y);\n    offset[8] = vec2( texel.x,  texel.y);\n    \n    float kernel[9];\n    \n    kernel[0] = 0.0625; kernel[1] = 0.1250; kernel[2] = 0.0625;\n    kernel[3] = 0.1250; kernel[4] = 0.2500; kernel[5] = 0.1250;\n    kernel[6] = 0.0625; kernel[7] = 0.1250; kernel[8] = 0.0625;\n    \n    vec4 sum = vec4(0.0);\n    \n    for (int i = 0; i < 9; i++){\n        sum += texture(iChannel1, st + offset[i]) * kernel[i];\n    }\n    \n\tvec4 color = vec4(sum.rgb, 1.0);\n    \n    // apply lighting, grain, final look /////////////////\n    \n    vec4 fb = texture(iChannel0, st);\n    \n    //make some grain\n    float strength = 16.0;\n    float x = (st.x + 4.0 ) * (st.y + 4.0 ) * (iTime * 10.0);\n\tvec3 grain = vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01)-0.005) * strength;\n    \n    color.rgb = pow(color.rgb, vec3(2.2)); //account for gamma\n    \n    //determine final color\n    fb.rgb *= 0.75;\n    color.rgb = fb.rgb + color.rgb + grain*0.48;\n    color.rgb = smoothstep(0.0, 1.0, color.rgb);\n    \n    color.rgb = clamp(pow(color.rgb, vec3(1.0/1.0)), 0.0, 1.0); //gamma correct\n\n    fragColor = color;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 3,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "//hsv feedback\n\nfloat random (vec2 st) {\n    return fract(sin(dot(st.xy,\n                         vec2(12.9898,78.233)))*\n        43758.5453123);\n}\n\nvec3 rgb2hsv(vec3 c)\n{\n    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);\n    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));\n    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));\n\n    float d = q.x - min(q.w, q.y);\n    float e = 1.0e-10;\n    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);\n}\n\nvec3 hsv2rgb(vec3 c)\n{\n    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);\n    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);\n    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \n    vec2 uv = fragCoord / iResolution.xy;\n    \n    ////////////////////////////////////////////////\n    \n    vec4 fb = texture(iChannel3, uv); //pull feedback from sharp buffer\n    \n    vec3 hsv = rgb2hsv(fb.rgb); //transform to hsv space\n    \n    float d = 1.0/4.0;\n    vec2 pix = floor( uv / d ) * d; //pixelate uv coords\n    \n    vec3 hsvT = rgb2hsv(texture(iChannel3, pix).rgb); //sample feedback @ pixelated coords and convert to hsv\n    \n   \tvec3 hsvX = hsvT - hsv; //get difference between per pixel and pixelated hsv\n    hsv += hsvX*0.16; //displace hsv with hsvX and some easing\n    \n    hsv = (hsv-0.5)*2.0; //remap to (-1 - +1)\n    uv += hsv.xy * 0.0016; //displace uv with hsv (hue and sat)\n    \n    ////////////////////////////////////////////////\n    \n    fb = texture(iChannel3, uv); //pull feedback at displaced uv coords\n    hsv = rgb2hsv(fb.rgb); //transform to hsv space\n    \n    hsv.x += 0.0016*hsvT.y*hsvT.z; //modify hue\n    hsv.x = mod(hsv.x, 1.0); //and wrap at 1\n    \n    float s = (hsv.x-0.5)*2.0*0.001 + (hsv.z-0.5)*2.0*0.001; //calculate sat modifier\n    \n    hsv.y *= 1.0 + s; //modify sat\n    hsv.y = mod(hsv.y, 1.0); //and wrap at 1\n    \n    hsv.z *= 1.0 + ((mod(hsv.x + hsv.y, 1.0)-0.5)*2.0)*0.001; //modify val\n    \n    vec3 rgb = hsv2rgb(hsv); //transform modified hsv into rgb space\n    \n    vec4 color = vec4(0.0);\n    \n    if (iFrame <= 10 || iMouse.z > 0.0){\n        color = texture(iChannel0, uv);\n    }else {\n        color = vec4(rgb.rgb, 1.0);\n    }\n\t\n    color = mix(color, texture(iChannel0, uv), 0.001); //mix feedback with a small bit of original texture\n    fragColor = color;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "//simple blur convolution\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 st = fragCoord.st/iResolution.st;\n    vec2 texel = 1.0/iResolution.xy;\n    \n    vec2 offset[9];\n    \n    offset[0] = vec2(-texel.x, -texel.y);\n    offset[1] = vec2(     0.0, -texel.y);\n    offset[2] = vec2( texel.x, -texel.y);\n    offset[3] = vec2(-texel.x,      0.0);\n    offset[4] = vec2(     0.0,      0.0);\n    offset[5] = vec2( texel.x,      0.0);\n    offset[6] = vec2(-texel.x,  texel.y);\n    offset[7] = vec2(     0.0,  texel.y);\n    offset[8] = vec2( texel.x,  texel.y);\n    \n    float kernel[9];\n    \n    kernel[0] = 0.0625; kernel[1] = 0.1250; kernel[2] = 0.0625;\n    kernel[3] = 0.1250; kernel[4] = 0.2500; kernel[5] = 0.1250;\n    kernel[6] = 0.0625; kernel[7] = 0.1250; kernel[8] = 0.0625;\n    \n    vec4 sum = vec4(0.0);\n    \n    for (int i = 0; i < 9; i++){\n        sum += texture(iChannel0, st + offset[i]) * kernel[i];\n    }\n    \n\tvec4 color = vec4(sum.rgb, 1.0);\n    \n    fragColor = color;\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "//soft sharp convolution\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 st = fragCoord.st/iResolution.st;\n    vec2 texel = 1.0/iResolution.xy;\n    \n    vec2 offset[9];\n    \n    offset[0] = vec2(-texel.x, -texel.y);\n    offset[1] = vec2(     0.0, -texel.y);\n    offset[2] = vec2( texel.x, -texel.y);\n    offset[3] = vec2(-texel.x,      0.0);\n    offset[4] = vec2(     0.0,      0.0);\n    offset[5] = vec2( texel.x,      0.0);\n    offset[6] = vec2(-texel.x,  texel.y);\n    offset[7] = vec2(     0.0,  texel.y);\n    offset[8] = vec2( texel.x,  texel.y);\n    \n    float kernel[9];\n    \n    kernel[0] =   0.0; kernel[1] = -0.35; kernel[2] =   0.0;\n    kernel[3] = -0.35; kernel[4] =  2.40; kernel[5] = -0.35;\n    kernel[6] =   0.0; kernel[7] = -0.35; kernel[8] =   0.0;\n    \n    vec4 sum = vec4(0.0);\n    \n    for (int i = 0; i < 9; i++){\n        sum += texture(iChannel0, st + offset[i]) * kernel[i];\n    }\n    \n    vec4 color = vec4(clamp(sum.rgb, 0.0, 1.0), 1.0);\n    \n    fragColor = color;\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 260,
+            "channel": 0
+          }
+        ],
+        "code": "//per-fragment phong\n\nfloat luma(vec4 color) {\n  return dot(color.rgb, vec3(0.299, 0.587, 0.114));\n}\n\nfloat getVal(vec2 uv)\n{\n    return luma(texture(iChannel0, uv));;\n}\n    \nvec2 getGrad(vec2 uv, float delta)\n{\n    vec2 d=vec2(delta, 0.0);\n    return vec2(\n        getVal(uv+d.xy)-getVal(uv-d.xy),\n        getVal(uv+d.yx)-getVal(uv-d.yx)\n    )/delta;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord / iResolution.xy;\n    \n    float res = iResolution.x;\n    float bumpAmt = 0.16;\n    \n    //generate bump map from texture\n    vec3 bump = vec3(getGrad(uv, 1.0/res), 0)*bumpAmt;\n    vec3 n = normalize(vec3(0, 0, -1) + bump);\n   \t\n    //define light position\n\tvec3 lightPos = vec3(cos(iTime)*0.5, sin(iTime*0.5)*0.5, -1.);\n\t\n    //define surface position\n    vec3 vertPos = vec3((uv-0.5)*2.0, 0.0);\n    \n    //define ray\n    vec3 rayOrigin = vec3(0.0, 0.0, -1.0);\n    vec3 rayDir = normalize(vertPos-rayOrigin);\n    \n    //light direction and distance\n\tvec3 lightDir = lightPos - vertPos;\n\tfloat lightDist = length(lightDir);\n    lightDist = lightDist * lightDist;\n    \n    //lightDir /= lightDist; //spot\n    lightDir = normalize(lightDir); //directional\n    \n    //diffuse component\n\tfloat diff = max(dot(lightDir, n), 0.0);\n    diff = pow(diff, 2.)*0.66 + pow(diff, 4.)*0.34; //shane brand diffuse enhancing\n    \n    //specular component\n    vec3 reflectDir = reflect(-lightDir, n);\n    \n    float spec = pow(max(dot( reflectDir, -rayDir), 0.), 2.) * 1.0;\n    float atten = 1.0/(lightDist);\n\t\n    //apply lighting\n\tvec4 color = texture(iChannel0, uv);\n\tcolor.rgb = pow(color.rgb, vec3(2.2)); //account for gamma\n\n\tcolor = color*(diff*0.5) + spec*atten; //apply lighting\n\n\tcolor.rgb = clamp(pow(color.rgb, vec3(1.0/2.2)), 0.0, 1.0); //gamma correct\n\tfragColor = vec4(color.rgb, 1.0);\n    \n    //fragColor = vec4(n, 1.0); //uncomment to see bump map with lighting\n}\n",
+        "name": "Buf D",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

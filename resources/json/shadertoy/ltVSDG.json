@@ -1,0 +1,63 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltVSDG",
+      "date": "1485817389",
+      "viewed": 353,
+      "name": "80's CRT",
+      "username": "arda",
+      "description": "Simple Chromatic Aberration and Contrast Loss",
+      "likes": 5,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "chromaticaberration"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\n\tvec2 R = iResolution.xy;\n    float US1 = sin(1080./(iResolution.y)*U.y)/3.+.66;\t\t\t\t\t//Screen Stripes\n    vec3 US2;\n    US2.x = sin(20./iResolution.y*U.y+(-iTime*2.-.4))/10.+.85;\t//R Chromatic Screen Waves\n   \tUS2.y = sin(20./iResolution.y*U.y+(-iTime*2.))/10.+.85;\t\t//G Chromatic Screen Waves\n    US2.z = sin(20./iResolution.y*U.y+(-iTime*2.+.4))/10.+.85;\t//B Chromatic Screen Waves\n    vec3 US = US1 * US2;\t\t\t\t\t\t\t\t\t\t\t\t//Screen Stripes & Screen Waves Combined\n    U =U/R;\n    vec2 UR = U + vec2(.001,0.);\t//Red UV\n    vec2 UG = U + vec2(0.,0.);\t\t//Green UV\n    vec2 UB = U + vec2(-.001,0.);\t//Blue UV\n    vec4 C = texture(iChannel0, U.xy);\n    vec4 CR = texture(iChannel0, UR.xy) * vec4(.8,.1,.1,0.);\t//Red Channel\n    vec4 CG = texture(iChannel0, UG.xy) * vec4(.1,.8,.1,0.);\t//Green Channel\n    vec4 CB = texture(iChannel0, UB.xy) * vec4(.1,.1,.8,0.);\t//BLue Channel\n    vec4 CL = .8+vec4(vec3(.2),0.);\t\t\t\t//Contrast Loss\n    O = (CR+CB+CG)/CL;\t\t\t\t\t\t//RGB Channels / Contrast Loss * Screen Stripes * Compensation\n\tO *= vec4(US*2.2,0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\nvec2 R = iResolution.xy;\n\tfloat C = (1.-U.y/R.y);\n    U =5.* (U+U-R) / R.y;         // normalized coordinates\n    U.y = 1.-U.y*2.;                   // swap vertical\n    U /= 1.+U.y/8.;                // perspective\n    U.y -= iTime;\n    vec2 UA = U;\n    vec2 UB = U;\n    U = abs(fract(U)- .50);\t\t\t// distance to axis\n    UA = abs(fract(UA+C/15.)-.50);\n    UB = abs(fract(UB+C/30.)-.50);\n    U = .1*C/ sqrt(U);                // turn to blured line\n    UA = .1*C/ sqrt(UA);\n    UB = .1*C/ sqrt(UB);\n    O = (U.x+U.y) * vec4(0,0.,.8,0)\n        +                 vec4(.25,.20,.20,0) \n        + (UA.x+UA.y)   * vec4(.8,0.,0.,0)\n        + (UB.x+UB.y)   * vec4(0.,.7,0.,0) ; // combine H&V + color * inverted fade\n    O *= C;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

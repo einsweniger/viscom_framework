@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4styR4",
+      "date": "1518043040",
+      "viewed": 236,
+      "name": "Procedural Tex, Fence Mesh",
+      "username": "4rknova",
+      "description": "A simple procedural fence mesh mask texture.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "texture"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI     ( 3.14159265359)\n#define ZOOM   (20.0)\n#define WEIGHT ( 3.5)\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{ \n    vec2 uv = ZOOM * PI * fragCoord/iResolution.xy\n            * vec2(iResolution.x/iResolution.y, 1.);\n    float d = sin(uv.x)+cos(uv.y);\n    fragColor = vec4(abs(d*WEIGHT));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

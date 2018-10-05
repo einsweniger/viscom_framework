@@ -1,0 +1,55 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sKSzG",
+      "date": "1465028739",
+      "viewed": 399,
+      "name": "Silhouette - 75 chars",
+      "username": "GregRostami",
+      "description": "This was inspired by Fabrice's optimization of ProPuke's shader: [url]https://www.shadertoy.com/view/ldyXzy[/url]",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "video",
+        "bw",
+        "image",
+        "short",
+        "2tc",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,u)\t\t\t\t\t\t\\\no=3.*texture(iChannel0,u/iResolution.xy);\t\\\no+=o.g-o.r-o\n\n// 89 chars - Fabrice shaved off 5 chars by reworking the math\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o = 3. * texture(iChannel0, u/iResolution.xy);\n    o += o.g - o.r - o;\n}\n/**/\n\n// 96 chars - Original\n/*\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o = texture(iChannel0, u/iResolution.xy);\n    o += 3.*(o.g - o.r) - .5 - o;\n}\n*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

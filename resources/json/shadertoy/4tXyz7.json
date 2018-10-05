@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tXyz7",
+      "date": "1504555133",
+      "viewed": 333,
+      "name": "Glitched Sphere Raytrace",
+      "username": "ThePopil",
+      "description": "Wanted to experiment and try some scanlines / glitch effects on a holographic style object",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "wireframe",
+        "sphere",
+        "raytrace",
+        "glitch",
+        "glitched"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Intersection for scene's sphere\nconst float r \t= 1.0f;\t\t\t\t\t\t\t// Sphere radius\nconst vec3 c \t= vec3(0.0f, 0.0f, 2.0f); \t\t// Sphere position\nconst float xs \t= 0.1f; \t\t\t\t\t\t// Sphere spin speed (x)\nconst float ys \t= 0.13f; \t\t\t\t\t\t// Sphere spin speed (y)\nconst float sr \t= 5.0f; \t\t\t\t\t\t// Stutter rate\nconst float sa \t= 0.15f; \t\t\t\t\t\t// Stutter amount\nconst float scs = 0.1f; \t\t\t\t\t\t// Scan speed\nconst float gl  = 10.0f; \t\t\t\t\t\t// Glitch line intensity\n\nvec2 MainSphereIntersection(vec3 ro, vec3 rd)\n{\n    float r2 = r*r;\n\tvec3 L = c - ro;\n    float tca = dot(L, rd);\n    float d2 = dot(L,L) - tca*tca;\n    if(d2 > r2)\n        return vec2(-1.0f, -1.0f);\n    float thc = sqrt(r2-d2);\n    \n    return vec2(tca-thc, tca+thc);\n}\n\n// Phong lighting\nconst vec3 light \t\t= vec3(1.0, 2.0f, 0.0f);\nconst float ac\t\t\t= 0.5f;\nconst float dc\t\t\t= 0.6f;\nfloat PhongShading(vec3 point, vec3 cam, vec3 norm)\n{\n    vec3 L = normalize(light - point);\n\treturn ac + dc * dot(L, norm);\n}\n\nfloat SphereMap(vec3 normal, float time)\n{\n    normal.x += sin(time * xs);\n    normal.y += sin(time * ys);\n    \n    float u = normal.x/2.0f + 0.5f;\n    float v = normal.y/2.0f + 0.5f;\n    \n    return max(0.02-mod(u,0.1), 0.02-mod(v,0.1));\n}\n\nconst vec3 ro = vec3(0.0f, 0.0f, 0.0f);\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (-1.0 + 2.0*fragCoord.xy / iResolution.xy) * vec2(iResolution.x/iResolution.y, 1.0);\n    vec4 tex = texture(iChannel0, uv)*0.2f;\n    float m_iTime = iTime;\n    \n    // Glitch stuff\n    if(mod(m_iTime, sr) > sr/3.0f)\n    \tm_iTime -= sa;\n    if(sin(m_iTime) > 0.999f && uv.y < 0.0f && uv.y >-0.02f)\n    \tuv.x -= gl * mod(m_iTime, 0.02f) / 0.2f;\n    if(sin(m_iTime/1.2f) > 0.999f && uv.y < 0.5f && uv.y >0.48f)\n    \tuv.x += gl * mod(m_iTime, 0.02f) / 0.2f;\n    if(sin(m_iTime/1.8f) > 0.999f && uv.y < -0.28f && uv.y >-0.3f)\n    \tuv.x -= gl * mod(m_iTime, 0.02f) / 0.2f;\n    if(sin(m_iTime/2.2f) > 0.999f && uv.y < 0.2f && uv.y >0.18f)\n    \tuv.x += gl * mod(m_iTime, 0.02f) / 0.2f;\n    if(sin(m_iTime/2.5f) > 0.999f && uv.y < -0.4f && uv.y >-0.42f)\n    \tuv.x -= gl * mod(m_iTime, 0.02f) / 0.2f;\n    if(sin(m_iTime/2.8f) > 0.999f && uv.y < 0.21f && uv.y >0.19f)\n    \tuv.x += gl * mod(m_iTime, 0.02f) / 0.2f;\n    if(sin(m_iTime/3.0f) > 0.999f && uv.y < -0.35f && uv.y >-0.37f)\n    \tuv.x -= gl * mod(m_iTime, 0.02f) / 0.2f;\n    if(sin(m_iTime/3.3f) > 0.999f && uv.y < 0.05f && uv.y >0.03f)\n    \tuv.x += gl * mod(m_iTime, 0.02f) / 0.2f;\n    \n    vec3 rd = vec3(uv, 1.0f);\n\n    vec2 solutions = MainSphereIntersection(ro, normalize(rd));\n\n    vec3 point_a = ro + solutions.x * rd;\n    vec3 normal_a = normalize(point_a - c);\n    vec3 point_b = ro + solutions.y * rd;\n    vec3 normal_b = normalize(c - point_b);\n    \n    if(solutions.x < 0.0f && solutions.y < 0.0f)\n    {\n    \tfragColor = vec4(0.0f);\n    }\n    else\n    {\n        vec4 buf1 = vec4(0.0f);\n        float scan = mod((uv.y) - (iTime * scs) * 4.0f, 1.0f);\n        float hit = SphereMap(normal_a, m_iTime);\n        if(hit > -0.01f)\n        {\n        \tfloat shading = PhongShading(point_a, ro, normal_a);\n            buf1 = vec4(0.0f,1.0f,0.0f,1.0f) * shading * scan;\n            if(hit < 0.0f)\n                buf1 *= (0.01 + hit)/0.01;\n        }\n        \n        vec4 buf2 = vec4(0.0f);\n        hit = SphereMap(normal_b, m_iTime);\n        if(hit > -0.01f)\n        {\n        \tfloat shading = PhongShading(point_b, ro, normal_b);\n            buf2 = vec4(0.0f,1.0f,0.0f,1.0f) * shading/5.0f * scan;\n            if(hit < 0.0f)\n                buf2 *= (0.01 + hit)/0.01;\n        }\n        \n        if(scan > 0.985f)\n        {\n            fragColor = tex + vec4(0.5f,scan,0.0f,1.0f) * PhongShading(point_a, ro, normal_a);\n        }\n        else if(length(buf1 + buf2) > 0.0f)\n        {\n            float pulse = (sin(m_iTime)*2.5f);\n            if(pulse<1.0f)\n                pulse=1.0f;\n            fragColor = tex + buf1 * pulse + buf2 * pulse;\n        }\n        else\n        {\n        \tfragColor = vec4(0.0f);\n        }\n    }\n}\n\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

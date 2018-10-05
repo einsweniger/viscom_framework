@@ -1,0 +1,93 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldGcWK",
+      "date": "1523371418",
+      "viewed": 100,
+      "name": "Ellipse-Geometry",
+      "username": "Txoka",
+      "description": "mouse to set 2\u00ba point\nright/left arrows to set size",
+      "likes": 0,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "geometry",
+        "ellipse"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define AA 2.\n\nvec2 p1=vec2(0.,0.);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    vec2 uv = fragCoord/iResolution.xy*2.-1.;\n\tuv.x*=iResolution.x/iResolution.y;\n\t\n\tvec2 p2 = iMouse.xy/iResolution.xy*2.-1.;\n\tp2.x*=iResolution.x/iResolution.y;\n    if(iMouse.x==0.&&iMouse.y==0.)p2=vec2(0,0);\n    \n\tfloat size=texture(iChannel0,vec2(0.)).r;\n\t\n    float col = distance(uv,p1)+distance(uv,p2);\n\tcol=smoothstep(size,size+fwidth(col)*AA,col);\n    \n    fragColor = vec4(col);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float isPressed(int keyCode){\n\treturn texture(iChannel0,vec2(float(keyCode)/256.,0.)).r;\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n\tvec2 uv = fragCoord/iResolution.xy;\n    fragColor = texture(iChannel1,uv);\n\tfragColor+=(isPressed(39)-isPressed(37))/60.;\n\tif(iTime<0.1)fragColor=vec4(1.);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

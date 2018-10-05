@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4ddcW2",
+      "date": "1520259626",
+      "viewed": 170,
+      "name": "bug: return+break in switch",
+      "username": "FabriceNeyret2",
+      "description": "Compilation is accepted on Angle and refused in true OpenGL (\"unreachable statemen\"t)\n\nwhat about macOS ?",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "glsl",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    int x = int(3.*U.x/iResolution.x);\n\n    switch(x) {\n        case 0: O = vec4(.3); return; break;\n        case 1: O = vec4(.6); return; break;\n        case 2: O = vec4(.9); return; break;\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

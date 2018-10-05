@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsycWh",
+      "date": "1521750832",
+      "viewed": 240,
+      "name": "Mandelbrot in 1 tweet :)",
+      "username": "spacegoo",
+      "description": "Mandelbrot fractal in less than 280 characters",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal",
+        "mandelbrot",
+        "twitter",
+        "tweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 o,in vec2 d){vec2 p=d/iResolution.x*4.-vec2(2.5,1.1);vec2 z=p,r;float j=0.;for(int i=0;i<201;i++){r=p+vec2(z.x*z.x-z.y*z.y,2.*z.y*z.x);if(length(r)>2.)break;z=r;j+=1.;}o=vec4(step(j,199.)*j*vec3(0.05,j*0.0003,0.),1.);}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

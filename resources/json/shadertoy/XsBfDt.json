@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsBfDt",
+      "date": "1502664361",
+      "viewed": 389,
+      "name": "Watercolor 83 chars",
+      "username": "benoitM",
+      "description": "Second try for short shader, same technique as https://www.shadertoy.com/view/MsjfDK",
+      "likes": 15,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "fractal",
+        "recursive",
+        "inversion",
+        "onetweet",
+        "symmetries"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11657,
+            "src": "https://soundcloud.com/cormac_carroll/heartbeats-jose-gonzales-the",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( o, u )   \\\n    o = vec4(u,iTime*9.,0); \\\n    for (int i=0; i++<96;) \\\n    o = abs( o/dot(o,o)-.9 )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

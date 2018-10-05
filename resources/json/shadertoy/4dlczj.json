@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dlczj",
+      "date": "1488955861",
+      "viewed": 76,
+      "name": "Greetings, Conspiracy",
+      "username": "Zavie",
+      "description": "This shader draws the logo of the Hungarian demogroup \"Conspiracy\".\n\nIt served as a prototype for a procedural texture during the creation of the 64kB intro \"H - Immersion\". The logo appeared, hidden in plain sight, as a nod to the group.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "demoscene",
+        "logo"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\n\nThis shader draws the logo of the Hungarian demogroup \"Conspiracy\".\n\nIt served as a prototype for a procedural texture during the\ncreation of the 64kB intro \"H - Immersion\". The logo appeared,\nhidden in plain sight, as a nod to the group.\n\n\nH - Immersion, by Ctrl-Alt-Test:\n > http://www.ctrl-alt-test.fr/?page_id=444\n > https://www.youtube.com/watch?v=27PN1SsXbjM\n   (logo visible at 2mn30s)\n\n\nConspiracy:\n > http://conspiracy.hu/\n > https://www.youtube.com/watch?v=qRVTI2y0BBg\n\n-- \nZavie / Ctrl-Alt-Test\n\n*/\n\nvec3 debugDistance(float d, vec3 color)\n{\n    float iso =\n        smoothstep(0.92, 0.98, abs(fract(d) * 2. - 1.)) +\n        smoothstep(0.8, 0.95, abs(fract(5.*d) * 2. - 1.))*0.5;\n    return mix(vec3(1.), color, iso)* mix(0.8, 1., float(d > 0.)) * smoothstep(0.02,0.06, abs(d));\n}\n\nfloat Plane(vec2 p, vec2 n, float t0)\n{\n    return dot(p, normalize(n)) - t0;\n}\n\nfloat Spike(vec2 p)\n{\n    return max(max(\n        Plane(p , vec2(1., 0.), 0.),\n        Plane(p , vec2(-1., -1.), -0.06)),\n        Plane(p , vec2(-5., 1.), 0.09));\n}\n\nfloat ConspiracyLogo(vec2 c)\n{\n    float halfSqrt2 = sqrt(2.)/2.;\n    vec2 c2 = vec2(c.y, -c.x);\n    vec2 c3 = halfSqrt2 * vec2(c.x + c.y, -c.x + c.y);\n    vec2 c4 = vec2(-c3.y, c3.x);\n\n    float d = length(c) - 0.05;\n    d = min(d, min(Spike(c), Spike(-c)));\n    d = min(d, min(Spike(c2), Spike(-c2)));\n    d = min(d, min(Spike(c3), Spike(-c3)));\n    d = min(d, min(Spike(c4), Spike(-c4)));\n    return d;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.y;\n    \n    float d = ConspiracyLogo(uv - vec2(0.9, 0.5));\n\n    vec3 color = debugDistance(10.*d, vec3(0.8, 0.5, 1.));\n    fragColor = vec4(color,1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlcSR4",
+      "date": "1478352575",
+      "viewed": 316,
+      "name": "dot wave (136 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "wave",
+        "short",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\n    U = 20.* ( U+U - (O.xy=iResolution.xy) ) / O.y;\n\n    O.xy  = cos(.3*U - iDate.w);   // -4 by coyote\n\n    O = O-O + .1/length( fract( U -2.*O.x*O.y )-.5 ); \n    \n   // O += .1/length( fract( U - 2.*length(O.xy) )-.5 ) -O; \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

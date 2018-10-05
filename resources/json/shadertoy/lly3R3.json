@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lly3R3",
+      "date": "1475776241",
+      "viewed": 243,
+      "name": "Spiral 01",
+      "username": "lokii",
+      "description": "Animated spiral.. Most of the color varying spiral shaders use nested spiral to have multiple spiral starting from the center. This one does it differently by essentially having just one spiral vary colors along its arc length.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "spiral"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Author: Akshay S. Loke\n// Title: Spiral 01\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n#define USE_SMOOTH\n#define M_PI 3.14159265358979\n#define M_2PI 6.28318530717958\n#define RADIUS .25\n#define NUMCURLS 6\n\n//http://iquilezles.org/www/articles/palettes/palettes.htm\nvec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )\n{\n    return a + b*cos( 6.28318*(c*t+d) );\n}\n\nvoid mainImage( out vec4 O, vec2 U ) {\n    vec2 R = iResolution.xy;\n    U = (2.*U-R)/R.y;\n    \n    float \tdist = length(U),\n\t\t\tnormTheta = .5+atan(U.y, U.x)/M_2PI,\n        \tval = 0.;\n    \n    for (int i=-1; i<NUMCURLS-1; i++) {\n        float iFloat = float(i);\n        float \tringPre = (iFloat == -1.)? 0.: (normTheta + iFloat) * RADIUS,\n            \tringPost = (normTheta + iFloat + 1.) * RADIUS;\n        \n#ifdef USE_SMOOTH\n        float ringVal = smoothstep(-.01, 0., dist-ringPre) - smoothstep(-.01, 0., dist-ringPost);\n#else\n        float ringVal = step(ringPre, dist) - step(ringPost, dist);\n#endif\n        val += ringVal * (normTheta + iFloat + 1.);\n    }\n\n    val /= float(NUMCURLS);\n    val += cos(iTime*.3);\n\n    vec3 col = pal(val, \n                   vec3(0.5,0.5,0.5),\n                   vec3(0.5,0.5,0.5),\n                   vec3(1.0,1.0,1.0),\n                   vec3(0.0,0.33,0.67) );\n    \n    O = vec4(col * smoothstep(0.81, .8, dist), 1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

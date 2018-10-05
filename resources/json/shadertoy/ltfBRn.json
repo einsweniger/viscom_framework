@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltfBRn",
+      "date": "1510739741",
+      "viewed": 190,
+      "name": "MyCircles2.0",
+      "username": "Arseny",
+      "description": "Second time",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define rot(a) mat2(cos(a),-sin(a),sin(a),cos(a))\n\nfloat H, W, fr;\nfloat thickness = 0.5;\nfloat a = 0.;\nfloat intensive = 1.1;\nint k = 3;\nconst int N = pow(3, k + 1) - 1) / 2; // must be (pow(3, k + 1) - 1) / 2   but unfourtunatly it is not compiles\nconst int M = (3 * 3 * 3 - 1) / 2; // must be (pow(3, k) - 1) / 2   but unfourtunatly it is not compiles\nvec2 fcenter, mainvec;\nfloat multiplier = sqrt(3.) / (2. + sqrt(3.)); // constant which provides tangency of circles\nfloat pi = 4. * atan(-1.);\n\nfloat circle_influence(vec2 center,float r,vec2 uv){\n    float delta = abs(distance(center, uv) - r);\n    return pow(thickness / delta, intensive);\n}\n\nvoid mainImage( out vec4 ans, in vec2 fragCoord )\n{\n    ans = vec4(0, 0, 0, 0);\n    H = iResolution.y;\n    W = iResolution.x;\n\tvec2 uv = fragCoord.xy;\n    fcenter = vec2(W / 2., H / 2.);\n    fr = min(H, W) / 2.1;\n    mainvec = vec2(fr, 0);\n    a = iTime; \n    mainvec = mainvec * rot(a);\n    vec3 queue[N]; // queue of circles (center and radius)\n    int l = 0;\n    queue[0] = vec3(fcenter, fr);\n    int r = 1;\n    ans += circle_influence(fcenter, fr, uv);\n    while (l < M){\n        vec2 nowvec = mainvec;\n        vec2 nowc = vec2(queue[l].x, queue[l].y);\n        for (int j = 0; j < 3; j++){\n            vec2 newc = (fcenter + nowvec) + (nowc - (fcenter + nowvec)) * multiplier;\n            float newr = queue[l].z * multiplier;\n            ans += vec3(1) * circle_influence(newc, newr, uv);\n            queue[r] = vec3(newc.xy, newr);\n            r++;\n            nowvec = nowvec * rot(2. * pi / 3.);\n        }\n        l++;\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

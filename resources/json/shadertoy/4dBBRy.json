@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dBBRy",
+      "date": "1500833953",
+      "viewed": 226,
+      "name": "Broken Cam Distortion",
+      "username": "Txoka",
+      "description": "distortion",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "distortion"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float rand(float co) {\n    return fract(sin(dot(co,12.9898+78.233)) * 43758.5453);\n}\nvoid mainImage( out vec4 o, in vec2 fragCoord ) {\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tvec2 uv1 = uv;\n    uv1.y-=rand(uv.x*iTime)/60.;\n    vec4 e = texture(iChannel0,uv1);\n    vec4 bn = vec4(vec3(e.r+e.g+e.b)/3.,1.0);\n\t\n\tvec2 offset = vec2(0.01*rand(iTime),sin(iTime)/30.);\n\te.r = texture(iChannel0, uv+offset.xy).r;\n\te.g = texture(iChannel0, uv).g;\n\te.b = texture(iChannel0, uv+offset.yx).b;\n\tuv.y+=rand(iTime)/(sin(iTime)*10.);\n    uv.x-=rand(iTime+2.)/(sin(iTime)*10.)/30.;\n    if(sin(iTime*rand(iTime))<0.99) {\n    \to=mix(e,bn,0.6);\n    } else {\n    \to=texture(iChannel0,uv);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

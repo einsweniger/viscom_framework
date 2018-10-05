@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ls3XR2",
+      "date": "1460236959",
+      "viewed": 266,
+      "name": "Self Shadow Volume",
+      "username": "KylBlz",
+      "description": "This is a smoky raymarched volume mostly to pilot the density normal calculation (lines 100-105). This is a draft of the object in my other shader Aurora Explorer",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "volume",
+        "raymarch",
+        "shadow",
+        "normal",
+        "density"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 46,
+            "src": "/media/a/79520a3d3a0f4d3caa440802ef4362e99d54e12b1392973e4ea321840970a88a.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI                  3.14159265\n\nconst float mtSphere = 1.,\n            mtGround = 2.,\n            mtLight = 3.,\n    \t\tzfar = 10000.;\n\n//the reflective sphere\nvec4 sphere = vec4(vec3(0.), 1.0);\n//the light\nvec4 light = vec4(vec3(1.,1.,0.), 0.1);\nfloat brightness = 2.5;\n//plane location, plane normal, nothing\nmat3 plane = mat3(vec3(0., -0.7, 0.), vec3(0., 1., 0.), vec3(0.));\n\nvec3 rotateXY(vec3 p, vec2 angle) {\n    vec2 c = cos(angle), s = sin(angle);\n    p = vec3(p.x, c.x*p.y + s.x*p.z, -s.x*p.y + c.x*p.z);\n    return vec3(c.y*p.x + s.y*p.z, p.y, -s.y*p.x + c.y*p.z);\n}\n\nvec3 rnd( vec3 p ) {\n\tp = vec3( dot(p,vec3(127.1,311.7,269.5)), dot(p,vec3(269.5,183.3,12.9898)), dot(p,vec3(12.9898, 78.233, 127.1)) );\n\treturn -1.0 + 2.0*fract(sin(p)*43758.5453123);\n}\n\nfloat fade(float t) { \n    return t * t * t * (t * (t * 6. - 15.) + 10.);\n}\n\n//perlin noise with scale, smoothsteped to 0. - 1.\nfloat pnoise3d(vec3 p, float scl) {\n    vec3 i = floor(p*scl);\n    vec3 f = fract(p*scl);\n    \n    vec3 u = vec3(fade(f.x), fade(f.y), fade(f.z));\n    \n    vec3 g000 = rnd(i + vec3(0.0, 0.0, 0.0));\n    vec3 g001 = rnd(i + vec3(0.0, 1.0, 0.0));\n    vec3 g011 = rnd(i + vec3(1.0, 1.0, 0.0));\n    vec3 g010 = rnd(i + vec3(1.0, 0.0, 0.0));\n    vec3 g100 = rnd(i + vec3(0.0, 0.0, 1.0));\n    vec3 g101 = rnd(i + vec3(0.0, 1.0, 1.0));\n    vec3 g111 = rnd(i + vec3(1.0, 1.0, 1.0));\n    vec3 g110 = rnd(i + vec3(1.0, 0.0, 1.0));\n    \n    vec3 d000 = f - vec3(0.0, 0.0, 0.0);\n    vec3 d001 = f - vec3(0.0, 1.0, 0.0);\n    vec3 d011 = f - vec3(1.0, 1.0, 0.0);\n    vec3 d010 = f - vec3(1.0, 0.0, 0.0);\n    vec3 d100 = f - vec3(0.0, 0.0, 1.0);\n    vec3 d101 = f - vec3(0.0, 1.0, 1.0);\n    vec3 d111 = f - vec3(1.0, 1.0, 1.0);\n    vec3 d110 = f - vec3(1.0, 0.0, 1.0);\n    \n    float s000 = dot(g000, d000);\n    float s001 = dot(g001, d001);\n    float s011 = dot(g011, d011);\n    float s010 = dot(g010, d010);\n    float s100 = dot(g100, d100);\n    float s101 = dot(g101, d101);\n    float s111 = dot(g111, d111);\n    float s110 = dot(g110, d110);\n    \n    float x01 = mix(s001,s011, u.x);\n    float x02 = mix(s000,s010, u.x);\n    float x11 = mix(s101,s111, u.x);\n    float x12 = mix(s100,s110, u.x);\n    \n    return smoothstep(0.,1.0,mix(mix(x02, x01, u.y), mix(x12, x11, u.y), u.z));\n}\n\n//marches subsurface volume\nvec3 volmarch( vec3 ro, vec3 rd, vec2 tminmax ) {\n    const int steps = 32, lightsteps = 16;\n    //start at starting loc\n    float t = tminmax.x;\n    //small delta\n    float dt = (tminmax.y - tminmax.x) / float(steps);\n    //output color\n    vec3 col= vec3(0.);\n    //sample offset for normal\n    vec2 offset = vec2(dt*0.1,0.);\n    //current sample\n    vec4 c = vec4(0.);\n    vec3 pos = ro;\n \n    for( int i=0; i<steps; i++ ) {        \n        //take 4 samples, use differentials as magnitudes\n        c.w = pnoise3d(pos,2.);\n        c.x = c.w-pnoise3d(pos+offset.xyy, 2.);\n        c.y = c.w-pnoise3d(pos+offset.yxy, 2.);\n        c.z = c.w-pnoise3d(pos+offset.yyx, 2.);\n        //i have no idea what im doing\n        vec3 norm = normalize(sin(c.xyz));\n        \n        //follow ray back to light\n \t\tvec3 lightdir = normalize(light.xyz-pos);\n        float dj = (sphere.w - length(pos-sphere.xyz))/float(lightsteps);\n        float shadow = 1.;\n        for( int j=0; j<lightsteps; j++ ) {\n            //step towards light\n        \tvec3 shadowPos = pos+lightdir*dj*float(j);\n            shadow -= 5.*dj*(pnoise3d(shadowPos, 2.)+0.1);\n        }\n        shadow = smoothstep(0., 1., max(shadow, 0.));\n        \n        //light properties\n        float lightdist = distance(light.xyz, pos);\n        float moment = brightness/(1.+lightdist*lightdist)+max(dot(norm, lightdir),0.);\n\t\t//color dense areas\n        vec3 blueish = vec3(1.0+moment) - vec3(1.4, 1.0, 0.)*float(int(c.w > 0.01));\n        \n        //simple sumation\n        col += max(dt*(c.w+0.2), 0.)*blueish*moment*shadow;\n        \n        //step at the end so we actually get the surface sample\n        t += dt;\n        pos = ro+rd*t;\n    }\n    \n    return col;\n}\n\n//returns { location, normal, vec3(dist, volume, material) }\nmat3 traceScene( vec3 ro, vec3 rd) {\n    //sphere intersection\n    vec3 oc = ro - sphere.xyz;\n    float c = dot( oc, oc ) - sphere.w*sphere.w;\n    float bs = dot( oc, rd );\n    float hs = sqrt(bs*bs - c);\n    float sphereDepth = zfar;\n    if (hs > 0.) {\n        if (bs < 0.) sphereDepth = -bs - hs;\n    }\n    //now the light\n    oc = ro - light.xyz;\n    c = dot( oc, oc ) - light.w*light.w;\n    float bl = dot( oc, rd );\n    float hl = sqrt(bl*bl - c);\n    float lightDepth = zfar;\n    if (hl > 0.) {\n        if (bl < 0.) lightDepth = -bl - hl;\n    }\n    //plane intersection\n    float planeAng = dot(plane[1], rd);\n    float planeDepth = dot(plane[1], plane[0] - ro) / planeAng;\n    if (planeDepth < 0. || planeDepth > zfar) planeDepth = zfar;\n    \n    //depth test\n    if (sphereDepth < planeDepth && sphereDepth < lightDepth) {\n        vec3 sloc = ro+rd*sphereDepth;\n        return mat3(sloc,\t//location\n                   (sloc-sphere.xyz) / sphere.w,\t//normal\n                   vec3(max(0., sphereDepth), hs/sphere.w, mtSphere));\t//depth, volume, material\n    } else if (planeDepth < sphereDepth && planeDepth < lightDepth) {\n\t\treturn mat3(ro+rd*planeDepth,\t//location\n                    plane[1],\t//normal\n                    vec3(max(0., planeDepth), planeAng+1.+plane[2].x, mtGround));\t//depth, volume, material\n    } else if (lightDepth < planeDepth && lightDepth < sphereDepth) {\n        vec3 sloc = ro+rd*lightDepth;\n        return mat3(sloc,\n                    sloc / light.w,\n                    vec3(max(0., lightDepth), light.w, mtLight));\n    } else {\n        return mat3(ro+rd*zfar,\n                    -rd,\t//just project everything out to zfar\n                    vec3(zfar, zfar, 0.));\n    }\n}\n\nvec3 shadeScene(vec3 rayDir, mat3 collision) {\n    //calculate light properties\n    vec3 lightDir = normalize(light.xyz - collision[0]);\n    float light2surface = distance(light.xyz, collision[0]),\n          lightPow = brightness / (light2surface*light2surface+1.);\n    //scrolls the clouds\n    vec3 timeoffset = vec3(iTime*0.1, 0., 0.);\n    //volume\n    vec3 outp = vec3(0.);\n    \n    //if ray collided with sphere\n    if (collision[2].z == mtSphere) {\n        //add sphere color\n        outp = volmarch(collision[0], rayDir, vec2(0., 1.));       \n    }\n    //if ray collided with ground\n    else if (collision[2].z == mtGround) {\n        outp = mix(\n            texture(iChannel0, collision[0].xz).rgb, //texture sampler\n            vec3(0.8,0.8,1.0), //sky color at horizon\n            (0.15+dot(collision[1], rayDir))*2.) * //distance fade\n            (1. - max(pnoise3d((rayDir*vec3(1.,-1.,1.)-timeoffset) * vec3(1.,7.,1.), 1.), 0.));\t//cloud shadow\n    }\n    //ray collided with light source\n    else if (collision[2].z == mtLight) {\n        outp = vec3(2.);\n    }\n    //ray did not collide (sky)\n    else {\n        vec3 smp = collision[1] + timeoffset;\n\t\toutp = mix(vec3(0.2, 0.6, 1.), vec3(1.0),\n            max(pnoise3d(smp*vec3(1.,7.,1.),1.)*5., 0.) *\t//wide bands of noise\n            max(pnoise3d(smp*vec3(7.,14.,7.),1.)+0.6, 0.) *\t//recursive blend finer details\n            max(pnoise3d(smp*vec3(7.,28.,7.),1.)+0.6, 0.) +\n            0.75 - rayDir.y);\n    }\n\treturn outp;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    //place 0,0 in center from -1 to 1 ndc\n    vec2 uv = fragCoord.xy * 2./iResolution.xx - vec2(1., 0.5);\n    //get input, update camera\n    vec3 camLoc = vec3(0., 0., 3.);\n    //vec3 camLocT = vec3(0., 0., 0.);\n    //camLoc = mix(camLoc, camLocT, rnd(uv).x);\n\tvec3 camRot = vec3(0., PI, 0.);\n    //camRot is angle vec in rad\n    vec3 camDir = normalize(vec3(uv, 1.0));\n    vec3 rayDir = normalize(rotateXY(camDir, camRot.xy));\n    //update light\n    light.x = cos(iTime);\n    light.z = sin(iTime);\n    //calculate intersection distance, normal, width, and material...\n    mat3 collision = traceScene(camLoc,  rayDir);\n\n \tfragColor = vec4(0., 0., 0., 1.);\n    //calculate color\n    fragColor.rgb = shadeScene(rayDir, collision);    \n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

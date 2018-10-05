@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsVczd",
+      "date": "1523032419",
+      "viewed": 109,
+      "name": "The Worm of France ",
+      "username": "Thomas_nathan21",
+      "description": "My French Breathren are so proud of me ",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "worm",
+        "fance"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159265359\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n   \t //sets 0 as the centre of the screen \n\tvec2 r = 2.*fragCoord / iResolution.xy -1.;\n    \n    //variables\n    float x = r.x;\n    float y = r.y;\n    float Thickness = 0.3;\n    float Yoffset = 0.9; \n    float Height = 0.2;\n    \n    //Colors\n    vec3 red = vec3(1,0,0);\n    vec3 white = vec3(1,1,1);\n    vec3 blue = vec3(0,0,1);\n    vec3 pixelCol = vec3(0, 0, 0);\n\t\n    if(abs((x * Height) * sin(PI * (x + iTime)) - (y - Yoffset)) < Thickness) pixelCol = red;\n    if(abs((x * Height) * sin(PI * (x + iTime)) - (y + Yoffset)) < Thickness) pixelCol = blue;\n    if(abs((x * Height) * sin(PI * (x + iTime)) - y) < (Thickness * 2.0)) pixelCol = white;\n   \n    // Output to screen\n    fragColor = vec4(pixelCol,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

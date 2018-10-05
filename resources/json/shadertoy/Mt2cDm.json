@@ -1,0 +1,56 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mt2cDm",
+      "date": "1508917727",
+      "viewed": 187,
+      "name": "free local contrast ",
+      "username": "FabriceNeyret2",
+      "description": "MIPmap (and wrap) are now available on buffers and videos !\nMeaning we can count, integrate, average, isolate frequency bands for free ! \n\nHere, adjust intensity according to neighborhood (varying size).",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "video",
+        "filter",
+        "image",
+        "processing",
+        "integration",
+        "signal",
+        "gpmipmap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define T(l) textureLod( iChannel0, U, (l)*8. )\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    U /= iResolution.xy;\n    O = T(0.) * .8/ T(.5+.5*cos(iTime)); // T(U.x); \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MllXDn",
+      "date": "1435983613",
+      "viewed": 269,
+      "name": "Rolling Marbles (with DOF)",
+      "username": "rubixcom",
+      "description": "This is a simple raytraced version of my earlier, raymarched version of the rolling marbles. I wanted to compare the difference in performance and quality of the image between raymarching and raytracing.",
+      "likes": 10,
+      "published": 3,
+      "flags": 33,
+      "tags": [
+        "raytracing",
+        "simple"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define BRIGHTNESS 1.5\n#define BLUR_RADIUS 2\n\n// Simple DOF bluring\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float w = texture( iChannel0, fragCoord /iChannelResolution[0].xy ).w;\n    \n    vec4 blur;\n    for (int x = -BLUR_RADIUS; x <= BLUR_RADIUS; x++)\n        for (int y = -BLUR_RADIUS; y <= BLUR_RADIUS; y++)\n            blur += texture( iChannel0, (fragCoord + vec2(x,y)) /iChannelResolution[0].xy ) * length(vec2(x,y));\n    \n     blur = blur / ((float(BLUR_RADIUS) *2. +1.) * (float(BLUR_RADIUS) *2. +1.));\n    \n    fragColor = mix(texture( iChannel0, fragCoord /iChannelResolution[0].xy ), blur, w) / (BRIGHTNESS + w);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define NO_INTERSECTION 100000000.\n#define OBJ_PLANE 0\n#define OBJ_SPHERE 1\n#define OBJ_LIGHT 2\n\n#define SPHERES 5\n#define LIGHTS 3\n#define SHADOWS \n#define REFLECTIONS\n\nconst vec4 lightColor = vec4(1.0,.75,0.6,0.0); \nconst vec4 lightColor2 = vec4(0.0,1.0,0.6,0.0);\nconst vec4 lightColor3 = vec4(0.75,0.0,1.0,0.0);\n\n// Returns ray vector for a pixel location based on a camera position, target and pixel coordinate\nvec3 rayVector(in vec3 position, in vec3 target, in vec2 fragCoord)\n{\n    vec3 eye = normalize(target - position);\n    vec3 up = vec3(0., 1., 0.);\n    vec3 right = cross(eye, up);\n    up = cross(eye,right);\n\n    mat3 cameraMatrix = mat3(right.x, up.x, eye.x,\n                \t\t\t right.y, up.y, eye.y,\n                \t\t\t right.z, up.z, eye.z);\n\n    vec2 uv = fragCoord.xy / iResolution.xy - vec2(.5);\n    uv.x = uv.x * iResolution.x/iResolution.y;\n    uv.y = -uv.y;\n    float focalDistance = 0.6 + .3 * sin(iTime* .10);\n    return normalize(vec3(uv.x,uv.y,focalDistance) * cameraMatrix) ;\n}\n\n// Texture for a ball object, basically dioganal stripes\nvec4 textureBall (in vec2 pos)\n{\n\treturn vec4(step(.5,fract((pos.x+pos.y)*4.)));\n}\n\n// Texture for the plane object, a checkerboard\nvec4 texturePlane (in vec2 pos)\n{\n\treturn vec4(abs(step(0.5,fract(pos.x*3.)) - step(0.5,fract(pos.y*3.))));\n}\n\n// Shading calculation, basic phong shading\nvec4 shade(in vec3 pos, in vec3 normal, in vec3 cameraVector, in vec3 lightPos, in vec4 lightColor, in vec4 surfaceTexture)\n{\n    vec3 light = normalize(lightPos - pos);\n    float dotlight = dot(normal,light);\n\n    vec3 cameraReflected = normalize(reflect(cameraVector,normal));\n    float spec = 0.0;\n    if (dot(cameraReflected,light) < 0.0)\n        spec = min(1.0,pow(dot(cameraReflected,light),2.0));\n    return (surfaceTexture\n        * vec4(0.2+dotlight) * lightColor\n        + vec4(0.5*spec)) * 10.0/length(lightPos - pos); // Sphere color\n}\n\n// Returns a bounce value for a ball based on it's position\nvec3 bounce(in vec3 p)\n{\n\treturn vec3(0.0,1.6*abs(sin(iTime + float(int(p.y/6.0) + int(p.x/6.0)))),0.0);\n}\n\n// Calculates the intersection between a vector (o = origin, I = direction) and a sphere (c = origin, r = radius) and returns distance along vector I. Returns NO_INTERSECTION if there isn't one.\nfloat lineSphereIntersection(in vec3 o, in vec3 I, in vec3 c, float r)\n{\n\tfloat det = pow(dot(I,o-c),2.) - pow(length(o-c),2.) + pow(r,2.);\n\t\n\tif (det <= 0.0)\n\t\treturn NO_INTERSECTION;\n\telse \n\t{\n\t\tfloat d = -dot(I, o-c) - sqrt(det);\n\t\tif (d < 0.0)\n\t\t\treturn NO_INTERSECTION;\n\t\treturn d;\n\t}\n}\n\n// Calculates the intersection between a vector (o = origin, I = direction) and a level y-plane (y = height) and returns distance along vector I. Returns NO_INTERSECTION if there isn't one.\nfloat lineFloorIntersection(in vec3 o, in vec3 I, in float y)\n{\n\tfloat t = ((y-o.y) / I.y);\n\tif (t < 0.)\n\t\treturn NO_INTERSECTION;\n\telse\n\t\treturn t;\n}\n\n// Finds an intersection between a camera vector (ro = origin, rd = direction) and all the shapes in the scene. Returns distance along the vector rd and objectType (0 = plane, 1 = sphere) \nfloat rayTrace(in vec3 ro, in vec3 rd, in vec3 shapeLoc, in vec3 lights[3], out vec3 shapeOffset, out int objectType)\n{\n    float t = 0.0;\n\tt = lineFloorIntersection(ro, rd, 0.0);\n\tshapeOffset = vec3(0.);\n\tobjectType = OBJ_PLANE;\n\n\tfor (int i = 0; i < SPHERES; i++)\n\t{\n\t\tvec3 off = vec3(float(i) * rd.x,0.0,float(i) * rd.z)+vec3(ro.x,0.,ro.z) / 6.; \n\t\toff = 6. * (off - fract(off));\n\t\tvec3 tcc = shapeLoc + off + bounce(off);\n\t\tfloat tm = lineSphereIntersection(ro, rd, tcc, 1.8);\n\t\tif (tm < t)\n\t\t{\n\t\t\tt = tm;\n\t\t\tshapeOffset = tcc;\n\t\t\tobjectType = OBJ_SPHERE;\n\t\t\tbreak;\n\t\t}\n\t}\n\t\t\n\tfor (int i = 0; i < LIGHTS; i++)\n\t{\n\t\tfloat tm = lineSphereIntersection(ro, rd, lights[i], .5);\n\t\tif (tm < t)\n\t\t{\n\t\t\tt = tm;\n\t\t\tobjectType = OBJ_LIGHT + i;\n\t\t}\n\t}\n\t\t\n\treturn t;\n}\n\n// Returns a normal and a texture pixel from the scene based on the ray traced position\nvoid normalsAndTexture(in vec3 ro, in vec3 rd, in float t, in int objectType, in vec3 shapeOffset, in mat3 rotation, out vec3 p, out vec3 normal, out vec4 texc)\n{\n\tp = ro + rd * t;\n\tif (objectType==OBJ_PLANE)\n\t{\n\t\tnormal = vec3(0.,1.,0.);\n\t\ttexc = texturePlane( vec2(p.x *.1 - 3.1415 * .5 * iTime,p.z *.1));\n\t}\n\telse if (objectType==OBJ_SPHERE)\n\t{\n\t\tnormal = normalize(p - shapeOffset);\n\t\tvec3 pmr = rotation * normal; \n\t\ttexc = textureBall( vec2(atan(pmr.x,pmr.z)*.20,pmr.y*.25));\n\t}\n\telse if (objectType>=OBJ_LIGHT && objectType<OBJ_LIGHT+SPHERES)\n\t{\n\t\tnormal = normalize(p - shapeOffset);\n\t\tif (objectType == OBJ_LIGHT)\n\t\t\ttexc = vec4(lightColor);\n\t\telse if (objectType == OBJ_LIGHT + 1)\n\t\t\ttexc = vec4(lightColor2);\n\t\telse if (objectType == OBJ_LIGHT + 2)\n\t\t\ttexc = vec4(lightColor3);\n\t\t//textureBall( vec2(atan(pmr.x,pmr.z)*.20,pmr.y*.25));\n\t}\n}\n\n// Returns the amount of shadow from a vector (ro,rd)\nfloat shadow(in vec3 ro, in vec3 rd, in vec3 shapeLoc, in vec3 lights[3])\n{\n\tvec3 shapeOffset = vec3(0.0);\n\tint objectType = 0;\n\tfloat t = rayTrace(ro, rd, shapeLoc, lights, shapeOffset, objectType);\n\n\tif (objectType>=OBJ_LIGHT && objectType<OBJ_LIGHT+SPHERES)\n\t\treturn 1.0;\n\t\n\tif (t == NO_INTERSECTION)\n\t\treturn 1.;\n\telse\n\t\treturn 0.2 / float(LIGHTS);\n}\n\n// Returns a reflection pixel color from a vector (ro, rd)\nvec4 reflection(in vec3 ro, in vec3 rd, in vec3 shapeLoc, in mat3 rotation, in vec3 lights[3])\n{\n\tvec3 shapeOffset = vec3(0.0);\n\tint objectType = 0;\n\tfloat t = rayTrace(ro, rd, shapeLoc, lights, shapeOffset, objectType);\n\tif (t == NO_INTERSECTION)\n\t\treturn vec4(0.);\n\t\n\tvec3 p = vec3(0.0);\n\tvec3 normal = vec3(0.0);\n\tvec4 texc = vec4(0.0);\n\tnormalsAndTexture(ro, rd, t, objectType, shapeOffset, rotation, p, normal, texc);\n\n\tif (objectType>=OBJ_LIGHT && objectType<OBJ_LIGHT+SPHERES)\n\t\treturn texc;\n\n\treturn (0.0\n#if (LIGHTS >= 1)\n\t\t\t+ shade(p, normal, -rd, lights[0], lightColor, texc)\n#endif\n#if  (LIGHTS >= 2)\n\t\t\t+ shade(p, normal, -rd, lights[1], lightColor2, texc)\n#endif\n#if  (LIGHTS >= 3)\n\t\t\t+ shade(p, normal, -rd, lights[2], lightColor3, texc)\n#endif\n#if (LIGHTS > 1)\n\t\t) / float(LIGHTS);\n#else\n\t\t);\n#endif\n}\n\n// Returns a traced pixel value for a camera vector (ro,rd) \nvec4 trace(in vec3 ro, in vec3 rd, in vec3 shapeLoc, in mat3 rotation, in vec3 lights[3])\n{\n\tvec3 shapeOffset = vec3(0.0);\n\tint objectType = 0;\n\tfloat t = rayTrace(ro, rd, shapeLoc, lights, shapeOffset, objectType);\n\tif (t == NO_INTERSECTION)\n\t\treturn vec4(0.);\n\t\n\tvec3 p = vec3(0.0);\n\tvec3 normal = vec3(0.0);\n\tvec4 texc = vec4(0.0);\n\tnormalsAndTexture(ro, rd, t, objectType, shapeOffset, rotation, p, normal, texc);\n\t\n\tif (objectType>=OBJ_LIGHT && objectType<OBJ_LIGHT+SPHERES)\n\t\treturn texc;\n\n\tvec3 cameraReflected = normalize(reflect(rd,normal));\n\n    return ((0.0\n#if (LIGHTS >= 1)\n\t\t\t+ shade(p, normal, -rd, lights[0], lightColor, texc)\n\t#ifdef SHADOWS\n\t\t\t* shadow(p+normal*.01, normalize(lights[0]-p), shapeLoc, lights)\n\t#endif\n#endif\n#if  (LIGHTS >= 2)\n\t\t\t+ shade(p, normal, -rd, lights[1], lightColor2, texc)\n\t#ifdef SHADOWS\n\t\t\t* shadow(p+normal*.01, normalize(lights[1]-p), shapeLoc, lights)\n\t#endif\n#endif\n#if  (LIGHTS >= 3)\n\t\t\t+ shade(p, normal, -rd, lights[2], lightColor3, texc)\n\t#ifdef SHADOWS\n\t\t\t* shadow(p+normal*.01, normalize(lights[2]-p), shapeLoc, lights)\n\t#endif\n#endif\n\t\t) \n#if (LIGHTS > 1)\n\t\t/ float(LIGHTS)\n#endif\n#ifdef REFLECTIONS\n\t\t+ .5*reflection(p+normal*.01, cameraReflected, shapeLoc, rotation, lights)\n#endif\n        )*vec4(1.,1.,1.,0.) + vec4(0.,0.,0.,(t-5.6)*(t-5.6) / 500.);\n    ;\n}\n\nvoid mainVR( out vec4 fragColor, in vec2 fragCoord, in vec3 ro, in vec3 rd )\n{\n    vec3 shapeLoc = vec3(3.0,1.8,3.0);\n    vec3 lights[LIGHTS];\n#if (LIGHTS >= 1)\n\tlights[0] = vec3(3. + 4.0 * sin(iTime*2.), 16.0 + 8.0 * sin(0.4*iTime) , 3.+4.0 * cos(2.*iTime));\n#endif\n#if (LIGHTS >= 2)\n\tlights[1] = vec3(3. + 4.0 * sin(iTime*3.), 4.0 + 4.0 * sin(0.2*iTime) , 3.+8.0 * cos(3.*iTime));\n#endif\n#if (LIGHTS >= 3)\n\tlights[2] = vec3(3. + 8.0 * sin(iTime*4.), 4.0 + 4.0 * sin(0.1*iTime) , 3.+4.0 * cos(4.*iTime));\n#endif\n\n    mat3 rotation = mat3(cos(iTime*5.),-sin(iTime*5.), 0.,\n                  sin(iTime*5.),cos(iTime*5.), 0.,\n                   0.,0.,1.);\n\n    ro *= 3.;\n    ro.y += 6.;\n    fragColor = trace(ro, rd, shapeLoc, rotation, lights);    \n}\n\n\n// Fragment shader entry point, sets up scene data\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 shapeLoc = vec3(3.0,2.5,3.0);\n    vec3 cameraLoc = vec3(4.0 * sin(iTime), 5.0 + 4.0 * sin(0.4*iTime) , 4.0 * cos(iTime)) + shapeLoc;\n    vec3 cameraTarget = shapeLoc + vec3(0.0,1.+1.*sin(iTime*.01),0.0);\n    vec3 lights[3];\n#if (LIGHTS >= 1)\n\tlights[0] = //vec3(-cameraLoc.x, 3.*cameraLoc.y, -cameraLoc.z);\n\t\tvec3(4.0 * sin(iTime*.1), 9.0 + 7.0 * sin(0.8*iTime) , 4.0 * cos(iTime*.1)) + shapeLoc;\n#endif\n#if (LIGHTS >= 2)\n\tlights[1] = vec3(4.0 * sin(iTime*.1+2.*3.1415*.33), 9.0 + 7.0 * sin(0.8*iTime) , 4.0 * cos(iTime*.1+2.*3.1415*.33)) + shapeLoc;\n#endif\n#if (LIGHTS >= 3)\n\tlights[2] = vec3(4.0 * sin(iTime*.1+2.*3.1415*.66), 9.0 + 7.0 * sin(0.8*iTime) , 4.0 * cos(iTime*.1+2.*3.1415*.66)) + shapeLoc;\n#endif\n    \n    vec3 ro = cameraLoc;\n    vec3 rd = rayVector(cameraLoc, cameraTarget, fragCoord);\n\n    mat3 rotation = mat3(cos(iTime*5.),-sin(iTime*5.), 0.,\n                  sin(iTime*5.),cos(iTime*5.), 0.,\n                   0.,0.,1.);\n\n    fragColor = trace(ro, rd, shapeLoc, rotation, lights);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

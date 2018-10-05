@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtSfDy",
+      "date": "1516971984",
+      "viewed": 201,
+      "name": "shortest Menger (98 chars)",
+      "username": "FabriceNeyret2",
+      "description": "NB: apparently firefox/windows/angle  has a bug when compiling O.a++",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,u)                    \\\n    for ( vec2 U = u / iResolution.y, I;  \\\n          O.a++ < 6.;                     \\\n          I == I/I || I.x > 2. ? O++ : O  \\\n        ) U -= I = floor(U *= 3.)\n        \n        \n        \n/** 114 chars\n\n#define mainImage(O,u)              \\\n    vec2 U = u / iResolution.y, I;  \\\n    U.x > 1. ? O++ : O;             \\\n    for (int i = 0; i < 5; i++ )    \\\n        U -= I = floor(U *= 3.),    \\\n        I==vec2(1) ? O++ : O\n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

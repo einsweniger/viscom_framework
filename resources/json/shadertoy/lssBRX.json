@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lssBRX",
+      "date": "1497314906",
+      "viewed": 205,
+      "name": "wave interference patterns 2",
+      "username": "public_int_i",
+      "description": "wave interference patterns 2",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "wave",
+        "patterns",
+        "interference",
+        "2"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 o, vec2 u )\n{\n    o -= o;\n    for (int i = 1; i < 9; i++) {\n        if (i > 1+iFrame/99%8) break;\n        float fi = float(i)*.04;\n        o += abs(tan(length(mod(u/300.,fi)-fi*.5)*(40./(1.+fi))-mod(iDate.w*(1.+vec4(fi*.01,fi*.03+sin(iDate.w*1e-7),fi*.002,0.)),2e3)))*.02;\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

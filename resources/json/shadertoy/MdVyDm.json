@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdVyDm",
+      "date": "1522325221",
+      "viewed": 131,
+      "name": "white-black board",
+      "username": "wuhao",
+      "description": "simple code to render white-black board",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "whiteblackboard"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/min(iResolution.x, iResolution.y);\n\tuv = uv/0.1;\n    float s = step(1.0, mod(floor(uv.x)+floor(uv.y), 2.0));\n    fragColor = vec4(s,s,s,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lslBDj",
+      "date": "1498482683",
+      "viewed": 230,
+      "name": "old super nova",
+      "username": "public_int_i",
+      "description": "old super nova",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "old",
+        "super",
+        "nova"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n\to += 1.-length(refract(u*.1,fract(u.yx*.8)*2.-1., max(0.,5.-iTime)))*.1 - o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

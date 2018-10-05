@@ -1,0 +1,94 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lslcD8",
+      "date": "1488070642",
+      "viewed": 195,
+      "name": "Flickering Lava",
+      "username": "jarble",
+      "description": "This is based on another shader I found: https://www.shadertoy.com/view/ltdSWf#",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "automata",
+        "cellular",
+        "automaton"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    O = .5+.5*sin(texture(iChannel0, U/iResolution.xy).x + vec4(0,2,-2,0));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define T(i,j) texture(iChannel0,(U+vec2(i,j))/iResolution.xy)\n #define c(i,j) (T(i,j).x > .1)\n// #define c(i,j) (T(i,j).x > .1) // variant\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    if (iFrame<30) {\n        O = texture(iChannel1,U/256.);\n        O = vec4(O.x+O.y/256.+O.z/65536. > 1. ); // 24bit random value. max: 1.004\n        return; }\n    \n    O = T(0,0);\n  O = T(0,0)*0.9; // variant\n    \n    for (int j=-1; j<2; j+=1)\n        for (int i=-1; i<2; i+=1){\n         \tif (    c(i*1,j*(i)) < c(i*2,j*4) ) O++;\n        }\n            \n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

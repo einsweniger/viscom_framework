@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtfSzf",
+      "date": "1438379900",
+      "viewed": 217,
+      "name": "circles tunnel",
+      "username": "patu",
+      "description": "just testing",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "simple"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*  s - size of circle\n\ta - angle\n\tc - center of circle\n\td - distance from current pixel to center\n    l - biggest circle brightness */\n\nvoid mainImage(out vec4 b, in vec2 f) {\n    \n    vec2 c;\n    \n    float \n        t = iTime,\n        l = 0., s, a;\n    \n    f = f.xy / iResolution.xy;\n        \n    for (float k = 0.; k < 76.; k++) {\n        \n        s = pow(fract(k / 36. + t / 4.), 5.),\n\t\ta = (k / 1.2 + t);\n        c = vec2(sin(a), cos(a)) * (s * s + s) + .5; \n        \n        if (length(c - f) < s) l = max(s, l);\n        \n    }\n    \n    b = l * vec4(.63,.45,.45, .5);\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

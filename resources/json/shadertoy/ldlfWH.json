@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldlfWH",
+      "date": "1496097499",
+      "viewed": 189,
+      "name": "FFT experiments",
+      "username": "flewww",
+      "description": "Using FFT track extracted from soundcloud sound",
+      "likes": 1,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "fft",
+        "soundcloud"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9345,
+            "src": "https://soundcloud.com/rockabit/505-michu-mutative",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    // There is probably 2 real lines in a 'soundcloud texture'\n    // line 0. containing an FFT of a time frame\n    // line 1. containing the corresponding waveform\n    float v = texture(iChannel0, vec2(uv.x,0.)).x;\n    if (uv.y > v) fragColor = vec4(0.);\n    else          fragColor = vec4(0., v, v, 0.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

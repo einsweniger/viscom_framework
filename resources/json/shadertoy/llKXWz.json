@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llKXWz",
+      "date": "1483967837",
+      "viewed": 260,
+      "name": "Blue wave",
+      "username": "qmuntada",
+      "description": "Simple 2D wave",
+      "likes": 11,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "radar"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec4 circle(vec2 uv, vec2 pos, float rad)\n{\n\tfloat d = length(pos - uv) - rad;\n    \n\tfloat t = 1.0 - clamp(d, 0.0, 1.0);\n    \n    float dist = (rad) - distance(uv, pos);\n    dist = clamp(dist * 0.01, 0.0, 1.0);\n    t -= dist;\n    \n\treturn vec4(t);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\n\tvec2 uv = fragCoord.xy;\n\tvec2 center = iResolution.xy * 0.5;\n    \n    float time = iTime * 0.25;\n   \tfloat iTime = floor(time);\n    float fTime = time - iTime;\n    \n    float radius = fTime * (iResolution.y * 0.5);\n\n\tvec4 col = circle(uv, center, radius);\n    col *= 1.0 - fTime;\n\t\n\tfragColor = col * vec4(0.4, 0.7, 0.9, 1.0);\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

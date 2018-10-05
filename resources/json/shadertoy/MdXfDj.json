@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdXfDj",
+      "date": "1498080694",
+      "viewed": 201,
+      "name": "Extending ring",
+      "username": "stas0",
+      "description": "Extending ring",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "ring"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159;\n\nfloat circle(vec2 uv, float width) {\n\tfloat add = fract(iTime);\n    float cOuter = step(length(uv), width + add);\n    float cInner = step(.0 + add, length(uv));\n    \n    float c = cOuter * cInner;\n    \n    return c;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord - .5 * iResolution.xy) / iResolution.y;\n    vec3 color = vec3(.0, .0, .0);\n    \n    float e = exp(fract(iTime));\n    float c = circle(uv * e, .02);\n  \t\n    color = vec3(c);\n    \n\tfragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

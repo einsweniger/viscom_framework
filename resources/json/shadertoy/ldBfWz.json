@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldBfWz",
+      "date": "1500036028",
+      "viewed": 149,
+      "name": "synchronous drops",
+      "username": "public_int_i",
+      "description": "synced drops",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "drops",
+        "synchronous"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n    o += 1.-fract((u.y*.02+atan(u.y,u.x)*iResolution.x*.03)*fract(u.x*.61)+iTime)*5.-o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

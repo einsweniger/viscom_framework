@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mdcczr",
+      "date": "1517765700",
+      "viewed": 213,
+      "name": "pasql riff 2",
+      "username": "teriyaki",
+      "description": "(kinda) working towards something that looks like pasql's experiment\nhttps://twitter.com/pasql/status/958733306182426629\n\nSAFARI: gotta click pause/play on iChannel0 to start it : /\ntry setting the input to microphone!",
+      "likes": 1,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "audio"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 13396,
+            "src": "https://soundcloud.com/user-276389511/ntror3asgh5awtpy",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#ifdef GL_ES\nprecision highp float;\n#endif\n\n#define     WAVE .75\n#define SPECTRUM .25\n\n#define      PI 3.141592653589793\n#define     TAU 6.283185307179586\n#define HALF_PI 1.570796326794896\n\n#define FUCHSIA vec3(.882, .192, .659)\n#define RHUBARB vec3(.772, .125, .227)\n#define CARMINE vec3(.831, .145, .369)\n\nfloat norm(float t, float a, float b) {\n  return (t - a) / (b - a);\n}\n\nfloat map(float t, float a, float b, float c, float d) {\n  return norm(t, a, b) * (d - c) + c;\n}\n\nvec4 blorb(vec3 col, vec2 pq, sampler2D channel) {\n    float audio = texture(channel, vec2(pq.x, SPECTRUM)).x;\n    float dilation = .25;\n    float blur = pow(pq.x * 2., 7.);\n    float x = audio - pq.y + dilation;\n    float mask = smoothstep(0., blur, x);\n    mask = sin(iTime * .15) + 1. + mask;\n    return vec4(col, 1.) * mask;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = ( 2.*fragCoord - iResolution.xy ) / iResolution.y;\n    vec2 pq = vec2(atan(uv.x * -sin(iTime) + .5, uv.y * cos(iTime) + .5), length(uv));\n    pq.x = pq.x / TAU + .5;\n\n    vec2 p0 = pq;\n    p0.x = map(p0.x * (sin(iTime * .5) + .5), 0., 1., .1, .35);\n\n    vec2 p1 = pq;\n    p1.x = map(p1.x, 0., 1., .12, .38);\n    \n    vec2 p2 = pq;\n    p2.x = map(p2.x, 0., 1., .13, .41);\n\n    vec4 b0 = blorb(FUCHSIA, p0, iChannel0);\n    vec4 b1 = blorb(RHUBARB, p1, iChannel0);\n    vec4 b2 = blorb(CARMINE, p2, iChannel0);\n    \n    vec4 c = mix(b2, b1, b1.a * .5);\n    c = mix(c, b0, b0.a * (sin(iTime * .5) + .5));\n\n    fragColor = c;\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

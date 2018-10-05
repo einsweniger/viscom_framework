@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tyGzW",
+      "date": "1473362634",
+      "viewed": 253,
+      "name": "DoubleVision",
+      "username": "seani",
+      "description": "Needed an effect for a game for when the player charges his psychic powers.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 14,
+            "src": "/media/a/cbcbb5a6cfb55c36f8f021fbb0e3f69ac96339a39fa85cd96f2017a2192821b5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float timeMod(){\n    return mod(iTime, 1.0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    float envelope = exp(-timeMod()*4.5);\n    float offsetX = envelope*0.08*sin(timeMod()*8.0);\n    float offsetY = envelope*0.08*cos(timeMod()*8.0);\n    vec3 ret = texture(iChannel0, uv).rgb;\n    ret = mix(ret, texture(iChannel0, vec2(uv.x + offsetX, uv.y + offsetY)).rgb, 0.5);\n    ret = mix(ret, texture(iChannel0, vec2(uv.x - offsetX, uv.y - offsetY)).rgb, 0.5);\n\tfragColor = vec4(ret,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

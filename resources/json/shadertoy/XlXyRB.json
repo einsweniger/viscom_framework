@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlXyRB",
+      "date": "1505188797",
+      "viewed": 224,
+      "name": "Black and White post process",
+      "username": "dmitry_matveev",
+      "description": "Learning to write shaders :) This one draws image in black and white using pixel luminosity value.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tutorial"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 xy = fragCoord.xy / iResolution.xy;\n        \n    vec4 col = texture(iChannel0, xy);\n    col *= col;\n    \n    float luminosity = 0.299 * col.r +  0.587 * col.g + 0.114 * col.b;\n    vec4 RGB = vec4(luminosity);\n    \n    vec4 sRGB = sqrt(RGB);\n    \n    fragColor = sRGB;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

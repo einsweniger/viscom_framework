@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlcGWr",
+      "date": "1468588985",
+      "viewed": 137,
+      "name": "Greyscale Mirrored",
+      "username": "Himred",
+      "description": "Coded only because this make me laugh :) sorry",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "mirror",
+        "greyscale"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 o,vec2 i)\n{\n    i /= iResolution.xy;\n    o = texture(iChannel0,i.x<.5 ? i : vec2(1.-i.x,i.y));\n    o = i.x>.5 ? vec4(.2*o.r + .7*o.g + .1*o.b) : o; \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

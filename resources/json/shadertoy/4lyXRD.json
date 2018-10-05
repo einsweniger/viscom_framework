@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lyXRD",
+      "date": "1483137669",
+      "viewed": 348,
+      "name": "puzzle pattern",
+      "username": "FabriceNeyret2",
+      "description": "64 kind of pieces",
+      "likes": 8,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "pattern",
+        "puzzle"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define rnd(U) fract(45678.*sin(dot(U,vec2(1,17.43))))\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    vec2 R = iResolution.xy;\n    //U = 1.2*U - .1*R;\n    //vec2 V = abs(U/R-.5);\n    O = // max(V.x,V.y)> .5 ? O-O : \n   \t\t.5+.5*texture(iChannel0,U/R);\n    \n\tU *= 10./R.y;\n\tU += .07*sin ( 3.14*U.yx);\n    float rx = rnd(floor(U+vec2(.5,0))) -.5,\n          ry = rnd(floor(U+vec2(0,.5))) -.5,\n          r = .2;\n    U = fract(U)-.5;\n    if (abs(U.x)<min(r,abs(U.y))) U.y += sign(ry)*sqrt(r*r-U.x*U.x);\n    if (abs(U.y)<min(r,abs(U.x))) U.x += sign(rx)*sqrt(r*r-U.y*U.y);\n    U = fract(U+.5)-.5;\n    U = smoothstep(0.,20./R.y,.5-abs(U));\n    O *= min(U.x,U.y);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

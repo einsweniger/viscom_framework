@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtBcR1",
+      "date": "1507391027",
+      "viewed": 285,
+      "name": "vortex field - 228 chars",
+      "username": "FabriceNeyret2",
+      "description": "simplified & golfed variant of [url]https://www.shadertoy.com/view/lljczz[/url].\nSee comments and extensions there.",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "field",
+        "ellipsoid",
+        "2tweets",
+        "short",
+        "golf",
+        "tensor"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// simplified & golfed variant of https://www.shadertoy.com/view/lljczz\n\n/**/ // coyote : -10 chars\n\n#define W(p) vec2( -(p).y, p ) / dot(p,p)\n\n#define mainImage( O , U )                         \\\n    vec2 R = iResolution.xy,                       \\\n         u = (U+U-R)/R.y,                          \\\n         m = vec2( sin(iTime), .2*cos(iTime/3.7) ),\\\n         P = ceil(u*20.-.5) / 20.,                 \\\n         L = R-R + length( m = W(P-m)-W(P+m) );    \\\n    O += length( (u-P) * mat2( m*60./L/L, W(m)*L*R.y/2.) )\n\n\n\n             \n/** // more readable version about the maths of physics :\n\n\n#define W(p) vec2( -(p).y, p ) / dot(p,p)\n\n#define mainImage( O , U )                         \\\n    vec2 R = iResolution.xy,                       \\\n         u = (U+U-R)/R.y,                          \\\n         m = vec2( sin(iTime), .2*cos(iTime/3.7) ),\\\n         P = ceil(u*20.-.5) / 20.,                 \\\n         V =  W(P-m) - W(P+m);                     \\\n    float l = length(V);                           \\\n    O += length( (u-P) * mat2( V*60./l, vec2(-V.y,V)*R.y/2.) ) / l\n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

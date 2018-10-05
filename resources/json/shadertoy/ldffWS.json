@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldffWS",
+      "date": "1497781439",
+      "viewed": 117,
+      "name": "Vertical noise",
+      "username": "stas0",
+      "description": "It is vertical noise",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.141259265359\n\nfloat random(float seed) {\n    return fract(sin(seed) * 10000.);\n}\n\nfloat noise(vec2 pos) {\n\tfloat t = fract(iTime);\n    t = iTime / 2000.;\n    \n    if (t > 1.) {\n    \tt -= floor(t);\n    }\n    \n    return random(pos.x * 14. + pos.y * sin(t) * .05);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 pos = fragCoord.xy;\n    pos.x = pos.x / iResolution.x;\n    pos.y = pos.y / iResolution.y;\n    \n\tvec3 color = vec3(0.0, 0.0, 0.0);\n    float rand = noise(pos);\n    \n    color.r = rand;\n    \n\tfragColor = vec4(color,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lVSRm",
+      "date": "1483611128",
+      "viewed": 429,
+      "name": "Pixelated camera",
+      "username": "IlyaLts",
+      "description": "Pixelated camera.",
+      "likes": 2,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "webcam",
+        "pixelate"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PIXEL_SIZE 10.0\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    fragColor = vec4(0);\n    \n    float dx = 1.0 / iResolution.x;\n    float dy = 1.0 / iResolution.y;\n    uv.x = (dx * PIXEL_SIZE) * floor(uv.x / (dx * PIXEL_SIZE));\n    uv.y = (dy * PIXEL_SIZE) * floor(uv.y / (dy * PIXEL_SIZE));\n    \n    for (int i = 0; i < int(PIXEL_SIZE); i++)\n        for (int j = 0; j < int(PIXEL_SIZE); j++)\n            fragColor += texture(iChannel0, vec2(uv.x + dx * float(i), uv.y + dy * float(j)));\n    \n    fragColor /= pow(PIXEL_SIZE, 2.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

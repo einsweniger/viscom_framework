@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdjfW1",
+      "date": "1500347809",
+      "viewed": 234,
+      "name": "[SH17A] PicoPaint (59c)",
+      "username": "ttg",
+      "description": "It has been done before...\n\nFitting a quine in two tweets was hopeless.  At 5 chars encoded per int, the boilerplate and the (1+11/5)x effective cost of each character leaves only 40 to implement decoding.  If I get it under 1000 I will release it though.",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "paint",
+        "tweet",
+        "halftweet",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( f, e ) if (length(iMouse.xy-e)>5.) discard; f++",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

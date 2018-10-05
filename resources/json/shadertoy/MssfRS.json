@@ -1,0 +1,82 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MssfRS",
+      "date": "1496857267",
+      "viewed": 247,
+      "name": "Raytracing Sphere, Triplanar Map",
+      "username": "Ebanflo",
+      "description": "Mouse rotates camera, just some simple raytracing with cheap directional lighting. ",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "raytracing",
+        "texture",
+        "sphere",
+        "mapping"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 2,
+            "src": "/media/a/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 45,
+            "src": "/media/a/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float iSphere(vec3 ray, vec3 dir, vec3 center, float radius)\n{\n\tvec3 rc = ray-center;\n\tfloat c = dot(rc, rc) - (radius*radius);\n\tfloat b = dot(dir, rc);\n\tfloat d = b*b - c;\n\tfloat t = -b - sqrt(abs(d));\n\tfloat st = step(0.0, min(t,d));\n\treturn mix(-1.0, t, st);\n}\n\nvec3 r(vec3 v, vec2 r)//rodolphitp's rotation\n{\n    vec4 t = sin(vec4(r, r + 1.5707963268));\n    float g = dot(v.yz, t.yw);\n    return vec3(v.x * t.z - g * t.x,\n                v.y * t.w - v.z * t.y,\n                v.x * t.x + g * t.z);\n}\n\nvec4 triplanarMap(vec3 n){\n    float s1 = smoothstep(0., 1.0, abs(n.x));\n    float s2 = smoothstep(0., 1.0, abs(n.y));\n    float s3 = smoothstep(0., 1.0, abs(n.z));\n    float temp = s1 + s2 + s3;\n    s1 /= temp; s2 /= temp; s3 /= temp;\n    vec4 col1 = s1 * texture(iChannel0, n.zy);\n    vec4 col2 = s2 * texture(iChannel1, n.xz);\n    vec4 col3 = s3 * texture(iChannel2, n.xy);\n    vec4 col = col1 + col2 + col3;\n    return col;\n}\n    \nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (-1.0 + 2.0*fragCoord.xy / iResolution.xy) * \n\t\tvec2(iResolution.x/iResolution.y, 1.0);\n\tvec3 ro = vec3(0.0, 0.0, -3.0);\n\tvec3 rd = normalize(vec3(uv, 1.0));\n    vec2 m = (2.0 * iMouse.xy - iResolution.xy) / iResolution.y;\n    m *= 2.0;\n    ro = r(ro, m);\n    rd = r(rd, m);\n\tvec3 p = vec3(0.0, 0.0, 0.0);\n\tfloat t = iSphere(ro, rd, p, 1.0);\n    vec3 light = vec3(sin(iTime), 3.0, cos(iTime));\n    light = normalize(light);\n    if(t > 0.0){\n\t\tvec3 n = normalize(-p + (ro+rd*t));\n        fragColor = triplanarMap(n);\n        fragColor *= 0.4 + max(0.0,dot(light, n));\n    }\n    else fragColor = vec4(0.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

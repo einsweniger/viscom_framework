@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtscWr",
+      "date": "1504379100",
+      "viewed": 385,
+      "name": "Melting Paint",
+      "username": "k_kondrak",
+      "description": "Melting paint! Simplified variation of https://www.shadertoy.com/view/XtlyDn",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "noise",
+        "paint",
+        "melt",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// ----------------------------------------------------\n//  \"Melting Paint\" by Krzysztof Kondrak @k_kondrak\n// ----------------------------------------------------\n\nvoid mainImage(out vec4 o, vec2 p)\n{\n\tp /= iResolution.xy;\n    p.y += .01 * iTime * fract(sin(dot(vec2(p.x), vec2(12.9, 78.2)))* 437.5);\n\n    o = texture(iChannel0, p);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

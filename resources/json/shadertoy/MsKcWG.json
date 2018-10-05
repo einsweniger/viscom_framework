@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsKcWG",
+      "date": "1523239761",
+      "viewed": 109,
+      "name": "red room",
+      "username": "tjak",
+      "description": "while exploring shadertoy's \"music textures\", I accidentally made a \"shimmying curtain\" effect. this pairs well with the music.",
+      "likes": 1,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "twinpeaks"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 14249,
+            "src": "https://soundcloud.com/full-eclipse/audreys-dance",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    vec3 col = vec3(0.0);\n    col.r = texture(iChannel0, vec2(uv.x)).r;\n    fragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

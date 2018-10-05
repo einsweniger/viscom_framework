@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldyczd",
+      "date": "1522954919",
+      "viewed": 135,
+      "name": "sdf of star (internal)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "sdf",
+        "shapes",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 O, vec2 U )\n{\n   float t = mod(iTime,8.), \n         N = 3.+5.*min(t,8.-t),\n         r = .5;                  // interior radius (ext = 1.)\n    \n    vec2 R = iResolution.xy;\n    U = ( U+U - R ) / R.y;\n    float a = atan(U.x,U.y), l = length(U),\n          b = 3.14159/N,\n        tb = tan(b),\n       // s = sin(b); // if control by peak angle\n          s = (r * tb)/(sqrt(1.+tb*tb)-r); // control by r\n    a = mod(a,2.*b)-b;\n    U = l * vec2(cos(a),sin(a)) / cos(b);\n    U.y = abs(U.y);\n    U.x -= 1.;\n    O = vec4( l = -(s*U.x+U.y)/sqrt(1.+s*s) );\n    \n    //O = sin(30.*O);\n    if (O.x<0.) O=vec4(1,0,0,0);\n    O.b = .5*sin(100.*l);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MslczX",
+      "date": "1489205369",
+      "viewed": 287,
+      "name": "My 2D Water",
+      "username": "taecg",
+      "description": "\u6a21\u62df2D\u6c34\u9762\u6548\u679c",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "water"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tfragCoord.y += sin(iTime+fragCoord.x*0.00125)*80.;\n    \n    float heigth = iResolution.y/2.;\n    \n    if(fragCoord.y<heigth)\n    {\n        fragColor=vec4(0.,fragCoord.y/heigth,0.85,1.);\n    }\n    else\n    {\n        fragColor=vec4(0.);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xs33R4",
+      "date": "1448239515",
+      "viewed": 371,
+      "name": "JeanClaude",
+      "username": "rbrt",
+      "description": "WHoa",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "jean",
+        "claude"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 noise = texture(iChannel2, uv);\n    vec2 tempUV = uv;\n    float theta = iTime + noise.x;\n\n    vec2 newPoint = vec2((cos(theta) * (uv.x * 2.0 - 1.0) + sin(theta) * (uv.y * 2.0 - 1.0) + 1.0)/2.0,\n\t                     (-sin(theta) * (uv.x * 2.0 - 1.0) + cos(theta) * (uv.y * 2.0 - 1.0) + 1.0)/2.0);\n\tvec4 video = texture(iChannel0, uv);\n    \n    newPoint.x = sin(newPoint.y);\n    //fragColor = video;\n    fragColor = texture(iChannel1, newPoint);\n    tempUV.x = sin(noise.x) * tempUV.x;\n    fragColor += texture(iChannel1, tempUV);\n\n\n    if (video.g > ((sin(iTime) + 1.0) / 2.0) * .5 + .1){\n        if (mod(iTime * 10.0, .3) < .15){\n            fragColor -= texture(iChannel0, uv * 1.02);\n\t    \tfragColor += texture(iChannel0, uv * .99);\n        }\n\n    }\n    else{\n\t\tfragColor = video;\n        fragColor += texture(iChannel0, uv * 1.01);\n        fragColor -= texture(iChannel0, uv * 1.02);\n        fragColor += texture(iChannel0, uv * .99);\n        fragColor -= texture(iChannel0, uv * .98);\n        \n    }\n    \n    if (mod(iTime, 3.0) < .5){\n        if (video.g < .6 - mod(iTime * 10.0, 1.0)){\n            fragColor = video;\n        }\n    }\n}",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

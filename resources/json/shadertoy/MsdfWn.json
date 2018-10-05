@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsdfWn",
+      "date": "1524761514",
+      "viewed": 108,
+      "name": "test pattern 2",
+      "username": "yx",
+      "description": "Inspired by Ryoji Ikeda",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "pattern"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 c,vec2 f){\n    vec2 u=(f/iResolution.xy)/vec2(1,8);\n    vec2 speed = texture(iChannel0,vec2(0,u.y)).rg;\n    u.x*=speed.g*.9+.1;\n    u.x+=iTime*(speed.r-.5)*.3;\n    c=vec4((fract(texture(iChannel0,u).r+iTime*.5)<.5||fract(u.y*256.)<.15)?1:0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

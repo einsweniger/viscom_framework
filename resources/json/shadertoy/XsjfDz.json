@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsjfDz",
+      "date": "1500088046",
+      "viewed": 259,
+      "name": "[SH17A]Gum cave",
+      "username": "Nesvi7",
+      "description": "Gum cave.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raymarching",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 c, vec2 f ){\n    vec3 m, p=m=vec3(0.,5,iTime);\n    float i = 1., l;\n    while(i++ < 1e2)\n        c = texture( iChannel0,p.xz/1e3 + iTime/5e2 ),\n        l = length(vec3(fract(p.xz)-.5, mod(p.y +c*4.,7.)-3.5))-.7,\n        p += (vec3(f/iResolution.y,1)-.5)*l;\n    \n    l = -.6 - length( p - m ) / 70.;\n    l *= l;\n    c *= l * l * l * 2.;\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

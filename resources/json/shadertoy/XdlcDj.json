@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdlcDj",
+      "date": "1489949144",
+      "viewed": 273,
+      "name": "2D Sphere 2 (114c)",
+      "username": "aiekick",
+      "description": "based on from [url=https://www.shadertoy.com/view/ldfyW2]2D Sphere[/url]",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "sphere"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/* based on https://www.shadertoy.com/view/ldfyW2 */\n\nvoid mainImage( out vec4 f, vec2 g )\n{\n    g -= f.xy=iResolution.xy/2.;\n    \n   \tf = vec4(g *= g += f.a = pow(abs(.2 - dot(g/=f.y,g)), .2), f.aa);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dVcWy",
+      "date": "1523201506",
+      "viewed": 36,
+      "name": "Cog Machinery",
+      "username": "MadEqua",
+      "description": "My first entry. Learning to create shapes and tiling.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "gears",
+        "shapes",
+        "tiles"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "mat2 rotate2D(float angle)\n{\n    return mat2(cos(angle), -sin(angle), \n                sin(angle), cos(angle));\n}\n\nmat2 scale(vec2 scale)\n{\n    return mat2(scale.x, 0.0,\n                0.0, scale.y);\n}\n\nfloat rectangle(vec2 uv, vec2 leftBottom, vec2 size, float smoothR)\n{\n    vec2 lb = smoothstep(leftBottom - smoothR * 0.5, leftBottom + smoothR * 0.5, uv);\n    vec2 rt = 1.0 - smoothstep(leftBottom + size - smoothR * 0.5, leftBottom + size + smoothR * 0.5, uv);\n    return lb.x * lb.y * rt.x * rt.y;\n}\n\nfloat rectangleOutline(vec2 uv, vec2 leftBottom, vec2 size, vec2 borderWidth, float smoothR)\n{\n    float r1 = rectangle(uv, leftBottom, size, smoothR);\n    float r2 = rectangle(uv, leftBottom + borderWidth, size - borderWidth*2.0, smoothR);\n    return r1 - r2;\n}\n\nfloat circle(vec2 uv, vec2 center, float r, float smoothR)\n{\n    float d = distance(center, uv);\n    return 1.0 - smoothstep(r - smoothR, r, d);\n}\n\nfloat circleOutline(vec2 uv, vec2 center, float r, float borderWidth, float smoothR)\n{\n    float c1 = circle(uv, center, r, smoothR);\n    float c2 = circle(uv, center, r - borderWidth, smoothR);\n    return c1 - c2;\n}\n\nfloat solidGear(vec2 uv, vec2 center, float r, int teethCount, float teethDepth, float teethRoundness, float smoothR) \n{\n    vec2 v = uv - center;\n    float d = length(v);\n    float theta = atan(v.y, v.x);\n    \n    float teethWave = smoothstep(-teethRoundness, teethRoundness, sin(theta * float(teethCount))) * teethDepth;\n    return 1.0 - smoothstep(r - teethWave - smoothR, r - teethWave, d);\n}\n\nfloat gear(vec2 uv, vec2 center, float r, int teethCount, float teethDepth, float teethRoundness, float smoothR) \n{\n    float solid = solidGear(uv, center, r, teethCount, teethDepth, teethRoundness, smoothR);\n    float hole = circle(uv, center, r * 0.35, smoothR);\n    float hole2 = circleOutline(uv, center, r * 0.65, 0.02, smoothR);\n    return clamp(0.0, 1.0, solid - hole - hole2);\n}\n\nfloat gear2(vec2 uv, vec2 center, float r, int teethCount, float teethDepth, float teethRoundness, float smoothR) \n{\n    float solid = solidGear(uv, center, r, teethCount, teethDepth, teethRoundness, smoothR);\n    float largeHole = circle(uv, center, r * 0.6, smoothR);\n    float centerCircle = circle(uv, center, r * 0.25, smoothR);\n    float centerHole = circle(uv, center, r * 0.1, smoothR);\n    \n    float insideR = r - teethDepth - 0.02;\n    float barThickness = 0.08;\n    \n    float rect = rectangle(uv, center-vec2(insideR, barThickness*0.5), vec2(insideR*2.0, barThickness), smoothR);\n    float rect2 = rectangle(uv, center-vec2(barThickness*0.5, insideR), vec2(barThickness, insideR*2.0), smoothR);\n\n    return max(0.0, solid - largeHole) + min(centerCircle + rect + rect2, 1.0) - centerHole;\n}\n\n\nconst float PI = 3.14159265359;\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = fragCoord / iResolution.xy;\n\n    //Camera zoom    \n    uv -= vec2(0.5);\n    uv = scale(vec2(sin(iTime) * 2.1 + 5.0)) * uv;\n    uv += vec2(0.5);\n    \n    //Camera shaking \n    uv.x += sin(iTime * 2.23) * cos(iTime * 1.65) * 0.05;\n    uv.y += cos(iTime * 3.54) * 0.075;\n    \n    //Camera scroll \n    uv.x += iTime * 0.3;\n    uv.y += iTime * 0.1;\n    \n   \t//Tiling\n    vec2 rowCol = floor(uv); \n    uv = fract(uv);\n    \n    //Aspect ratio adjustment\n    float ratio = iResolution.x / iResolution.y;    \n    vec2 center = vec2(ratio, 1.0) * vec2(0.5);\n    uv.x *= ratio;\n    \n    //Color\n    vec3 col = vec3(0.0);\n    col.r += 0.6 * abs(sin(iTime * 1.3 + rowCol.x));\n    col.g += 0.7 * abs(sin(iTime + rowCol.y));\n    col.b += 0.2 * abs(sin(iTime * 2.7));\n    \n    //Rotate space (tile) in preparation for gear\n    float gearType = mod(rowCol.x, 2.0) * mod(rowCol.y, 2.0);  \n    uv -= center;\n    //uv = rotate2D(((col.r + col.g) * PI)) * uv;\n    uv = rotate2D(PI * sin((gearType + 0.5) * iTime) * cos((gearType + 1.5) * 0.5 * iTime)) * uv;\n    uv += center;\n    \n    //Gear shape\n    float g2 = gear2(uv, center, 0.5, 12, 0.07, 0.3, 0.015);\n    float g1 = gear(uv, center, 0.45, 8, 0.09, 0.25, 0.015);\n    float gearShape = clamp(0.0, 1.0,  mix(g1, g2, gearType));\n    \n    col = mix(col, vec3(gearShape), 0.6);\n    fragColor = vec4(col,1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

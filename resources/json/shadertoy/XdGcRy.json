@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdGcRy",
+      "date": "1522357460",
+      "viewed": 139,
+      "name": "Basic Raymarched Plane",
+      "username": "Jamie_Pendergast",
+      "description": "a very simple solution!",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raymarching"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float map(vec3 p, vec3 n) {\n\tfloat d = dot(p,n);\n    if(d > n.y)\n        return d;\n    return 0.;\n}\n\nfloat map1(vec3 p, float l) {\n\treturn length(p) - l;\n}\n\nfloat trace(vec3 ro, vec3 rd) {\n\tfloat t = 0.;\n    vec3 p;\n    \n    for(int i = 0; i < 32; i++) {\t\n    \tt += map(rd,normalize(vec3(0.,-1.,0.)));    \n        p = ro + rd * t;\n    }\n    \n    return t;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.x;\n\t\n    vec3 ro = vec3(0., sin(iTime),-3.);\n    \n    vec2 m = iMouse.xy / iResolution.xy;\n    m = m * 2.;\n    m -= 1.;\n    \n    vec3 dir = normalize(vec3(uv + m,1.) );\n    float t = trace(ro,dir);\n    // Output to screen\n    fragColor = vec4(t);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

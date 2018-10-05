@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xt2yW3",
+      "date": "1510442686",
+      "viewed": 225,
+      "name": "sinusoids",
+      "username": "chillu",
+      "description": "my first shader..",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sinusoids"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv -= 0.5;\n    uv.x *= iResolution.x / iResolution.y;\n\tuv *= 2.0;\n\n    float t = iTime;\n    float r = 15.*(1.0+0.2*sin(5.*t));\n \n    float l1 = 1.0 - length(uv);\n    float l2 = 1.0 - length(uv + vec2(cos(t*2.5),sin(t)));\n    float l3 = 1.0 - length(uv + vec2(cos(t),-sin(1.25*t)));\n\n    float x = sin(r*l1)/2.+l2/2.0+l3/2.0;\n\n    float fw = 0.5*fwidth(x);\n\tfloat l = smoothstep(0.25 - fw, 0.25 + fw, x);\n\n    fragColor = vec4(l,l,l, 1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

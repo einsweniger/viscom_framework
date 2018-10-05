@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldjBRw",
+      "date": "1499967259",
+      "viewed": 300,
+      "name": "[SH17A] Waves",
+      "username": "Koltes",
+      "description": "Variation of https://www.shadertoy.com/view/MdXBWl\nThanks to GregRostami and FabriceNeyret2 for starting the golf.\nS trick by BigWIngs",
+      "likes": 9,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "waves"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11122,
+            "src": "https://soundcloud.com/khaled-elyamany/piano-1-hour-with-sea-sound",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define S sin(iTime\n\nvoid mainImage(out vec4 O, vec2 U)\n{\n    O.xyz = iResolution;\n    float y, i=-15., k=O.y, c;\n    \n\tU /= k;\n    \n    while (i++ < 15.)\n        c = exp(-.1*i*i),\n        y = (.08 + .02 * S*2.+i*2.)) * exp(-.01*i*i)\n            * S*2. + U.x / (.2-.1*c) + i*4. )\n            - i/20. + .5 - U.y, \n        O += max(0., 1.-exp(-y*k*c) )\n             * (\n                 tanh(40.*y)\n                 * (.5 + .4 * S+i+vec4(0,1,1,0)))\n                 - O\n             );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

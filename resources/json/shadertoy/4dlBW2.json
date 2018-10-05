@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dlBW2",
+      "date": "1498226406",
+      "viewed": 179,
+      "name": "down the stairs 2d",
+      "username": "public_int_i",
+      "description": "down the stairs",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "the",
+        "stairs",
+        "down"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n    vec2 R = iResolution.xy;\n    u = (u*2.-R)/R.x;\n    float t = fract(iDate.w);\n\to += min(length(u+vec2(0,pow(t*2.-max(t*4.-2.,0.), 2.)*.27))-.04, u.y+floor(u.x*2.+t)*.2-t*.2+.4)*length(R*.2)-o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xs3yzS",
+      "date": "1519244165",
+      "viewed": 201,
+      "name": "KIFS - 2",
+      "username": "FabriceNeyret2",
+      "description": "mouse control: x = scaling, y = rotation.\nAuto-demo: bottom-left corner.",
+      "likes": 4,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "fractal",
+        "ifs",
+        "kifs",
+        "short",
+        "classic",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// subset of https://shadertoy.com/view/Ms3yD7\n// inverse of https://shadertoy.com/view/4scyWM\n\n#define mainImage(O,U)  O = texture( iChannel0, U /  iResolution.xy )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "const int Z = 5;                   // recursion depth\n\n#define rot(a)     mat2( cos(a), -sin(a), sin(a), cos(a) )\n\nvoid mainImage( out vec4 O, vec2 u ) {\n    vec2 R = iResolution.xy,\n         U = 1.2 * ( u+u - R ) / R.y, \n         M = iMouse.xy / R, z;\n\n    float T = .5*iTime, k=.95;\n    if ( length(iMouse.xy)<10. )      // auto-demo\n        M = .5 + .4 *vec2( cos(T)-.4*sin(2.7*T), sin(1.73*T)-.3*cos(2.3*T) ) / 1.4,\n        k = .98;                      // relaxation duration\n\n    float s = (.5+.5*M.x)/2.,         // scaling\n          t = 1.-s,                   // translation\n          a = 3.14*M.y;               // rotation\n    O = k * texture(iChannel0, u/R) * vec4( .96, .98, 1, 0); // relaxation\n    \n\n    z = U;\n    for( int i=0; i<Z; i++ ) { // --- iterate up to depth N. should be log(1/R.y)/log(s)\n        z = abs(z);\n        z = (z-vec2(t,t))* rot(-a) / s;\n    }\n    \n    O += smoothstep(.01,0.,length(z)-1.) ;\n    O = clamp(O, 0., 1.);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dd3RN",
+      "date": "1448392097",
+      "viewed": 166,
+      "name": "2d experiment #11 - public_int_i",
+      "username": "public_int_i",
+      "description": "ldslfsjldj",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sldjflsdj"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy - .5;\n    \n    for (int i = 0; i < 5; i++) {\n        vec2 puv = (mod(abs(uv),1.)-.5)-uv;\n        uv -= normalize(puv+cos(uv*10.)*.1)*cos(length(uv)+iTime);\n    }\n    \n\tfragColor = vec4(normalize(uv)*.5+.5,\n                     cos(length(uv)+iTime) ,1.0);\n    fragColor = texture(iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

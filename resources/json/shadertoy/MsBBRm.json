@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsBBRm",
+      "date": "1499922940",
+      "viewed": 332,
+      "name": "[SH17A] microfeedback",
+      "username": "victor_shepardson",
+      "description": "the tiniest rainbow goo shader",
+      "likes": 9,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "feedback",
+        "codegolf",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(c,u) c=texelFetch(iChannel0, ivec2(u),0);\n\n/*void mainImage(out vec4 c, vec2 u)\n{\n    c = texelFetch(iChannel0, ivec2(u),0);\n}*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// LICENSE:\n// Creative Commons Attribution 4.0 International License.\n// https://creativecommons.org/licenses/by/4.0/\n\n#define T(x) texture(iChannel0, (x)/d)\n#define C +T(T(u-y).zw*2.-1.+u+(y*=y.yx))/2.\n\nvoid mainImage(out vec4 c, vec2 u)\n{\n    vec2 d = iResolution.xy, y = vec2(-.8,.8);\n    \n    c = mix(fract(sin((u/d).xxyy C) C C).gbar, T(u+y), .8);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

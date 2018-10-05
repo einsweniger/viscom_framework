@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsBfDt",
+      "date": "1502739964",
+      "viewed": 229,
+      "name": "Movement Illusion",
+      "username": "DJDoomz",
+      "description": "Based off of a gif I saw on twitter. Do the balls look like they're moving in a straight line between the spinny things? Click and find out",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "illusion"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159\n#define SPEED .4\n#define SCALE 4.\n\n#define atan2(a) atan(a.x,a.y)\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float t = iTime*PI*SPEED;\n\tvec2 uv = fragCoord.xy / iResolution.xy, muv = uv;\n    uv *= SCALE;\n    uv.y/=iResolution.x/iResolution.y;\n    uv = fract(uv);\n    uv -= .5;\n    uv *= 3.;\n    float s = sin(t), c = cos(t);\n    vec2 cpos = vec2(s,c)*1.4;\n    float color = length(uv-cpos) < .12 || length(uv+cpos) < .12 ? 1. : 0.;\n    \n    muv.y/=iResolution.x/iResolution.y;\n    muv *= SCALE;\n    muv +=.5;\n    muv = fract(muv);\n    muv -=.5;\n    \n    float ang = t+.2*cos(t*4.+1.7);\n    \n    s = sin(ang), c = cos(ang);\n    \n    muv *= mat2(c,s,-s,c);\n    float color2 = 0.;\n    if(iMouse.w < 0.1)\n    color2 = length(muv) < .45 ?\n        \t\t   pow(abs(sin(atan2(muv)*2.)),.1) > .9 ? 1.: 0. : 0.;\n    fragColor = vec4(color,0,0,1)+color2;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

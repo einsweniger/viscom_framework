@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mtc3Dn",
+      "date": "1468677832",
+      "viewed": 202,
+      "name": "Sun2_sp",
+      "username": "SmartPointer",
+      "description": "Sun_sp",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 coord = fragCoord.xy / iResolution.xy;\n    vec3 color = vec3(0.6, 0.6, 0.0);\n    vec2 q = coord - vec2(0.5, 0.5);\n    \n    float r = 0.25 + 0.03 * cos(atan(q.x, q.y) * 10.0 + iTime);\n    color *= 1.5 - smoothstep(r, r + 0.3, length(q));\n    \n    color += 0.5 - smoothstep(r, r + 0.01, length(q));\n    \n    fragColor = vec4(color, 1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

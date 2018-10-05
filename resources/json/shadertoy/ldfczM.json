@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldfczM",
+      "date": "1487428341",
+      "viewed": 272,
+      "name": "Simple dithering",
+      "username": "robobo1221",
+      "description": "Just a simple way of doing dithering i guess",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "simple",
+        "texture",
+        "fast",
+        "dither"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 getTex(vec2 uv){\n    vec4 tex = texture(iChannel0, uv.xy);\n    \n\treturn tex.rgb * tex.a;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    vec3 color = vec3(0.0);\n    \n    vec2 olduv = uv;\n    \n    uv *= iResolution.xy;\n    uv = cos(uv);\n    \n    float pattern = dot((uv.x - uv.y) * 0.5 + 0.5, (uv.y - uv.x) * 0.5 + 0.5);\n    \n    color = step(vec3((1.0 - getTex(olduv)) * 0.250001), vec3(pattern));\n    \n\tfragColor = vec4(color,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

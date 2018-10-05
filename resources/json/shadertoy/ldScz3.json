@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldScz3",
+      "date": "1493076551",
+      "viewed": 245,
+      "name": "Simple Tetrahedron Raytracer",
+      "username": "Ebanflo",
+      "description": "Pretty tetrahedron",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "raytracing",
+        "tetrahedron"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const vec3 v1 = vec3(1.0, 0., -.707107);\nconst vec3 v2 = vec3(-1.0, 0.0, -.707107);\nconst vec3 v3 = vec3(0., 1.0, .707107);\nconst vec3 v4 = vec3(0., -1.0, .707107);\nvec3 r(vec3 v, vec2 r)//incomplete but ultrafast rotation fcn thnx to rodolphito\n{\n    vec4 t = sin(vec4(r, r + 1.5707963268));\n    float g = dot(v.yz, t.yw);\n    return vec3(v.x * t.z - g * t.x,\n                v.y * t.w - v.z * t.y,\n                v.x * t.x + g * t.z);\n}\nvec4 tetrahedron(vec3 lineOrigin, vec3 vertex1, vec3 vertex2, vec3 vertex3, vec3 vertex4, vec3 lineDir){\n    mat4x3 normal;\n    normal[0] = -normalize(cross(vertex2 - vertex1, vertex4 - vertex1));\n    normal[1] = -normalize(cross(vertex3 - vertex2, vertex4 - vertex2));\n    normal[2] = -normalize(cross(vertex4 - vertex1, vertex3 - vertex1));\n    normal[3] = -normalize(cross(vertex3 - vertex1, vertex2 - vertex1));    \n    vec4 dist;    \n    vec4 ln;\n    ln.x = dot(lineDir, normal[0]);\n    ln.y = dot(lineDir, normal[1]);\n    ln.z = dot(lineDir, normal[2]);\n    ln.w = dot(lineDir, normal[3]);   \n    dist.x = dot(vertex1 - lineOrigin, normal[0]) / ln.x;\n    dist.y = dot(vertex2 - lineOrigin, normal[1]) / ln.y;\n    dist.z = dot(vertex1 - lineOrigin, normal[2]) / ln.z;\n    dist.w = dot(vertex1 - lineOrigin, normal[3]) / ln.w;\t\n    float fff = -9e20;\n    float cbf = 9e20;\n    vec3 result;    \n    for(int n = 0; n < 4; n++){\n        if(ln[n] < 0. && dist[n] > fff){\n            fff = dist[n];\n            result = normal[n];\n        }\n        if(ln[n] > 0. && dist[n] < cbf) cbf = dist[n];\n    }\n    if(fff < cbf) return vec4(result, fff);\n    else return vec4(9e20);         \n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 xy = 2. * fragCoord.xy / iResolution.y;\n    xy -= vec2(iResolution.x / iResolution.y, 1.);\n    \n\tvec3 vertex1 = r(v1, vec2(iTime));\n\tvec3 vertex2 = r(v2, vec2(iTime));\n\tvec3 vertex3 = r(v3, vec2(iTime));\n\tvec3 vertex4 = r(v4, vec2(iTime));\n    \n    vec3 cam = vec3(0., 0., -10.);\n    vec3 dir = normalize(vec3(xy, 3.));\n    \n    vec4 tet = tetrahedron(cam, vertex1, vertex2, vertex3, vertex4, dir);\n    fragColor = vec4(.1 * tet.w * abs(tet.xyz), 1.);\n    fragColor.xyz = fragColor.zyx;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

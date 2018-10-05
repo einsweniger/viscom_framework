@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlSBDW",
+      "date": "1515698828",
+      "viewed": 236,
+      "name": "Interesting Cellular Automata",
+      "username": "xdaimon",
+      "description": "Does anybody know anything about this CA here?",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "cellular",
+        "autonoma",
+        "cellularautonoma"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0,uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float f(ivec2 p) {\n    return texelFetch(iChannel0,p,0).r;\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \n    // Rotated (90degree) initial configurations result in rotated output patterns.\n\t// The bounding box for the CA grows by 1 in each dimension each iteration.\n    \n\t// I'm trying to count the preimages for this CA, but I've not come up with\n\t// any way to do that yet.\n    \n    float dist = 11.;\n    \n    if (iFrame==0){\n        //vec2 init = vec2(iResolution.x-1., 1.);\n    \tvec2 init = iResolution.xy/2.;\n        //if (distance(fragCoord, init) < dist || distance(fragCoord, iResolution.xy/vec2(2.,3.)) < 3. )\n        if (distance(fragCoord,init)<1.)\n            fragColor=vec4(1);\n        return;\n    }\n    \n\t\n    // Keep it in the center\n    if (iFrame%2 == 0)\n    \tfragCoord-=vec2(1,-1);\n    \n    \n    ivec2 uv = ivec2(fragCoord);\n    ivec2 ee = ivec2(1,0);\n    float c = f(uv);\n    float s = f(uv-ee.yx);\n    float e = f(uv+ee.xy);\n    float se = f(uv+ivec2(ee.x,-ee.x));\n    float new = 0.;\n    if (int(c+e+s+se+.1) == 1)\n        new = 1.;\n    fragColor = vec4(new);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

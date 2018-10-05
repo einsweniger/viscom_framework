@@ -1,0 +1,250 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldXcD7",
+      "date": "1488460462",
+      "viewed": 329,
+      "name": "Very old TV",
+      "username": "0xAA55",
+      "description": "I'm not good at math... I just tried to make a cubic version of smallpt (from Zavie)",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "ray",
+        "cube",
+        "tracing",
+        "hdr",
+        "smallpt"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 260,
+            "src": "/media/previz/buffer03.png",
+            "ctype": "buffer",
+            "channel": 3,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\n#define HDR_MINLUM 1.\n#define HDR_MAXLUM 20.\n\n#define LBLUR_V 20\n#define LBLUR_DIFFUSION 40.\n#define BLUR_V 1\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec4 bright = vec4(0);\n    vec4 avrlum = texture(iChannel1,fragCoord / iResolution.xy);\n    float rgblum = avrlum.r + avrlum.g + avrlum.b;\n    rgblum = min(HDR_MAXLUM, max(HDR_MINLUM, rgblum));\n    for(int i = -LBLUR_V; i <= LBLUR_V; i++)\n    {\n        vec4 samp = texture(iChannel2, (fragCoord - vec2(0, i) * LBLUR_DIFFUSION / vec2(LBLUR_V)) / iResolution.xy);\n        bright += samp;\n    }\n    bright = bright / vec4(LBLUR_V * 2 + 1);\n    \n    vec4 color = vec4(0);\n    for(int i = -BLUR_V; i <= BLUR_V; i++)\n    {\n        color += texture(iChannel3, (fragCoord - vec2(0, i)) / iResolution.xy) ;\n    }\n    color = color / vec4(BLUR_V * 2 + 1);\n    color = color / (rgblum * 2./ 3.);\n    \n    fragColor = color + bright;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "\nfloat PI = 3.1415926535897932384626;\nvec3 eyepos = vec3(0.0, 2.0, -4.0);\nvec2 yawpitch = vec2(0, 0);\n\n#define FLT_MAX 99999999999.\n\n#define DEPTH 4\n#define SAMPLES 16\n#define ROOM_SIZE 9.\n#define WALL_THICKNESS .1\n#define POV (1./10.)\n\n#define PREDICT_NEXT_MOVEMENT 1\n\nfloat seed = 0.;\nfloat rand() { return fract(sin(seed++)*43758.5453123); }\n\nstruct box_t\n{\n    vec3 p, d;\n    mat3 r;\n};\n\nmat3 RotXAxis(float ang)\n{\n    return mat3\n    (\n        vec3(1.0, 0.0, 0.0),\n        vec3(0.0, cos(ang),-sin(ang)),\n        vec3(0.0, sin(ang), cos(ang))\n    );\n}\n\nmat3 RotYAxis(float ang)\n{\n    return mat3\n    (\n        vec3(cos(ang), 0.0, sin(ang)),\n        vec3(0.0, 1.0, 0.0),\n        vec3(-sin(ang), 0.0, cos(ang))\n    );\n}\n\nmat3 RotZAxis(float ang)\n{\n    return mat3\n    (\n        vec3( cos(ang), sin(ang), 0.0),\n        vec3(-sin(ang), cos(ang), 0.0),\n        vec3(0.0, 0.0, 1.0)\n    );\n}\n\nmat3 RotAxis(vec3 v, float ang)\n{\n    return mat3\n    (\n        vec3\n        (\n            (1.0f - cos(ang)) * v.x * v.x + cos(ang),\n            (1.0f - cos(ang)) * v.x * v.y - sin(ang) * v.z,\n            (1.0f - cos(ang)) * v.x * v.z + sin(ang) * v.y\n        ),\n        vec3\n        (\n            (1.0f - cos(ang)) * v.y * v.x + sin(ang) * v.z,\n            (1.0f - cos(ang)) * v.y * v.y + cos(ang),\n            (1.0f - cos(ang)) * v.y * v.z - sin(ang) * v.x\n        ),\n        vec3\n        (\n            (1.0f - cos(ang)) * v.z * v.x - sin(ang) * v.y,\n            (1.0f - cos(ang)) * v.z * v.y + sin(ang) * v.x,\n            (1.0f - cos(ang)) * v.z * v.z + cos(ang)\n        )\n    );\n}\n    \nmat3 EulerRotation(vec3 ypr)\n{\n    return RotZAxis(ypr.z) * RotXAxis(ypr.y) * RotYAxis(ypr.x);\n}\n\nvec4 Plane_Normalize(vec4 p)\n{\n    float leng = length(p.xyz);\n    vec4 n = p / vec4(leng);\n    return n;\n}\n\n// n_plane stand for normalized plane\nfloat Plane_DistToPoint(vec4 n_plane, vec3 p)\n{\n    return abs(dot(n_plane.xyz, p) + n_plane.w);\n}\n\n// n_plane stand for normalized plane, n_ray stand for normalized ray\nfloat Plane_Raycast_Dist(vec4 n_plane, vec3 start, vec3 n_ray)\n{\n    float ratio = -dot(n_ray, n_plane.xyz);\n    return (dot(n_plane.xyz, start) + n_plane.w) / ratio;\n}\n\nvec3 Plane_Raycast_Point(vec4 n_plane, vec3 start, vec3 n_ray)\n{\n    return start + n_ray * Plane_Raycast_Dist(n_plane, start, n_ray);\n}\n\nbool Plane_Raycast_Point_Front(vec4 n_plane, vec3 start, vec3 n_ray, out vec3 castpoint, out float castdist)\n{\n\tcastdist = Plane_Raycast_Dist(n_plane, start, n_ray);\n\tif(castdist <= 0.)\n\t\treturn false;\n\tcastpoint = start + n_ray * castdist;\n    return true;\n}\n\nvec4 Plane_FromPointNormal(vec3 point, vec3 n_normal)\n{\n    float dist_to_org = dot(point, n_normal);\n    return vec4(n_normal, -dist_to_org);\n}\n\nbool Box_Raycast(box_t box, vec3 start, vec3 n_ray, bool ignore_from_inside, out bool is_from_inside, out vec3 castpoint, out vec3 normal, out vec2 uv, out float castdist)\n{\n    vec4 planes[6];\n    vec4 front_plane;\n    vec4 back_plane;\n    planes[0] = Plane_FromPointNormal(box.p + box.r[0] * box.d.x, +box.r[0]);\n    planes[1] = Plane_FromPointNormal(box.p + box.r[1] * box.d.y, +box.r[1]);\n    planes[2] = Plane_FromPointNormal(box.p + box.r[2] * box.d.z, +box.r[2]);\n    planes[3] = Plane_FromPointNormal(box.p - box.r[0] * box.d.x, -box.r[0]);\n    planes[4] = Plane_FromPointNormal(box.p - box.r[1] * box.d.y, -box.r[1]);\n    planes[5] = Plane_FromPointNormal(box.p - box.r[2] * box.d.z, -box.r[2]);\n    \n    float backdist = FLT_MAX;\n    float frontdist = -FLT_MAX;\n    int frontplane = 6;\n    int backplane = 6;\n    int curplane = 6;\n    for(int i = 0; i < 6; i++)\n    {\n    \tif(dot(planes[i].xyz, n_ray) < 0.)\n        {\n            float planedist = Plane_Raycast_Dist(planes[i], start, n_ray);\n            if(planedist >= frontdist)\n            {\n                frontdist = planedist;\n                frontplane = i;\n                front_plane = planes[i];\n            }\n        }\n        else\n        {\n            float planedist = Plane_Raycast_Dist(planes[i], start, n_ray);\n            if(backdist >= planedist)\n            {\n                backdist = planedist;\n                backplane = i;\n                back_plane = planes[i];\n            }\n        }\n    }\n    \n    if(frontdist >= 0. && backdist >= frontdist)\n    {\n        is_from_inside = false;\n        castdist = frontdist;\n        castpoint = start + n_ray * castdist;\n        normal = front_plane.xyz;\n        curplane = frontplane;\n    }\n    else if(frontdist < 0. && backdist >= 0.)\n    {\n        if(ignore_from_inside)\n            return false;\n        is_from_inside = true;\n        castdist = backdist;\n        castpoint = start + n_ray * castdist;\n        normal = -back_plane.xyz;\n        curplane = backplane;\n    }\n    else\n        return false;\n    \n    if(curplane == 0)uv = vec2(Plane_DistToPoint(planes[5],castpoint) / box.d.z, Plane_DistToPoint(planes[4],castpoint) / box.d.y) * .5;\n    else if(curplane == 1)uv = vec2(Plane_DistToPoint(planes[3],castpoint) / box.d.x, Plane_DistToPoint(planes[2],castpoint) / box.d.z) * .5;\n    else if(curplane == 2)uv = vec2(Plane_DistToPoint(planes[0],castpoint) / box.d.x, Plane_DistToPoint(planes[4],castpoint) / box.d.y) * .5;\n    else if(curplane == 3)uv = vec2(Plane_DistToPoint(planes[2],castpoint) / box.d.z, Plane_DistToPoint(planes[4],castpoint) / box.d.y) * .5;\n    else if(curplane == 4)uv = vec2(Plane_DistToPoint(planes[3],castpoint) / box.d.x, Plane_DistToPoint(planes[5],castpoint) / box.d.z) * .5;\n    else uv = vec2(Plane_DistToPoint(planes[3],castpoint) / box.d.x, Plane_DistToPoint(planes[4],castpoint) / box.d.y) * .5;\n    \n    return true;\n}\n\nstruct object_t\n{\n    box_t shape;\n    vec3 color;\n    float specular;\n    vec3 emissive;\n};\n\n#define num_Objects 8\nobject_t g_Objects[num_Objects];\nfloat total_lum;\n\nvoid Scene_Init()\n{\n\tg_Objects[0] = object_t\n    (\n        box_t(vec3(0,0,0),\n              vec3(ROOM_SIZE*.5,WALL_THICKNESS,ROOM_SIZE*.5),\n              mat3(vec3(1,0,0),\n                   vec3(0,1,0),\n                   vec3(0,0,1))),\n        vec3(.75),\n        0.,\n        vec3(0)\n    );\n\tg_Objects[1] = object_t\n    (\n        box_t(vec3(-ROOM_SIZE*.5,ROOM_SIZE*.5,0),\n              vec3(WALL_THICKNESS,ROOM_SIZE*.5,ROOM_SIZE*.5),\n              mat3(vec3(1,0,0),\n                   vec3(0,1,0),\n                   vec3(0,0,1))),\n        vec3(.75,.25,.25),\n        0.,\n        vec3(0)\n    );\n\tg_Objects[2] = object_t\n    (\n        box_t(vec3(ROOM_SIZE*.5,ROOM_SIZE*.5,0),\n              vec3(WALL_THICKNESS,ROOM_SIZE*.5,ROOM_SIZE*.5),\n              mat3(vec3(1,0,0),\n                   vec3(0,1,0),\n                   vec3(0,0,1))),\n        vec3(.25, .25, .75),\n        0.,\n        vec3(0)\n    );\n\tg_Objects[3] = object_t\n    (\n        box_t(vec3(0,ROOM_SIZE,0),\n              vec3(ROOM_SIZE*.5,WALL_THICKNESS,ROOM_SIZE*.5),\n              mat3(vec3(1,0,0),\n                   vec3(0,1,0),\n                   vec3(0,0,1))),\n        vec3(.75),\n        0.,\n        vec3(0)\n    );\n\tg_Objects[4] = object_t\n    (\n        box_t(vec3(0,ROOM_SIZE*.5,ROOM_SIZE*.5),\n              vec3(ROOM_SIZE*.5,ROOM_SIZE*.5,WALL_THICKNESS),\n              mat3(vec3(1,0,0),\n                   vec3(0,1,0),\n                   vec3(0,0,1))),\n        vec3(.75),\n        0.,\n        vec3(0)\n    );\n\tg_Objects[5] = object_t\n    (\n        box_t(vec3(0,ROOM_SIZE*.5,-ROOM_SIZE*.5),\n              vec3(ROOM_SIZE*.5,ROOM_SIZE*.5,WALL_THICKNESS),\n              mat3(vec3(1,0,0),\n                   vec3(0,1,0),\n                   vec3(0,0,1))),\n        vec3(1),\n        0.,\n        vec3(0)\n    );\n\tg_Objects[6] = object_t\n    (\n        box_t(vec3(0,WALL_THICKNESS + sqrt(2.) * .4,0),\n              vec3(.4),\n              RotYAxis(iTime) *\n              RotZAxis(atan(1./sqrt(2.))) *\n              RotXAxis(PI*.25)),\n        vec3(1),\n        1.,\n        vec3(0)\n    );\n\tg_Objects[7] = object_t\n    (\n        box_t(vec3(0,ROOM_SIZE * .5,0),\n              vec3(.5,.5,.5),\n              mat3(vec3(1,0,0),\n                   vec3(0,1,0),\n                   vec3(0,0,1))),\n        vec3(1),\n        0.,\n        vec3(10,9,8)\n    );\n    total_lum = 0.;\n    for(int i = 0; i < num_Objects; i++)\n    {\n        total_lum += g_Objects[i].emissive.r +\n                     g_Objects[i].emissive.g +\n                     g_Objects[i].emissive.b;\n    }\n}\n\nbool pick_object\n(\n    vec3 start,\n    vec3 n_ray,\n    bool ignore_from_inside,\n    out bool is_from_inside,\n    out int objindex,\n    out vec3 castpoint,\n    out vec3 castnormal,\n    out vec2 castuv,\n    out float castdist\n)\n{\n    vec3 cp, cn;\n    vec2 cuv;\n    float cd;\n    bool have_cast = false;\n    bool isin = false;\n    \n    float min_dist = FLT_MAX;\n    for(int i = 0; i < num_Objects; i++)\n    {\n        if(Box_Raycast(g_Objects[i].shape, start, n_ray, ignore_from_inside, isin, cp, cn, cuv, cd))\n        {\n            if(cd <= min_dist)\n            {\n            \thave_cast = true;\n                min_dist = cd;\n                objindex = i;\n                \n                is_from_inside = isin;\n                castpoint = cp;\n                castnormal = cn;\n                castuv = cuv;\n                castdist = cd;\n            }\n        }\n    }\n    return have_cast;\n}\n\nint select_lightsource()\n{\n    float val = rand() * total_lum;\n    for(int i = 0; i < num_Objects; i++)\n    {\n        float curlum =\tg_Objects[i].emissive.r +\n                        g_Objects[i].emissive.g +\n                        g_Objects[i].emissive.b;\n        if(curlum > val)\n            return i;\n        else\n            val -= curlum;\n    }\n}\n\nvec3 random_vector()\n{\n    float ang = (rand() - rand()) * PI;\n    float pitch = rand() * PI * 2.;\n    return normalize(vec3(sin(ang) * cos(pitch), sin(pitch), cos(ang) * cos(pitch)));\n}\n\nvec3 diffuse_vector(vec3 normal)\n{\n    vec3 rv = random_vector();\n    if(dot(rv, normal) <= 0.)\n        rv = reflect(rv, normal);\n    return rv;\n}\n\nvec4 sky_color(vec3 ray)\n{\n    return vec4(0);\n}\n\nbool radiance(vec3 eyepos, vec3 n_ray, out vec3 color)\n{\n    vec3 start = eyepos;\n    vec3 dir = n_ray;\n    \n    bool is_from_inside;\n    int objindex;\n    vec3 castpoint;\n    vec3 castnormal;\n    vec2 castuv;\n    float castdist;\n    \n    if(pick_object(start, dir, true,\n\t\tis_from_inside, objindex, castpoint, castnormal, castuv, castdist) == false)\n    \treturn false;\n    \n    vec3 color_mask = g_Objects[objindex].color;\n    vec3 color_emissive = g_Objects[objindex].emissive;\n    \n    for(int i = 0; i < DEPTH; i++)\n    {\n        start = castpoint;\n        color_emissive += g_Objects[objindex].emissive * color_mask;\n        color_mask *= g_Objects[objindex].color;\n        \n        if(rand() >= g_Objects[objindex].specular)\n        {\n#if PREDICT_NEXT_MOVEMENT\n            if(i == DEPTH-1)\n            {\n                int ls = select_lightsource();\n                dir = g_Objects[ls].shape.p - castpoint;\n                if(dot(dir, castnormal) >= 0.)\n                    dir = normalize(dir);\n                else\n                    dir = diffuse_vector(castnormal);\n            }\n            else\n#endif\n            dir = diffuse_vector(castnormal);\n        }\n        else\n            dir = reflect(dir, castnormal);\n        \n        if(pick_object(start, dir, true,\n\t\t\tis_from_inside, objindex, castpoint, castnormal, castuv, castdist) == false)\n    \t\tbreak;\n    }\n    \n    color = sky_color(dir).rgb * color_mask + color_emissive;\n\n    return true;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tseed = iTime + iResolution.y * fragCoord.x / iResolution.x + fragCoord.y / iResolution.y;\n    Scene_Init();\n    \n\tvec2 xy = (fragCoord.xy - iResolution.xy * .5) / iResolution.y;\n    \n    vec2 mouse_rotation = ((iMouse.xy - iResolution.xy / 2.) / iResolution.y) * PI;\n    \n    mat3 RotMat = RotXAxis(-mouse_rotation.y)\n        * RotYAxis(mouse_rotation.x);\n    \n    vec3 ray = normalize(vec3(xy, 1) * RotMat);\n    \n    vec4 color = vec4(0,0,0,1);\n    bool hit = false;\n    for(int i = 0; i < SAMPLES; i++)\n    {\n        vec3 c;\n    \thit = radiance(eyepos, ray, c);\n        color.xyz += c;\n    }\n    if(hit)\n\t    color.xyz /= vec3(SAMPLES);\n    else\n        color = sky_color(ray);\n    \n    color = vec4\n    (\n        color.r + (((color.r + color.g + color.b) / 3.)-.5) * .01,\n        color.g + (((color.r + color.g + color.b) / 3.)-.5) * .01,\n        color.b + (((color.r + color.g + color.b) / 3.)-.5) * .01,\n        color.a\n    );\n    \n    if(iTimeDelta < POV)\n    {\n        float ratio = iTimeDelta / POV;\n        color = color * ratio + texture(iChannel0,fragCoord / iResolution.xy) * (1. - ratio);\n    }\n    \n\tfragColor = color;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "#define POV (1./1.)\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec4 avrlum = vec4(0);\n    float num_points = 0.;\n    for(float y = 0.5; y < iResolution.y; y += iResolution.y / 10.)\n    {\n        for(float x = 0.5; x < iResolution.x; x += iResolution.x / 10.)\n        {\n            avrlum += texture(iChannel0, (vec2(x,y) + fragCoord * 10./ iResolution.xy) / iResolution.xy);\n            num_points ++;\n        }\n    }\n\n    avrlum /= num_points;\n\n    if(iTimeDelta < POV)\n    {\n        float ratio = iTimeDelta / POV;\n        avrlum = avrlum * ratio + texture(iChannel1,vec2(0)).r * (1. - ratio);\n    }\n    fragColor = avrlum;\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "\n#define HDR_MINLUM 1.\n#define HDR_MAXLUM 20.\n\n#define LBLUR_H 20\n#define LBLUR_DIFFUSION 40.\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec4 color = vec4(0);\n    vec4 avrlum = texture(iChannel1,fragCoord / iResolution.xy);\n    float rgblum = avrlum.r + avrlum.g + avrlum.b;\n    for(int i = -LBLUR_H; i <= LBLUR_H; i++)\n    {\n        vec4 samp = texture(iChannel0, (fragCoord - vec2(i, 0) * LBLUR_DIFFUSION / vec2(LBLUR_H)) / iResolution.xy);\n        color += samp;\n    }\n    rgblum = min(HDR_MAXLUM, max(HDR_MINLUM, rgblum));\n    fragColor = color / vec4(LBLUR_H * 2 + 1) / (rgblum * 8. / 3.);\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 260,
+            "channel": 0
+          }
+        ],
+        "code": "\n#define HDR_MINLUM 1.\n#define HDR_MAXLUM 20.\n\n#define BLUR_H 2\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec4 color = vec4(0);\n    vec4 avrlum = texture(iChannel1,fragCoord / iResolution.xy);\n    float rgblum = avrlum.r + avrlum.g + avrlum.b;\n    for(int i = -BLUR_H; i <= BLUR_H; i++)\n    {\n        color += texture(iChannel0, (fragCoord - vec2(i, 0)) / iResolution.xy);\n    }\n    rgblum = min(HDR_MAXLUM, max(HDR_MINLUM, rgblum));\n    color = color / vec4(BLUR_H * 2 + 1);\n    color = color / (rgblum * 2./ 3.);\n    \n    fragColor = color;\n}",
+        "name": "Buf D",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lsBWN",
+      "date": "1511905895",
+      "viewed": 240,
+      "name": "Float noise without texture",
+      "username": "lexmar",
+      "description": "Generates random float in the range 0.0-1.0, without textures. It uses the bottom 23 bits of a random integer (generated from a hash function) for the mantissa.",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "int hash(int x)\n{\n    x = ((x >> 16) ^ x) * 0x45d9f3b;\n    x = ((x >> 16) ^ x) * 0x45d9f3b;\n    x = (x >> 16) ^ x;\n    return x;\n}\n\nfloat random(int state)\n{\n    int h = hash(state);\n    float result =  intBitsToFloat((0x3F800000 | (h & 0x007fffff))) - 1.0;\n    return result;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    int state = int(fragCoord.x) + int(fragCoord.y)*int(iResolution.x);\n    float r = random(state);\n    \n    fragColor = vec4(r, r, r, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4djyzK",
+      "date": "1509469600",
+      "viewed": 459,
+      "name": "Laplacian",
+      "username": "iq",
+      "description": "Visualization of the Laplacian of a distance field. It measures average rate of of change. So it can be used to detect discontinuities and also rate of curvature of the distance field.",
+      "likes": 16,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "sdf",
+        "laplacian",
+        "disntancefield"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// The MIT License\n// Copyright \u00a9 2017 Inigo Quilez\n// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n// Computes the laplacian of a distance field.\n\n// The Laplacian measures average rate of change at a given location (while gradient measures\n// the direction of maximum change). If compareted agains a threshold, you can use is as an\n// edge detector. You can also use it to detect linear sections of the distanec field, where\n// the Laplace is zero, or alternativelly, measure how curved the isolines are (where the\n// laplacian is higher the bigger the curvature).\n\n\n\nfloat sdBox( vec2 p, vec2 b )\n{\n  vec2 d = abs(p) - b;\n  return min(max(d.x,d.y),0.0) + length(max(d,0.0));\n}\n\nfloat sdTriangle( in vec2 p0, in vec2 p1, in vec2 p2, in vec2 p )\n{\n\tvec2 e0 = p1 - p0;\n\tvec2 e1 = p2 - p1;\n\tvec2 e2 = p0 - p2;\n\tvec2 v0 = p - p0;\n\tvec2 v1 = p - p1;\n\tvec2 v2 = p - p2;\n\tvec2 pq0 = v0 - e0*clamp( dot(v0,e0)/dot(e0,e0), 0.0, 1.0 );\n\tvec2 pq1 = v1 - e1*clamp( dot(v1,e1)/dot(e1,e1), 0.0, 1.0 );\n\tvec2 pq2 = v2 - e2*clamp( dot(v2,e2)/dot(e2,e2), 0.0, 1.0 );\n    float s = sign( e0.x*e2.y - e0.y*e2.x );\n    vec2 d = min( min( vec2( dot( pq0, pq0 ), s*(v0.x*e0.y-v0.y*e0.x) ),\n                       vec2( dot( pq1, pq1 ), s*(v1.x*e1.y-v1.y*e1.x) )),\n                       vec2( dot( pq2, pq2 ), s*(v2.x*e2.y-v2.y*e2.x) ));\n\treturn -sqrt(d.x)*sign(d.y);\n}\n\nvec2 v1, v2, v3;\n\nfloat map( in vec2 p )\n{\n    float d1 = length(p-vec2(-0.6,-0.3))-0.4;\n    float d2 = sdTriangle( v1, v2, v3, p );\n    float d3 = sdBox( p-vec2(1.0,0.5), vec2(0.6,0.2) );\n    return min( d1, min(d2,d3) );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 p = (2.0*fragCoord.xy-iResolution.xy)/iResolution.y;\n\n    v1 = 0.7*cos( iTime*0.55 + vec2(0.0,1.5) + 0.0 );\n\tv2 = 0.5*cos( iTime*0.50 + vec2(0.0,1.7) + 3.0 );\n\tv3 = 0.8*cos( iTime*0.60 + vec2(0.0,1.6) + 4.0 );\n\n    vec2 e = vec2(2.0/iResolution.y,0.0);\n\tfloat dis = map( p );\n    vec2  gra = vec2(map(p+e.xy)-map(p-e.xy), map(p+e.yx)-map(p-e.yx))/(2.0*e.x);\n    float lap = (map(p+e.xy) + map(p-e.xy) + map(p+e.yx) + map(p-e.yx) - 4.0*map(p))/(e.x*e.x);\n    \n    \n    //vec3 col = vec3(0.9+0.1*gra,0.0);\n\tvec3 col = vec3(1.0,0.7,0.3);\n    if( dis<0.0 ) col = col.zxy;\n    col *= 1.0 - 0.7*exp(-1.5*abs(dis));\n    col *= 0.96 + 0.04*cos(200.0*dis);\n\tcol = mix( col, vec3(0.0,0.0,0.0), 1.0-smoothstep(0.0,0.01,abs(dis)) );\n    \n  \n    // laplacian display\n    float anim = fract( iTime/8.0 );\n         if( lap<-10.0 ) { if( anim>0.25 ) col  = vec3(1.0,1.0,1.0); }\n    else if( lap> 10.0 ) { if( anim>0.50 ) col  = vec3(1.0,0.8,0.1); }\n    else                 { if( anim>0.75 ) col += vec3(1.0,1.0,1.0)*abs(lap)*0.1; }\n    \n\tfragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

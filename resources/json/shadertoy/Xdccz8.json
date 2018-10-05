@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xdccz8",
+      "date": "1517866590",
+      "viewed": 218,
+      "name": "Cosine jamming",
+      "username": "Txoka",
+      "description": ":)",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "cos",
+        "jamming"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define BorderSmoothness .2\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    vec2 uv = fragCoord/iResolution.xy*2.-1.;\n    uv.x*=iResolution.x/iResolution.y;\n    uv*=10.;\n    \n    vec2 mouse=iMouse.xy/iResolution.xy*2.-1.;\n    mouse.x*=iResolution.x/iResolution.y;\n    mouse*=10.;\n    \n    float col=cos(length(uv)*2.)/2.+0.5;\n    float col2=cos(length(uv-mouse)*2.)/2.+0.5;\n    \n    fragColor = vec4(smoothstep(1.-BorderSmoothness,1.+BorderSmoothness,col+col2));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

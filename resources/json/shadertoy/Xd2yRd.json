@@ -1,0 +1,41 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xd2yRd",
+      "date": "1493373670",
+      "viewed": 361,
+      "name": "Interpolating with 1/x",
+      "username": "grinist",
+      "description": "Hi guys.\nI couldn't find this being used anywhere so decided to share. Cheap interpolation / easing using 1/x. More info in code comments.\nMouse x controls slope, mouse y on top / bottom half switches between functions.\nVirgin Shadertoy entry.",
+      "likes": 23,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "contrast",
+        "graph",
+        "step",
+        "shape",
+        "slope",
+        "interpolate",
+        "ease"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Cheap interpolation / easing using 1/x.\n// Properties:\n// * A bit similar to exponential easing functions, but\n// * Discontinuity at x=0 and x=1\n// * Symmetrical relative to the diagonal!\n// * Uses a div and a mul\n// The functions are easy to control and useful for easing, shaping, attack, contrast curves.\n// Symmetricity may be interesting for shaping functions.\n\n// invXEase uses a mirrored or flipped 1/x shape.\n// invXEaseDual uses symmetry at the origin, thanks iq.\n\n// -----\n\n// Interpolates from 0 to 1 with slope of k at x=0 and 1/k at x=1.\n// k must be greater than zero.\n// k<1: ease in, k=1: lerp, k>1: ease out\nfloat invXEase(float x, float k)\n{\n\tk = clamp(k, 0.0001, 10000.0) - 1.0; // clamp optional, if you know your k\n    \n\tx = clamp(x, 0.0, 1.0);\n    float kx = k * x;\n    return (x + kx) / (kx + 1.0);    \n}\n\n// Interpolates from 0 to 1 with slope of k at x=0 and x=1.\n// k must be greater than zero.\n// k<1: sigmoid, k=1: lerp, k>1: seat\nfloat invXEaseDual(float x, float k)\n{\n    k = clamp(k, 0.0001, 10000.0); // clamp optional, if you know your k\n    \n    x = 0.5 - x; // re-center at 0\n    float s = sign(x);\n    x = clamp(abs(x) * 2.0, 0.0, 1.0);\n    return 0.5 + 0.5 * s * x / (x * (k - 1.0) - k);\n    \n    // old piecewise version\n\t//return 0.5 * (invXEase(x * 2.0, k) + 1.0 - invXEase((1.0 - x) * 2.0, k));\n}\n\n\n// ----- The rest is just for demo\n\n\n// Alpha blends color\nvoid mixColor(inout vec4 baseCol, vec4 color, float alpha)\n{\n    baseCol = vec4(mix(baseCol.rgb, color.rgb, alpha * color.a), 1.0);\n}\n\n// Draws a gridline at each stepSize\nvoid drawGrid(inout vec4 baseCol, vec2 xy, vec2 dxy, float stepSize, vec4 gridCol)\n{\n\tfloat mul = 1.0 / stepSize;\n\tvec2 g = abs(vec2(-0.5) + fract((xy + vec2(stepSize) * 0.5) * mul)); // g passes 0 at stepSize intervals\n\tg = vec2(1.0) - smoothstep(vec2(0.0), dxy * mul * 1.5, g); // three pixels wide with aa\n    mixColor(baseCol, gridCol, max(g.x, g.y));\n}\n\n// Draws a curve\nvoid drawCurve(inout vec4 baseCol, vec2 xy, vec2 dxy, float value, vec4 curveCol)\n{\n\t// Using y distance to curve, modifying distance threshold with approximated slope\n    // Derivative breaks with drastic changes of value and discontinuities, but so be it\n    float yDist = abs(value - xy.y);\n    float dValue = abs(dFdx(value));\n\tfloat c = 1.0 - smoothstep(0.0, (dxy.y + dValue) * 2.0, yDist); // four pixels wide with aa\n\tmixColor(baseCol, curveCol, c);\n}\n\n// Draws a gradient rect\nvoid drawGradientRect(inout vec4 baseCol, vec2 xy, vec2 pos, vec2 size, float t, vec4 startCol, vec4 endCol)\n{\n\tvec4 gradientCol = mix(startCol, endCol, t);\n\tvec2 inside = step(pos, xy) * step(xy, pos + size);\n\tmixColor(baseCol, gradientCol, inside.x * inside.y);\n}\n\n// Draws a circle\nvoid drawCircle(inout vec4 baseCol, vec2 xy, vec2 dxy, vec2 pos, float radius, vec4 circleCol)\n{\n    float r = length(pos - xy);\n    float aar = length(dxy) * 0.707;\n    float c = 1.0 - smoothstep(radius - aar, radius + aar, r);\n    mixColor(baseCol, circleCol, c);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n\n    // graph setup\n\tfloat aspect = iResolution.x / iResolution.y;\n\tvec2 graphSize = vec2(aspect * 1.4, 1.4);\n\tvec2 graphPos = 0.5 - graphSize * 0.5;\n\n\tvec2 xy = graphPos + uv * graphSize;\t// graph coords\n\tvec2 dxy = graphSize / iResolution.xy;\t// pixel size in graph units\n\n    // background\n\tvec4 col = mix(vec4(0.1, 0.25, 0.35, 1.0), vec4(0.0, 0.0, 0.0, 1.0), invXEase(length(0.5 - uv) * 1.414, 0.3));\n    \n\t// grid\n    drawGrid(col, xy, dxy, 0.1, vec4(1.0, 1.0, 1.0, 0.2));\n\tdrawGrid(col, xy, dxy, 0.5, vec4(1.0, 1.0, 1.0, 0.3));\n\tdrawGrid(col, xy, dxy, 1.0, vec4(1.0, 1.0, 1.0, 0.4));\n\n    vec2 auto = vec2(0.5 + 0.5 * sin(iTime), fract(iTime / (6.2832 * 2.0)));\n\tvec2 mouse = iMouse.xy / iResolution.xy;\n    mouse = iMouse.z <= 0.0 ? auto : mouse;\n    // translate x coordinate to a slope value between 0.01 and 100\n\tfloat k = pow(10.0, (-0.5 + mouse.x) * 4.0);\n    float lerpTime = clamp(fract(iTime * 0.25) * 2.0 - 0.5, 0.0, 1.0);\n    \n\tif (mouse.y > 0.5)\n\t{\n\t\t// draw ease function if mouse is dragged on the top half\n\t\tfloat value = invXEase(xy.x, k);\n        vec4 curveCol = vec4(0.2, 0.7, 1.0, 1.0);\n        vec4 semiCurveCol = vec4(curveCol.rgb, 0.5);\n        if (iMouse.z > 0.0)\n\t\t\tdrawCurve(col, xy, dxy, xy.x * k, semiCurveCol);\n        \n\t\tdrawCurve(col, xy, dxy, value, curveCol);\n\t\tdrawGradientRect(col, xy, vec2(graphPos.x, -0.2), vec2(graphSize.x, 0.1), value, vec4(0.0, 0.0, 0.0, 1.0), curveCol);\n        \n        if (iMouse.z > 0.0)\n        {\n            drawCircle(col, xy, dxy, vec2(lerpTime, invXEase(lerpTime, k)), 0.0125, semiCurveCol);\n            drawCircle(col, xy, dxy, vec2(1.1, invXEase(lerpTime, k)), 0.025, curveCol);\n        }\n\t}\n\telse\n\t{\n\t\t// draw dual ease function if mouse is dragged on the bottom half\n\t\tfloat value = invXEaseDual(xy.x, k);\n        vec4 curveCol = vec4(1, 0.45, 0.1, 1.0);\n        vec4 semiCurveCol = vec4(curveCol.rgb, 0.5);\n        if (iMouse.z > 0.0)\n\t\t\tdrawCurve(col, xy, dxy, xy.x * k, semiCurveCol);\n\n        drawCurve(col, xy, dxy, value, curveCol);\n\t\tdrawGradientRect(col, xy, vec2(graphPos.x, -0.2), vec2(graphSize.x, 0.1), value, vec4(0.0, 0.0, 0.0, 1.0), curveCol);\n\n        if (iMouse.z > 0.0)\n        {\n            drawCircle(col, xy, dxy, vec2(lerpTime, invXEaseDual(lerpTime, k)), 0.0125, semiCurveCol);\n            drawCircle(col, xy, dxy, vec2(1.1, invXEaseDual(lerpTime, k)), 0.025, curveCol);\n        }\n\t}\n\n\tfragColor = col;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

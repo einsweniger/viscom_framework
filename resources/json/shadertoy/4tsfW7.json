@@ -1,0 +1,93 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tsfW7",
+      "date": "1512182349",
+      "viewed": 19,
+      "name": "Marker Quality",
+      "username": "KylBlz",
+      "description": "visualizes quality",
+      "likes": 0,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "marker",
+        "quality"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//rendering\n#define EAS_SAMPLES 32\n#define EAS_SAMPLES_RCP .03125\n\n// Some shortcuts\n#define vec3max(a) max(a.x, max(a.y, a.z))\n#define vec3min(a) min(a.x, min(a.y, a.z))\n#define vec4max(a) max(max(a.x, a.y), max(a.z, a.w))\n#define vec4min(a) min(min(a.x, a.y), min(a.z, a.w))\n#define inRange(a,x,b) step(a,x)*step(x,b)\n#define tex(a,b) textureLod(a,b,0.)\n\nconst float\teps = .0001, ieps = .9999, sml = .001, isml = .999, zfar = 20.;\nconst vec2\tVEL = vec2(0.5), POS = vec2(1.5, 0.5), ROT = vec2(2.5, 0.5), MOU = vec2(3.5, 0.5);\n\n//Reflect, Transmit, Emit rgb wavelengths, Surface scatter, sUbsurface scatter, Refractive index, Emission Uniformity, unique iDentifier\nstruct mat { vec3 r, t, e; float s, u, f, eu; int d; };\n//1D line segment with signed IDs for each end point\nstruct seg { vec2 t; ivec2 d; };\n//Location, Normal, Distance, Object id, current Material\nstruct hit { vec3 l, n; seg s; int o; mat m; };\n//Origin, Direction, Color, current Material\nstruct ray { vec3 o, d, c; mat m; };\n//Location, Normal, size, Material, iDentifier\nstruct pln { vec3 l; mat3 o; int m, d; };\n//Center, Size, Orientation, Material, iDentifier\nstruct box { vec3 c, s; int m, d; };\n\nconst mat nullMat = mat(vec3(0.), vec3(1.), vec3(0.), 0., 0., 0., 0., -1);\nconst seg nullSeg = seg(vec2(zfar), ivec2(0));\nconst hit nullHit = hit(vec3(0.), vec3(0.), nullSeg, 0, nullMat);\nconst vec2 nullT = vec2(zfar, 0.);\n\n//////////////////////////////////////////// Materials /////////////////////////////////////////////\nconst int _air = 0, _mgrid = 1, _mbox = 2;\nconst mat[] matLib = mat[] (\n    mat(vec3(.01), vec3(0.99), vec3(0.), .01, .01, 1.0003, 0., _air),\n    mat(vec3(.01), vec3(0.), vec3(0.), 0., 0., -1., 0., _mgrid),\n    mat(vec3(1.), vec3(0.), vec3(0.), 0., 0., -1., 0., _mbox)\n);\n\n//////////////////////////////////////////// Primitives ////////////////////////////////////////////\nconst int _pln1 = 1, _box1 = 2;\npln pln1 = pln(vec3(0., -.05, 0.), mat3(1.), _mgrid, _pln1);\nbox box1 = box(vec3(0.), vec3(1.,.05,1.), _mbox, _box1);\n\n//////////////////////////////////////// Function Library /////////////////////////////////////////\nfloat hash12( in vec2 p );\nvec3 rotateXY(in vec3 p, in vec2 angle);\nvoid basis(in vec3 n, out vec3 f, out vec3 r);\nvec3 slerp(in vec3 start, in vec3 end, in float percent);\n// Segment operators\n#define len(a) (a.t.y - a.t.x)\n#define valid(a) (a.t.y < zfar)\n#define minT(a) ((a.y<a.x)? zfar: (a.x<0.)? (a.y<0.)? zfar: a.y: a.x)\nvec2 lt(in seg s);\nvoid lt(inout seg o, in seg s);\n// Signed distance functions (thanks IQ)\nfloat sd(in vec3 l, in box b);\nfloat sd(in vec3 l, in pln p);\n//vec3 sdNrm( make them provide samples? )\n// UV map functions\nvec2 map(in vec3 l, in box b);\nvec2 map(in vec3 l, in pln p);\n// Normal functions\nvec3 nrm(in vec3 l, in box b);\nvec3 nrm(in vec3 l, in pln p);\n// Segment functions\nseg rs(in ray r, in box b);\nseg rs(in ray r, in pln p);\n// Hit functions\nvoid lt(inout hit o, in hit h) { if (minT(h.s.t) < minT(o.s.t)) o = h; }\n#define _trc seg s = rs(r, o); vec3 l = r.o + r.d * minT(s.t); hit h = hit(l, nrm(l, o), s, o.d, matLib[o.m])\nhit trace(in ray r, in box o) { _trc; return h; }\nhit trace(in ray r, in pln o) { _trc; return h; }\n// Surface functions\nvec3 Kyles(in ray r, in hit h, in vec3 l);\n// Subsurface functions\n//https://colinbarrebrisebois.com/2011/03/07/gdc-2011-approximating-translucency-for-a-fast-cheap-and-convincing-subsurface-scattering-look/\nfloat sss(in vec3 rd, in vec3 n, in vec3 h, in vec3 l, in float dst, in float ltPow, in float ltScl, in float ltAmb, in float thickness);\n// Volume functions\nvec3 volmarch(in ray r, in vec3 l, in seg s);\n//void sampleEquiAngular(float u, float t2, vec3 ro, vec3 rd, vec3 l, out float d, out float pdf);\n\n// Public functions\nhit traceScene(in ray r); // for rs scene\nhit traceSceneSimple(in ray r); // for rs volume lighting\n\n//////////////////////////////////// Dynamic material implementation ///////////////////////////////\nmat mgrid(in ray r, inout hit h) {\n    mat ret = matLib[_mgrid];\n    ret.r = vec3(0., step(vec2(.8+distance(r.o, h.l)*.01), fract(h.l.xz)));\n    return ret;\n}\nmat mbox(in ray r, inout hit h) {\n    mat ret = matLib[_mbox];\n    float p1d = sd(h.l, pln1);\n    ret.e = vec3(clamp(sqrt(p1d)*2.5, .25, .75));\n    if (all(lessThan(h.l.xz, box1.s.xz * .75)) && all(greaterThan(h.l.xz, box1.s.xz * -.75))) {\n        ret.r = vec3(0.);\n        ret.e = vec3(0.);\n    }\n    return ret;\n}\n\n//updates dynamic materials. better solution?\nvoid updateMaterials(in ray r, inout hit h) {\n\tif (h.m.d == _mgrid) h.m = mgrid(r, h);\n\telse if (h.m.d == _mbox) h.m = mbox(r, h);\n}\n\n//////////////////////////////////////////// Scene //////////////////////////////////////////////\nhit traceSceneSimple(in ray r) {\n    seg s = nullSeg;\n    lt(s, rs(r, pln1));\n\tlt(s, rs(r, box1));\n\treturn hit(r.o + r.d*minT(s.t), vec3(0.), s, s.d.x, nullMat);\n}\nhit traceScene(in ray r) {\n\thit ret = nullHit;\n    lt(ret, trace(r, pln1));\n    lt(ret, trace(r, box1));\n\treturn ret;\n}\n\n//////////////////////////////////////////// Main ///////////////////////////////////////////////\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    //get input\n\tvec3 l = tex(iChannel0, POS / iResolution.xy).xyz,\n\t\t o = tex(iChannel0, ROT / iResolution.xy).xyz,\n\t\t d = rotateXY(normalize(vec3(vec2(1., iResolution.y / iResolution.x) * (uv * 2. - 1.), 1.2)), o.xy);\n    //begin tracing\n\thit res;\n    //final color\n    vec3 final = vec3(0.);\n    ray r = ray(l, d, vec3(1.), matLib[_air]);\n    //orthonormal basis for tangent and bitanget\n    vec3 uu = vec3(0.), vv = vec3(0.);\n    float px = 1. / iResolution.y;\n    basis(d, uu, vv);\n    uu *= px; vv *= px;\n    //trace scene\n    res = traceScene(r);\n    //march volume\n    vec3 col = vec3(0.);\n    if (res.m.d > 0) {\n        //update dynamic materials\n        updateMaterials(r, res);\n        vec3 dl = vec3(0.);\n\n        vec3 kyles = Kyles(r, res, vec3(-10., 10., 10.));\n        dl += kyles.x;\n        col += kyles.z;\n\n        final += r.c * res.m.r * dl + res.m.e;\n    }\n    col += volmarch(r, vec3(0.), seg(vec2(0., minT(res.s.t)), ivec2(0)));\n    final += col;\n\tfragColor = vec4(clamp(final, vec3(0.), vec3(1.)), 1.);\n} //////////////////////////////////////////////////////////////////////////////////////////////////////////////\n\nfloat hash12( in vec2 p ) {\n\tfloat h = dot(p,vec2(907.4993, 683.64751));\n    return fract(sin(h)*701.5837);\n}\nvec3 rotateXY(in vec3 p, in vec2 angle) {\n\tvec2 c = cos(angle), s = sin(angle); vec3 o = p;\n\to.yz *= mat2(c.x, s.x, -s.x, c.x); \n    o.xz *= mat2(c.y, s.y, -s.y, c.y);\n\treturn o;\n}\n//thanks MBR\nvoid basis(in vec3 n, out vec3 f, out vec3 r) {\n    float a = 1. / (1. + n.z);\n    float b = -n.x*n.y*a;\n    f = vec3(1. - n.x*n.x*a, b, -n.x);\n    r = vec3(b, 1. - n.y*n.y*a, -n.y);\n}\nvec3 slerp(in vec3 start, in vec3 end, in float percent) {\n\tfloat dt = dot(start, end),\n        theta = acos(dt)*percent;\n\treturn start*cos(theta) + normalize(end - start*dt)*sin(theta);\n}\n\n//////////////////////////////////////////// Segment operators ////////////////////////////////////////////\nvec2 lt(in seg s) {\n    if (s.t.x < s.t.y && s.t.x > 0.) return vec2(s.t.x, float(s.d.x));\n    else if (s.t.y > 0.) return vec2(s.t.y, float(s.d.y));\n    return nullT;\n}\nvoid lt(inout seg o, in seg s) {\n    if (o.t.x < s.t.x && o.t.y > 0.) return;\n    if (s.t.y > 0.) {\n        o = s; return;\n    }\n    o = nullSeg;\n}\n\n//////////////////////////////////////////// Signed distance functions ////////////////////////////////////////////\n//thanks IQ\nfloat sd(in vec3 l, in box b) {\n\tvec3 d = abs(l - b.c) - b.s;\n\treturn min(vec3max(d), 0.) + length(max(d, 0.));\n}\nfloat sd(in vec3 l, in pln p) {\n    return dot(p.o[1], l - p.l);\n}\n\n//////////////////////////////////////////// UV map functions ////////////////////////////////////////////\nvec2 map(in vec3 l, in box b) {\n\tmat3 o = mat3(vec3(0.), nrm(l, b) + eps, vec3(0.));\n    basis(o[1], o[0], o[2]);\n    vec3 r = l * o;\n    return r.xz;\n}\nvec2 map(in vec3 l, in pln p) {\n    return vec2(dot(l, p.o[0]), dot(l, p.o[2]));\n}\n\n//////////////////////////////////////////// Normal functions ////////////////////////////////////////////\nvec3 nrm(in vec3 l, in box b) {\n\tvec3 a = l - b.c;\n\treturn step(b.s*ieps, abs(a)) * sign(a);\n}\nvec3 nrm(in vec3 l, in pln p) {\n    return p.o[1];\n}\n\n//////////////////////////////////////////// Segment functions ////////////////////////////////////////////\n//modified from siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm\nseg rs(in ray r, in box b) {\n    vec3 t0 = b.c - r.o,\n         t1 = (t0 - b.s)/r.d,\n         t2 = (t0 + b.s)/r.d;\n    float tn = vec3max(min(t1, t2)),\n          tx = vec3min(max(t1, t2));\n    if (tx<tn || tx<0.) return nullSeg;\n    return seg(vec2(tn, tx), ivec2(b.d, -b.d));\n}\nseg rs(in ray r, in pln p) {\n    float t = dot(p.o[1], p.l - r.o) / dot(p.o[1], r.d);\n\treturn seg(vec2(t, t + eps), ivec2(p.d, -p.d));\n}\n\n////////////////////////////////////////// Surface functions //////////////////////////////////////////\nvec3 Kyles(in ray r, in hit h, in vec3 l) {\n    vec3 lv = l - h.l, lvn = normalize(lv);\n    float ld2 = dot(lv, lv),\n          lp = 1. / (1. + ld2),\n    \t  diff = max(.1, dot(lvn, h.n)),\n    \t  spec = max(.1, dot(r.d, reflect(lvn, h.n))),\n\t\t  ss = max(0., sss(r.d, h.n, h.l, l, .01, 2., .04, 0., max(0., (1. / h.m.u) - len(h.s) * h.m.u)));\n    return vec3(diff, ss, spec * .333);\n}\n\n//////////////////////////////////////// Subsurface functions ////////////////////////////////////////\nfloat sss(in vec3 rd, in vec3 n, in vec3 h, in vec3 l, in float dst, in float ltPow, in float ltScl, in float ltAmb, in float thickness) {\n    vec3 light = normalize(h-l),\n         ltlight = light+n*dst;\n    float ltdot = pow(clamp(dot(rd, -ltlight), 0., 1.), ltPow) * ltScl,\n          v = (dot(n, light) + dot(rd, -light)) * (ltdot + ltAmb) * thickness;\n    return v;\n}\n\n////////////////////////////////////////// Volume functions //////////////////////////////////////////\nvec3 qualityFunc(in vec3 lit, in float d) {\n    \n   \tfloat qual = 7.;\n\t//\tmagnitude of normal vector is cosine, reduce quality as cosine approaches 1\n\tvec3 lv = normalize(lit);\n    qual *= min(1., 5.*dot(-lv, vec3(0., 1., 0.)));\n\t// size\n\t//\tdegrade quality the inverse square of distance away from camera\n\tqual *= 1. / (1. + d*d);\n\t\n    //graph with colors\n    qual = clamp(qual, 1.5, 7.);\n\treturn vec3(cos(qual), sin(qual), 0.);\n}\n//thanks sjb https://www.shadertoy.com/view/Xdf3zB\nvoid sampleEquiAngular(float u, float t2, vec3 ro, vec3 rd, vec3 l, out float d, out float pdf) {\n\t// get coord of closest point to light along (infinite) ray\n\tfloat delta = dot(l - ro, rd),\n\t// get distance this point is from light\n\tD = length(ro + delta*rd - l),\n\t// get angle of endpoints\n\tthetaA = atan(-delta, D),\n\tthetaB = atan(t2 - delta, D),\n\tt = D*tan(mix(thetaA, thetaB, u));\n    // take sample\n\td = delta + t;\n\tpdf = D / ((thetaB - thetaA)*(D*D + t*t));\n}\nvec3 volmarch(in ray r, in vec3 l, in seg s) {\n\tfloat offset = 0., SIGMA = .3;\n    vec3 col = vec3(0.);\n\tfor (int i = 0; i < EAS_SAMPLES; ++i) {\n        // normalized progress, length of step, pdf\n\t\tfloat u = (float(i)+offset) * EAS_SAMPLES_RCP, x, pdf;\n\t\tsampleEquiAngular(u, s.t.y, r.o, r.d, l, x, pdf);\t\t\n\t\t// adjust for number of ray samples\n\t\tpdf *= float(EAS_SAMPLES);\n\t\t// connect to light and check shadow ray\n\t\tvec3 h = r.o + r.d*x,\n\t\t\t lightVec = l - h;\n\t\tfloat d = length(lightVec);\n\t\tfloat trans = exp(-SIGMA*(d + x)),\n\t\t\t  geomTerm = 1./dot(lightVec, lightVec);\n\t\tvec3 media = qualityFunc(lightVec * .2, d * .2);\n        col += SIGMA*media*geomTerm*trans / pdf;\n\t}\n    return pow(col, vec3(.5)) * .01;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "//controls\n\n#define MAX_ACCELERATION      4.\n#define MAX_VELOCITY          4.\n#define FRICTION              2.\n\n#define VALUE_VELOCITY        0\n#define VALUE_POSITION        1\n#define VALUE_ROTATION        2\n#define VALUE_MOUSE           3\n\n#define tex(a,b) textureLod(a,b,0.)\n\n//controls\n\nconst float pi_5 = 1.5707963, pi = 3.1415926;\n\nconst vec2 KEY_W \t = vec2(87.5 / 256., 0.),\n    \t   KEY_S \t = vec2(83.5 / 256., 0.),\n    \t   KEY_A \t = vec2(65.5 / 256., 0.),\n    \t   KEY_D \t = vec2(68.5 / 256., 0.),\n\t\t   KEY_LEFT  = vec2(37.5 / 256., 0.),\n\t\t   KEY_UP    = vec2(38.5 / 256., 0.),\n\t\t   KEY_RIGHT = vec2(39.5 / 256., 0.),\n\t\t   KEY_DOWN  = vec2(40.5 / 256., 0.),\n    \t   KEY_SHIFT = vec2(16.0 / 256., 0.),\n    \t   KEY_SPACE = vec2(32.0 / 256., 0.);\n\nconst vec4 INIT_POS = vec4(10., 3., 10., 0.),\n    \t   INIT_VEL = vec4(0., 0., 0., 0.),\n    \t   INIT_ROT = vec4(0., -2.35, 0., 0.),\n    \t   INIT_MOU = vec4(0.);\n\nvec3 vRotateY(vec3 p, float angle) {\n    float c = cos(angle), s = sin(angle);\n    return vec3(c*p.x + s*p.z, p.y, -s*p.x + c*p.z);\n}\n\nvec3 getAcceleration() {\n    return vec3(\n        tex(iChannel1, KEY_D).x - tex(iChannel1, KEY_A).x + tex(iChannel1, KEY_RIGHT).x - tex(iChannel1, KEY_LEFT).x,\n        tex(iChannel1, KEY_SPACE).x - tex(iChannel1, KEY_SHIFT).x,\n        tex(iChannel1, KEY_W).x - tex(iChannel1, KEY_S).x + tex(iChannel1, KEY_UP).x - tex(iChannel1, KEY_DOWN).x\n    );\n}\n\nvec4 getValue(int a) {\n    vec2 q = vec2(float(a) + 0.5, 0.0) / iResolution.x;\n    return tex(iChannel0, q);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    if (fragCoord.y > 1.) discard;\n    \n    int a = int(fragCoord.x);\n    float q = fragCoord.x / iResolution.x;\n    vec4 value = tex(iChannel0, vec2(q, 0.));\n    \n    //set initial values\n    if (iFrame == 0) {\n        if (a == VALUE_ROTATION) {\n            value = INIT_ROT;\n        } else if (a == VALUE_MOUSE) {\n            value = INIT_MOU;\n        } else if (a == VALUE_VELOCITY) {\n            value = INIT_VEL;\n        } else if (a == VALUE_POSITION) {\n            value = INIT_POS;\n        }    \n    }\n    \n    if (a == VALUE_ROTATION && iMouse.z > 0.) {\n        vec4 mouse = 2.0 * abs(iMouse) / iResolution.y;\n        vec4 rot = getValue(VALUE_MOUSE);\n        value.y = mouse.x - mouse.z + rot.y;\n        value.x = clamp(mouse.y - mouse.w + rot.x, -pi_5, pi_5);\n        \n    } else if (a == VALUE_MOUSE && iMouse.z < 0.) {\n        value = getValue(VALUE_ROTATION);\n        \n    } else if (a == VALUE_VELOCITY) {\n        float rot = getValue(VALUE_ROTATION).y;\n        vec3 acc = vRotateY(getAcceleration(), rot);\n        value.xyz += acc * MAX_ACCELERATION * iTimeDelta;\n        float speed = length(value.xyz);\n        //limit speed\n        if (speed > MAX_VELOCITY) {\n            value.xyz *= MAX_VELOCITY / speed;\n        } else if (speed > FRICTION * iTimeDelta) {\n            value.xyz *= (speed - FRICTION * iTimeDelta) / speed;\n        } else {\n            value.xyz = vec3(0.0, 0.0, 0.0);\n        }\n    } else if (a == VALUE_POSITION) {\n        vec3 velocity = getValue(VALUE_VELOCITY).xyz;\n        value.xyz += velocity * iTimeDelta;\n        //collision detection?\n    }\n    \n    fragColor = vec4(value);\n    return;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

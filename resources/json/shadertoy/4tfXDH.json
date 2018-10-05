@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tfXDH",
+      "date": "1436304988",
+      "viewed": 952,
+      "name": "texture-aliasing-test",
+      "username": "ap",
+      "description": "testing mipmap quality of textures",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "texture",
+        "mipmap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n   vec2 p = (fragCoord.xy) / vec2(256,256);\n   vec2 uv = p  - 0.01 * vec2(iTime, 0.0);\t\n\t\n    //---------------------------------------------\t\n\t// regular texture map filtering\n    //---------------------------------------------\t\n\tvec3 colA = texture( iChannel0, uv ).xyz;\n\n\n    fragColor = vec4( colA, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

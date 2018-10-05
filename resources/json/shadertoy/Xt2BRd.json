@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xt2BRd",
+      "date": "1516856371",
+      "viewed": 142,
+      "name": "zooming in center",
+      "username": "bhavesh",
+      "description": "asdsad",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "zoomingincenter"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv = mix(vec2(0.5,0.5) -0.1, vec2(0.5,0.5) + 0.1 , uv);\n    //texture(_channel_, vec 2 coordinates);\n    vec3 t_color = texture(iChannel0, uv/4.0).xyz;\n   \t//float t_brightness =  t_color.x+ t_color.y + t_color.z;\n    float t_brightness = max(max(t_color.r, t_color.g), t_color.b);\n    \n//    if(t_brightness > 0.3)\n  //      t_color = vec3(1.0, 1.0, 1.0);\n    //else\n      //  t_color = vec3(0.0, 0.0, 0.0);\n    \n    \n\tfragColor = vec4(t_brightness,t_brightness, t_brightness, 1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

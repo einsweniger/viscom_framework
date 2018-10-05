@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdXBDM",
+      "date": "1496323290",
+      "viewed": 290,
+      "name": "Wormy's Space Adventure",
+      "username": "DJDoomz",
+      "description": "Just messing about\n",
+      "likes": 8,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "starfield"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float t = iTime/10.;\n    float color = 0.;\n    fragCoord-= iResolution.xy/2.;\n    float w = iResolution.x/2.;\n    float h = iResolution.y/2.;\n    \n    //wormy\n    for(float i = 0.; i < 12.; i+=.25){\n    \tfloat x = (w/2.)*sin(i/30.+t*4.);\n    \tfloat y = (h/10.)*cos(i/10.+t*8.) + 2.*sin((x*3.+t*200.)/25.);\n        color += .2/distance(fragCoord, vec2(x, y));\n    }\n\n    //stars\n    for(float i = 0.; i < 25.; i++){\n        float x = mod(i+(sin(i))*(t+500.)*500., w*2.+200.)-w-100.;\n        float y = h*sin(cos(i*524.)*i*5.+i*2.);\n        color += (.2*sin(i)+.2)/distance(fragCoord, vec2(x,y));\n    }\n   \n    fragColor = vec4(color);\n    \n    //for more fun:\n    //fragColor = vec4(abs(sin(color*34.)),abs(sin(color*45.+3.)),abs(cos(color*23.+23.)), 255);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

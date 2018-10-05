@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdsfDB",
+      "date": "1497996146",
+      "viewed": 150,
+      "name": "Moved rectangle",
+      "username": "stas0",
+      "description": "Moved rectangle",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rectangle"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord) / iResolution.y;\n    uv.x *= iResolution.x / iResolution.y;\n    \n    vec3 color = vec3(.0, .0, .0);\n    \n    uv.x -= 1.08;\n    uv.y -= sin(iTime)/(3.4);\n    \n    float angleL = atan(uv.x, uv.y - .2);\n    float angleR = atan(abs(uv.y - 1.), uv.x - .2);\n    \n    angleL = step(PI/4., angleL);\n    angleR = step(PI/4., angleR);\n    \n    float offsetY = step(.3, uv.y);\n    float drawColor = angleL * angleR * offsetY;\n    \n    if (drawColor == 1.0) {\n    \tcolor = vec3(.8 + .2 * sin(iTime), uv);\n    }\n    \n    fragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

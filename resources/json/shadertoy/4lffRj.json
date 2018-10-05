@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lffRj",
+      "date": "1512424955",
+      "viewed": 187,
+      "name": "Bouncing Objects",
+      "username": "Txoka",
+      "description": "A simple way to make objects moving with different rhymes and directions.",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "noise",
+        "random",
+        "bounce",
+        "objects"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define tau 6.28318530717958647692\n\n#define ChangeFactor 40.\n\n#define rot(a) mat2(C=cos(a),S=sin(a),-S,C)\n\nhighp float rand(vec2 co) {\n    return fract(sin(mod(dot(co.xy ,vec2(12.9898,78.233)),tau/2.))*43758.5453);\n}\n\nfloat obj(vec2 uv,float x) {\n\tfloat S,C;\n    float r = rand(round(uv/tau+0.746));\n    \n    vec2 gain = round(uv/tau)*tau+1.5;\n    uv-=gain;\n    uv*=rot(tau/pow(2.,ceil(r*2.)));\n    uv+=gain;\n    \n\tfloat f = sin(uv.x)+sin(uv.y);\n\tfloat b = sin(uv.x+uv.y);\n    x+=r*ChangeFactor;\n    \n\tfloat col = f-b/(tan(x)/sin(x));\n\treturn smoothstep(0., 1., col*col*col*col*col);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord ){\n\tfragColor = vec4(obj(fragCoord.xy/10.,iTime*10.));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

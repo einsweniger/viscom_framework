@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mty3Wh",
+      "date": "1474383587",
+      "viewed": 333,
+      "name": "gamma  vs  textures",
+      "username": "FabriceNeyret2",
+      "description": "shadertoy noise textures are in flat space (while pictures textures are sRGB).\n\nLeft: noise texture   Right: checker texture (perceptual average = value average = 0.5).\nBottom: no correction. Top: gamma correction",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "textures",
+        "gamma",
+        "srgb"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n\tO = vec4( U.x/iResolution.x < .5 \n                ? texture(iChannel0,U/iChannelResolution[0].xy).x\n                : mod(U.x+U.y,2.)\n            );\n    if ( U.y/iResolution.y > .5 ) O = sqrt(O); // gamma conversion (i.e. to_sRGB);\n        \n\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

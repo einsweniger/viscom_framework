@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sByWt",
+      "date": "1494244722",
+      "viewed": 199,
+      "name": "utyut",
+      "username": "moeein",
+      "description": "ghjk",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tyu6yunyuiyuiynuiyu"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.x;\n    uv.x -= 0.5;\n    uv.y -= iResolution.y/iResolution.x/2.0;\n    uv *= 4.0;\n    vec2 mv = iMouse.xy / iResolution.x;\n    mv.x -= 0.5;\n    mv.y -= iResolution.y/iResolution.x/2.0;\n    mv *= 4.0;\n  \tfloat c = 1.0/distance(uv,mv);\n    c += 1.0/length(uv);\n    vec2 coord = vec2(sin(iTime),cos(iTime));\n    c += 1.0/distance(uv,coord);\n    coord = vec2(sin(-iTime),cos(-iTime));\n    c += 1.0/distance(uv,coord);\n    float n;\n    if(mod(iTime/4.0,2.0) < 1.0) {\n    \tn = mod(iTime/2.0,2.0);\n    } else {\n    \tn = (mod(2.0-iTime/2.0,2.0));\n    }\n    n -= 1.0;\n    n *= 2.0;\n    coord = vec2(n,0.0);\n    c += 1.0/distance(uv,coord);\n    c /= 20.0;\n\tfragColor = vec4(vec3(c),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llGSR3",
+      "date": "1485206554",
+      "viewed": 250,
+      "name": "checkerboard tunnel",
+      "username": "abje",
+      "description": "many tunnels, modification of https://www.shadertoy.com/view/lssGDn",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tunnel",
+        "checkerboard"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 1,
+            "src": "/media/a/10eb4fe0ac8a7dc348a2cc282ca5df1759ab8bf680117e4047728100969e7b43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 checker(vec2 p) {\n    vec2 p2 = abs(fract(p)-0.5);\n    return vec2(mod(floor(p.x)+floor(p.y), 2.0),max(1.0-(-max(p2.x,p2.y)+0.5)*50.0,0.0));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;\n    fragColor = vec4(1.0);\n    \n    \n    float len = 0.0;\n    for ( float i = 5.0; i< 160.0; i++) {\n    \n        float size = i;\n        \n        vec2  pos = (2. * fragCoord.xy / iResolution.xy - 1.)\n                * vec2(iResolution.x / iResolution.y,1.);\n        vec2  rot = vec2(atan(pos.x, pos.y) / 3.14*size+iTime/(size-4.0),\n                         size / length(pos)*0.1+iTime+i*0.2);\n        vec2 check = checker(rot);\n        if (check.x == 1.0) {\n    \t\tfragColor = vec4(0.05*i);\n            break;\n        }\n        len = max(check.y,len);\n        \n    }\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

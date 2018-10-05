@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4ddyDn",
+      "date": "1518480085",
+      "viewed": 225,
+      "name": "Water ripples",
+      "username": "Aj_",
+      "description": "Inspired by this shader https://www.shadertoy.com/view/MtXSzs",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "ripple"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float uvMult = 2.;\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy;\n\tuv*=uvMult;\n    float len = length(uv - vec2(.5 * uvMult)) * 50.;    \n    vec2 s = normalize(uv) * ( sin((len - iTime * 10.))) * .01;      \n    vec4 tex = texture(iChannel0, uv + s);       \n    fragColor = tex;\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xt3Szj",
+      "date": "1480425730",
+      "viewed": 306,
+      "name": "Astora",
+      "username": "stduhpf",
+      "description": "Praise the sun! \\[T]/",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "draw",
+        "darksouls",
+        "solaire"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nfloat rand(vec2 co){\n    return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453)-.5;}\nfloat noise(vec2 uv)\n{\n    vec2 u = floor(uv);\n    vec2 v =fract(uv);\n    return mix(\n        mix(\n            rand(u),\n            rand(u+vec2(1,0)),\n            smoothstep(0.,1.,v.x))\n        ,mix(rand(u+vec2(0,1)),\n          rand(u+1.),smoothstep(0.,1.,v.x)),\n                    smoothstep(0.,1.,v.y));\n}\n\nfloat fbm(vec2 uv)\n{\n    float n =1.;\n    float r =1.;\n    for (int i =0;i<8;i++)\n    {\n        uv*=2.;\n        uv+=100.;\n        n=mix(n,noise(uv),r);\n        r*=.25;\n    }\n    return n;\n}\n\nvec3 sol(vec2 uv)\n{\n    vec3 col = vec3(1.);\n    vec2 p= vec2(length(uv),atan(uv.x,uv.y)+.2);\n    col=mix(col,vec3(1,.4,.1),smoothstep(.005,-.005,p.x-.2*pow(.51+.51*cos(8.*p.y+fbm(vec2(10.*p.x,p.y))),5.-.5)-.15));\n    col=mix(col,vec3(.5,.15,.15),smoothstep(.005,-.005,abs(p.x-.2*pow(.51+.51*cos(8.*p.y+fbm(vec2(10.*p.x,p.y))),5.-.5)-.15)-.01));    \n    col=mix(col,vec3(1,1,.25),smoothstep(.005,-.005,p.x-.13));\n    col=mix(col,vec3(.5,.15,.15),smoothstep(.005,-.005,2.*abs(p.x-.13)-.005));\n\treturn col;\n}\n\nvoid mainImage( out vec4 O, vec2 I )\n{\n\tvec2 uv = (I+I- iResolution.xy)/iResolution.y;\n\tO = vec4(sol(.5*uv),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

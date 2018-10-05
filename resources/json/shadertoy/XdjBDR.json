@@ -1,0 +1,79 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdjBDR",
+      "date": "1500058003",
+      "viewed": 264,
+      "name": "[SH17A]Gladiator",
+      "username": "Nesvi7",
+      "description": "Gladiator.",
+      "likes": 8,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "terrain",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 46,
+            "src": "/media/a/79520a3d3a0f4d3caa440802ef4362e99d54e12b1392973e4ea321840970a88a.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 11178,
+            "src": "https://soundcloud.com/avinashvarma/now-we-are-free-gladiator",
+            "ctype": "musicstream",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//By Nestor Vina\nvoid mainImage( out vec4 c, vec2 f ){\n\tc-=c;\n    float i = 1.,l,h;\n   \twhile( i++ < 1e2){\n        h= texture(iChannel0,(c.xz+iTime)*.3).r+texture(iChannel1,(c.xz+iTime)*.01).r*3.;  l = c.y+4.-h;\n        if( l < .1)\n        \tbreak;\n        c += (vec4(f/iResolution.x,1,.5)-.5)*l;\n    }   \n    l = 1.-length(c)*.1;\n    c.rgb= mix(vec3(0.3,.2,.1),vec3(.6,.4,.2),l*l)*h;\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

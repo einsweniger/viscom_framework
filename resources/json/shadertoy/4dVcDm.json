@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dVcDm",
+      "date": "1522288739",
+      "viewed": 149,
+      "name": "Sheeeeen",
+      "username": "kroltan",
+      "description": "A nice metallic cartoon sheen animation that runs in unit time",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "effect",
+        "ui"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.14159\n#define SCALE 3.0\n\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\n    // y-x causes the diagonal\n    // iTime * PI scales the time offset such that it is complete in 1 second\n    float pos = uv.y - uv.x + iTime * PI - 2.0;\n    \n    // Apply sizing\n    float scaled = pos * SCALE * PI;\n    \n    // Clamp input to prevent the cyclic nature of a sine wave\n    float clamped = clamp(scaled, 0.0, PI);\n    \n    // This is the \"sheen factor\", 1 for full contribution, 0 for none.\n    float n = sin(clamped);\n    \n    // You could do further processing here to apply custom blending modes or whatnot\n    // Output to screen\n    fragColor = vec4(n, n, n,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

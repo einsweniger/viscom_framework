@@ -1,0 +1,68 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Ms3XRX",
+      "date": "1460505499",
+      "viewed": 473,
+      "name": "OBJ loading test",
+      "username": "KylBlz",
+      "description": "Testing python script that generates shadertoy code from a simple OBJ file",
+      "likes": 6,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "triangle",
+        "barycentric",
+        "rasterize",
+        "obj",
+        "python"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 6,
+            "src": "/media/a/1f7dca9c22f324751f2a5a59c9b181dfe3b5564a04b724c657732d0bf09c99db.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 24,
+            "src": "/media/a/488bd40303a2e2b9a71987e48c66ef41f5e937174bf316d3ed0e86410784b919.jpg",
+            "ctype": "cubemap",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\n#this is the Python script\n\ndef loadOBJ(filename):\n    #load file\n    f = open(filename)\n    lines = f.readlines()\n    f.close()\n    #outputs\n    coordout = ('//python output phase 1\\nconst vec3\\n')\n    matout = ('//python output phase 2\\nconst mat3\\n')\n    lnum = 1 #obj files use 1 based coord index\n    fnum = 0\n    #loop through OBJ file lines\n    for line in lines:\n        #replace white space with space\n        line.replace('\\t', ' ')\n        #replace space with ...less space\n        line.replace('  ', ' ')\n        vals = line.split()\n        if len(vals) == 4:\n            if (vals[0] == 'v'):\n                #output coords\n                coordout += ('v' + str(lnum) + ' = vec3(' + str(vals[1]) + ', '+ str(vals[2]) + ', '+ str(vals[3]) + '),\\n')\n                lnum += 1\n            elif( vals[0] == 'f'):\n                #output indexes\n                matout += ('f' + str(fnum) + ' = mat3(f' + str(vals[1]) + ', f'+ str(vals[2]) + ', f'+ str(vals[3]) + '),\\n')\n                fnum += 1\n        #do texcoords next\n\n    #output face drawing code\n    output = ('//python output phase 3\\n')\n    for i in range(0,fnum):\n        output += ('o += vertex(v, f' + str(i) + ', m);\\n')\n    w = open('output.txt', 'w')\n    #-2 for comma and newline chars\n    w.write(coordout[:-2] + ';\\n\\n' + matout[:-2] + ';\\n\\n' + output)\n    w.close()\n*/\n\n\n\n//some problems include\n//\tprocessing each point for each face it's a member of (5 times)\n//  2d bary\n//\tno fill rules\n//\tno depth optimization\n\n\n\n//python output phase 1\nconst vec3\nv1 = vec3(0.0, -0.525731, 0.850651),\nv2 = vec3(0.850651, 0.0, 0.525731),\nv3 = vec3(0.850651, 0.0, -0.525731),\nv4 = vec3(-0.850651, 0.0, -0.525731),\nv5 = vec3(-0.850651, 0.0, 0.525731),\nv6 = vec3(-0.525731, 0.850651, 0.0),\nv7 = vec3(0.525731, 0.850651, 0.0),\nv8 = vec3(0.525731, -0.850651, 0.0),\nv9 = vec3(-0.525731, -0.850651, 0.0),\nv10 = vec3(0.0, -0.525731, -0.850651),\nv11 = vec3(0.0, 0.525731, -0.850651),\nv12 = vec3(0.0, 0.525731, 0.850651);\n//python output phase 2\nconst mat3\nf0 = mat3(v2, v3, v7),\nf1 = mat3(v2, v8, v3),\nf2 = mat3(v4, v5, v6),\nf3 = mat3(v5, v4, v9),\nf4 = mat3(v7, v6, v12),\nf5 = mat3(v6, v7, v11),\nf6 = mat3(v10, v11, v3),\nf7 = mat3(v11, v10, v4),\nf8 = mat3(v8, v9, v10),\nf9 = mat3(v9, v8, v1),\nf10 = mat3(v12, v1, v2),\nf11 = mat3(v1, v12, v5),\nf12 = mat3(v7, v3, v11),\nf13 = mat3(v2, v7, v12),\nf14 = mat3(v4, v6, v11),\nf15 = mat3(v6, v5, v12),\nf16 = mat3(v3, v8, v10),\nf17 = mat3(v8, v2, v1),\nf18 = mat3(v4, v10, v9),\nf19 = mat3(v5, v9, v1);\n\n//structs like CG\nstruct VertexIn {\n    vec2 cs;\n    vec2 sn;\n    vec2 uv;\n};\nstruct PixelIn {\n    vec3 loc;\n    vec3 wuv;\n    vec3 norm;\n    vec3 rd;\n};\n\nvec3 rotateXY(vec3 p, vec2 c, vec2 s) {\n    p = vec3(p.x, c.x*p.y + s.x*p.z, -s.x*p.y + c.x*p.z);\n    return vec3(c.y*p.x + s.y*p.z, p.y, -s.y*p.x + c.y*p.z);\n}\n//use cramer to solve 2D system w/ maximum swizzle\nvec3 triBarycentric(vec4 a, vec4 b) {\n    vec4 p =(vec4(a.z,b.wxy) - vec4(b.xyz,a.w)) * a.yxyx,\n         q = vec4(a.wz, b.yx) * b,\n         r = vec4(q.zx - q.wy, a.zw * b.wz);\n    float det = r.x + r.y + r.z - r.w;\n    if (det == 0.) return vec3(0.);\n    vec2 t = (r.xy + p.yw + p.zx)/det;\n    float w = t.x + t.y;\n    if(t.x<0.||t.y<0.||w>1.) return vec3(0.);\n    return vec3(t, 1. - w);\n}\n#define insideTriangle(p,a,b,c) triBarycentric(vec4(p,a),vec4(b,c))\n\n//this is the pixel shader\nvec3 pixel (PixelIn p, vec2 uv) {\n    //for diffuse and specular\n    float n2 = dot(p.rd, p.norm), amb = 0.3;\n    float n3 = n2*n2*n2*n2;\n    //wear edges a bit\n    float edges = smoothstep(0., 1.0, 0.3333-min(p.wuv.x, min(p.wuv.y, p.wuv.z)))+length(p.wuv-0.3)*0.3;\n    vec3 edgecol = vec3(1.0,0.9,0.7), nrd = reflect(p.rd, p.norm);\n    //final\n    vec3 fin = mix(texture(iChannel0, p.wuv.xy * 0.5).rgb, edgecol, edges*edges) + p.loc.z * .55;\n    fin = pow(fin, vec3(1.2));\n    fin = mix(fin, texture(iChannel1, nrd).rgb * 2., clamp(.5-n3, .025, .9));\n    fin *= n2 + amb;\n    return fin;\n\n}\n\n//this is the vertex shader\nvec3 vertex (VertexIn v, mat3 face, vec3 rd) {\n    float mindist = 1000.;\n    //setup output\n    PixelIn o;\n    //transform\n    vec3 a = rotateXY(face[0], v.cs, v.sn),\n         b = rotateXY(face[1], v.cs, v.sn),\n         c = rotateXY(face[2], v.cs, v.sn);\n    //normal\n    o.norm = normalize(cross(b-a, c-a));\n    //ray dir\n    o.rd = rd;\n    //cull back faces\n    if (o.norm.z < 0.) return vec3(0.);\n    //calc wuv\n    o.wuv = insideTriangle(v.uv,a.xy,b.xy,c.xy);\n    //check if valid\n    if (o.wuv.x+o.wuv.y+o.wuv.z == 0.) return vec3(0.);\n    //interpolate values for pixel shader\n    o.loc = o.wuv.x*a + o.wuv.z*b + o.wuv.y*c;\n    // depth buffer test\n    if (o.loc.z > mindist) return vec3(0.);\n    mindist = o.loc.z;\n\t//run pixel shader\n    return pixel( o, v.uv );\n    \n    //thanks IQ\n    //https://www.shadertoy.com/view/4slGzn\n    /* transform to clip space\n    float w0 = 1.0/a.z;\n    float w1 = 1.0/b.z;\n    float w2 = 1.0/c.z;\n    vec2 cp0 = 2.0*a.xy * -w0;\n    vec2 cp1 = 2.0*b.xy * -w1;\n    vec2 cp2 = 2.0*c.xy * -w2;\n\n    //fetch vertex attributes, and divide by z\n    //vec2 uva = a.uv * w0;\n    //vec2 uvb = b.uv * w1;\n    //vec2 uvc = c.uv * w2;\n   \n    // calculate areas for subtriangles\n    vec3 di = vec3( cross( cp1 - cp0, v.uv - cp0 ), \n                    cross( cp2 - cp1, v.uv - cp1 ), \n                    cross( cp0 - cp2, v.uv - cp2 ) );\n\n    // if all positive, point is inside triangle\n    if( all(greaterThan(di,vec3(0.0)))) {\n        // calc barycentric coordinates\n        o.wuv = di.yzx / (di.x+di.y+di.z);\n\n        // barycentric interpolation of attributes and 1/z\n        o.loc = o.wuv.x*a + o.wuv.y*b + o.wuv.z*c;\n        float iz = o.wuv.x*w0 + o.wuv.y*w1 + o.wuv.z*w2;\n        //vec2 st = o.wuv.x*u0 + o.wuv.y*u1 + o.wuv.z*u2;\n        \n        // recover interpolated attributes (this could be done after 1/depth test)\n        float z = 1./iz;\n        //uv *= z;\n\n        // depth buffer test\n        if (z > mindist) {\n            mindist = z;\n\n            // run pixel shader\n            return pixel( o, v.uv );\n        }\n    } */\n}\n\nvec3 drawFaces (VertexIn v) {\n    vec3 rd = normalize(vec3(v.uv, 1.)),\n         o = vec3(0.);\n    //python output phase 3\n    o += vertex(v, f0,  rd);\n    o += vertex(v, f1,  rd);\n    o += vertex(v, f2,  rd);\n    o += vertex(v, f3,  rd);\n    o += vertex(v, f4,  rd);\n    o += vertex(v, f5,  rd);\n    o += vertex(v, f6,  rd);\n    o += vertex(v, f7,  rd);\n    o += vertex(v, f8,  rd);\n    o += vertex(v, f9,  rd);\n    o += vertex(v, f10, rd);\n    o += vertex(v, f11, rd);\n    o += vertex(v, f12, rd);\n    o += vertex(v, f13, rd);\n    o += vertex(v, f14, rd);\n    o += vertex(v, f15, rd);\n    o += vertex(v, f16, rd);\n    o += vertex(v, f17, rd);\n    o += vertex(v, f18, rd);\n    o += vertex(v, f19, rd);\n    o += step(length(o), .0001) * texture(iChannel1, rd).rgb;\n    return o;\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord ) {\n    vec2 ang = vec2(sin(iTime*0.1)*0.5, iTime*0.2);\n    \n    VertexIn v;\n    v.uv = (4.*fragCoord.xy - 2.*iResolution.xy) / iResolution.x;\n    v.cs = cos(ang),\n    v.sn = sin(ang);\n    \n    fragColor = vec4(drawFaces(v), 1.);    \n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

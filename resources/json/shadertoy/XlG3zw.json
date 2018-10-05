@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlG3zw",
+      "date": "1473736505",
+      "viewed": 276,
+      "name": "Glownut",
+      "username": "seani",
+      "description": "mmm glownuts",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// By Sean Irby\n// sean.t.irby@gmail.com\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nfloat round(float x)\n{\n    return floor(x + 0.5);\n}\n\nfloat square(vec2 r, vec2 center, float width, float angle){\n    width = width/2.0;\n    \n    r = vec2(cos(angle)*(r.x - center.x) - sin(angle)*(r.y-center.y) + center.x,\n             sin(angle)*(r.x - center.x) + cos(angle)*(r.y-center.y) + center.y);\n    \n    if(r.x > (center.x - width) && r.x < (center.x + width) && r.y > (center.y - width) && r.y < (center.y + width))\n    {\n        return 1.0;\n    }\n    \n    return 0.0;\n}\n\nvec3 grid(vec2 r, float scale)\n{\n    vec2 rp;\n    \n    float angle;\n    float rr;\n    float g;\n    float b;\n    float boxWidth;\n    float mask = 0.0;\n    vec3 ret = vec3(0.1, 0.03, 0.1);\n    float width;\n    float widthPhase;\n    float widthFreq;\n    float scaleMult;\n    float widthRange = 0.025;\n    float dist = 10.0*distance(r, vec2(0.0, 0.0))*(1.1 + sin(iTime));\n    dist = dist*(1.0-smoothstep(0.7, 1.2, length(r)));\n    //iterate the 3x3 grid surrounding r\n    //see if im in any of the boxes\n    for(float i = -1.0; i < 2.0; ++i)\n    {\n        for(float j = -1.0; j < 2.0; ++j)\n        {\n            rp = vec2(round(r.x*scale + i), round(r.y*scale + j));\n            angle = 3.0*(rand(vec2(rp.x + 0.3, rp.y)) - 1.0)*iTime/3.0;\n            rr = rand(vec2(rp.x + 0.4, rp.y));\n            g = rand(vec2(rp.x + 0.5, rp.y));\n            b = rand(vec2(rp.x + 0.6, rp.y));\n            widthPhase = rand(vec2(rp.x + 0.1, rp.y));\n            widthFreq = 1.0*rand(vec2(rp.x + 0.2, rp.y));\n            scaleMult = 1.0*rand(vec2(rp.x, rp.y));\n            boxWidth = dist*scaleMult*scale*(widthRange + 0.01 + widthRange*sin(iTime*widthFreq + widthPhase));\n            \n            \n            //if(mod(rp.x, 2.0) > 0.001 || mod(rp.y, 2.0) > 0.001)\n            //{\n            //   mask = 1.0 - mask;\n            //}\n            \n            mask += square(vec2(r.x*scale, r.y*scale), rp, boxWidth, angle);\n            ret = mix(ret, vec3(rr*0.9*dist/5.0, g*0.9*(1.0-dist), b*0.8), clamp(mask, 0.0, 1.0));\n        }\n    }\n    \n    \n    return ret;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\t//normalize x and y to [-1, 1]\n    vec2 r = 2.0*vec2(fragCoord.xy - 0.5*iResolution.xy)/iResolution.y;\n\n\tfragColor = vec4(grid(vec2(r.x, r.y), 15.0), 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

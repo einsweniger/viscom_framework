@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4s2cRt",
+      "date": "1493340478",
+      "viewed": 231,
+      "name": "diamonds or circles",
+      "username": "public_int_i",
+      "description": "diamonds or circles.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "circles",
+        "diamonds",
+        "or"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Ethan Alexander Shulman 2017\n\n\n#define circleSize 0.1\n\n#define draw(dc) c = mix(dc,c,clamp(d/pixelSize, 0., 1.))\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float pixelSize = length(1.0/iResolution.xy);\n\tvec2 uv = (fragCoord*2. - iResolution.xy)/iResolution.x;\n    \n    \n    vec3 c = vec3(1.);//start with white background\n    \n    //deform\n    uv *= 1.+length(uv)*(5.+cos(iTime*0.25)*4.);\n    \n    //scrolling repeating black circles\n\tvec2 ruv = mod(abs(uv+vec2(0.,iTime*0.2)),circleSize*2.)-circleSize;    \n    float d = (length(ruv)-circleSize);\n    draw(vec3(0.));\n    \n    //output color\n    fragColor = vec4(c, 1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

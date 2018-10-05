@@ -1,0 +1,83 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4s2fDR",
+      "date": "1500137515",
+      "viewed": 325,
+      "name": "[SH17A] Burn!",
+      "username": "knarkowicz",
+      "description": "Burn!",
+      "likes": 14,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "burn",
+        "sun",
+        "fire",
+        "sphere",
+        "2tweets",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 45,
+            "src": "/media/a/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 48,
+            "src": "/media/a/8979352a182bde7c3c651ba2b2f4e0615de819585cc37b7175bcefbca15a6683.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define A texture( iChannel0, u = u * .7 - t )\n#define B texture( iChannel1, p = p * .7 - t ).x\n\nvoid mainImage( out vec4 Y, vec2 X )\n{\n    vec2 u = iResolution.xy,\n         p = ( X + X - u ) / u.y / .7;\n    \n    float d = dot( p, p ),\n          t = .03 * iTime + .5;\n\n    u = p / pow( 1. - d, .25 );\n    p /= d;\n    \n    Y = d < 1. ?\n\t\t\t9. * A * A * A \n\t\t\t:\n    \t\tvec4( 6, 3, 1, 1 ) * exp( -d - d ) * ( B + B + B ) + .3 * texture( iChannel2, p );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

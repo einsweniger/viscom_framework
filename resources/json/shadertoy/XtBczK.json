@@ -1,0 +1,72 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtBczK",
+      "date": "1509129145",
+      "viewed": 162,
+      "name": "Restored [SH17A] Music",
+      "username": "xyzw",
+      "description": "Restored shader 4sSBD1 (5th place at SH17A)",
+      "likes": 1,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "sound"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 3,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "#define T(c, a) textureLod(c, t*vec2(int[](50, i > 73 && i < 161 ? 60 : 50, 40, 38)[a % 4], .2), 6. - sqrt(t))\n\nvec2 mainSound(float t)\n{\n    t *= fract(t *= .75) > .25 ? 1. : 2.;\n    int i = int(t * (fract(t) < .25 ? 1. : 2.));\n    (i & 6) == 0 && i > 31 ? t *= 1.5 : t;\n\n    return T(iChannel3, i).xy * 0.4 - T(iChannel2, i / 3).x * 0.2;\n}",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

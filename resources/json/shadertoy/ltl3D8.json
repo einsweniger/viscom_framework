@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltl3D8",
+      "date": "1421816467",
+      "viewed": 2135,
+      "name": "Cheap Cubemap",
+      "username": "iq",
+      "description": "A cheap cube map texturing method for 2D textures, without branches.",
+      "likes": 21,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "cubemap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// The MIT License\n// Copyright \u00a9 2015 Inigo Quilez\n// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n\n// How to do cubemapping when you don't have access to texture() or when you want to do it in the CPU.\n// This is a very cheap version without seam filtering or anything.\n//\n// The point of this rutine was to do be super cheap and do the indexing without branches/conditionals.\n\n\nvec3 cubemap( sampler2D sam, in vec3 d )\n{\n    vec3 n = abs(d);\n\n#if 0\n    // sort components (small to big)    \n    float mi = min(min(n.x,n.y),n.z);\n    float ma = max(max(n.x,n.y),n.z);\n    vec3 o = vec3( mi, n.x+n.y+n.z-mi-ma, ma );\n    return texture( sam, .1*o.xy/o.z ).xyz;\n#else\n    vec2 uv = (n.x>n.y && n.x>n.z) ? d.yz/d.x: \n              (n.y>n.x && n.y>n.z) ? d.zx/d.y:\n                                     d.xy/d.z;\n    return texture( sam, uv ).xyz;\n    \n#endif    \n}\n\n    \n//===============================================================================================\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 p = (-iResolution.xy + 2.0*fragCoord.xy) / iResolution.y;\n\n     // camera movement\t\n\tfloat an = 0.2*iTime;\n\tvec3 ro = vec3( 2.5*sin(an), 1.0, 2.5*cos(an) );\n    vec3 ta = vec3( 0.0, 1.0, 0.0 );\n    // camera matrix\n    vec3 ww = normalize( ta - ro );\n    vec3 uu = normalize( cross(ww,vec3(0.0,1.0,0.0) ) );\n    vec3 vv = normalize( cross(uu,ww));\n\t// create view ray\n\tvec3 rd = normalize( p.x*uu + p.y*vv + 1.5*ww );\n\n    // sphere center\t\n\tvec3 sc = vec3(0.0,1.0,0.0);\n\n    vec3 col = vec3(0.0);\n    \n\t// raytrace-plane\n\tfloat h = (0.0-ro.y)/rd.y;\n\tif( h>0.0 ) \n\t{ \n\t\tvec3 pos = ro + h*rd;\n\t\tvec3 nor = vec3(0.0,1.0,0.0); \n\t\tvec3 di = sc - pos;\n\t\tfloat l = length(di);\n\t\tfloat occ = 1.0 - dot(nor,di/l)*1.0*1.0/(l*l); \n\n        col = texture( iChannel0, 0.5*pos.xz ).xyz;\n        col *= occ;\n        col *= exp(-0.1*h);\n\t}\n\n\t// raytrace-sphere\n\tvec3  ce = ro - sc;\n\tfloat b = dot( rd, ce );\n\tfloat c = dot( ce, ce ) - 1.0;\n\th = b*b - c;\n\tif( h>0.0 )\n\t{\n\t\th = -b - sqrt(h);\n        vec3 pos = ro + h*rd;\n        vec3 nor = normalize(ro+h*rd-sc); \n        float occ = 0.5 + 0.5*nor.y;\n        \n        col = cubemap( iChannel0, nor );\n        col *= occ;\n    }\n\n\tcol = sqrt( col );\n\t\n\tfragColor = vec4( col, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

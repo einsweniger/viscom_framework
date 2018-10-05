@@ -1,0 +1,83 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xl2yDm",
+      "date": "1508847864",
+      "viewed": 342,
+      "name": "IFS fern short (cumulated)",
+      "username": "FabriceNeyret2",
+      "description": "Fern IFS golfing inspired from iq's [url]https://www.shadertoy.com/view/lst3zf[/url]\nCumulated version of [url]https://www.shadertoy.com/view/Xl2yWm[/url]",
+      "likes": 9,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "fractal",
+        "ifs",
+        "short",
+        "classic",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Cumulated version of https://www.shadertoy.com/view/Xl2yWm\n\n#define mainImage( O, U )   O = texture( iChannel0, U /  iResolution.xy ) / float(iFrame)\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Fern IFS golfing inspired from iq's https://www.shadertoy.com/view/lst3zf\n// proba: 1% stem, 84% next row, 8% mirror side, 8% left side\n\n#define mainImage( O, u )                                        \\\n    vec2 R = iResolution.xy,                                     \\\n         U = 12. * u/R - vec2(5.5,1),                            \\\n         z = U;                                                  \\\n    O = texture(iChannel0, u/R);                                 \\\n    for( float p, i=0.; i<3e2; i++ )                             \\\n        p = fract( 1e4* sin( U.x*73.+U.y*7. + iTime + i ) ),     \\\n        z = vec3(z,1)* (/* z = zM+T. Mx  Tx      My    Ty    */  \\\n              p < .01 ? mat2x3(        O-O       , .16, 0   )    \\\n            : p < .84 ? mat2x3( .85, .04, 0, -.04, .85, 1.6 )    \\\n            : p < .92 ? mat2x3( .20,-.26, 0,  .23, .22, 1.6 )    \\\n            :           mat2x3(-.15, .28, 0,  .26, .24,  .4 ) ), \\\n        i>32. ? O += .002 / dot(U-z,U-z) : O",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldjfzR",
+      "date": "1499248828",
+      "viewed": 295,
+      "name": "fire fire 2d",
+      "username": "public_int_i",
+      "description": "fire 2d",
+      "likes": 9,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "fire",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n    float v = fract(u.x*.41);\n    o = (fract((u.y*.02+u.x*.4)*v-iDate.w))*vec4(1,.6,.4,1)/(1.+u.y*.02-v);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

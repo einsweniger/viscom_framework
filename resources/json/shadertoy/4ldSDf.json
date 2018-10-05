@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4ldSDf",
+      "date": "1481909709",
+      "viewed": 182,
+      "name": "texture wave",
+      "username": "ProgC",
+      "description": "waving a texture",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "texturewave"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 14,
+            "src": "/media/a/cbcbb5a6cfb55c36f8f021fbb0e3f69ac96339a39fa85cd96f2017a2192821b5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// simple waving texture.\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 f = fragCoord.xy;    \n    f.y += sin(iTime + f.x * 0.01) * 50.0;\n    vec2 uv = f / iResolution.xy;\n\tvec4 col = texture(iChannel0, uv);;\n\tfragColor = col;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

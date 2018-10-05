@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsjfRz",
+      "date": "1499339780",
+      "viewed": 181,
+      "name": "voronoi grid",
+      "username": "public_int_i",
+      "description": "voronoi grid",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "voronoi",
+        "grid",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n    #define l(i) dot(abs(fract(u*.01+fract(i*vec2(1,8)))-.5),vec2(1))\n\to += min(l(.3),l(fract(iDate.w*.01)))-o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

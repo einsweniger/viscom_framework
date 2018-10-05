@@ -1,0 +1,93 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lt2fzt",
+      "date": "1516908672",
+      "viewed": 151,
+      "name": "rgb shifting",
+      "username": "jrsa",
+      "description": "feedback is the future, raymarching is just a neat trick for 4k demos",
+      "likes": 5,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "feedback",
+        "shaderclub"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 poltocar( vec2 pol ) {\n    return vec2( pol.x * cos(pol.y), pol.x * sin(pol.y) );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    vec2 uv = fragCoord / iResolution.st;\n    vec2 displacedUv = uv;\n    vec4 imageIn = texture(iChannel1, uv);    \n    vec4 feedbackIn = texture(iChannel0, uv);\n\n    displacedUv += poltocar( vec2(length(feedbackIn.rg), length(feedbackIn.rb)) ) / 1000.0;\n    vec4 feedback = texture(iChannel0, displacedUv);\n    feedback.r = mod(feedback.r + 0.001, 1.0);\n    feedback.b = mod(feedback.b + (feedback.r / 10.0), 1.0);\n    \n    if(iFrame <= 10 || iMouse.z > 0.0){\n        fragColor = imageIn;\n    } else {\n        fragColor = feedback;\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

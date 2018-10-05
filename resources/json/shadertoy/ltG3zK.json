@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltG3zK",
+      "date": "1475489520",
+      "viewed": 322,
+      "name": "Circle-Circle Intersection",
+      "username": "JLee",
+      "description": "http://mathworld.wolfram.com/Circle-CircleIntersection.html",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\nvoid solve(in vec2 p1,in float r1,in vec2 p2,in float r2,\n           out vec2[2] intersection){\n    vec2 e1=p2-p1; \n    float d=length(e1);\n    e1=e1/d; //p1\uc5d0\uc11c p2\ub85c \ud5a5\ud558\ub294 \uae38\uc774 1\uc778 \ubca1\ud130\n    vec2 e2=vec2(-e1.y,e1.x); //e2\ub294 e1\uacfc \uc218\uc9c1\ud558\uace0 \uae38\uc774\uac00 1\n    \n    float x=(r1*r1-r2*r2+d*d)/(2.*d);\n    float y=r1*r1-x*x; // x,y,r1\uc774 \uc9c1\uac01\uc0bc\uac01\ud615\uc744 \uc774\ub8e8\ubbc0\ub85c \ud53c\ud0c0\uace0\ub77c\uc2a4 \uc815\ub9ac\n    \n    if(y<0.)//\ud574\uac00 \uc874\uc7ac\ud558\uc9c0 \uc54a\uc74c\n        intersection[0]=intersection[1]=vec2(100.);\n    else{\n        y=sqrt(y);\n        intersection[0]=p1+x*e1+y*e2; //p1\uc5d0\uc11c e1\ubc29\ud5a5\uc73c\ub85c x\ub9cc\ud07c \uac00\uace0 e2\ubc29\ud5a5\uc73c\ub85c y\ub9cc\ud07c \uac00\uba74 \uad50\uc810\n        intersection[1]=p1+x*e1-y*e2; //\ub2e4\ub978 \ud574\n    }\n}\nfloat draw_circle(in vec2 uv,in vec2 p,in float r){\n    float d=distance(uv,p)-r;\n    return smoothstep(-0.015,-0.01,d)-smoothstep(0.01,0.015,d);\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv   = 2.*fragCoord.xy / iResolution.y - vec2(1.,1.);\n    vec2 uvMouse = 2.*iMouse.xy / iResolution.y - vec2(1.,1.);\n    \n    vec2 p1=vec2(0.,0.),p2=uvMouse,intersection[2];\n    float r1=0.5,r2=0.2;\n    \n    fragColor=vec4(vec3(max(draw_circle(uv,p1,r1),\n                            draw_circle(uv,p2,r2))),1.);\n    solve(p1,r1,p2,r2,intersection);\n    fragColor.r=max(fragColor.r,draw_circle(uv,intersection[0],0.04));\n    fragColor.g=max(fragColor.b,draw_circle(uv,intersection[1],0.04));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

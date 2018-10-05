@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tlfRB",
+      "date": "1512334557",
+      "viewed": 255,
+      "name": "square spiral",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "2tweets",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define r(a) mat2(cos(a),-sin(a),sin(a),cos(a))\n\nvoid mainImage( out vec4 O, vec2 u )\n{\n    vec2 R = iResolution.xy,\n\t     U = r(iTime) * ( u+u - R ) / R.y,\n         S = sign(U) * r(.1);  // wave train direction ( 4 sectors, tilted by .1 or .28 ). \n\n    O = vec4( sin( 8.* log( dot( U, S ) ) + atan(S.y,S.x) -10.*iTime) );\n\tO = smoothstep( .7, .5, abs(O) );                                       // bands\n  //O = smoothstep( 1.,0.,(abs(O)-.6)/fwidth(O) );                          // better antialiasing\n  //O = sqrt(smoothstep( 0., 50./R.y/(abs(U.x) + abs(U.y)), .7 - abs(O) )); // Shane variant\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

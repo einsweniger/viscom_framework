@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsBcWz",
+      "date": "1492702237",
+      "viewed": 156,
+      "name": "Arena jellyfish sway",
+      "username": "lachnblach",
+      "description": "sway",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sway"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    float sway = 70.0;\n    \n    uv.x += (cos(iTime/2.0 + fragCoord.y / 20.0) / (100.0 - sway)) + sin(iTime + fragCoord.y / 50.0) / (100.0 - sway);\n    \n    vec4 texColor = texture(iChannel0, uv);\n    \n\tfragColor = texColor;\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

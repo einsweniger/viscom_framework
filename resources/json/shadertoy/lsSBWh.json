@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsSBWh",
+      "date": "1500203645",
+      "viewed": 478,
+      "name": "[SH17A] Space fungus",
+      "username": "FabriceNeyret2",
+      "description": "variant of [url]https://www.shadertoy.com/view/ldlyD2[/url]\ngolfed and inspired by [url]https://www.shadertoy.com/view/lslcWj[/url]",
+      "likes": 13,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raymarching",
+        "2tweets",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://www.shadertoy.com/view/ldlyD2\n// golfed and inspired by https://www.shadertoy.com/view/lslcWj\n\n/**/\nvoid mainImage(out vec4 O, vec2 U) {\n    float t = iTime, a,b; // s =  10.; \n    mat2  R = mat2( sin(t+1.57*vec4(1,2,0,1)) );\n    vec3  q = iResolution,\n          D = vec3((U+U-q.xy)/q.y, -1),\n          p = 15./q;  // 1.5*s;\n\n    for ( O+=1.-O; O.x > 0. && t > .01 ; O-=.015)\n        q = p,\n        q.xz *= R,\n        q.yz *= R,\n        t = max( length(q) - 9.,  // -s                         // Sphere\n                 abs(a=cos(b=3.*dot(sin(q),D/D)))/9. ), // /s   // EggCarton\n        p += t*D;\n\n    O.r -= b/30.;\n    O.g -= a;\n}\n/**/\n\n\n\n\n\n/**  // variants\n\nvoid mainImage(out vec4 O, vec2 U) {\n    float t = iTime*.5, a,b,c,\n          s =  17.; // 6.25 + 2.75* sin(t*.86);\n    mat2  R = mat2( sin(t+1.57*vec4(1,2,0,1)) );\n    vec3  q = iResolution,\n          D = vec3((U+U-q.xy)/q.y, -1),\n          p=q-q; p.z = 1.5;\n\n    for ( O+=1.-O; O.x > 0. && t > .001 ; O-=.015)\n        q = s*p,\n        q.xz *= R,\n        q.yz *= R,\n      //t = max( length(q) - s,                        // Sphere\n      //t = max( abs(length(q) - s)-.2,                // sliced\n        t = max( abs(abs(length(q) - s)-.8)-.2,        // sliced\n        //       abs(k=dot(q=sin(q),D/D))/6.) / s,     // EggCarton\n        //       abs(k=dot(q=sin(q),D/D))/6.-.06) / s, // EggCarton\n                 abs(c=abs(b=abs(a=dot(q=sin(q),D/D))-.6)-.3)/6.) / s, // EggCarton\n        p += t*D;\n    // O += vec4(c,b,a,0)/2.;\n    O *= sign(vec4(c,b,a,0));\n    //O.g *= sign(a);\n    //O = sin(O*vec4(1,9,19,0));\n}\n/**/\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

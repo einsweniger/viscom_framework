@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldGczG",
+      "date": "1522402329",
+      "viewed": 163,
+      "name": "The Dreamzone",
+      "username": "Jamie_Pendergast",
+      "description": "My first actual ray marcher :/\nDont know how i feel about it",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raymarch"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float map(vec3 p) {\n    vec3 q = fract(p) * 2. - 1.;\n    float z = sin(0.125 + p.x * 0.156 + sin(iTime));\n  \tz = min(z,0.5);\n    z = mix(z,p.x,p.y);\n   \n    return length(q) - 0.25 - z;\n}\n\nfloat trace(vec3 ro, vec3 rd) {\n\tfloat t = 0.;\n    vec3 p = vec3(0.);\n    \n    for(int i = 0; i < 32; i++) {\n        t += map(p) * 0.5;\n        p = ro + rd * t ;\n    }\n    \n    return t;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\tuv *= 2.;\n    uv -= 1.;\n    \n    uv.x *= iResolution.x / iResolution.y;\n    \n    \n    vec3 rd = normalize(vec3(uv,1.));\n\n\tvec3 ro = vec3(0.,0.,iTime);\n    float t = trace(ro,rd);\n    // Output to screen\n    fragColor = vec4(1. / ( 1. + t * t * 0.1));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

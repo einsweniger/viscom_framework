@@ -1,0 +1,58 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xl3SDn",
+      "date": "1478894658",
+      "viewed": 359,
+      "name": "Black and White Fade",
+      "username": "kbjwes77",
+      "description": "smoothly fade between color and black and white",
+      "likes": 1,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "grayscale",
+        "color",
+        "transition",
+        "bw",
+        "fade",
+        "gray",
+        "white",
+        "smooth",
+        "black"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float cRange = 256.00/12.0;\nfloat cValue = 0.0;\nfloat cColor = 0.0;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0, fragCoord.xy / iResolution.xy);\n    \n    cColor = 0.5 + 0.5*sin(iTime);\n    cValue = max(max(fragColor.x,fragColor.y),fragColor.z);\n    \n    fragColor.x = mix(fragColor.x,cValue,cColor);\n    fragColor.y = mix(fragColor.y,cValue,cColor);\n    fragColor.z = mix(fragColor.z,cValue,cColor);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

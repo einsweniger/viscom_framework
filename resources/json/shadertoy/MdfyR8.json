@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdfyR8",
+      "date": "1486942076",
+      "viewed": 214,
+      "name": "R.O.Y. Flash",
+      "username": "BestCar11",
+      "description": "After a few seconds, FLASH!",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "redorangeyellow"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(iTime, sin(iTime), uv.x, uv); \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lGXDz",
+      "date": "1483780287",
+      "viewed": 176,
+      "name": "Rect",
+      "username": "oshixiaoxiliu",
+      "description": "\u5b66\u4e00\u4e0b\u600e\u4e48\u7528",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rect"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nbool check(float coord, vec2 bound)\n{\n    return (coord > bound.x) && (coord < bound.y);\n}\n    \nvoid mainImage( out vec4 color, in vec2 coord )\n{\n    vec2 pos = coord / iResolution.xy ; \n    vec2 bound = vec2(1./4.,3./4.);\n    if(check(pos.x, bound) && check(pos.y,bound) )\n    {\n        color = vec4((pos - 0.25) * 2., .5 + sin(iTime) , 1.);\n    }\n    else \n    {\n        color = vec4(0.,0.,0.,1.);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

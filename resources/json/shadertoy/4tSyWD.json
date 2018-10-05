@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tSyWD",
+      "date": "1510419493",
+      "viewed": 266,
+      "name": "Conway's Game of Life Playground",
+      "username": "BeardThings",
+      "description": "Experimenting with maintaining state in the shader.",
+      "likes": 7,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "experimentation",
+        "stateful"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nfloat loadSate(vec2 uv)\n{\n\treturn 0.0;\n}\n\nint readCellState(vec2 id)\n{\n\treturn int(1.0 - step(texture(iChannel0, id / iChannelResolution[0].xy).x, 0.99));\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tint cellState = 0;\n\n\t// Set initial state\n\tif(iFrame == 0)\n    {\n        int on = int(step(rand(fragCoord.xy), 0.3));\n    \tcellState = on;\n        fragColor = vec4(cellState);\n        return;\n    }\n\n\tcellState = readCellState(fragCoord.xy);\n\n\t// Modify State\n    int liveNeighbours = 0;\n    liveNeighbours += readCellState(fragCoord.xy + vec2(1.0, 0.0));\n    liveNeighbours += readCellState(fragCoord.xy + vec2(-1.0, 0.0));\n    liveNeighbours += readCellState(fragCoord.xy + vec2(0.0, 1.0));\n    liveNeighbours += readCellState(fragCoord.xy + vec2(0.0, -1.0));\n    liveNeighbours += readCellState(fragCoord.xy + vec2(-1.0, 1.0));\n    liveNeighbours += readCellState(fragCoord.xy + vec2(1.0, 1.0));\n    liveNeighbours += readCellState(fragCoord.xy + vec2(-1.0, -1.0));\n    liveNeighbours += readCellState(fragCoord.xy + vec2(1.0, -1.0));\n\n    if(cellState == 1)\n    {\n        if(liveNeighbours < 2) cellState = 0;\n        else if(liveNeighbours == 2 || liveNeighbours == 3) cellState = 1;\n            else if(liveNeighbours > 3) cellState = 0;\n                }\n    else if(liveNeighbours == 3) cellState = 1;\n    \n\n    vec2 mouseUV = iMouse.xy / iResolution.xy;\n    float distancceToUV = distance(fragCoord.xy / iResolution.xy, mouseUV);\n    \n    int on = int(step(rand(fragCoord.xy), 0.3));\n    cellState += on * int(step(distancceToUV, 0.01));\n    \n    float previousFloatState = texture(iChannel0, fragCoord.xy / iResolution.xy).x * 0.98;\n    \n\tfragColor = vec4(min(float(cellState) + previousFloatState, 1.0));\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

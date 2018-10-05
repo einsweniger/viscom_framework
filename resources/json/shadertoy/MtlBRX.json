@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtlBRX",
+      "date": "1512740067",
+      "viewed": 220,
+      "name": "texture-controlled selection",
+      "username": "FabriceNeyret2",
+      "description": "Use a texture as texture selector.\nexamples: modulating images or stipples; using scalar or rgb-independant selector.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "video",
+        "effect"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 2,
+            "src": "/media/a/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 7,
+            "src": "/media/a/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 u )\n{\n    vec2 U = u / iResolution.xy, \n         A = .5+.5*sin( 1.5*u*mat2(1,-1,1,1) );             // 2 stipples stored in A.x and A.y\n    vec4 S =  clamp(-1.+3.*texture(iChannel1, U ),0.,1.);   // selector\n    int t = int(iTime/2.);\n    \n    if (t%2<1) S = S.rrrr;\n    \n    O = mix(  (t/2)%2<1 ? A.xxxx : texture(iChannel0, U ),\n              (t/2)%2<1 ? A.yyyy : texture(iChannel2, U ),\n\t          S );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

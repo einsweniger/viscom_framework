@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdjyRW",
+      "date": "1491210943",
+      "viewed": 283,
+      "name": "Smallest Grid - 69 chars",
+      "username": "GregRostami",
+      "description": "I'm sure there's another function that can make a smaller grid, but I can't think of it now.\nPlease help. ",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "grid",
+        "2tc",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,u)\t\t\t\t\t\t\\\no=step(.01,mod(u.xxxy/iResolution.y,.1));\t\\\no*=o.w\n\n//83 chars - Fabrice shows psonice how to follow the rules. ;-)\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o = step(.01, mod(u.xxxy / iResolution.y, .1));\n    o *= o.w;\n}\n/**/\n\n/** //70 chars - psonice breaks the rules for this tiny grid!\nvoid mainImage(out vec4 o,vec2 u)\n{\n    u = step(4.,mod(u,40.));\n    o = u.xxxx*u.y;\n}\n/**/\n\n/** //86 chars - s23b moves the fract out to reduce the shader\nvoid mainImage(out vec4 o,vec2 u)\n{\n    u = fract(u / .1 / iResolution.y);\n    o = vec4(u.x <.9 && u.y < .9);\n}\n/**/\n\n/** //92 chars - Original Shader by Greg Rostami \nvoid mainImage(out vec4 o,vec2 u)\n{\n    u /= .1*iResolution.y;\n    o = vec4( fract(u.x)<.9 && fract(u.y)<.9 );\n}\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

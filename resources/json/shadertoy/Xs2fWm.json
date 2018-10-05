@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xs2fWm",
+      "date": "1500765255",
+      "viewed": 211,
+      "name": "zqvhdzki \ua5a3",
+      "username": "squid",
+      "description": ".",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 hash22(vec2 p)\n{\n\tp  = fract(p * vec2(5.3983, 5.4427));\n    p += dot(p.yx, p.xy +  vec2(21.5351, 14.3137));\n\treturn fract(vec2(p.x * p.y * 95.4337, p.x * p.y * 97.597));\n}\n\n#define HASHSCALE4 vec4(443.897, 441.423, 437.195, 444.129)\nvec4 hash43(vec3 p)\n{\n\tvec4 p4 = fract(vec4(p.xyzx)  * HASHSCALE4);\n    p4 += dot(p4, p4.wzxy+19.19);\n    return fract((p4.xxyz+p4.yzzw)*p4.zywx);\n}\n\nmat2 rot2(float a){\n    float c = cos(a); float s = sin(a);\n\treturn mat2(c, s, -s, c);\n}\nvec2 P(float t) {\n\treturn vec2(0.);\n}\nvec2 U(vec2 a, vec2 b) {\n    return a.x < b.x ? a : b;\n}\nfloat SM(float a, float b, float k)\n{\n    float xp = clamp(-(b-a) * k + 0.5, 0.0, 1.0), xp2 = xp*xp;\n   \treturn a+min((b-a), xp2 * (xp2 * 0.5 - xp) / k);\n}\n\nfloat det( vec2 a, vec2 b ) { return a.x*b.y-b.x*a.y; }\nvec3 getClosest( vec2 b0, vec2 b1, vec2 b2 ) \n{\n\t\n  float a =     det(b0,b2);\n  float b = 2.0*det(b1,b0);\n  float d = 2.0*det(b2,b1);\n  float f = b*d - a*a;\n  vec2  d21 = b2-b1;\n  vec2  d10 = b1-b0;\n  vec2  d20 = b2-b0;\n  vec2  gf = 2.0*(b*d21+d*d10+a*d20); gf = vec2(gf.y,-gf.x);\n  vec2  pp = -f*gf/dot(gf,gf);\n  vec2  d0p = b0-pp;\n  float ap = det(d0p,d20);\n  float bp = 2.0*det(d10,d0p);\n  float t = clamp( (ap+bp)/(2.0*a+b+d), 0.0 ,1.0 );\n  return vec3( mix(mix(b0,b1,t), mix(b1,b2,t),t), t );\n}\n\nvec2 _bezier( vec3 a, vec3 b, vec3 c, vec3 p )\n{\n\tvec3 w = normalize( cross( c-b, a-b ) );\n\tvec3 u = normalize( c-b );\n\tvec3 v = normalize( cross( w, u ) );\n\n\tvec2 a2 = vec2( dot(a-b,u), dot(a-b,v) );\n\tvec2 b2 = vec2( 0.0 );\n\tvec2 c2 = vec2( dot(c-b,u), dot(c-b,v) );\n\tvec3 p3 = vec3( dot(p-b,u), dot(p-b,v), dot(p-b,w) );\n\n\tvec3 cp = getClosest( a2-p3.xy, b2-p3.xy, c2-p3.xy );\n\n\treturn vec2( sqrt(dot(cp.xy,cp.xy)+p3.z*p3.z), cp.z );\n}\nfloat bezier1(vec3 p, vec3 a, vec3 b, vec3 c, float r) {\n    vec2 h = _bezier(a, b, c, p);\n\t\t\n\treturn h.x-r;\n}\n\n    const float V = 2.;\n    const float R = 0.03;\n\nvec2 map(vec3 p) {\n    vec3 c = vec3(cos(iTime*4.),sin(iTime*2.+cos(iTime)),0.)*1.9;\n    vec3 d = vec3(-cos(iTime*4.+sin(iTime)),0.,sin(iTime*2.))*1.9;\n    \n    float b = min(bezier1(p, vec3(-V), c, (c+d)*.5, 0.2),\n                  bezier1(p, (c+d)*.5, d, vec3(V), 0.2));\n    \n    \n\tvec3 q = abs(p);\n    float cy = SM(length(q.xy-V)-R, \n                    SM(length(q.xz-V)-R, \n                        length(q.yz-V)-R, 5.), 5.);\n    cy = SM(cy, b, 5.);\n    cy = max(max(max(cy, q.x-V-R), q.y-V-R), q.z-V-R);\n    \n    return U(vec2(cy,0.), \n        U(vec2(length(p-c)-0.1,2.), vec2(length(p-d)-0.1,3.)));\n}\nvec3 N(in vec3 p)\n{  \n    vec2 e = vec2(-1.,1.)*0.001;     \n\treturn normalize(e.yxx*map(p + e.yxx).x + e.xxy*map(p + e.xxy).x + \n\t\t\t\t\t e.xyx*map(p + e.xyx).x + e.yyy*map(p + e.yyy).x );   \n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord - iResolution.xy*.5)/iResolution.y;\n    \n\tvec3 LA = vec3(0., -0.2, 0.),ro = LA + vec3(cos(iTime*0.2), 0.1, sin(iTime*0.2))*7.,\n        c = vec3(0.0,0.01,0.2),sp;\n    \n\tLA.xy += P(LA.z);\n\tro.xy += P(ro.z);\n    \n    vec3 f = normalize(LA-ro),\n        r = normalize(vec3(f.z, 0., -f.x)),\n        u = cross(f, r),\n        rd = normalize(f + uv.x*r + uv.y*u);\n        \n\tfloat t = 0., dt, x;\n\tfor(int i=0; i<256; i++){\n\t\tdt = map(ro + rd*t).x;\n\t\tif(dt<5e-3 || t > 100.) break;\n\t\tt += dt*0.25;\n\t}\n\t\n\tif(dt<5e-3){\n    \tsp = t * rd+ro;\n    \tvec3 L = normalize(vec3(0., 1.5, 0.)-sp);\n        x = map(sp).y;\n        vec3 n = N(sp);\n        vec3 dc = x == 0. ? vec3(.6,.6,.55) :\n        \t\t \tx == 2. ? vec3(0.05, 0.8, .15) :\n        \t\t\tx == 3. ? vec3(.8, 0.15, 0.05) : vec3(0.);\n        \n        c = vec3(0.88, 0.85, 0.8)*pow(max(dot(n, L), 0.), 10.)+\n            dc*max(dot(n, L), 0.)+\n            vec3(0.1,0.1,0.15)*dc*max(dot(n, vec3(-0.15, -1., 0.1)), 0.)+\n            vec3(0.09,0.09,0.12)*dc*pow(1.-max(dot(n, -rd), 0.), 4.);\n\t}\n    vec2 p = fragCoord.xy / iResolution.xy;\n    p *=  1.0 - p.yx;\n    float vig = pow(p.x*p.y * 30.0, 0.5);\n\tfragColor = vec4(pow(c*vig, vec3(1./2.2)), 0.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

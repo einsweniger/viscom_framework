@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MljBDG",
+      "date": "1517078495",
+      "viewed": 246,
+      "name": "wave greek frieze 2 (animated)",
+      "username": "FabriceNeyret2",
+      "description": "other greek friezes here: [url]https://www.shadertoy.com/results?query=frieze[/url]",
+      "likes": 13,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "waves",
+        "patterns",
+        "2tweets",
+        "short",
+        "greek",
+        "frieze"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://shadertoy.com/view/ll2fWG\n\n#define mainImage(O,u)                                            \\\n\tvec2 U = 8.*u/iResolution.y, V; U.x -= iTime; V = floor(U);   \\\n    U.y = dot( cos( (2.*(iTime+V.x)+7.-V.y) * max(0.,.5-length(U = fract(U)-.5)) - vec2(33,0) ), U); \\\n\tO += smoothstep(-1.,1.,U/fwidth(U)).y\n        \n\n\n        \n\n/** // 201 chars\n\n#define mainImage(O,u)                                  \\\n\tvec2 R = iResolution.xy,                            \\\n         U = 8.*u/R.y, V; U.x -= iTime; V = floor(U);   \\\n    U.y = dot( cos( (2.*(iTime+V.x)+7.-V.y) * max(0.,.5-length(U = fract(U)-.5)) - vec2(33,0) ), U); \\\n\tO += smoothstep(-1.,1.,U.y/fwidth(U.y))\n        \n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tsXRM",
+      "date": "1435310056",
+      "viewed": 882,
+      "name": "Skyline3 - 156 chars",
+      "username": "FabriceNeyret2",
+      "description": "my variant  of  GregRostami https://www.shadertoy.com/view/MtXSR7 variant of  gsingh93 shader  https://www.shadertoy.com/view/4tXSRM#  :-D",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "2tweets",
+        "short",
+        "2tc",
+        "skyline"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 f, vec2 u) {\n    u /= iResolution.xy;\n    f.g=.3;\n    for (float i=1.; i < 20.; i++) \n\t\tf = u.y < .7+.2*sin(2e2*u.x/i+9.*i+iDate.w) -.04*i ? i*vec4(.1,.04,.01,1) : f; \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

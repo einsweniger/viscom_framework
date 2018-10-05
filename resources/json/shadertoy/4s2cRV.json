@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4s2cRV",
+      "date": "1492875934",
+      "viewed": 87,
+      "name": "Daily 2017-04-22",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 p=uv-.5;\n    p.x*=iResolution.x/iResolution.y;\n    float l=length(p);\n    uv+=p/l*abs(sin(l*9.-iTime*2.));\n    vec3 c=vec3(.01/length(fract(uv)-.5)/l);\n    fragColor=vec4(.01/abs(fract(uv)-.5),0.,1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xs2cWV",
+      "date": "1493874557",
+      "viewed": 187,
+      "name": "angle isleft or isright",
+      "username": "ollj",
+      "description": "because i keep forgetting the 2 fucntions to get;\n- Angle Between 2 vectors.\n- if c is left or right of a ray from points a to b.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "acos",
+        "left",
+        "right",
+        "anglebetween",
+        "determinant"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\nsmall demo of \nhttp://stackoverflow.com/questions/1560492/how-to-tell-whether-a-point-is-to-the-right-or-left-side-of-a-line\n*/\n\n//return framed [u]\nvec2 frame(vec2 u){u=u/iResolution.xy;u-=.5;\n u.x*=iResolution.x/iResolution.y;u*=4.;return u;}\n\n//return angle between 2 vectors (is unsigned)\nfloat angleBetween(vec2 a,vec2 b){\n return acos(dot(normalize(a),normalize(b)));\n}\n//if(c is left of ray from a to b)return 1.; return 0.;\nfloat  isLeft(vec2 a,vec2 b,vec2 c){c-=a;b-=a;\n return step(determinant(mat2(b,c)),0.);}\n\n//return smoothstepped distance of p from a, to paint a dot\nfloat ddot(vec2 p,vec2 a){float r=length(p-a);\n return smoothstep(.1,.0,r);}\n\nvoid mainImage(out vec4 Out,in vec2 In){\n vec2 u=frame(In);\n vec2 m=frame(iMouse.xy);\n vec2 a=vec2(0,0);\n vec2 b=vec2(2,1);\n vec2 c=m;//vec2(1,0);\n float dots=max(ddot(a,u),max(ddot(b,u),ddot(c,u)));\n float angle=angleBetween(m,b-a)/acos(-1.);\n float left=isLeft(a,c,b);\n float d=length(u-c);\n d=smoothstep(.7,.6,d);\n float red  =dots;\n float green=d*angle*(1.-left);\n float blue =d*angle*    left ;\n Out=vec4(red,green,blue,1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

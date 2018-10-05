@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdffDn",
+      "date": "1495695438",
+      "viewed": 272,
+      "name": "Daily 2017-05-24",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 12,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define rand(x) fract(sin(x)*1e4)\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy,v=uv*(1.-uv);\n    uv-=.5;\n    uv.x*=iResolution.x/iResolution.y;\n    vec3 ro=vec3(0.),rd=normalize(vec3(uv,1.)),dh=vec3(0.,0.,1.);\n    float c=0.;\n    for(float f=0.;f<64.;++f){\n        float fr=rand(f)*100.+iTime,rr=fract(fr),rb=floor(fr);\n        vec4 rnd=rand(rb+vec4(0.,3.,5.,8.));\n        float a=rnd.w*6.2831;\n        float r=1.;//rnd.x+rnd.y;r=min(r,2.-r);\n        vec3 p=vec3(cos(a)*r,sin(a)*r,0.),rop=ro-p;\n        float z=mix(50.,-10.,rr);\n        vec3 n=normalize(cross(dh,rd));\n        float d=abs(dot(n,rop));\n        vec3 n2=cross(rd,n);\n        float t=dot(rop,n2)/dot(dh,n2);\n        c+=.002/d/d*step(0.,t)*smoothstep(5.,0.,abs(t-z))*max(0.,1.-.03*t);\n    }\n    vec3 clr=mix(vec3(1.,.1,.2),vec3(1.,.4,.2),c)*c;\n    clr=sqrt(clr)*pow(v.x*v.y*25.,.25);\n\tfragColor = vec4(clr,0.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

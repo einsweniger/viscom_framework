@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dyyWK",
+      "date": "1523291559",
+      "viewed": 106,
+      "name": "Simple Night-Vision effect",
+      "username": "Txoka",
+      "description": "night vision google effect",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "vignette",
+        "nightvision"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "highp float rand(vec2 co) {\n    return fract(sin(mod(dot(co.xy ,vec2(12.9898,78.233)),3.14))*43758.5453);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    vec2 uv = fragCoord/iResolution.xy;\n\n    float lum = cos(fragCoord.y);\n\tlum*=lum;\n\tlum/=3.;\n    lum+=0.6+rand(uv*iTime)/6.;\n\n    float col = dot(texture(iChannel0,uv).rgb,vec3(0.65,0.3,0.1)*lum);\n    \n    fragColor = vec4(0,col,0,1.)*smoothstep(0.9,0.,distance(uv,vec2(0.5)));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

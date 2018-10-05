@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lySzz",
+      "date": "1482393764",
+      "viewed": 202,
+      "name": "fading effect practice",
+      "username": "ProgC",
+      "description": "fading effect practice",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "effect",
+        "fadingeffect"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float dfBox2(vec2 p, float r)\n{\n    return length(p) - r;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    vec2 p = uv - 0.5;\n        \n    float d = 1.0-dfBox2(vec2(p.x, p.y), cos(iTime) * 0.4) * 2.0;\n    vec3 grayColor = vec3(d);\n    \n    fragColor = vec4(grayColor, 1.0);\n    fragColor *= texture(iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

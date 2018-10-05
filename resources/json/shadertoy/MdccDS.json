@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdccDS",
+      "date": "1519993494",
+      "viewed": 175,
+      "name": "Explore non-primes / multiples",
+      "username": "gbirbilis",
+      "description": "Click or Drag the mouse towards each of the four corners to change scale of X and Y axes.\nPress Play to increase X and/or Y (depending on SPEEDX and SPEEDY which can be zero) offset as frames pass.\n\nTry bottom-right corner for nice moire pattern",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "primes",
+        "scaling"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//#define INT_MODE //uncomment this for integer mode\n\nconst vec2 SPEED = vec2(.001, .0001); //(SPEEDX, SPEEDY) //try *10 or *100 speed at INT_MODE\nconst vec2 ZERO = vec2(0, 0);\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{    \n    vec2 mousexy = iMouse.xy;\n    if (mousexy.xy==ZERO) mousexy = vec2(100.0, 1.0); //aesthetic workarround for total blackness at (0, 0)\n    \n    vec2 p = mousexy * (fragCoord/iResolution.xy + iTime*SPEED);\n  \n#ifdef INT_MODE\n    int c = int(p.x) % int(p.y);\n#else\n    float c = mod(p.x, p.y);\n#endif\n    \n    fragColor = vec4(c);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

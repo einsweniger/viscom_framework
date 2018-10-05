@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldSfD3",
+      "date": "1502433009",
+      "viewed": 212,
+      "name": "BubbleVerse 138 chars",
+      "username": "coyote",
+      "description": "So much happening in first 15 seconds with so few characters. :)\n\nBased on phenomenal [url]https://www.shadertoy.com/view/MsjfDK[/url]",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "short",
+        "tweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//practically the same as benoitM's https://www.shadertoy.com/view/MsjfDK\n//only differences are the constants and swizzling\n\n#define mainImage( o, u )                   \\\n    o = 20.*vec4((u+u-(o.xy=iResolution.xy))/o.y, iTime*.1,0); \\\n    for(int i=0; i++ < 33;)               \\\n        o.wxzy = abs( o/dot(o,o) - vec4(.8,.2,.01,.4) )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

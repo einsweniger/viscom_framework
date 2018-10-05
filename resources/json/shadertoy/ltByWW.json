@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltByWW",
+      "date": "1508525422",
+      "viewed": 767,
+      "name": "Smootherstep alternative",
+      "username": "grinist",
+      "description": "I stumbled upon this when doing something completely different (weighing and normalizing sound volumes on a \"mix field\"). It's very close in value to smootherstep with a very different approach. Smootherstep is overlaid in blue. See pow version in source.",
+      "likes": 17,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "graph",
+        "ramp",
+        "step",
+        "interpolate",
+        "smootherstep",
+        "sstep"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// sstep - \"smootherstep alternative\"\nfloat sstep(float x)\n{\n\tx = clamp(x, 0.0, 1.0); // optional\n\tfloat ix = 1.0 - x;\n    x = x * x;\n    ix = ix * ix;\n    return x / (x + ix);\n}\n\n// ssteppow\n// Like above but with a pow function to control the shape.\n// p < 1: seat, p > 1: sigmoid, p = 1: lerp\nfloat ssteppow(float x, float p)\n{\n\tx = clamp(x, 0.0, 1.0);\n\tfloat ix = 1.0 - x;\n    x = pow(x, p);\n    ix = pow(ix, p);\n    return x / (x + ix);\n}\n\n// Original smootherstep\nfloat smootherstep(float x)\n{\n\tx = clamp(x, 0.0, 1.0); // optional\n\treturn x * x * x * (x * (x * 6.0 - 15.0) + 10.0);\n}\n\n\n// ----- The rest is just for demo\n\nvec2 xy;\t\t// current graph coords\nvec2 dxy; \t\t// pixel size in graph units\nvec4 fColor;\t// current fragment color\n\nvoid mixColor(vec4 color, float alpha)\n{\n    fColor = vec4(mix(fColor.rgb, color.rgb, alpha * color.a), 1.0);\n}\n\nvoid drawGrid(float stepSize, vec4 gridCol)\n{\n\tfloat mul = 1.0 / stepSize;\n\tvec2 g = abs(vec2(-0.5) + fract((xy + vec2(stepSize) * 0.5) * mul)); // g passes 0 at stepSize intervals\n\tg = vec2(1.0) - smoothstep(vec2(0.0), dxy * mul * 1.5, g);\n    mixColor(gridCol, max(g.x, g.y));\n}\n\nvoid drawCurve(float value, vec4 curveCol)\n{\n\t// Using y distance to curve, modifying distance threshold with approximated slope\n    // Derivative breaks with drastic changes of value and discontinuities, but so be it\n    float yDist = abs(value - xy.y);\n    float dValue = abs(dFdx(value));\n\tfloat c = 1.0 - smoothstep(0.0, (dxy.y + dValue) * 2.0, yDist);\n\tmixColor(curveCol, c);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n\n    // graph setup\n\tfloat aspect = iResolution.x / iResolution.y;\n\tvec2 graphSize = vec2(aspect * 1.2, 1.2);\n\tvec2 graphPos = 0.5 - graphSize * 0.5;\n\n\txy = graphPos + uv * graphSize;\t// graph coords\n\tdxy = graphSize / iResolution.xy;\t// pixel size in graph units\n\n    // background\n\tfColor = mix(vec4(1.0, 1.0, 1.0, 1.0), vec4(0.7, 0.7, 0.7, 1.0), pow(length(0.5 - uv) * 1.414, 3.5));\n    \n\t// grid\n    drawGrid(0.1, vec4(0.0, 0.0, 0.0, 0.2));\n\tdrawGrid(0.5, vec4(0.0, 0.0, 0.0, 0.3));\n\tdrawGrid(1.0, vec4(0.0, 0.0, 0.0, 0.4));\n\n    // curves\n    drawCurve(sstep(xy.x), vec4(0.91, 0.13, 0.23, 1.0));\n    if (fract(iTime * 0.25) < 0.5)\n\t    drawCurve(smootherstep(xy.x), vec4(0.15, 0.45, 0.85, 0.8));\n\n\tfragColor = fColor;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

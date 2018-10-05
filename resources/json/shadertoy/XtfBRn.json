@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtfBRn",
+      "date": "1510757316",
+      "viewed": 173,
+      "name": "Motion Blur Attempt",
+      "username": "Txoka",
+      "description": "speed controlled by mouse",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "motionblur"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define blur\n#define c1 vec4(1.,1.,1.,1.)\n#define c2 vec4(0.,0.13,0.,1.)\n#define aa 4.\n#define samples 0.6\n\n\n#define speed max(1.1,iMouse.x/iResolution.x*20.)\n#define time iTime*speed\n#define p(t) vec2(sin(t),cos(t)/2.)\n\nfloat rand(vec2 n) { \n\treturn fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n\tvec2 uv = fragCoord.xy / iResolution.xy*2.-1.;\n    uv.x*=iResolution.x/iResolution.y;\n    fragColor=c2;\n    #ifdef blur\n    for(float i=-speed*5.*samples+1.;i<speed*5.*samples;i++){\n        vec2 c=p(time-i/350./samples);\n        float d=distance(c,uv);\n        if(d<0.1){\n            fragColor = mix(c1,c2,abs(i)/(speed*4.5*samples)/1.1);\n            if(i>0.)break;\n        }\n    }\n    #else\n    fragColor = mix(c2,c1,smoothstep(0.1,0.1-aa/iResolution.y,distance(p(time),uv)));\n    #endif\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

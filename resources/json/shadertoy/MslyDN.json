@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MslyDN",
+      "date": "1488338433",
+      "viewed": 148,
+      "name": "texture flip",
+      "username": "TheOnlyaaa",
+      "description": "change texture effect",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "texture"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const float perWidth = 0.1;\nconst float rspeed = 10.5;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\n    float index = floor( uv.x / perWidth );\n    float centerX = perWidth * ( index + 0.5 );\n    float left = perWidth * index;\n    float right = left + perWidth;\n    \n    float perRotateTime = 3.14159 / rspeed;\n    float startRotateTime = perRotateTime * 0.5 * index;\n    float endRotateTime = startRotateTime + perRotateTime;\n    \n    float angle = (iTime - startRotateTime) * rspeed;\n    vec2 cod = vec2(( uv.x - centerX) / cos( angle ) + centerX, uv.y );\n    \n    if( iTime <= startRotateTime ) {\n        fragColor = texture( iChannel0, uv );\n    }\n    else if( iTime > endRotateTime ) {\n        fragColor = texture( iChannel1, uv );\n    }\n    else if( cod.x <= right && cod.x >= left ) {\n        if( angle <= 1.5707 ) {\n    \t\tfragColor = texture( iChannel0, cod );\n        } else if( angle <= 3.14159 ) {\n         \tfragColor = texture( iChannel1, vec2( right - cod.x + left, cod.y ) );\n        }\n    } else {\n     \tfragColor = vec4( vec3( 0.0 ), 1.0 );   \n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

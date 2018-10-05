@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XllyW7",
+      "date": "1505094563",
+      "viewed": 248,
+      "name": "Almost a Shoreline",
+      "username": "DJDoomz",
+      "description": "Just an idea I had",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 7,
+            "src": "/media/a/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord.xy / iResolution.xy);\n    uv += .2*sin(.2*iTime+vec2(0,1.55));\n    uv = texture(iChannel0,uv).bg*(.1*sin(2.*iTime-16.*length(uv-1.5))+.12);\n\tfragColor = texture(iChannel0,uv).brga;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4t2BRt",
+      "date": "1516995479",
+      "viewed": 146,
+      "name": "planar warp pattern",
+      "username": "public_int_i",
+      "description": "planar warp",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "warp",
+        "pattern",
+        "planar"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Ethan Alexander Shulman 2018\nmat2 rot2d(float a) {\n    float s = sin(a), c = cos(a);\n    return mat2(c,s,-s,c);\n}\nfloat twave(float t) {\n    t = fract(t);\n   \treturn t*2.-max(0.,t*4.-2.); \n}\nvoid mainImage(out vec4 o, in vec2 u)\n{\n\tvec2 uv = u/iResolution.y*(.5+twave(iTime*.04)*1.5);\n    for (float s = 1.; s < 6.; s+=s) uv = 1.-abs(vec2(uv.x,uv.y)*rot2d(uv.x*s+iTime*.2)/(1.-abs(uv.y)));\n    o = cos(texture(iChannel0,uv*.01)*6.28+cos((iTime)*.07*vec4(.3,.9,4,4))*4.)*0.5+0.5;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

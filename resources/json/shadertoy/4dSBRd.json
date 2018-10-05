@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dSBRd",
+      "date": "1501595063",
+      "viewed": 381,
+      "name": "Molten Space Crystal",
+      "username": "DJDoomz",
+      "description": "woah buffers are cool\n(why is this not working on other devices?\nFigured it out... setting filter to \"linear\" doesn't work on my phone for some reason)",
+      "likes": 8,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "plasma",
+        "buffer"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tfragColor = texture(iChannel0,fragCoord / iResolution.xy);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy;\n    \n    float t = iTime/4.;\n\n    float s = sin(t/8.), c = cos(t/8.);\n   \n    vec2 muv = fragCoord/iResolution.xy-.5;\n    muv += .1*sin(muv.yx*vec2(5.5,8.3)+t/2.);\n    //muv.y/=iResolution.x/iResolution.y;\n    muv *= mat2(s,c,c,-s);\n    muv *= smoothstep(0.,6.,t)*3.;\n    \n    muv = abs(muv);\n    \n    muv = fract(abs(muv-1.));\n  \t\n    vec4 last = texture(iChannel0,muv);\n    \n    vec4 new = .07/length(muv-vec2(.4+.05*s,.5+.05*c))*vec4(uv,1,1);\n        \n    fragColor = last*min(.6,t/5.)+new;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

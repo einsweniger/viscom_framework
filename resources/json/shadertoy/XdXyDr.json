@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdXyDr",
+      "date": "1487625963",
+      "viewed": 290,
+      "name": "peace & love (132 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    U= (U+U -(O.xy=iResolution.xy))/O.y ; // Windows doesn't compile correctly if injected in length(U)\n    O += 1. -O\n       - .05/abs(length(U) -.9)\n       - .05/abs(U.x) - .06/abs(abs(U.x)+U.y);\n\n // O.r = max(O.r,.5); // variant 1: red graffiti look\n // O *= O;            // variant 2: a neat white version automagically appears\n}\n\n\n\n/**    // 144 chars\nvoid mainImage( out vec4 O, vec2 U )\n{\n    O = vec4(    abs(length(U= (U+U -(O.xy=iResolution.xy)) / O.y)-.9) > .1 \n              && abs(U.x)>.1 \n              && ( abs(abs(U.x)+U.y)>.13 || U.y<-.64) );\n}\n/**/\n\n\n\n/**    // 153 chars\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n\tU = (U+U -(O.xy=iResolution.xy)) / O.y;\n    U.x = abs(U.x);\n  \n    O = vec4(U.x>.1 && ( abs(1.5*U.x+U.y)>.15 || U.y<-.75) && abs(length(U)-.9)>.1);\n}\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

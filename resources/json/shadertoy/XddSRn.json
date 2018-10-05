@@ -1,0 +1,135 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XddSRn",
+      "date": "1457347869",
+      "viewed": 379,
+      "name": "correlation detector",
+      "username": "FabriceNeyret2",
+      "description": "find the correlation between the noise texture channels.\nSpoiler: (37,17)\n\nParallel version (*256) here: https://www.shadertoy.com/view/4stXzn",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "noise",
+        "correlation"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Find the correlation between the noise texture channels.\n// G = R+(37,17)\n// No correlations between G and B\n// A = B+(37,17)\n// More explaination here: https://www.shadertoy.com/view/Ms3SRr\n// Test the correlations here: https://www.shadertoy.com/view/XstSRn.\n// improved version ( speed*256 ) https://www.shadertoy.com/view/4stXzn\n\nint Digit(vec2 p, float n) { // display digit\n    int i=int(p.y), b=int(exp2(floor(30.-p.x-n*3.)));\n    i = ( p.x<0.||p.x>3.? 0:\n    i==5? 972980223: i==4? 690407533: i==3? 704642687: i==2? 696556137:i==1? 972881535: 0 )/b;\n \treturn i-i/2*2;\n}\n\nfloat displayN(float v, vec2 i) {\n    i/=12.; \n    for (float n=2.; n>=0.; n--) { \n        if ((i.x-=4.)<3.) return float(Digit(i,floor(mod(v/pow(10.,n),10.))));     \n    }\n    return 0.;\n}\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    float f = float(iFrame), s=0.;\n    vec2 R = iResolution.xy,\n        ofs = vec2(mod(f,256.),floor(f/256.));\n    vec4 C = texture(iChannel0,.5/R);\n\tU /= R;\n    O = texture(iChannel1,U);\n    \n    if (C.xy!=vec2(0.)) { \n        if (length(U-.5)<.2)  O++; else O.g = texture(iChannel0,U+C.xy/256.).g;\n        O += displayN(C.x,U*800.);\n        O += displayN(C.y,(U-vec2(.3,0))*800.);\n    } else {\n        O += displayN(ofs.x,U*800.);\n        O += displayN(ofs.y,(U-vec2(.3,0))*800.);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// choose the channels to test.\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    float f = float(iFrame);\n    vec2 ofs = vec2(mod(f,256.),floor(f/256.));\n    float v0 = texture(iChannel0, U/256.).r,\n          v1 = texture(iChannel0, (U+ofs)/256.).g;\n\n    O = vec4(v0,v1,abs(v0-v1),0);   \n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "#define N 16\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    if (iFrame==0) O-=O; else O = texture(iChannel1,U/iResolution.xy);\n    if (U != vec2(.5)) return; \n    \n    float f = float(iFrame), s=0.;\n    vec2 ofs = vec2(mod(f,256.),floor(f/256.));\n    \n    for (int i=0; i<N; i++)\n        for (int j=0; j<N; j++)\n            s += texture(iChannel0,(.5+vec2(i,j))/iResolution.xy).z;\n   if (s==0.) O = vec4(ofs,0,0);     \n   \n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

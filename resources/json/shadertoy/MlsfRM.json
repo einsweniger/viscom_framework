@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlsfRM",
+      "date": "1511471672",
+      "viewed": 80,
+      "name": "2D solar system",
+      "username": "Otringal",
+      "description": "A simple 2D demo of a solar-system.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "circles",
+        "rotating",
+        "solar",
+        "system"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define RADIUS_ADJUST 1e-4\n#define AU_ADJUST 1e-2\n#define TIME_ADJUST 0.3e1\n\nfloat getAspectRatio()\n{\n    return iResolution.x / iResolution.y;\n}\n\nvec2 getUVCoords(in vec2 fragCoords)\n{\n    vec2 standardUVs = (fragCoords - 0.5) / (iResolution.xy - 1.0);\n    standardUVs.x *= getAspectRatio();\n    standardUVs.y = 1.0 - standardUVs.y;\n    return standardUVs;\n}\n\nvoid drawSpace(in vec2 /*uvCoords*/, inout vec4 canvas)\n{\n\tcanvas = vec4(0.1, 0.0, 0.2, 1.0);\n}\n\nvoid drawDisc(in float orbitSize,\n              in float orbitSpeed,\n              in float radius,\n              in vec3 color,\n              in float blurAmount,\n              in vec2 uvCoords, \n              inout vec4 canvas)\n{\n    vec2 origin = vec2(0.5);\n    origin.x *= getAspectRatio();\n    origin.x += orbitSize * cos(orbitSpeed * iTime);\n    origin.y += orbitSize * sin(orbitSpeed * iTime);\n    float color_amount = 1.0 - smoothstep(radius - blurAmount,\n                                          radius + blurAmount,\n                                          distance(origin, uvCoords));\n    canvas += vec4(color_amount * color, 0.0);\n}\n\nvoid drawSun(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 0.0;\n    float orbit_speed = 0.0;\n    float radius1 = RADIUS_ADJUST * 550.0;\n    float radius2 = RADIUS_ADJUST * 750.0;\n    float radius3 = RADIUS_ADJUST * 900.0;\n    vec3 color1 = vec3(1.0, 1.0, 0.2) / 1.0;\n    vec3 color2 = vec3(1.0, 0.65, 0.3) / 5.0;\n    vec3 color3 = vec3(1.0, 0.3, 0.4) / 2.0;\n    float blur_amount1 = 0.02;\n    float blur_amount2 = 0.015;\n    float blur_amount3 = 0.03;\n    \n    drawDisc(orbit_size, orbit_speed, radius1, color1, blur_amount1, uvCoords, canvas);\n    drawDisc(orbit_size, orbit_speed, radius2, color2, blur_amount2, uvCoords, canvas);\n    drawDisc(orbit_size, orbit_speed, radius3, color3, blur_amount3, uvCoords, canvas);\n}\n\nvoid drawMercury(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 14.0;\n    float orbit_speed = TIME_ADJUST * 4.15;\n    float radius = RADIUS_ADJUST * 20.0;\n    vec3 color = vec3(0.55, 0.4, 0.2);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawVenus(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 18.0;\n    float orbit_speed = TIME_ADJUST * 1.62;\n    float radius = RADIUS_ADJUST * 40.0;\n    vec3 color = vec3(0.9, 0.65, 0.0);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawEarth(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 22.0;\n    float orbit_speed = TIME_ADJUST * 1.0;\n    float radius = RADIUS_ADJUST * 50.0;\n    vec3 color = vec3(0.5, 0.7, 0.8);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawMars(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 26.0;\n    float orbit_speed = TIME_ADJUST * 0.45;\n    float radius = RADIUS_ADJUST * 30.0;\n    vec3 color = vec3(0.7, 0.4, 0.1);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawJupiter(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 30.0;\n    float orbit_speed = TIME_ADJUST * 0.084;\n    float radius = RADIUS_ADJUST * 90.0;\n    vec3 color = vec3(0.8, 0.5, 0.1);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawSaturn(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 34.0;\n    float orbit_speed = TIME_ADJUST * 0.033;\n    float radius = RADIUS_ADJUST * 75.0;\n    vec3 color = vec3(0.5, 0.5, 0.35);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawUranus(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 38.0;\n    float orbit_speed = TIME_ADJUST * 0.012;\n    float radius = RADIUS_ADJUST * 60.0;\n    vec3 color = vec3(0.25, 0.4, 0.4);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawNeptune(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 42.0;\n    float orbit_speed = TIME_ADJUST * 0.006;\n    float radius = RADIUS_ADJUST * 65.0;\n    vec3 color = vec3(0.5, 0.8, 1.0);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid drawPluto(in vec2 uvCoords, inout vec4 canvas)\n{\n    float orbit_size = AU_ADJUST * 46.0;\n    float orbit_speed = TIME_ADJUST * 0.004;\n    float radius = RADIUS_ADJUST * 5.0;\n    vec3 color = vec3(0.6, 0.4, 0.1);\n    float blur_amount = 0.003;\n    \n    drawDisc(orbit_size, orbit_speed, radius, color, blur_amount, uvCoords, canvas);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n\tvec2 uv = getUVCoords(fragCoord);\n    vec4 image;\n    \n    drawSpace(uv, image);\n    drawSun(uv, image);\n    drawMercury(uv, image);\n    drawVenus(uv, image);\n    drawEarth(uv, image);\n    drawMars(uv, image);\n    drawJupiter(uv, image);\n    drawSaturn(uv, image);\n    drawUranus(uv, image);\n    drawNeptune(uv, image);\n    drawPluto(uv, image);\n    \n    fragColor = image;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

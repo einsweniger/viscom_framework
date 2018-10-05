@@ -1,0 +1,92 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsdBWr",
+      "date": "1524725887",
+      "viewed": 27,
+      "name": "continuous sharpen",
+      "username": "timeiskey",
+      "description": "laplacian propogating weeeeeeeeeeeeeeeeeeeee",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "sharpensobel"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel1, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define RADIUS 10.0\n#define PI 3.1415926\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy;\n\tvec2 nppd = 1.0/iResolution.xy * 1.0;\n    \n    vec2 nmp = iMouse.xy / iResolution.xy;\n\n    vec3 c = vec3(0.0);\n\n    vec3 tl = texture(iChannel1, abs(uv + nppd * vec2( -1.0, -1.0))).rgb;\n    vec3 tc = texture(iChannel1, abs(uv + nppd * vec2(  0.0, -1.0))).rgb;\n    vec3 tr = texture(iChannel1, abs(uv + nppd * vec2(  1.0, -1.0))).rgb;\n    vec3 ml = texture(iChannel1, abs(uv + nppd * vec2( -1.0,  0.0))).rgb;\n    vec3 mc = texture(iChannel1, abs(uv + nppd * vec2(  0.0,  0.0))).rgb;\n    vec3 mr = texture(iChannel1, abs(uv + nppd * vec2(  1.0,  0.0))).rgb;\n    vec3 bl = texture(iChannel1, abs(uv + nppd * vec2( -1.0,  1.0))).rgb;\n    vec3 bc = texture(iChannel1, abs(uv + nppd * vec2(\t0.0,  1.0))).rgb;\n    vec3 br = texture(iChannel1, abs(uv + nppd * vec2(  1.0,  1.0))).rgb;\n \n    if (iFrame < 20)\n    {\n        tl = texture(iChannel0, uv + nppd * vec2( -1.0, -1.0)).rgb;\n        tc = texture(iChannel0, uv + nppd * vec2(  0.0, -1.0)).rgb;\n        tr = texture(iChannel0, uv + nppd * vec2(  1.0, -1.0)).rgb;\n        ml = texture(iChannel0, uv + nppd * vec2( -1.0,  0.0)).rgb;\n        mc = texture(iChannel0, uv + nppd * vec2(  0.0,  0.0)).rgb;\n        mr = texture(iChannel0, uv + nppd * vec2(  1.0,  0.0)).rgb;\n        bl = texture(iChannel0, uv + nppd * vec2( -1.0,  1.0)).rgb;\n        bc = texture(iChannel0, uv + nppd * vec2(\t0.0,  1.0)).rgb;\n        br = texture(iChannel0, uv + nppd * vec2(  1.0,  1.0)).rgb;\n    }\n    \n    vec3 dx = mr-ml;\n    vec3 dy = bc-tc;\n    vec3 d = (dx + dy) * 0.5;\n    \n    float a = iTime * PI / 2.0;\t//\tangle in radians\n    \n    vec3 dys = sin( a ) \t* dy;\t//\tdx\n    vec3 dxs = cos( a ) \t* dx;\t//\tdy\n    vec3 ds = (dx + dy) * 0.5;\n\n    \n    float sharpness = 1.0;\n    c = mc - d * sharpness;\n    c = clamp(c, 0.0, 1.0);\n\n    \n    fragColor = vec4( c, 1.0 );\n    \n    if(iMouse.z > 0.0)\n    \tfragColor = max(fragColor,vec4(step(length(iMouse.xy - fragCoord),RADIUS)));\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

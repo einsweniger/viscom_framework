@@ -1,0 +1,92 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsSBz1",
+      "date": "1499373656",
+      "viewed": 207,
+      "name": "Mic Control Scroll",
+      "username": "pthextract",
+      "description": "Something on the mic\nMaybe I'll upgrade to make notes from song if possible. :) ",
+      "likes": 0,
+      "published": 3,
+      "flags": 36,
+      "tags": [
+        "mic"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 c,  vec2 i )\n{\n  \tvec2 uv = i / iResolution.xy;\n      c=texture(iChannel0,uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 32,
+            "src": "/presets/mic.png",
+            "ctype": "mic",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 c,  vec2 i )\n{\n  \tvec2 uv = i.xy / iResolution.xy;\n    vec4 mus ;\n    \n   \n    \n    \n  if (uv.x>.995)\n            \n    { \n        \n   \tfloat zoom=12.;\n        \n   \n    mus= 0.8*texture(iChannel0,uv.yy/zoom).rrrr+ 0.8*texture(iChannel0,uv.yy+vec2(0.)/zoom).rrrr;//+float(fract(uv.y*15.+.5)<.05);\n   \n    \n    float maxread=0.0;float mx=0.;\n      for (float x=.5;x<11.;x++)\n          \n    {float xx=x/11.;\n     if (texture(iChannel0,vec2(xx)).r>maxread)\n     {mx=xx;maxread=texture(iChannel0,vec2(xx)).r;}\n        \n     mus+=.003*texture(iChannel0,vec2(xx)).r/distance(xx,uv.y);\n     //mus+=0.0001/distance(mx,uv.y);\n    }}\n    \n    else {mus=texture(iChannel1,uv+vec2(0.006,-.005+uv.y*.01));}\n    \n\tc =mus;  \n}\n\n//floor(.1*iDate.w)\n/* mus.r+=.3*\n      (\n        float(\n         texture(iChannel0,uv.yy/zoom).r>texture(iChannel0,uv.yy+vec2(.0001)/zoom).r\n         &&texture(iChannel0,uv.yy/zoom).r>texture(iChannel0,uv.yy-vec2(.0001)/zoom).r\n        )*/",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

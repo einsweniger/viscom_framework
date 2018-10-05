@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dSyRd",
+      "date": "1493222480",
+      "viewed": 355,
+      "name": "colored inversion",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "inversion",
+        "2tweets",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// inspired from https://www.shadertoy.com/view/4dBczt and https://www.shadertoy.com/view/XsyXzt\n\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    U = ( U - .5*(O.xy=iResolution.xy) ) / O.y;\n    U /= dot(U,U);                                       // inversion\n\n    vec2 S = mod(floor(U+.5),2.)*2.-1.;                  // checkering tiles\n         U = fract(U+.5)-.5;                             // tile coordinates\n    O =   (.4+.6*texture(iChannel0,U).rrrr)              // canvas\n        * smoothstep(.765,.3,length(U) )                 // disks\n        * ( .5 + .5* cos(3.14*dot(U,S)+vec4(0,1,2,0)) ); // colors\n//      * ( .5 + .5* cos(6.28*U.x+vec4(0,1,2,0)) ); \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

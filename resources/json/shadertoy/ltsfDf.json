@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltsfDf",
+      "date": "1513776202",
+      "viewed": 227,
+      "name": "Natural Texture (Directional)",
+      "username": "Txoka",
+      "description": "natural texture generation, tilt and mixing textures.\nhttps://www.shadertoy.com/view/MtSyDc (for not directional textures)",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "directional",
+        "natural",
+        "antirepeat"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 1,
+            "src": "/media/a/10eb4fe0ac8a7dc348a2cc282ca5df1759ab8bf680117e4047728100969e7b43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define transition 0.5\n#define patternSquares 3.\n\n//#define ZOOM\n//#define REPEAT\n//#define PATERN\n#define REDUCELINES\n\n#define rot(a) mat2(C=cos(a),S=-sin(a),-S,C)\n#define rand(co) fract(sin(mod(dot(co ,vec2(12.9898,78.233)),3.14))*43758.5453)\n#define p(uv,col) vec4(mod(floor((uv).x*patternSquares) + floor((uv).y*patternSquares), 2.))*col\n#define t(uv) texture(iChannel0,uv)\n\n#ifdef PATERN\n#define f(uv,col) p(uv,col)\n#else\n#define f(uv,col) t(uv)\n#endif\n\nconst highp float pi = 3.141592653589793;\n\nvoid mainImage( out vec4 o, vec2 u ){\n    #ifdef ZOOM\n    vec2 uv = u/iResolution.x/(1.+sin(iTime/3.)/1.3)*7.;\n    #else\n    vec2 uv = u/iResolution.x*7.;\n    #endif\n    #ifdef REPEAT\n    o=texture(iChannel0,uv);\n    #else\n\t#ifdef REDUCELINES\n\tfloat C,S,\n          dist = length(2.*fract(uv)-1.),\n\t\t  dist2 = length(2.*fract(uv+vec2(0.5,0.))-1.),\n          dist3 = length(2.*fract(uv+vec2(0.,0.5))-1.),\n          r = rand(floor(uv)),\n\t\t  r2 = rand(floor(uv+0.5)),\n\t\t  r3 = rand(floor(uv+vec2(0.5,0.))),\n          r4 = rand(floor(uv+vec2(0.,0.5)));\n    \n    o = mix(mix(mix(f((uv+r)*rot(floor(r*2.)*pi),vec4(1,0,1,0)), \n            \t\t\t\t \t\t  f((uv+r2)*rot(floor(r2*2.)*pi),vec4(0,1,1,0)), \n            \t\t\t\t \t\t  smoothstep(1.-transition,.93, dist)),\n\t\t\t\t\t\t\t f((uv+r3)*rot(floor(r3*2.)*pi),vec4(1,1,0,1)),\n\t\t\t\t   \t\t\t smoothstep(0.93,1.-transition, dist2)),\n\t\t\t\t\tf((uv+r4)*rot(floor(r4*2.)*pi),vec4(1,1,1,1)),\n\t\t\t\t\tsmoothstep(0.93,1.-transition, dist3));\n   \n\t#else\n    float C,S,\n          dist = length(2.*fract(uv)-1.),\n          r = rand(floor(uv)),\n\t\t  r2 = rand(floor(uv+0.5));\n\n    o = mix(f((uv+r)*rot(floor(r*2.)*pi),vec4(1,0,1,0)), \n            f((uv+r2)*rot(floor(r2*2.)*pi),vec4(0,1,1,0)), \n            smoothstep(1.-transition,.93, dist));\n   \n\t#endif\n    #endif\n}\n//feel free to chage the texture :)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

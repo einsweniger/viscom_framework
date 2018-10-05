@@ -1,0 +1,106 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltVXDy",
+      "date": "1485842000",
+      "viewed": 138,
+      "name": "ExB",
+      "username": "lyaunzbe",
+      "description": "bork",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "blah"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tvec4 fb = texture(iChannel0, uv) ;\n    fragColor = fb;\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy; \n    \n    \n \n    float sin_factor = sin(iTime*0.00001);\n    float cos_factor = cos(iTime*0.00001);\n    uv = vec2((uv.x - 0.5), uv.y - 0.5 ) * mat2(cos_factor, sin_factor, -sin_factor, cos_factor);\n\n    uv += 0.5;\n   \n    \n    if(iFrame < 10 || iMouse.z >0.0) {\n    \tfragColor = texture(iChannel1, uv);\n    } else {\n        uv = -1.0 + 2.0 * uv;\n        uv *= 0.995;\n        uv.y += 0.001;\n        vec3 r = texture(iChannel0, uv*0.5 + 0.5).rgb;\n                \n        r.r += r.g*0.001;\n        r.g += r.b*0.001;\n        r.b += r.r*0.001;\n        r = mod(r, vec3(1.0));\n\n    \tfragColor = vec4(vec3(r), 1.0);\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

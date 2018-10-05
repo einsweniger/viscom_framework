@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lXfDr",
+      "date": "1511564438",
+      "viewed": 184,
+      "name": "sine dots ( 74 chars )",
+      "username": "FabriceNeyret2",
+      "description": "Just wait :-)",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "aliasing",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,U)   O += 1./ ( U.y - iResolution.y * ( .5+ .5* sin( .01* iTime* U.x ) ) )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

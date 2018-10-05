@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldVcRW",
+      "date": "1521289838",
+      "viewed": 159,
+      "name": "Matrix GFX",
+      "username": "Jamie_Pendergast",
+      "description": "What if I were to tell you....",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "gfxtexture"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float brightness(vec4 vector) {\n\tfloat avg;\n    avg += vector.x;\n    avg += vector.y;\n    avg += vector.z;\n    \n    avg /= 3.;\n\treturn avg;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\t\n    float m = sin(iTime) * 0.01;\n    vec4 up = texture(iChannel0,uv + vec2(0.,m));\n    vec4 down = texture(iChannel0,uv + vec2(0.,-m));\n    vec4 left = texture(iChannel0,uv + vec2(-m,0.));\n    vec4 right = texture(iChannel0,uv + vec2(m,0.));\n    \n    \n\tfloat upB = brightness(up);  \n   \tfloat downB = brightness(down);\n    float leftB = brightness(left);\n    float rightB = brightness(right);\n    \n    \n   \tvec3 direction = vec3(0.);\n    direction.x = leftB * rightB;\n    direction.y = downB * upB;\n    direction.z = direction.x * direction.y;\n \n    \n \n    \n    // Output to screen\n    fragColor = vec4(direction,1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

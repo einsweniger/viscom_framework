@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldfcD7",
+      "date": "1488446080",
+      "viewed": 236,
+      "name": "Simple-Circle",
+      "username": "PinkFloyd",
+      "description": "Simple Circle",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "circle"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv -= 0.5;\n    uv.x *= iResolution.x / iResolution.y;\n    float r = 0.4;\n    float d = length(uv);\n    float c = smoothstep(d,d+0.02,r);\n\tfragColor = vec4(vec3(c,0.5*sin(iTime)+0.5,0.),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

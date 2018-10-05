@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdlcWr",
+      "date": "1487714745",
+      "viewed": 560,
+      "name": "Inverse Morton",
+      "username": "iq",
+      "description": "Remix of [url=https://www.shadertoy.com/view/XdsyWr]Fabrice's shader[/url] without LUTs. Source: [url]http://www.iquilezles.org/www/articles/wavelet/wavelet.htm[/url]",
+      "likes": 13,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "inverse",
+        "morton"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Created by inigo quilez - iq/2017\n// License Creative Commons Attribution-ShareAlike 3.0 Unported\n// https://creativecommons.org/licenses/by-sa/3.0/\n\n\n// Remix of Fabrice's shader (https://www.shadertoy.com/view/XdsyWr) without LUTs\n\n\nconst int level = 4;  // Number of points is 2^level in each dimension\n\n\n// Source of inverse morton sequence: \n//\n// http://www.iquilezles.org/www/articles/wavelet/wavelet.htm\n//\nivec2 imorton( int i )\n{\n    ivec2 res = ivec2(0,0);\n    for( int k=0; k<level; k++ )\n    {\n        res += (ivec2(i,i>>1)&1)<<k;\n        i >>= 2;\n    }\n    return res;\n}\n\nfloat sdSqLine( in vec2 p, in vec2 a, in vec2 b )\n{\n\tvec2 pa = p - a, ba = b - a;\n    float h = clamp(dot(pa,ba)/dot(ba,ba), 0.0, 1.0);\n    vec2 d = pa - ba*h;\n    return dot(d,d);\n}\n    \nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float e = 1.0/iResolution.y; // size of a pixel\n    vec2 p = (fragCoord - vec2(0.25*iResolution.x,0.0))*e;\n    \n    p = -0.05 + (1.0+2.0*0.05)*p; // add margin of 0.05\n    \n    const int numPoints = 1<<(level<<1);\n    const float w = float((1<<level)-1); // distance between grid points\n\n    // compute distance field\n    float d = 2.0;\n    ivec2 o = ivec2(0,0);\n    for( int i=1; i<numPoints; i++ )\n    {\n        ivec2 m = imorton(i);\n        \n        d = min( d, sdSqLine( p, vec2(m)/w, vec2(o)/w ) );\n        o = m;\n    }\n    d = sqrt(d);\n    \n    // colors\n    float f  = smoothstep(0.0,2.0*e,d); \n          f *= 0.8 + 0.2*sqrt(clamp(d/(8.0*e),0.0,1.0));\n    \n    fragColor = vec4( f, f, f, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

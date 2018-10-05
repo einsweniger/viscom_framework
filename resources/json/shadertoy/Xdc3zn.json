@@ -1,0 +1,59 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xdc3zn",
+      "date": "1447571907",
+      "viewed": 417,
+      "name": "What the heck is happening",
+      "username": "CaptCM74",
+      "description": "Why world ;-;",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "strange"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "#define sat 0.0\n#define blueness 0.5\n#define zoomout 1.0\n#define ispan false\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 coord = fragCoord.xy / iResolution.xy;\n    vec2 zoom = coord.xy * zoomout;\n    vec2 pan = zoom.xy;\n    vec4 img = texture(iChannel0,pan);\n    vec4 aze = texture(iChannel1,pan);\n    vec4 fin = img;\n    \n    if (ispan == true)\n    {\n    vec2 pan = zoom.xy + max(min(sin(iTime),0.5),0.0);\n    }\n    else\n    {\n    vec2 pan = zoom.xy;\n    }\n    \n    if (aze.g > 0.5)\n    {\n        \n      discard;  \n    }\n   \n    fin = aze;\n    img.b = blueness;\n    float green = aze.g;\n    vec4 sated = vec4(mix(img,img*2.0,sat));\n    fragColor = vec4(mix(sated,fin,0.5));\n   // fragColor = vec4(mix(img,img*2.0,sat));\n}",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

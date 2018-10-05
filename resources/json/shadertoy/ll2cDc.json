@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ll2cDc",
+      "date": "1510480104",
+      "viewed": 271,
+      "name": "shortest rainbow / hue (93 ch)",
+      "username": "FabriceNeyret2",
+      "description": "This one is indeed a close approximation of Hue( x ) function , with x = length , here.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "hsv",
+        "hue",
+        "short",
+        "onetweet",
+        "hls"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,U)      \\\n    O.xyz = iResolution;    \\\n    O = .6 + .6 * cos( 6.3 *  length(U+U-O.xz)/O.y  + vec4(0,23,21,0)  )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

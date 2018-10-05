@@ -1,0 +1,66 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lsfzf",
+      "date": "1512738641",
+      "viewed": 196,
+      "name": "texture-controlled blur",
+      "username": "FabriceNeyret2",
+      "description": "Use a texture to choose the LOD of another texture.\n2 examples: video modulating a base noise, or modulating itself.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "video",
+        "effect"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, in vec2 U )\n{\n    vec2 R = iResolution.xy, \n         T = iChannelResolution[0].xy;\n    float lod = textureLod(iChannel1, U/R, 0.).r;\n    O = fract(iTime/6.) > .5\n\t    ? textureLod(iChannel0, U/T, 6.* lod -1. )   // example 1: base noise\n\t    : textureLod(iChannel1, U/R, 6.* lod -1. );  // example 2: self-action on video\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

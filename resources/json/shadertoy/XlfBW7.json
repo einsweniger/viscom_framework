@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlfBW7",
+      "date": "1511998783",
+      "viewed": 256,
+      "name": "Amiga ball - globe 2 (139 chars)",
+      "username": "FabriceNeyret2",
+      "description": "( playing with NaN. The background should be black ).\n\ninspired by [url]https://www.shadertoy.com/view/XstXzs[/url]\nand [url]https://www.shadertoy.com/view/XsdXRl[/url]",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "short",
+        "onetweet",
+        "golf",
+        "nan"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( O,u )          \\\n \tvec2 R = iResolution.xy,      \\\n         U = (u+u-R)/R.y /.7;     \\\n         U.x = asin( U.x / cos( U.y = asin(U.y) )) - iTime; \\\n         U = 6.* sin(8.*U);       \\\n         O += U.x/U.x;            \\\n         O.gb += U.x*U.y            \n\n             \n// windows: try instead  O += U.x*1.1/U.x  or  (U.x+1e-9)/U.x  or  (U.x+min(0.,iTime)) / U.x\n//          to fool the silly optimizer             \n             \n             \n        \n/**             \n         O.r = U.x*U.y;           \\\n         O += U.x/U.x * (1.-O.r)\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

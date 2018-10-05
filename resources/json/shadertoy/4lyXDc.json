@@ -1,0 +1,84 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lyXDc",
+      "date": "1486122479",
+      "viewed": 312,
+      "name": "Infinite sierpinski",
+      "username": "kzy",
+      "description": "1 dimensional cellular automata generating a sierpinski like pattern.\nupdate: made the code a lot more compact. You can now also specify the automata rules by editing the define. ",
+      "likes": 10,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "procedural",
+        "fractal",
+        "triangle",
+        "automata",
+        "cellular",
+        "sierpinski",
+        "infinite"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(texture(iChannel0, uv).xxx, 1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define RULES(v) (v == 0 || v == 3)\n//#define RULES(v) (v == 1)\n\nbool get(vec2 uv, vec2 o)\n{\n\tuv += o / iResolution.xy;\n\treturn texture(iChannel0, uv).x > 0.5 && uv.x >= 0. && uv.x < 1.;\n}\n\nvoid mainImage(out vec4 C, in vec2 p)\n{\n    vec2 x = p.xy / iResolution.xy;    \n    \n    int v = int(dot(vec3(\n        get(x, vec2(-1, 0)),\n        get(x, vec2(0, 0)),\n        get(x, vec2(1, 0))\n    ), vec3(1)));\n   \n    C = vec4(iTime < .1 ? abs(iResolution.x / 2. - p.x - .5) < 1. :\n    \tx.y < 1. / iResolution.y ? RULES(v) :\n    \tget(x, vec2(0, -1)));\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

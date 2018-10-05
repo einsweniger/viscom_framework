@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsjfzm",
+      "date": "1499968159",
+      "viewed": 233,
+      "name": "[SH17A] 3 in 1 !",
+      "username": "GregRostami",
+      "description": "Here are three of my older small shaders combined into one.\nA BIG thanks to all of my fellow golfers!!\n[url]https://www.shadertoy.com/view/MtyGzy[/url]\n[url]https://www.shadertoy.com/view/XsySD3[/url]\n[url]https://www.shadertoy.com/view/XtXXR4[/url]",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "3d",
+        "raymarch",
+        "multiple",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11,
+            "src": "/media/a/c3a071ecf273428bc72fc72b2dd972671de8da420a2d4f917b75d20e1c24b34c.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,U)\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\\\n    vec2 u = U/iResolution.x;\t\t\t\t\t\t\t\t\t\t\t\t\t\\\n    float t = iTime, c = fract(t*.1-u.y), n=c;\t\t\t\t\t\t\t\t\t\\\n    while(n++<99.)\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\\\n        o += vec4(1, u, 1) * (length(cos(o.xyz - vec3(t,0,t))) - .3);\t\t\t\\\n    u-=.5;\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\\\n    o =   c<.3 ? max( u = fract(2.*u/dot(u,u)-t), u.x - u ).yyyy\t\t\t\t\\\n        : c<.6 ? texture( iChannel0, fract(t*.2-vec2(u.x,1)/u.y ) )* -u.y*3.\t\\\n        : o/50.\n\n// 278 chars - With sweeping transitions:\n// Thanks to Fabrice's optimization, I've added a few extra effects.\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o -= o;\n    u /= iResolution.x;\n    float t = iTime, c = fract(t*.1-u.y), n=c;\n    \n    while(n++<99.)\n        o += vec4(1, u, 1) * (length(cos(o.xyz - vec3(t,0,t))) - .3);\n   \n    u-=.5;\n    \n    o =   c<.3 ? max( u = fract(2.*u/dot(u,u)-t), u.x - u ).yyyy\n        : c<.6 ? texture( iChannel0, fract(t*.2-vec2(u.x,1)/u.y ) )* -u.y*3.\n        : o/50.;\n}\n/**/\n\n// 277 chars - Origianl version with cuts only:\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o-=o;\n    float t = iTime, c = fract(t*.1);\n    vec2 U = u/dot(u = u / iResolution.x - .5, u);\n    \n    for (int n=0; n<80; n++)\n        o += vec4(1, u+.5, 1) * (length(cos(o.xyz + t)) - .3);\n    o /= 50.;\n    \n    o =   c<.3 ? max( U= fract(U+U+t), U.x - U ).yyyy\n        : c<.6 ? texture( iChannel0, fract( t*.2 - vec2(u.x,1)/u.y ) )* -u.y*3.\n        : o;\n}\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

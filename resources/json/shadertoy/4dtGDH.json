@@ -1,0 +1,55 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dtGDH",
+      "date": "1449413846",
+      "viewed": 412,
+      "name": "\u266b sA.1 - \"Mono Adventrures\"",
+      "username": "patu",
+      "description": "\"Mono Adventures\" by YERZMYEY (Atari XL music)\nhttps://soundcloud.com/yerzmyey\n\n",
+      "likes": 5,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "volume",
+        "sound",
+        "music",
+        "atari",
+        "pokey",
+        "xe"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 328,
+            "src": "https://soundcloud.com/yerzmyey/yerzmyey-mono-adventures",
+            "ctype": "musicstream",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Can't manage with raymarching glitches. \n\n#define R 1.0\n#define max_distance 50.0\n#define epsilon 0.00001\n#define max_steps 96\n#define K .03\n#define shininess 115.0\n#define ambient 0.8\n#define bump_factor 0.15\n#define specular_koef .5\n#define diffuse_koef 6.0\n#define FOV 70.0\n#define PI 3.1415\n\nconst float EQSIZE = 10.;\nfloat ceiledPoint = 0.0;\n\nvec4 getFreq(float f){\n    // first texture row is frequency data\n\tfloat fft  = texture( iChannel1, vec2(f, 0.25) ).x; \n\t\n    // second texture row is the sound wave\n\tfloat wave = texture( iChannel1, vec2(f, 0.75) ).x;\n\t\n\t// convert frequency to colors\n\tvec3 col = vec3( fft, 4.0 * fft * (1.0 - fft), 1.0 - fft ) * fft;\n    return vec4(col + 0.05, 1.0);\n}\n\nvec3 opRep( vec3 p, vec3 c ) {\n    return mod(p,c)-0.5*c;\n}\n\nfloat opS( float d1, float d2 ) {\n    return max(-d2,d1);\n}\n\nfloat opU( float d1, float d2 )\n{\n    return min(d1,d2);\n}\n\nfloat sdBox( vec3 p, vec3 b ) {\n  vec3 d = abs(p) - b;\n  return min(max(d.x,max(d.y,d.z)),0.0) +\n         length(max(d,0.0));\n}\n\nfloat get_distance(vec3 point) {\n    float ceiledPoint = ceil(point.x + EQSIZE) / EQSIZE / 2.;\n    float vol = getFreq(ceiledPoint).r;\n    float eq = sdBox(point, vec3(EQSIZE, vol * 4., 5.));\n    \n    vec3 eqSsize  = vec3(0.25, 2.0, 3.);\n    vec3 eqSRep = vec3(1.0, 1.0, 4.);\n    \n    eq = opS(eq, sdBox(mod(point, eqSRep) - eqSRep, eqSsize));\n    eq = opS(eq, sdBox(mod(point, vec3(EQSIZE, 2.0, 4.0)) - 1., vec3(EQSIZE, 2.0, 2.)));\n    \n    return eq;\n}\n\nfloat raymarch(vec3 ray_origin, vec3 ray_direction) {\n    float d = 0.0;\n\t\n\tfor (int i = 0; i < max_steps; i++) {\n\t\tvec3 new_point = ray_origin + ray_direction * d;\n\t\t\n        float s = get_distance(new_point) ;\n        \n\t\tif (s  < epsilon) return d;\n\t\td += s;\n\t\tif (d > max_distance) return max_distance;\n\t}\n\treturn max_distance;\n}\n\nvec3 get_normal(vec3 point) {\n\tfloat d0 = get_distance(point);\n\tfloat dX = get_distance(point-vec3(epsilon, 0.0, 0.0));\n\tfloat dY = get_distance(point-vec3(0.0, epsilon, 0.0));\n\tfloat dZ = get_distance(point-vec3(0.0, 0.0, epsilon));\n\t\t\n\treturn normalize(vec3(dX-d0, dY-d0, dZ-d0));\n}\n\nfloat shadow_sample (vec3 org, vec3 dir) {\n    float res = 1.0;\n    float t = epsilon * 200.0;\n    for (int i = 0; i < 32; ++i){\n        float h = get_distance (org + dir * t);\n\t\tif (h <= epsilon) {\n            return 0.2;\n\t\t}\n        res = min (res, 32.0 * h / t);\n        t += h;\n\t\tif (t >= max_distance) {\n      \t\treturn res;\n\t\t}\n\t\t\n    }\n    return res;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float minRes = min(iResolution.x, iResolution.y);\n\tvec2 vPos = ((2.0 * fragCoord.xy) - iResolution.xy) / minRes;\n\tvPos *= tan (radians (FOV)/2.0);\n\t//vPos.y -= 0.1;\n    //vPos.y += sin(vPos.x * 4.) / 16.;\n    \n\tvec4 color = vec4(0.0);\n\t\n\tvec3 light = vec3(0., 1.6, -12.0);// * rotateY(iTime*2.0) ;\n\t\n    float k = PI ;//+ iTime / 2.6;\n    float sk = sin(k), ck = cos(k);\n    \n    vec3 vuv = vec3(0, 1., 0.); // up\n    vec3 prp = vec3(sk * 2., 2.1 , ck * 2. - 7.); // pos\n    vec3 vrp = vec3(0., 0., -3.); // lookat    \n    \n    vec3 vpn = normalize(vrp - prp) ;\n    vec3 u = normalize(cross(vuv, vpn));\n    vec3 v = cross(vpn, u);\n    vec3 vcv = (prp + vpn);\n    vec3 scrCoord = (vcv + vPos.x * u * iResolution.x/iResolution.y + vPos.y * v);\n    vec3 scp = normalize(scrCoord - prp);\n\n\tfloat d = raymarch(prp, scp);\n    \n\tvec3 point = (prp + scp * d);\t\t\t\n\t\n    \n\tif (d < max_distance) {\t\t\n\t\tvec3 point_normal = get_normal(point);\n\t\t\n\t\tvec3 light_dir = -normalize(light-point);\n\t\tvec3 reflected_light_dir = reflect(-light_dir, point_normal);\n\t\tfloat attenuation = 1.0 / (1.0 + K*pow( length(light - point), 2.0));\n\t\t\t\n\t\tfloat dotp_diffuse = max(0.0, dot(light_dir, point_normal));\n\t\tfloat dotp_specular = pow(max(0.0, dot(scp, reflected_light_dir)), shininess);\n\t\t\n\t\t// no diffuse -> no specular\n\t\tif (dotp_diffuse <= 0.0) dotp_specular = 0.0;\n\t\t\n        ceiledPoint = ceil(point.x + 10.) / 20.;\n        \n        vec4 mainColor = vec4(getFreq(ceiledPoint).r * 2.) *\n            vec4(1.0, 0.3, 0.5, 1.0);\n        \n        mainColor.b *= ceiledPoint * 4.;\n\t\t        \n        fragColor = \n            (ambient + (\n                dotp_diffuse * diffuse_koef + \n                dotp_specular*specular_koef\n            ) * shadow_sample(point, -light_dir) \n             * attenuation) \n            * mainColor;\n        \n        if (point.y <= 0.) {\n            fragColor -= -point.y  * 2. + .2;//0.1;\n        \tfragColor = max(vec4(0.), fragColor) + vec4(0.3, 0.0, 0.2, 1.0);\n        }\n        \n\t} else {\t\t\t\n\t    fragColor = vec4(0.3, 0.0, 0.2, 1.0) * sin(-0.8 + PI + scp.y * 1.3);//cos(vPos.y + 0.4);\t \n    }\n    \n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

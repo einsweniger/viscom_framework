@@ -1,0 +1,151 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mtsczs",
+      "date": "1506104670",
+      "viewed": 230,
+      "name": "Separable Gaussian",
+      "username": "05gash",
+      "description": "Just testing multiple buffers, click + mouse see original",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "filter",
+        "gaussian",
+        "separable",
+        "3tap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    if(fragCoord.x > iMouse.x) fragColor = texture(iChannel0, uv);\n    else fragColor = texture(iChannel1, uv);\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = 0.25*texture(iChannel0, vec2(fragCoord.x -1., fragCoord.y) / iResolution.xy);\n    fragColor += 0.5*texture(iChannel0, fragCoord.xy / iResolution.xy);\n    fragColor += 0.25*texture(iChannel0, vec2(fragCoord.x + 1., fragCoord.y) / iResolution.xy);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = 0.25*texture(iChannel0, vec2(fragCoord.x, fragCoord.y - 1.) / iResolution.xy);\n    fragColor += 0.5*texture(iChannel0, fragCoord.xy / iResolution.xy);\n    fragColor += 0.25*texture(iChannel0, vec2(fragCoord.x, fragCoord.y + 1.) / iResolution.xy);\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / vec2(256.);\n    fragColor = texture(iChannel0, uv).xxxx; //lol\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

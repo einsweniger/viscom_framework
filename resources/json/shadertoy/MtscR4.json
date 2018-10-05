@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtscR4",
+      "date": "1503816709",
+      "viewed": 194,
+      "name": "simple frame",
+      "username": "aferriss",
+      "description": "A simple frame mask",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tunnel",
+        "smoothstep",
+        "frame",
+        "sqaure"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv = -1.0 + 2.0 * uv;\n\n    float m = max(abs(uv.x), abs(uv.y));\n    m = smoothstep(0.74,0.75,m);\n\tfragColor = vec4(m,m,m,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

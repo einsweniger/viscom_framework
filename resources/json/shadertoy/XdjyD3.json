@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdjyD3",
+      "date": "1494119384",
+      "viewed": 321,
+      "name": "gears",
+      "username": "lennyjpg",
+      "description": "http://thebookofshaders.com/09/",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 rotate2D(vec2 _st, float _angle){\n    _st -= 0.5;\n    _st =  mat2(cos(_angle),-sin(_angle),sin(_angle),cos(_angle)) * _st;\n    return _st + 0.5;\n}\nfloat e = 7.0;\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 st = rotate2D(fragCoord.xy / iResolution.y, iTime * -0.05);\n    st.x += step(1., mod(st.y * e, 2.0)) * 0.5;\n    float g = (step(1., mod(st.x * e, 2.0)) - 0.5) * iTime * 6.5 ;  \n    st = fract(st * e) - 0.5;\n    float r = clamp(0.46, 0.37, 0.42 + 0.12 * sin( atan(st.x,st.y) * 7.0  +  g));\n    fragColor = vec4(smoothstep(r,r + 0.01,length(st)));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsBBRw",
+      "date": "1499986061",
+      "viewed": 659,
+      "name": "[SH17A] Paint!",
+      "username": "TekF",
+      "description": "Paint!\n\nDraw with the mouse, palette on the left side.",
+      "likes": 15,
+      "published": 3,
+      "flags": 96,
+      "tags": [
+        "shortcode"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 11151,
+            "src": "https://soundcloud.com/dewolfemusic/left-bank-two",
+            "ctype": "musicstream",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,u) o = 1.-texelFetch(iChannel0, ivec2(u) ,0)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define T(u) texelFetch(iChannel0,ivec2(u),0)\n\nvoid mainImage( out vec4 o, vec2 s )\n{\n    o = T(s);\n    \n    o = s.x+s.y > 1. ?\n   \t\t\ts.x < 32. ?\n            \tstep(.5,fract(s.y/vec4(64,128,256,1)))\n            :\n    \t\t\tmix(T(0),o,min(1.,length(s-iMouse.xy)/8.))\n        :\n    \t\tiMouse.x < 32. ?\n                T(iMouse.xy)\n            :\n    \t\t\to;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

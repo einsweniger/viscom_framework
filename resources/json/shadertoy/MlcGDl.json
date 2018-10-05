@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlcGDl",
+      "date": "1472317078",
+      "viewed": 517,
+      "name": "[SH17A] voronoi paint",
+      "username": "abje",
+      "description": "i saved this one on top of my old shader by mistake :(\nnow works in fullscreen again",
+      "likes": 7,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "voronoi",
+        "2tweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, in vec2 g ) {\n\tf = texelFetch(iChannel0, ivec2(g),0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 f, in vec2 g ) {\n    //setting the previous frame pixel color to f\n    f = texelFetch(iChannel0, ivec2(g),0);\n    \n    //if the length from mouse is lower than length from previous mouse positions, set this length to closest and set a random color\n\tfloat o = 1e4-length(iMouse.xy-g);\n    if (f.a < o&&iMouse.z>.0) {\n        f = vec4(fract(sin(iTime*vec3(1,2,3))*9.)-step(1e4-o,10.),o);\n    }\n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

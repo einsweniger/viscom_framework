@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsdcDj",
+      "date": "1520250077",
+      "viewed": 150,
+      "name": "failure to return",
+      "username": "WillKirkby",
+      "description": "Apparently GLSL doesn't require all codepaths to return a value, so you'll get undefined behavior on the left half of this shader.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec4 func(vec2 uv)\n{\n    if (uv.x > .5)\n    {\n        return vec4(1);\n    }\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    fragColor = func(fragCoord / iResolution.xy);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

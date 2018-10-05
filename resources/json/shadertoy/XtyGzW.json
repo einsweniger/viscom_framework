@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtyGzW",
+      "date": "1473361510",
+      "viewed": 234,
+      "name": "TBP: Forgotten Future",
+      "username": "thebeardphantom",
+      "description": "https://www.youtube.com/watch?v=HoG9zOhu3qU",
+      "likes": 3,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "forgottenfuture"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 4648,
+            "src": "https://soundcloud.com/thebeardphantom/forgotten-future",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// This will use more comments than I'd ever use\nconst float trackLength = 383.0;\nconst float thickness = 10.0;\nconst float range = 10.0;\nconst float step = 0.25;\nvec2 center;\nfloat speed = 5.0;\nfloat freq = 50.0;\nfloat wavelength = 0.1;\nfloat width = 1.0;\n\n\nfloat mapSin(float t)\n{\n    return (sin(t) + 1.0) / 2.0;\n}\nbool approx(float x, float y)\n{\n return abs(x - y) < thickness;   \n}\nbool drawLine(vec2 p, float yCenter, float height, vec2 modRange)\n{\n    vec2 center = iResolution.xy/2.0;\n    vec2 uv = p.xy /iResolution.xy;\n    vec2 smple = vec2(uv.x, 0.0);\n    vec4 rnd = texture(iChannel0, smple);\n    // based on the x position, get a y offset\n    float mod = rnd.r * (freq + 40.0 * (iChannelTime[0]/trackLength));\n    // check if the current pixel Y is within 10 pixels of the offset Y position\n    if(abs(p.y - yCenter + mod) < height)\n    {\n        return true;\n    }\n    else\n    {\n        return false;\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    if(drawLine(fragCoord, 0.2 * iResolution.y, thickness, vec2(0.0, 0.25)))\n    {\n        fragColor = vec4(0.2549019607843137, 0.5803921568627451, 0.396078431372549, 1.0);\n        return;\n    }\n\tif(drawLine(fragCoord, 0.4 * iResolution.y, thickness, vec2(0.25, 0.5)))\n    {\n        fragColor = vec4(0.5450980392156863, 0.7764705882352941, 0.9215686274509804, 1.0);\n        return;\n    }\n    if(drawLine(fragCoord, 0.6 * iResolution.y, thickness, vec2(0.5, 0.75)))\n    {\n        fragColor = vec4(0.1372549019607843, 0.3456362937331795, 0.2941176470588235, 1.0);\n        return;\n    }\n    if(drawLine(fragCoord, 0.8 * iResolution.y, thickness, vec2(0.75, 1.0)))\n    {\n        fragColor = vec4(0.1686274509803922, 0.2784313725490196, 0.407843137254902, 1.0);\n        return;\n    }\n    fragColor = texture(iChannel0, uv) * (vec4(0.0862745098039216, 0.1529411764705882, 0.1725490196078431, 1.0) * 2.0) + (iChannelTime[0]/trackLength);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

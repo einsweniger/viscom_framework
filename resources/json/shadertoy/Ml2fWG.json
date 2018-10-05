@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Ml2fWG",
+      "date": "1517075534",
+      "viewed": 172,
+      "name": "firefox/windows/angle O.a++ bug",
+      "username": "FabriceNeyret2",
+      "description": "Trying to get the acid test for the compilation fail of \"shortest Menger\": [url]https://www.shadertoy.com/view/XtSfDy[/url]\n\n is this acid test compiling on firefox/windows/angle ? \nApparently yes.-> not the right cause.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "glsl",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O,  vec2 U )\n{\n    U /= iResolution.y;\n    vec2 I; \n    \n    for ( O -= O ; O.a++ < 5.;  )  \n    {             \n        U -= I = floor(U *= 3.);\n        I == vec2(1) ? O++ : O;\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

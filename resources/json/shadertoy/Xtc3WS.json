@@ -1,0 +1,65 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xtc3WS",
+      "date": "1471076870",
+      "viewed": 223,
+      "name": "wavesine v1",
+      "username": "Imsure1200q_1UWE130",
+      "description": "Just SomeThing You Would Like To... Copy....!\nThanks For Viewing!!!\nPlz Subscribe My Youtube (Kino Bacaltos) So I Can Give Tutorials!",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "color",
+        "raybling",
+        "wavesine"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float bl( vec2 c )\n{\n    //constants:\n    float y = c.x/c.y;\n    float x = -y;\n    vec3 rd = normalize(vec3(c, 1.0));\n    vec3 ro = vec3(0.0, 0.0, -3.0);\n    float t = 0.0;\n    float p = floor(x/y);\n    float f = fract(x/y);\n    float it = float(vec2(c.x, c.y)) * max(c.x, c.y);\n    \n    //forms:\n    float rot = f - p * it;\n    float formedPI = 3.14159265359 / rot;\n    vec2 p2 = vec2(rd.x, rd.y) * t;\n    t++; if(t > 1.0) t = 0.0;\n    float vertex = (float(p2) / rot) * formedPI;\n    vec3 comp = vertex * ro;\n    \n    //complexes\n    vec3 vertex2 = comp * sin(cos(rot)/(x/y));\n    float iv = float(vertex) + rot;\n    float rq = length(iv);\n    \n    //conecting / flow adjusting:\n    float freq = rq * it;\n    if(freq > iv/rq * mod(p, -f)) freq -= (freq - it);\n    if(iv < rq) t += formedPI;\n    if(vertex2 != rd) vertex2 += rd;\n    \n    //return result:\n    return it * freq - pow(iv, tan(iTime));\n    \n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    //uv.x = iResolution.x / iResolution.y;\n    uv += sin(mod(abs(uv - length(uv) * iTimeDelta),smoothstep(0.4, bl(vec2(uv.x/uv.y)), -0.03)));\n\tfragColor = vec4(uv.x*uv.y) - texture(iChannel0, vec2(uv.x*uv.y));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    fragColor = vec4(uv.x*uv.y) /*+ vec4(uv, 0.5+0.5*sqrt(iTime),1.0)*/ - vec4(0.9,0.5,0.1,1.0);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

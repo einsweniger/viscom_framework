@@ -1,0 +1,66 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsSfWz",
+      "date": "1500063900",
+      "viewed": 259,
+      "name": "[SH17A] A Peculiar Sphere",
+      "username": "knarkowicz",
+      "description": "Fragile. Don't touch!",
+      "likes": 12,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sphere",
+        "2tweets",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 25,
+            "src": "/media/a/550a8cce1bf403869fde66dddf6028dd171f1852f4a704a465e1b80d23955663.png",
+            "ctype": "cubemap",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define T texture( iChannel0, u = u * 2. + iTime * .07 ).x\n\nvoid mainImage( out vec4 Y, vec2 X )\n{\n    vec2 u = iResolution.xy,\n         p = ( X + X - u ) / u.y / .9;\n    \n    float d = dot( p, p );\n    \n    vec3 n = vec3( p, sqrt( 1. - d ) );\n    u = n.xy / sqrt( n.z ) / 4.;\n    \n    Y = d > 1. ? \n            exp( -.3 * d ) * vec4( .3, .4, .5, 1 )\n            : \n            T * vec4( .9, .9 - .3 * ( n.z += T * .5 ), .3, 1 ) + texture( iChannel1, n ) * .5;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

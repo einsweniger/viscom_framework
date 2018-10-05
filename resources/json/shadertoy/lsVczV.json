@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsVczV",
+      "date": "1522704452",
+      "viewed": 113,
+      "name": "diamond pattern",
+      "username": "FabriceNeyret2",
+      "description": "Just a pattern I saw on a mug recently.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 15,
+            "src": "/media/a/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,u)               /*  6. / vec2(1.5,1) */                 \\\n    vec2 U = abs( fract( u/iResolution.y* vec2(4,6) * mat2(1,-1,1,1) ) - .5);\\\n    O += .3 - cos ( 19.*max(U.x,U.y)  + texture(iChannel0,U/3.).r )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

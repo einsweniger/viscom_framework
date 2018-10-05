@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtKXWD",
+      "date": "1484480250",
+      "viewed": 411,
+      "name": "bloody Britney",
+      "username": "FabriceNeyret2",
+      "description": "Trying simple tracking of lips. Not so easy, indeed !\n\nIf people experienced better way to detect lips in such video, I'ld be curious to know (visually it's obvious, but it's surprisingly hard to get clean math/algorithmics criterion ).",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tracking",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// --- trying simple tracking of lips.\n\n// Red component is dominating the whole body.\n// (col-min)/(Max-min) is normalized saturated color\n// ( no luminance effect, 0 for blue, 1 for red )\n// so that (col.g-min)/(Max-min) measures the orangeness: 0:red 1:yellow\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    O = texture(iChannel0, U / iResolution.xy);\n    float m = min(O.r,min(O.g,O.b)),\n          M = max(O.r,max(O.g,O.b));\n    \n // O = vec4(1.-(O.g-m)/(M-m)); // orangeness map\n    O = mix(O, vec4(length(O.xyz)), smoothstep(.2,.4, (O.g-m)/(M-m)) );\n // O = mix(O, vec4(length(O.xyz)), smoothstep(.0,.1, abs((O.g-m)/(M-m))-.27) );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

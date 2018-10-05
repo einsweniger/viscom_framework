@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lXfRX",
+      "date": "1512588605",
+      "viewed": 26,
+      "name": "mix-circle-square",
+      "username": "jshrake",
+      "description": "linearly interpolate between a circle and square",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "sdf",
+        "tutorial",
+        "fun",
+        "education"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Returns a 2D point where:\n// x -> [-aspect_ratio, aspect_ratio]\n// y -> [-1, 1]\nvec2 calculateWorldCoord(vec2 fragCoord) {\n    float aspect_ratio = iResolution.x / iResolution.y ;\n\tvec2 uv = 2.0 * (fragCoord.xy / iResolution.xy) - 1.0;\n    uv.x *= aspect_ratio;\n    return uv;\n}\n\n// from http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm\nfloat circleSDF(float radius, vec2 worldCoord) {\n    return length(worldCoord) - radius;\n}\n\n// from http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm\nfloat boxSDF(float side_len, vec2 worldCoord) {\n  vec2 d = abs(worldCoord) - side_len;\n  return min(max(d.x,d.y),0.0) + length(max(d,0.0));\n}\n\nfloat sceneSDF(vec2 worldCoord) {\n    // pct -> [0.0, 1.0]\n\tfloat pct = 0.5 * (1.0 + sin(iTime));\n    float boxDist = boxSDF(0.5, worldCoord);\n    float circleDist = circleSDF(0.5, worldCoord);\n    return mix(boxDist, circleDist, pct);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    vec4 bgColor = vec4(0.32, 0.22, 0.77, 1.0);\n    vec4 sceneColor = vec4(1.0, 0.0, 0.55, 1.0);\n    vec2 worldCoord = calculateWorldCoord(fragCoord);\n    float dist = sceneSDF(worldCoord);\n    if (dist < 0.0) {\n\t  fragColor = sceneColor;\n    } else {\n      fragColor = bgColor;\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

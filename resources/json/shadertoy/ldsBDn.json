@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldsBDn",
+      "date": "1495776811",
+      "viewed": 155,
+      "name": "smoothstep extensions",
+      "username": "ollj",
+      "description": "mouse input:\n\nuses 2*vec4 to set 3*smoothstep() between a sequence of 4 control vectors (including start and end point&volume)\n\nsmoothstep aliases, sums and modulo sum, possibly most useful for an ADSR-like envelope with continuous second derivative. ",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "mod",
+        "modulo",
+        "smoothstep",
+        "alias",
+        "adsr"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define zoom 6.\n\n\n//smoothstep alias\nfloat ss(float t,float a,float b){return smoothstep(a,b,t);}\nfloat ss(float t,float a){return ss(t,a,-a);}\nfloat ss(float t){return ss(t,.01);}\nfloat ss(float t,vec2 r){return ss(t,r.x,r.y);}\n//repeated smoothstep(); [r]Ranges.y [v]values.y   //[r] and [v] span rectangle(s with shared corners)\n//return smoothstep(), 3rd degree polynomial hermite, constrained within the rectangle from (r.x,v.x) to (r.y,v.y) \nfloat ss(float t,vec2 r,vec2 v){return mix(v.x,v.y,ss(t,r));}\n//return 2*smoothstep() sum within 2 rectangles from (r.x,v.x) to (r.y,v.y) and from (r.y,v.y) to (r.z,v.z) \nfloat ss(float t,vec3 r,vec3 v){return ss(t,r.yz,v.yz)+r.x+ss(t,r.xy,v.xy);}\n//return 3*smoothstep() sum within 3 rectangles...\nfloat ss(float t,vec4 r,vec4 v){return ss(t,r.xyz,v.xyz)+ss(t,r.zw,v.zw);}\n//return modulo*smoothstep() sum \nfloat ssm(float t,vec2 r,vec2 v){if(r.y==0.)r.y=1e-16;\n return ss(mod(t,r.y),r,v)+floor(t/r.y)*v.y;}\n//inspired by https://www.shadertoy.com/view/MslfWn\n\nvec2 frame(vec2 u){u/=iResolution.xy;u-=.5;u.x*=iResolution.x/iResolution.y;return u;}\n\nvoid mainImage(out vec4 O,in vec2 U){vec2 u=frame(U);float r=0.;\n u*=zoom;\n vec2 m;\n if(iMouse.z<=0.)\n  if(u.x>0.)m=vec2(3.,.8*(sin(iTime)*.5+.5));\n  else      m=vec2(cos(iTime+1.)*2.,sin(iTime+1.))-u;     \n else \n  m=frame(iMouse.xy)*6.-u;\n float d;\n //d=length(m);\n //d=sin(u.x)-u.y;\n //d=ss(u.x,vec2(0,2   ),vec2(0,1   ))-u.y;\n //d=ss(u.x,vec3(-1,0,2),vec3(-2,1,2))-u.y;\n //d=ss(u.x,vec4(-3,-1,1,3),vec4(0,1,2,3))-u.y;\n if(u.x>0.){//right half\n  m.x*=zoom;//m.y*=2.;\n  m.x=clamp(m.x,.7,3.3);//keeping first derivative low.\n  m.y=clamp(m.y,.0,1. );//keeping first derivative low.\n  d=ss(u.x,vec4(0,.5,m.x,3.5),vec4(0,1,m.y,0))-u.y-m.y-1.; //ADSR-ish envelope\n }else      d=ssm(u.x,vec2(0,u.x+m.x),vec2(0,u.y+m.y))-u.y;//endless smoothstep staircase\n //d=fract(d);\n d=abs(d);\n d=ss(fract(d)+.01*floor(d)-.1)*fract(-d*d);\n r+=d*.5;\n r=fract(r*1.8);//seesaw first derivative, contrast illusion.\n u=fract(u);\n u.x*=.5;//for weak trichromacy.\n O=vec4(r,u,1.);}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

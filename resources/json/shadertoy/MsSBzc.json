@@ -1,0 +1,63 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsSBzc",
+      "date": "1501435994",
+      "viewed": 170,
+      "name": "Color packing/unpacking test",
+      "username": "ttg",
+      "description": "The color output of the default shader is packed into 32 bits in an imitation of R11F_G11F_B10F format and then unpacked.  Columns marked in red are passed from a single channel of Buf A in compressed form.  This does not work on some systems.",
+      "likes": 3,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "colorformat"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 f32_to_r11g11b10 (float enc) {\n  const uvec3 shifts = uvec3( 0,11,22);\n  const uvec3 bits   = uvec3(11,11,10);\n  const uvec3 masks = ((uvec3(1u)<<bits)-1u);\n  return vec3( (uvec3(floatBitsToUint(enc)) >> shifts) & masks ) / vec3(masks);\n}\n\nfloat r11g11b10_to_f32 (vec3 col) {\n  col = clamp(col, 0., 1.);\n  const uvec3 shifts = uvec3( 0,11,22);\n  const uvec3 bits   = uvec3(11,11,10);\n  const uvec3 masks = ((uvec3(1u)<<bits)-1u);\n  uvec3 uints = uvec3( col * vec3(masks) );\n  uvec3 s = ( uints & masks ) << shifts;\n  return uintBitsToFloat( s.r | s.g | s.b );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = vec4(0.);\n\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tvec3 color = vec3(uv,0.5+0.5*sin(iTime));\n\n    float packed = r11g11b10_to_f32(color);\n    if (fract(fragCoord.x/64.)<0.5) {\n        if (fragCoord.y < 16.) {\n            fragColor.rgb = vec3(1.,0.,0.);\n            return;\n        }\n        packed = texelFetch(iChannel0, ivec2(fragCoord), 0).x;\n    }\n    fragColor.rgb = f32_to_r11g11b10(packed);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 f32_to_r11g11b10 (float enc) {\n  const uvec3 shifts = uvec3( 0,11,22);\n  const uvec3 bits   = uvec3(11,11,10);\n  const uvec3 masks = ((uvec3(1u)<<bits)-1u);\n  return vec3( (uvec3(floatBitsToUint(enc)) >> shifts) & masks ) / vec3(masks);\n}\n\nfloat r11g11b10_to_f32 (vec3 col) {\n  col = clamp(col, 0., 1.);\n  const uvec3 shifts = uvec3( 0,11,22);\n  const uvec3 bits   = uvec3(11,11,10);\n  const uvec3 masks = ((uvec3(1u)<<bits)-1u);\n  uvec3 uints = uvec3( col * vec3(masks) );\n  uvec3 s = ( uints & masks ) << shifts;\n  return uintBitsToFloat( s.r | s.g | s.b );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = vec4(0.);\n    \n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tvec3 color = vec3(uv,0.5+0.5*sin(iTime));\n    \n    float packed = r11g11b10_to_f32(color);\n    fragColor.x = packed;\n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

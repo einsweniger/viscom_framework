@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltKXRy",
+      "date": "1484856555",
+      "viewed": 341,
+      "name": "Kaleidoscopic Feedback Array",
+      "username": "ttg",
+      "description": "Rotating texture feedback on cells in a grid\n\"[url=https://www.shadertoy.com/view/MtVSRG]Spinning Tiles[/url]\" is a snapshot of this project before I completed the desired effect shown here.",
+      "likes": 11,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "fractal",
+        "feedback",
+        "multipass"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\n\nKaleidoscopic Feedback Array\nCopyright 2017 Theron Tarigo\n\nRotating texture feedback on cells in a grid\n\n*/\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tvec4 s = texture(iChannel0, uv);\n    fragColor.rgb = vec3(2.,1.,3.)*s.rgb;\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "/*\n\nKaleidoscopic Feedback Array\nCopyright 2017 Theron Tarigo\n\nRotating texture feedback on cells in a grid\n\n*/\n\nfloat squaresize;\n\nivec2 squaresel(vec2 frc) {\n    return ivec2(floor(frc/squaresize+vec2(0.,0.5)));\n}\n\nvec2 squareuv(vec2 frc) {\n    return fract(frc/squaresize+vec2(0.,0.5))*2.-1.;\n}\n\nvec4 squaresamp(ivec2 sq, vec2 uv) {\n    if (max(abs(uv.x),abs(uv.y))>1.) {\n        return iFrame==(iFrame/2)*2 ? vec4(1.) : vec4(0.);\n    }\n    return texture(iChannel0, (((uv*0.5+0.5)+vec2(sq)-vec2(0.,0.5))*squaresize)/iResolution.xy + vec2(0.5));\n}\n\nbool squarefit(ivec2 sq) {\n    vec2 d = (abs(vec2(sq)+vec2(0.5,0.))+vec2(0.5,0.5))*squaresize - 0.5*iResolution.xy;\n    return max(d.x,d.y)<=0.;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    squaresize = 120.*pow(iResolution.y/1080.,0.5);\n    vec2 frc = fragCoord.xy - 0.5*iResolution.xy;\n    ivec2 sq = squaresel(frc);\n    vec2 uv = squareuv(frc);\n    fragColor.a = 1.;\n    fragColor.rgb = vec3(0.);\n    if (!squarefit(sq)) return;\n    float a = 0.2*(float(iFrame)/(60.+float(sq.x))-float(sq.y));\n    mat2 trans = 1.2*mat2(cos(a),-sin(a),sin(a),cos(a))*min(1./abs(cos(a)),1./abs(sin(a)));\n    uv = trans*uv;\n    uv = abs(mod(abs(uv+1.),2.)-1.);\n    mat3 clrtrans1 = 0.9*mat3(\n        1., -0.1, 0.1,\n        -0.1, 1.0, -0.1,\n        -0.1, 0.1, 1.0 );\n    fragColor.rgb = clrtrans1*squaresamp(sq, 0.98*uv).rgb;\n    vec2 suv = uv-vec2(0.5,0.5);\n    fragColor.rgb += vec3(pow(dot(suv,suv)+1., -50.));\n}\n",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

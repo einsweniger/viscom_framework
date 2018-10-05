@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsfBDs",
+      "date": "1498823930",
+      "viewed": 193,
+      "name": "small sun & sky",
+      "username": "public_int_i",
+      "description": "small sun and sky",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sun",
+        "sky",
+        "small"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o,  vec2 u )\n{\n    u /= iResolution.xy;\n    float y = sin(iTime*.3),\n          s = length(u-vec2(.5,y));\n    o = max(mix(vec4(.2,.4,.6,1)*(.6+y*.4),//sky\n            vec4(.95,.5,.4,1), (1.-abs(y))*(1.-u.y)-pow(s,2.)), //horizon scattering\n            vec4(0,0,.1,1))+ //night\n        max(0.,10.-s*200.);//sun\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

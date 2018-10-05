@@ -1,0 +1,66 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldXczB",
+      "date": "1488693174",
+      "viewed": 312,
+      "name": "Ordered Dithering sample 2",
+      "username": "0xAA55",
+      "description": "A simple sample for demonstrating ordered dithering, 3bit color",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "dithering",
+        "ordered",
+        "downgrade"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 28,
+            "src": "/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 src = texture(iChannel0, fragCoord / iResolution.xy).rgb;\n    float lum = texture(iChannel1, fragCoord / vec2(8)).r;\n    fragColor = vec4(src.r >= lum ? 1.:0.,\n                     src.g >= lum ? 1.:0.,\n                     src.b >= lum ? 1.:0.,\n                     1.); \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

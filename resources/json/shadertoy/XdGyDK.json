@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdGyDK",
+      "date": "1523301769",
+      "viewed": 143,
+      "name": "Inspired by photomosh",
+      "username": "mds2",
+      "description": "Inspired by one of the effects in photomosh by user https://www.shadertoy.com/user/airtight , I decided to try to imitate it.\n\nOriginal comes from https://photomosh.com/",
+      "likes": 0,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "ripoff",
+        "photomosh"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\n    // Time varying pixel color\n    vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n    \n    float stheta = sin(0.1 * iTime);\n    float ctheta = cos(0.1 * iTime);\n    vec2 rot_uv = mat2(ctheta, stheta, -stheta, ctheta) * uv;\n    \n    vec2 warped_uv = uv + vec2(0.25 * sin(3.0 * rot_uv.x), 0.05 * cos(4.5 * rot_uv.y));\n    \n    float wiggle = sin(400.0 * dot(vec2(0.6, 0.8), warped_uv));\n    \n    float intense = dot(vec3(0.58), textureLod(iChannel0, vec2(1.0 - uv.x, uv.y), 2.0).rgb);\n\n    // Output to screen\n    fragColor = vec4(col * clamp(wiggle - 1.0 + 2.0 * intense, 0.0, 1.0),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

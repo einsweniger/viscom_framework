@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsBBDW",
+      "date": "1500401351",
+      "viewed": 179,
+      "name": "[SH17A] 4 Waves",
+      "username": "public_int_i",
+      "description": "4 waves, click and move mouse to change wave origins",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "waves",
+        "4",
+        "onetweet",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define a sin(vec4(1,2,iTime,0)+log(length(u+(r=cos(r.yx*34.)*.2)))*9.)*.4\n\n//Credits to pellicus and theGiallo for minimizing mainImage https://www.shadertoy.com/view/Xd2BWh\n#define mainImage(o,c) vec2 u = c/400.-.5, r = iMouse.xy*.13; o = a+a+a+a;",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

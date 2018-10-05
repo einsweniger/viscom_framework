@@ -1,0 +1,45 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlX3DS",
+      "date": "1424738657",
+      "viewed": 1547,
+      "name": "Fractal Inmorality",
+      "username": "Kali",
+      "description": "Remove line 36 and take a look at the first ever nsfw raw fractal. Original post had to be removed because it became the most popular shader after it was featured in a VICE website article and got an incredible amount of views, making some people upset. ",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "mathporn"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "\n//#define VOYEUR_MODE\n\nfloat orgy(vec2 p) {\n\tfloat pl=0., expsmo=0.;\n\tfloat t=sin(iTime*10.);\n\tfloat a=-.35+t*.02;\n\tp*=mat2(cos(a),sin(a),-sin(a),cos(a));\n\tp=p*.07+vec2(.728,-.565)+t*.017+vec2(0.,t*.014);\n\tfor (int i=0; i<13; i++) {\n\t\tp.x=abs(p.x);\n\t\tp=p*2.+vec2(-2.,.85)-t*.04;\n\t\tp/=min(dot(p,p),1.06);  \n\t\tfloat l=length(p*p);\n\t\texpsmo+=exp(-1.2/abs(l-pl));\n\t\tpl=l;\n\t}\n\treturn expsmo;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy/iResolution.xy-.5;\n\tvec3 vi=texture(iChannel0,uv+.5).xyz;\n    uv.x*=iResolution.x/iResolution.y;\n    vec2 p=uv; p.x*=1.2;\n    float o=clamp(orgy(p)*.07,.3,1.); o=pow(o,1.8);\n\tvec3 col=vec3(o*.8,o*o*.87,o*o*o*.9);\n\tfloat hole=length(uv+vec2(.1,0.05))-.25;\n\t#ifdef VOYEUR_MODE \n\t\tcol*=pow(abs(1.-max(0.,hole)),80.);\n\t#endif\n    col=col*1.2+.155;\n\tcol = vec4( mix(vec3(vi.r, min( vi.g, max( vi.r, vi.b )*0.8 ), vi.b) + vi.g - min( vi.g, max( vi.r, vi.b )*0.8 ), col, clamp( (vi.g-max( vi.r, vi.b ))*5.0, 0.0, 1.0 )), 1.0 ).rgb;    \n\tcol = vi;\n    fragColor = vec4(col, 1.0 );\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

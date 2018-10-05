@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MllBWs",
+      "date": "1514108621",
+      "viewed": 178,
+      "name": "red cabbage - try 1",
+      "username": "FabriceNeyret2",
+      "description": "trying to reproduce the image of a slice of red cabbage.\nNot very satisfying, maybe not best approach.\nrefs: [url]https://www.google.fr/search?q=coupe+choux+rouge&tbm=isch[/url]",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal",
+        "texture",
+        "reproduction"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define rnd(U) texture(iChannel0, U)\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    vec2 R = iResolution.xy;\n    O -= O; \n    U = ( U+U - R ) / R.y;\n\tfloat t = 0.*iTime,\n          a = atan(U.y,U.x) + .1*t, r = length(U);           // to polar\n    vec4 N;\n  //N = rnd( vec2(.4*r,a/6.283)); r+=.0*N.x; a+=.3*N.y; \n  //N = rnd( .2*U); r+=.1*N.x; a+=.3*N.y; \n    r += 1.2*sin(3.*r*6.28)/18.8 * mix( 1., sin(7.*a) , 1.); // base pattern of sliced stem-leaves\n    N = rnd( vec2(.4*r,a/6.283)); r+=.04*N.x; a+=.6*N.y;     // perturbations (which space is best ?)\n  //N = rnd( .3*U); r+=.04*N.x; a+=.6*N.y; \n  //O = N; return;\n    O += .5+.5*sin( 100.*r + 2.*a + 2.*t) ;                  // double spiral\n    O *=  vec4(.6,.3,1,1) * 3.2;                             // coloring scheme\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

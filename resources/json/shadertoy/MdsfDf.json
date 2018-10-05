@@ -1,0 +1,79 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdsfDf",
+      "date": "1498654915",
+      "viewed": 328,
+      "name": "who-knows texture",
+      "username": "FabriceNeyret2",
+      "description": "nice bug while implementing Poisson disc. (all dots are particles).",
+      "likes": 9,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "simulation",
+        "texture"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define T(i,j)  texelFetch(iChannel0, ivec2(U)+ivec2(i,j), 0).xy\n#define N 30\n\nvoid mainImage( out vec4 O, vec2 U )\n{   \n    \n    O -= O; \n    for (int j=0; j<N; j++)\n        for (int i=0; i<N; i++) \n            O += smoothstep(.3,0., length(T(i,j)-U)/10. )*.2;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define rnd(U)  ( 2. * fract(4567.89*sin(4567.89*U*mat2(1,-13.17,377.1,-78.73))) - 1. )\n \n#define T(i,j)  texelFetch(iChannel0, ivec2(U)+ivec2(i,j), 0).xy\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    if (iFrame==0) {\n        O.xy = U + .2*rnd(U);\n        return;\n    }\n    \n    vec2 U0 = T(0,0), D, F = vec2(0);\n    \n    for (int j=-2; j<=2; j++)\n        for (int i=-2; i<=2; i++) \n            if ( vec2(i,j) != vec2(0) ) {\n                D = T(i,j) - U0;\n                // F += D / dot(D,D);\n                float l = length(D);\n                F += D / l * max(2.-l,0.);\n            }\n    \n    O.xy = U0 - .1* F;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

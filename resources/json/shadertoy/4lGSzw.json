@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lGSzw",
+      "date": "1483465786",
+      "viewed": 270,
+      "name": "VR reticle",
+      "username": "public_int_i",
+      "description": "Reticle for VR",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "reticle"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Ethan Alexander Shulman 2016\n\n\n//units = pixels\n#define RETICLE_SIZE 100.\n#define BAR_DISTANCE 40.\n#define INDICATOR_BAR_THICKNESS 7.\n#define INDICATOR_BAR_FADE 8.\n#define PROGRESS_BAR_THICKNESS 10.\n#define TOTAL_SIZE (RETICLE_SIZE + BAR_DISTANCE + INDICATOR_BAR_THICKNESS*2.0 + PROGRESS_BAR_THICKNESS*2.0)\n\n\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord*2. - iResolution.xy);\n    float len = length(uv),\n          ang = 3.14-atan(uv.y,uv.x);\n    \n    float indicatorOn = mod(floor(iTime),2.),\n          progress = cos(iTime)*.5+.5;\n    \n    float blen = (RETICLE_SIZE+BAR_DISTANCE)-len;\n    \n    float d = max(RETICLE_SIZE-len,\n                  max(indicatorOn*(INDICATOR_BAR_THICKNESS-abs(blen))/INDICATOR_BAR_FADE,\n                     clamp(ang/(-6.28)+progress*2.,0.,1.)*(PROGRESS_BAR_THICKNESS-abs(blen+INDICATOR_BAR_THICKNESS+PROGRESS_BAR_THICKNESS))));\n\tfragColor = vec4(clamp(pow(max(0.,d/4.),1./1.3),0.,1.));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

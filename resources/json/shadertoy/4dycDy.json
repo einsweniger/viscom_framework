@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dycDy",
+      "date": "1523090708",
+      "viewed": 115,
+      "name": "Sierpenski Triangle?",
+      "username": "Jamie_Pendergast",
+      "description": "Why is that there?",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "random"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nint _rand_ = 31;\nint magic = 30;\n\nint rand(int seed) {\n\tint number = seed;\n\tint _xor = seed ^ _rand_;\n\tint nor = ~(seed & _rand_);\n\tint x = _xor & number;\n\t// x = x ^ _xor & magic; //uncomment for crt effect\n\t_rand_ = x | magic;\n\treturn x;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    int mX = int(iMouse.x);\n    int mY = int(iMouse.y);\n    \n    magic = 31;\n    int x = rand(int(fragCoord.x * 50. - (iTime * 50.)) + mX);\n    int y = rand(int(fragCoord.y * 50. - (iTime * 50.)) + mY);\n    int z = 4;\n    \n    \n    // Output to screen\n    fragColor = vec4(0.,y,0.,1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

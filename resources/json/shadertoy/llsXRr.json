@@ -1,0 +1,46 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llsXRr",
+      "date": "1434196818",
+      "viewed": 1182,
+      "name": "Surfing 139 chars",
+      "username": "coyote",
+      "description": "Finally managed to fit it in 1 tweet! :)",
+      "likes": 18,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "short",
+        "1tweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 3,
+            "src": "/media/a/95b90082f799f48677b4f206d856ad572f1d178c676269eac6347631d4447258.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "//139\n//sorry iapafoto, your coloring had to go...\nvoid mainImage( out vec4 o, vec2 i )\n{\n    i/=iResolution.y;\n    float a=atan(i.y,i.x-=.9),\n          L=length(i+i)/a;\n    o=texture(iChannel0, vec2( L, L*a-iDate.w) )/L;\n}\n\n\n//157\n//colors by iapafoto\n/*\nvoid mainImage( out vec4 o, vec2 i )\n{\n    i = (i+i-(o.xy=iResolution.xy))/o.y;\n    float a=atan(++i.y,i.x),\n          L=length(i)/a;\n    o.garb=texture(iChannel0, vec2( L, L*a-iDate.w) )/L;\n}\n*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

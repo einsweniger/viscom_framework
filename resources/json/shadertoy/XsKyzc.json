@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsKyzc",
+      "date": "1522792965",
+      "viewed": 109,
+      "name": "Spinning Square - No Antialias",
+      "username": "DonKarlssonSan",
+      "description": "You must give a description to your shader",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "square",
+        "step"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define rotate(a)  mat2(cos(a), -sin(a), sin(a), cos(a))\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = (fragCoord.xy -0.5 * iResolution.xy) / iResolution.x * rotate(iTime / 3.0);\n\n    float left = step(-0.2, uv.x); \n    float bottom = step(-0.2, uv.y);\n    float top = step(0.8, 1.0 - uv.x);\n    float right = step(0.8, 1.0 - uv.y);   \n    \n    vec3 color = vec3(left * top * right * bottom);\n    \n    fragColor = vec4(color, 1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

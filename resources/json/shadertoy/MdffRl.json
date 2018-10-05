@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdffRl",
+      "date": "1497470452",
+      "viewed": 196,
+      "name": "hypnotic eye",
+      "username": "public_int_i",
+      "description": "hypnotic eye",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "eye",
+        "hypnotic"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n    u /= 300.;\n    vec2 p = fract(u)-0.5;\n\to = cos(texture(iChannel0, vec2(length(p)-iDate.w*.04,atan(p.x,p.y)+dot(floor(u),vec2(.4,2.))))*9.)*.5+.5;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

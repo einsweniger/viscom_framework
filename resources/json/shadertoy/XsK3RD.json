@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsK3RD",
+      "date": "1453502417",
+      "viewed": 233,
+      "name": "Radial in 115 chars",
+      "username": "GregRostami",
+      "description": "Here's my One Tweet version of aiekick's shader:\nhttps://www.shadertoy.com/view/lsG3RW",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "radial",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(f,G)\t\t\\\nvec2 g= G/iResolution.y-.5;\t\\\nf=texture(iChannel0,(length(g)+vec2(atan(g.x, g.y),0))*.1-iTime*.01)\n\n//Fabrice did his magic to bring it down to 122 chars!!\n/**\nvoid mainImage(out vec4 f,vec2 g)\n{\n\tf = texture(iChannel0, \n                   ( length(g= g/iResolution.y-.5) + vec2(atan(g.x, g.y),0) ) * .1\n                  - iTime*.01 );\n}\n/**/\n\n//Original at 139 chars\n/*\nvoid mainImage(out vec4 f,vec2 g)\n{\n    g = g/iResolution.y-.5;\n\tg = vec2(atan(g.x, g.y),length(g))/.1;\n\tg.x += g.y;\n\tf = texture(iChannel0,(g - iDate.w)*.01);\n}\n*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldlyDl",
+      "date": "1490441746",
+      "viewed": 290,
+      "name": "penta IFS - self-tiling shape",
+      "username": "FabriceNeyret2",
+      "description": "inspired by \"self-tiling shapes\" by JP Delahaye, /Pour La Science/ #470 p 76 Dec,2016\nsee also [url]https://en.wikipedia.org/wiki/Self-tiling_tile_set[/url]\nShapes that can tile spacially + trough scales.\n\nStill a slight angular error. why ?",
+      "likes": 5,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "ifs",
+        "tiling",
+        "tiles",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n\tU /= iResolution.xy;\n\tO = texture(iChannel0,U);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// inspired by \"self-tiling shapes\" by JP Delahaye, /Pour La Science/ #470 p 76 Dec,2016\n\n#define rot(a) mat2(cos(a),sin(a),-sin(a),cos(a))\n#define CS(a) vec2(cos(a),sin(a))\n#define PI 3.14159265359\n#define imod(i,m) (i-(i)/(m)*(m))\nvoid mainImage( out vec4 O, vec2 U )\n{\n    vec2 R = iResolution.xy;\n\tU /= R;\n\n    if (imod(iFrame,30) > 0 ) { \tO = texture(iChannel0,U); return; }\n\n    float e=.05, s = .866025; // sqrt(3)/2\n    U.x -= .5;\n    //U *= vec2(2,s);\n    U *= vec2(2,2.*R.y/R.x);\n    \n    if (imod(iFrame,30*7)==0) {  // initial pentagon\n        O = vec4( U.y > e && U.y < s-e  &&  .5*U.y <  s*(1.-abs(U.x))-e ); \n        return; \n    }\n    \n    O-=O;\n    // --- IFS transform\n    if (U.y<s/2. &&  s*(.5-abs(U.x)) >.5*U.y)                // central child\n        U*= 2., O++;\n    else if ( -s*U.x >.5*U.y )                               // left child\n        U -= s*CS(PI*5./6.), U *= 2.* rot(-PI*2./3.), O.r++; \n    else if ( s*U.x >.5*U.y)                                 // right child\n        U -= s*CS(PI/6.),    U *= 2.* rot( PI*2./3.), O.b++; \n    else                                                     // top child\n        U -= s*CS(PI/2.), U *= 2.* rot( PI ), O.g++;   \n        \n    U.x = .5 + .5*U.x; U.y *= s;  // not sure why the U.y *= s\n    //U = fract(U);\n    if (U.y<0.) { O-=O; return; }\n    O = texture(iChannel0,U) * (.7+.3*O);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

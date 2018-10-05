@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lt2Bzd",
+      "date": "1516914309",
+      "viewed": 187,
+      "name": "polar 3 ( 236 chars )",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2tweets",
+        "short",
+        "golfing"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://shadertoy.com/view/MljfRd\n// variant of https://shadertoy.com/view/MljBzt\n\n\n#define mainImage(O,u)                                      \\\n    vec2 U = u+u - iResolution.xy;                          \\\n    float T = 6.2832, l = length(U) / 30.,                  \\\n          L = exp2(floor(log2(l))) * 9.,                    \\\n          a = atan(U.x,U.y) - iTime *floor(l-5.)/2.;        \\\n    O = .6 + .4* cos( floor(l)+floor(fract(a/T)*L) + vec4(0,23,21,0) ) \\\n        - max(0., 9.* max( cos( T*l ), cos( a*L  )) - 8. )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

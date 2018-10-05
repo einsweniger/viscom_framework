@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tXfW8",
+      "date": "1511686546",
+      "viewed": 176,
+      "name": " shortest heart  (194 chars)",
+      "username": "FabriceNeyret2",
+      "description": "golfing + regularizing [url]https://www.shadertoy.com/view/XlsfDr[/url]",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "2tweets",
+        "short",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// inspired from https://www.shadertoy.com/view/XlsfDr\n\n#define D(a,b)  fwidth( R = U-2.4 + dot( vec4(a 13,5,b 2,1), cos( asin( pow( abs(U.x)/16., .33) ) * vec4(1,2,3,4) ))).y / abs(R.y) /3.\n\n#define mainImage(O,u)                   \\\n    vec2 R =  iResolution.xy,            \\\n         U = 19.* ( u+u - R.xy ) / R.y;  \\\n    O +=  D( - , ) +  D( , - )\n\n\n\n// note that O +=  D( , - ) +  D( - , )  is -3 chars,  but I guess it won't work on windows. ",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xst3Wf",
+      "date": "1452532522",
+      "viewed": 248,
+      "name": "Britney Stop Motion",
+      "username": "aiekick",
+      "description": "Britney Stop Motion",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "britney",
+        "motion",
+        "stop"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tfragColor = texture(iChannel0, fragCoord / iResolution.xy);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define FRAME_INTERVAL 15\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    if (mod(float(iFrame), float(FRAME_INTERVAL)) == 0.) // init with britney\n    {\n        fragColor = texture(iChannel1, fragCoord / iResolution.xy);\n    }\n    else\n    {\n        fragColor = texture(iChannel0, fragCoord / iResolution.xy); // read buffer and keep britney\n    }\n    \n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsfyzS",
+      "date": "1488652986",
+      "viewed": 267,
+      "name": "Cellular Flower",
+      "username": "ocb",
+      "description": "First shader test\nclic mouse rigth-left to scale\nCould be a tutorial",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "tutorial",
+        "random",
+        "cellular"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Author: ocb\n// Title: Cellular Flower\n// Animated and modified code from Patricio Gonzalez Vivo\n\n\nvec2 random2( vec2 p ) {\n    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 st = fragCoord.xy / iResolution.xy;\n    st.x *= iResolution.x/iResolution.y;\n    vec3 color = vec3(.0);\n    \n \n    // Scale \n    st *= floor(iMouse.x*50./iResolution.x+1.1);\n\n    \n    // Tile the space\n    vec2 i_st = floor(st);\n    vec2 f_st = fract(st);\n    \n\n    vec3 m_dist = vec3(1.);  // minimun distance\n    \n    for (int y= -1; y <= 1; y++) {\n        for (int x= -1; x <= 1; x++) {\n            // Neighbor place in the grid\n            vec2 neighbor = vec2(float(x),float(y));\n            \n            // Random position from current + neighbor place in the grid\n            vec2 point = random2(i_st + neighbor);\n\t\t\t\n\t\t\t// Animate the point\n            point = 0.5 + 0.5*sin(iTime*point);\n            \n    \n\t\t\t// Vector between the pixel and the point\n            vec2 diff = neighbor + point - f_st;\n            \n            // Distance to the point\n            float dist = length(diff);\n\n            // Keep the closer distance\n            m_dist.r = m_dist.r- .15*dist;\n            m_dist.b = min(m_dist.b,dist);\n            m_dist.g = dist;\n        }\n    }\n\n    // Draw the min distance (distance field)\n    color.r += m_dist.r;\n    color.b += 1.-m_dist.b;\n\n    // Draw cell center\n    color += 1.-step(.02, m_dist);\n    \n    // Show isolines\n     color -= step(.7,abs(sin(27.0*m_dist)))*.5;\n    \n\n    \n\tfragColor = vec4(color,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

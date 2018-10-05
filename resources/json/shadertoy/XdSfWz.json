@@ -1,0 +1,80 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdSfWz",
+      "date": "1500034121",
+      "viewed": 269,
+      "name": "[SH17A] Lorenz attractor",
+      "username": "mattz",
+      "description": "[url]https://en.wikipedia.org/wiki/Lorenz_system[/url] - let it run for a little while to get the full path fading effect",
+      "likes": 10,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "chaos",
+        "compo",
+        "dynamicalsystem"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/* [SH17A] Lorenz attractor, by mattz\n   Licence: https://creativecommons.org/licenses/by-nc-sa/3.0/\n*/\n\nvoid mainImage( out vec4 c, vec2 p ) {\n    c = texelFetch(iChannel0, ivec2(p), 0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "/* [SH17A] Lorenz attractor, by mattz\n   Licence: https://creativecommons.org/licenses/by-nc-sa/3.0/\n*/\n\n\n#define f(x) texelFetch(iChannel0, ivec2(x), 0)\n\nvoid mainImage( out vec4 c, vec2 p ) {\n    \n    c = f(p);\n    \n    p.x -= 250.;\n\n    c += p.y > 1. ?\n        \n        f(0)/exp(2.+length(p - 5.*f(0).yx)) - c/4e2 :\n    \n    vec4(c.z*c.y - 2.6*c.x,\n         10.*(c.z-c.y) + .1,\n         c.y*(28.-c.x)-c.z,\n         0)/1e2;\n    \n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

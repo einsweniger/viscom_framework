@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dSyDw",
+      "date": "1492255716",
+      "viewed": 350,
+      "name": "soundsensitiveglasscells",
+      "username": "Nitato_",
+      "description": "drag with the mouse",
+      "likes": 0,
+      "published": 3,
+      "flags": 6,
+      "tags": [
+        "2dfilter"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 32,
+            "src": "/presets/mic.png",
+            "ctype": "mic",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvec4 scanSquare (vec2 uv, vec2 r, vec2 step) {\n\tvec4 ret = vec4(0);\n    for (float sy=-r.y; sy<=r.y; sy +=1.) {\n        for (float sx=-r.x; sx<=r.x; sx +=1.) {\n            ret+=vec4(texture(iChannel0, uv + step + vec2(sx, sy)).rgb, 1.0);\n        }\n    }   \n    \n    return ret;\n}\n\nvec2 snap(vec2 v, vec2 s) {\n\treturn floor(v*s)/s;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord / iResolution.xy;\n    vec2 step = vec2(1.0) / iChannelResolution[0].xy;\n    \n\n    float s = 1.0/iChannelResolution[1].x;\n    float fft = texture(iChannel1, vec2(0.25, 0.25)).x;\n   // for (float x=0.0;x<=1.;x+=s){\n  //  \tfft += texture(iChannel1, vec2(x, 0.25)).x;\n  //  }\n    \n    float intensity = 4.*fft;\n        vec2 m = iMouse.xy / iResolution.xy;\n\n    //try this one \\/\n     vec2 snappedCoord = snap(uv, m.y*vec2(200.)*sin(uv.x*m.x*100.0)*sin(uv.y*m.y*100.)*intensity);\n    // vec2 snappedCoord = snap(uv, m*100.); \n\n\n\tvec4 sc = texture(iChannel0, snappedCoord);    \n    vec4 c = texture(iChannel0, uv);\n    \n    fragColor = sc;\n}\n    \n        ",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

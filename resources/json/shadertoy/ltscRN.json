@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltscRN",
+      "date": "1503860985",
+      "viewed": 182,
+      "name": "sliding bar",
+      "username": "aferriss",
+      "description": "Simple bar, back and forth",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sin",
+        "wipe",
+        "bar",
+        "slide"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfloat o = iResolution.x;\n    o += smoothstep(1.0/o, 0., abs(sin(iTime)*0.5+0.5 -uv.x) - .05)-o;\n\tfragColor = vec4(o,o,o,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

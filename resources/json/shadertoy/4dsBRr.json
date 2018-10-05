@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dsBRr",
+      "date": "1494633913",
+      "viewed": 117,
+      "name": "3/100",
+      "username": "yahe",
+      "description": "3/100",
+      "likes": 1,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "music"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8564,
+            "src": "https://soundcloud.com/blue-dot-sessions/sunday-lights?in=blue-dot-sessions/sets/onesuch-village",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\n#define SUNSET vec3(0.9, 0.3, 0.3)\n\nfloat circle(in vec2 _st, in float _radius){\n    vec2 dist = _st-vec2(0.5)*texture( iChannel0, vec2(_st.x,_st.y) ).x;\n\treturn 1.-smoothstep(_radius-(_radius*0.01),\n                         _radius*texture( iChannel0, vec2(_st.x,_st.y) ).y+(_radius*0.01),\n                         dot(dist,dist)*4.0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    vec2 st = fragCoord.xy / iResolution.x;\n\n    vec3 color1 = vec3(circle(st,0.5*texture( iChannel0, vec2(st.x,st.y) ).x));\n    vec3 color = mix(color1, SUNSET, 0.5);\n    fragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

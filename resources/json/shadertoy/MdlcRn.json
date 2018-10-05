@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdlcRn",
+      "date": "1486766992",
+      "viewed": 206,
+      "name": "Red Wave",
+      "username": "BestCar11",
+      "description": "RED WAVE",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "wave"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(0.9+uv.y+0.007, 0.2+uv.x+uv.y+sin(iTime), 0.2568+0.00713+sin(iTime), 1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdGcDV",
+      "date": "1523335123",
+      "viewed": 83,
+      "name": "Fade between negative",
+      "username": "chao_mu",
+      "description": "Reading the book Beyond Photography and they had an example of solarization that I tweaked to be animated and work with color images.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "solarization",
+        "beyondphotography"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Inspired by the book Beyond Photography\n\nfloat luminance(vec3 rgb) {\n    return dot(rgb, vec3(0.3, 0.59, 0.11));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\n    vec3 col = texture(iChannel0, uv).rgb;\n    \n   \tfloat threshold = (1. + sin(iTime)) * 0.5;\n    if (luminance(col) < threshold) {\n        col = 1. - col;\n    }\n    \n    // Output to screen\n    fragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

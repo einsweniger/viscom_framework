@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ld3cRj",
+      "date": "1519507476",
+      "viewed": 205,
+      "name": "Simple SDF w/ Antialiasing",
+      "username": "escp_",
+      "description": "Simple SDF test with the default font, saving for later",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sdf",
+        "text",
+        "font"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float tri(float T, float A, float P) {\n\treturn (A/P) * (P - abs(mod(T,(2.0*P)) - P) );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) { \n    vec2 zoom = vec2(mix(1.0,10.0,(tri(iTime/1.0,1.0,6.0))));\n    //vec2 zoom = vec2(10.0f);\n\tfloat mask = texture( iChannel0, (fragCoord.xy/iResolution.xy)*(vec2(1,1)/zoom)).a;\n    vec4 clr = vec4(1.0,1.0,1.0,1.0);\n    if (mask < 0.5) {\n        clr *= 0.0;\n    }\n    float aar = mix(0.08, 0.007, (zoom.x-1.0)/9.0);\n    clr *= mix(1.0/(aar*mask),0.0,(1.0-mask)/0.5);\n    fragColor = clr;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

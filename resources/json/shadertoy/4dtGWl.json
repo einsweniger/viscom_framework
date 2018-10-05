@@ -1,0 +1,45 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dtGWl",
+      "date": "1452753953",
+      "viewed": 239,
+      "name": "smooth show",
+      "username": "DeMaCia",
+      "description": "smooth show obj",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2daction"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 1,
+            "src": "/media/a/10eb4fe0ac8a7dc348a2cc282ca5df1759ab8bf680117e4047728100969e7b43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float speed = iTime * .5;\n    float dp = .2;\n    \n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    float op = smoothstep(max(1.-speed-dp,-dp),\n                          max(1.-speed,0.),\n                          1.-uv.y);\n    \n    vec4 clr = op * texture(iChannel0,uv);\n    \n\tfragColor = clr;\n}",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

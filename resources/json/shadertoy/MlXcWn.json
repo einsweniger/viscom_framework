@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlXcWn",
+      "date": "1504280180",
+      "viewed": 208,
+      "name": "oriental pattern 1",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "2tweets",
+        "short",
+        "weaving"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    float N = 2.+mod(floor(iTime),6.), // number of axis\n          S = 8.,                      // scale\n          a = 3.14/N, \n          h = iResolution.y;\n    U /= h; U -= .5;\n    O -= O;\n    \n    for (float i=0.; i<N; i++)\n        O += smoothstep(S/h, 0., abs(fract(S*U.x)-.5)-.1), // * (.7+.3*sin(6.28*S*U.y)),\n        U *= mat2(cos(a),-sin(a),sin(a),cos(a));\n    \n    O *= vec4(1,.9,.8,0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

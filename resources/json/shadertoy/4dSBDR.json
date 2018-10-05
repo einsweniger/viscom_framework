@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dSBDR",
+      "date": "1499999342",
+      "viewed": 167,
+      "name": "[SH17A] Asteroids Belt",
+      "username": "ttoinou",
+      "description": "Watch in fullscreen !",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "challenge",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 a, vec2 b )\n{\n    a -= a;\n\tb /= iResolution.xy;\n    \n    for(a.a = .56; a.a < 4. ; a.a += .21)\n    {\n       vec2 d = ( b - .5 ) * ( cos( a.a * iTime * .9 ) + 1. ) + .1 + a.a;\n       d = vec2(d.x*cos(a.a*1.1)-d.y*sin(a.a),d.y*cos(a.a)+d.x*sin(a.a));\n\t   a += step(\n           texture( iChannel0, d) ,\n           vec4( (sin(iTime)+1.)/1e2 )\n        ).gbra*.7;\n    }\n    \n    a = tanh(a+a.brga*.3);\n}\n/*\n#define T texture(\n#define A iChannel0,\n\nvoid mainImage( out vec4 a, vec2 b )\n{\n    a -= a;\n\tb /= 1e3;\n    \n    for(a.a = .6; a.a < 4. ; a.a += .21)\n    {\n       vec2 d = ( b - .5 ) * ( cos( a.a * iTime ) + 1. )  + a.a;\n       d = vec2(d.x*cos(a.a*1.6)-d.y*sin(a.a),d.y*cos(a.a)+d.x*sin(a.a));\n\t   a +=  step( T A d) , vec4(.03) ).gbra*.4;\n    }\n    \n    a = tanh(a-a.gbra*.1);\n}\n*/\n/*\n#define T texture(\n#define A iChannel0,\n\nmat2 makem2(in float theta)\n{\n\tfloat c = cos(theta);\n\tfloat s = sin(theta);\n\treturn mat2(c,-s,s,c);\n}\n\nvoid mainImage( out vec4 a, vec2 b )\n{\n    a -= a;\n\tb /= iResolution.xy;\n    \n    for(a.a = 1.; a.a < 8. ; a.a += .345678)\n    {\n       vec2 d = ( b - .5 ) * ( cos( a.a * iTime ) + 1. ) + a.a;\n       //d *= makem2(iTime*a.a/4.);\n\t   a *= step( T A d) , vec4(.2) ) ;\n    }\n    \n    a = tanh(a/8.);\n}*/\n\n/*#define T texture(\n#define A iChannel0,\n#define B iChannel1,\nvoid mainImage( out vec4 a, vec2 b )\n{\n    a -= a;\n\tb /= iResolution.xy;\n    \n    for(a.a = 1.; a.a < 8. ; a.a += .345678)\n    {\n       vec2 d = ( b - .5 ) * ( cos( a.a * iTime ) + 1. )  + a.a;\n\t   a += step( T A d) , vec4(.2) )*a.a;\n    }\n    \n    a = tanh(a/8.);\n}*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

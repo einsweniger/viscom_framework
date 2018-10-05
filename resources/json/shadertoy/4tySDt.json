@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tySDt",
+      "date": "1486330514",
+      "viewed": 195,
+      "name": "Changing Colors",
+      "username": "BestCar11",
+      "description": "It's changing color!",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "color",
+        "changing"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(uv.y, 0.5+0.5*sin(iTime), sin(iTime), uv.x);\n    iDate;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

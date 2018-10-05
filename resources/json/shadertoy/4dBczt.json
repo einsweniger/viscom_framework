@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dBczt",
+      "date": "1493220136",
+      "viewed": 314,
+      "name": "shortest inversion (120 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "inversion",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// inspired from https://www.shadertoy.com/view/XsyXzt\n\n// -2 by coyote \nvoid mainImage( out vec4 O,  vec2 U )\n{\n    U -= .5*(O.xy=iResolution.xy);\n    \n               // inversion\n    U = sin(6.3*  U*O.y/dot(U,U) );\n    U *= U.y;                           // checker\n \n\tO = .5+  U.xxxx / fwidth(U.x);      // anti-aliasing\n}\n\n\n\n/**   // 122 chars\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    U -= .5*(O.xy=iResolution.xy);\n    \n               // inversion\n    U = sin(6.3*  U*O.y/dot(U,U) );\n    U.x *= U.y;                         // checker\n \n\tO += .5+  U.x / fwidth(U.x) -O;     // anti-aliasing\n}\n**/\n\n\n\n/**  // 132 chars\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    U -= .5*(O.xy=iResolution.xy);\n    U *= O.y/dot(U,U);                  // inversion\n\n    U = sin(6.28*U); float c = U.x*U.y; // checker\n \n\tO = vec4(.5+  c / fwidth(c));       // anti-aliasing\n}\n**/\n\n\n\n/**  // 135 chars\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    U = ( U - .5*(O.xy=iResolution.xy) ) / O.y;\n    U /= dot(U,U);                      // inversion\n\n    U = sin(6.28*U); float c = U.x*U.y; // checker\n \n\tO = vec4(.5+  c / fwidth(c));       // anti-aliasing\n}\n**/\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlBfzy",
+      "date": "1516181406",
+      "viewed": 204,
+      "name": "Rotoscope - 249 chars",
+      "username": "GregRostami",
+      "description": "This is golfing and combining two shaders:\nFabrice's grab Britney: [url]https://www.shadertoy.com/view/MtsfW2[/url]\ndarkf's simple edge detection: [url]https://www.shadertoy.com/view/4lXyDN[/url]\nCan you make it smaller?",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d",
+        "edge",
+        "strobe",
+        "short",
+        "2tc",
+        "rotoscope"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Thanks to Fabrice and Coyote this is a lot smaller:\n/**/\n#define A texture(iChannel0, v/iResolution.xy).r\n#define mainImage(o,u)\t\\\n\tvec2 v=u;\\\n    o += 3.4*(.3-length(A-vec2( (v.x++,A),(v.x--,v.y++,A) )))\n/**/\n\n// 154 chars -  Original version\n/**\nfloat a(vec2 v) { return texture(iChannel0, v/iResolution.xy).g; }\n#define mainImage(o,u)\t\\\n    o += 3.4*(.3-length(vec2((o.a = a(u)) - a(u + vec2(1,0)), o.a - a(u + vec2(0,1)))))\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// Thanks to Fabrice and Coyote this is a lot smaller:\n/**/\n#define mainImage(O,u) \\\n\tvec2 U=u/iResolution.xy; \\\n\tO = mod(iChannelTime[1],.5) < .03 ? texture(iChannel1,U) : texture(iChannel0,U)\n/**/     \n        \n// 126 chars - Original\n/**\n#define T(a) texture(a, U/iResolution.xy)\n#define mainImage(O,u)\t\\\nvec2 U=u; O = mod(iChannelTime[1],.5) < .03 ? T(iChannel1) : T(iChannel0)\n/**/",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

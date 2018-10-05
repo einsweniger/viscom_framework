@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tKSzR",
+      "date": "1482500110",
+      "viewed": 208,
+      "name": "Smooth random",
+      "username": "SmartPointer",
+      "description": "A smooth (more or less) random function built using shadershop[1].\n\n[1] http://www.cdglabs.org/Shadershop/",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "smoothrandom"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float randomStep(float x) {\n    return fract(sin(floor(x)) * 208.0);\n}\n\nfloat mySmoothStep(float x) {\n    return (((x - 1.0) * -2.0 + 1.0) * (x) * (x));\n}\n\nfloat smoothSaw(float x) {\n    return mySmoothStep(fract(x));\n}\n\nfloat smoothRandom(float x) {\n\treturn randomStep(x) * smoothSaw(x) + randomStep(x - 1.0) * (smoothSaw(x - 1.0) * -1.0 + 1.0);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    //fragColor = vec4(smoothRandom(iTime), 0.0, 0.0, 1.0);\n    //fragColor = vec4(smoothRandom(iTime + 10.0 * uv.x), 0.0, 0.0, 1.0);\t\t// thanks stduhpf!\n    fragColor = vec4(smoothRandom(iTime + 100.0 * uv.x), smoothRandom(iTime + 100.0 * uv.y) * 0.7, 0.0, 1.0);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

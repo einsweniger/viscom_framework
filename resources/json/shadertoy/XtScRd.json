@@ -1,0 +1,105 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtScRd",
+      "date": "1509726266",
+      "viewed": 247,
+      "name": "HO_wave_equation",
+      "username": "hiogawa",
+      "description": "Wave equation (linear 2nd order partial differential equation, hyperbolic) solved via finite difference method.\nInspired by Unreal Engine's Content Example Render Target Water simulation (HeightSim shader).",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "simulation"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    fragColor = vec4(1.0);\n\n    float value = texelFetch(iChannel0, ivec2(fragCoord.x, 0), 0).a;\n    if (uv.y * 2.0 - 1.0 <= value) {\n       fragColor.xyz = vec3(0.0);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "float gDamping = 0.98;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // simulation using 2 steps previous frames\n    if (fragCoord.y == 0.5) {\n\n        //  t\n        // /|\\        f_12\n        //  |   f_01, f_11, f_21\n        //  |         f_10\n        //   -----------------> x\n\n        float f_01 = texelFetch(iChannel0, ivec2(fragCoord) + ivec2(-1, 0), 0).a +\n                     texelFetch(iChannel1, ivec2(fragCoord) + ivec2(-1, 0), 0).a;\n        \n        float f_11 = texelFetch(iChannel0, ivec2(fragCoord) + ivec2(0,  0), 0).a +\n                     texelFetch(iChannel1, ivec2(fragCoord) + ivec2(0,  0), 0).a;\n        \n        float f_21 = texelFetch(iChannel0, ivec2(fragCoord) + ivec2(1,  0), 0).a +\n                     texelFetch(iChannel1, ivec2(fragCoord) + ivec2(1,  0), 0).a;\n        \n        float f_10 = texelFetch(iChannel0, ivec2(fragCoord) + ivec2(0,  1), 0).a;\n\n        fragColor.a = (f_01 + f_21 - 2.0 * f_11) * 0.5 - f_10;\n        fragColor.a *= gDamping;\n\n    // progress previous frame\n    } else if (fragCoord.y == 1.5) {\n        fragColor.a = texelFetch(iChannel0, ivec2(fragCoord) + ivec2(0, -1), 0).a;\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "float gBroadness = 1.0;\nfloat gStrength = 3.0;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor.a = 0.0;\n    if (fragCoord.y == 0.5 && iMouse.w > 0.5) {\n        if (distance(fragCoord.x, iMouse.x) <= gBroadness) {\n          float value = (iMouse.w / iResolution.y) * 2.0 - 1.0;\n          fragColor.a = value * gStrength;\n        }\n    }\n\n    // Fake input for better thumbnail\n    if (fragCoord.y == 0.5 && float(iFrame) < 1.0) {\n        if (fragCoord.x >= iResolution.x / 2.0 &&\n            fragCoord.x < iResolution.x / 2.0 + gBroadness * 2.0) {\n            fragColor.a = 2.0;\n        }\n    }\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

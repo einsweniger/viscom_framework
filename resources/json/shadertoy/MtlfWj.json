@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtlfWj",
+      "date": "1513420304",
+      "viewed": 214,
+      "name": "bug: -1 % n = who knows",
+      "username": "FabriceNeyret2",
+      "description": "yellow: -1 % y\nblue: what it should be \nwhite if matches.\nNote that in C,  -1 % y = -1",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "glsl",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 u )\n{\n    ivec2 U = ivec2( 30.*u/iResolution.xy );\n    \n\tint i = ( - 1 ) % U.y;\n\t//int i = ( min(0,iFrame) - 1 ) % U.y;  // same with non consts\n    \n    O = vec4( i == U.x );\n    O.b = float( U.y - 1 == U.x );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

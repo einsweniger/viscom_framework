@@ -1,0 +1,82 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlsBDB",
+      "date": "1517456468",
+      "viewed": 413,
+      "name": "Layered Terrain Islands",
+      "username": "ThePopil",
+      "description": "Learning terrain ray-marching techniques using perlin noise and this is what I came up with. Can be kind of janky if you mess with the parameters but in general I like the look of it, and learned a lot implementing it. Might pick this up again someday.",
+      "likes": 22,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "3d",
+        "noise",
+        "terrain",
+        "raymarch",
+        "perlin"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Terrain Parameters\nconst float SCALE = 0.75;\nconst float TERRAIN_HEIGHT = 4.0;\nconst float LEVELS_PER_HEIGHT = 10.0; // The levels per one unit on y-axis\nconst float SEA_LEVEL = 1.9;\n\n// FBM Parameters\nconst int OCTAVES = 3;\nconst int SEA_OCTAVES = 3;\nconst float FREQUENCY = 2.3;\nconst float AMPLITUDE = 0.5;\n\n// Shadow Parameters\nconst float SHADOW_CHECK_ITERATIONS = 16.0;\nconst float SHADOW_CHECK_DISTANCE = 0.7;\n\n// Camera Parameters\nconst float CAM_HEIGHT = 5.2;\n\nfloat fade(float t)\n{\n\treturn t*t*t*(10.0+t*(-15.0 + 6.0*t));\n}\n\nfloat sunFade(float t)\n{\n\treturn t*t*(-1.0+t*(3.0-1.0*t));\n}\n\nfloat hashbrowns(vec2 p)\n{\n    p = vec2( dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));\n\treturn fract(sin(p)*43758.5453).x;\n}\n\nfloat noise(vec2 pos)\n{\n    pos *= SCALE;\n    vec2 base = floor(pos);\n    vec2 coord = fract(pos);\n    \n    float a = hashbrowns(base);\n    float b = hashbrowns(base+vec2(1,0));\n    float c = hashbrowns(base+vec2(0,1));\n    float d = hashbrowns(base+vec2(1,1));\n    \n    float s1 = mix(a,b,fade(coord.x));\n\tfloat s2 = mix(c,d,fade(coord.x));\n    float f = mix(s1,s2,fade(coord.y));\n    \n    return f;\n}\n\nfloat getLevel(float h)\n{\n\treturn floor(h * LEVELS_PER_HEIGHT) / LEVELS_PER_HEIGHT;\n}\n\n// 90 degree matrix transformation\nconst mat2 m2  = mat2( 0.0,  -1.0,\n                       1.0,   0.0);\n\nvec2 height(vec2 pos)\n{\n    float f = FREQUENCY;\n    float a = AMPLITUDE;\n    float landTotal = 0.0;\n    float b = 0.5;\n    for( int i=0; i < OCTAVES; i++ )\n    {\n        float n = noise(pos);\n        landTotal += b*n;\n        b *= a;\n        \n        pos = f*m2*pos;\n    }\n    \n    landTotal *= TERRAIN_HEIGHT;\n    \n    float seaTotal = SEA_LEVEL;\n    b = 0.01;\n    a = 0.5;\n    pos *= 0.25;\n    for( int i=0; i < SEA_OCTAVES; i++ )\n    {\n        float n = noise(pos-iTime);\n        seaTotal += b*n;\n        b *= a;\n        \n        pos = f*m2*pos;\n    }\n    \n    float type = landTotal > seaTotal ? 1.0 : -1.0;\n    return vec2(max(seaTotal, landTotal), type);\n}\n\nvec2 march(const vec3 ro, const vec3 rd)\n{\n\tfloat delt = 0.1;\n    \n    const float mint = 0.3;   // Ie, the near plane of the camera\n    const float maxt = 35.0;  // Ie, the far plane of the camera\n    float t = 0.0;\n    float lh = 0.0;\n    vec3 lp = vec3(0.0);\n    for(t = mint; t < maxt; t += delt )\n    {\n        vec3 p = ro + rd*t;\n        vec2 res = height(p.xz);\n        float h = getLevel(res.x);\n        \n        if( p.y <= res.x && res.y == -1.0)\n        {\n        \treturn vec2(t, 2.0);\n        }\n        \n        if( p.y <= h )\n        {   \n            float wall = -1.0;\n            if(h != lh)\n            {\n            \tfloat t = (h-lp.y)/(p.y-lp.y);\n                vec3 sol = lp + t*(p-lp);\n                float solh = getLevel(height(sol.xz).x);\n                wall = solh != h ? 1.0 : -1.0;\n            }\n            return vec2(t, wall);\n        }\n        lh = h;\n        lp = p;\n        float dy = abs(p.y-h)/3.0;\n        delt = 0.01f + dy;\n    }\n    \n    return vec2(-1.0);\n}\n\nvec3 normal( in vec2 pos)\n{\n    vec2  eps = vec2(0.0002, 0.0);\n    return normalize( vec3( height(pos-eps.xy).x - height(pos+eps.xy).x,\n                            2.0*eps.x,\n                            height(pos-eps.yx).x - height(pos+eps.yx).x));\n}\n\n// Phong lighting, minus specular\nconst float ac\t\t\t= 0.4f;\nconst float dc\t\t\t= 2.0f;\nfloat PhongShading(vec3 norm)\n{\n    vec3 light_dir = vec3(1.0, -0.3f, 1.0f);\n    vec3 L = -1.0 * normalize(light_dir);\n\treturn min(1.0, ac + dc * dot(L, norm));\n}\n\nbool CheckShadow(vec3 point)\n{\n    vec3 light_dir = vec3(-1.0, -0.5f, -1.0f);\n\tvec3 lightSource = SHADOW_CHECK_DISTANCE * -light_dir;\n    for (float i = 0.4; i < SHADOW_CHECK_ITERATIONS; i++)\n    {\n        float delta = i / SHADOW_CHECK_ITERATIONS;\n    \tvec3 newPoint = point + delta * lightSource;\n        if (newPoint.y < getLevel(height(newPoint.xz).x))\n            return true;\n    }\n    \n    return false;\n}\n\nvec4 GetTerrainColor(vec3 spot, vec2 type, vec2 uv, vec2 coord)\n{\n    vec3 n;\n    vec4 color;\n    if (type.y == 2.0)\n    {\n        // Sea terrain\n        n = normal(spot.xz);\n        color = vec4(70./255.,130./255.,180./255., 1.0) * PhongShading(n);\n    }\n    else if (type.y == 1.0)\n    {\n        // Wall\n        n = normal(spot.xz);\n        n = normalize(vec3(n.x, 0.0, n.z));\n        \n        if(spot.y < 2.0)\n        {\n        \tcolor = vec4(238./255.,232./255.,170./255., 1.0) * PhongShading(n) * 0.5;\n        }\n        else\n        {\n            // lmao this doesn't make sense but it looks good\n        \tcolor = vec4(abs(n), 1.0) * PhongShading(n) * 0.5;\n        }\n    }\n    else\n    {\n        // Flat grass\n        n = vec3(0.0, 1.0, 0.0);\n        \n        if(spot.y < 1.9)\n        {\n        \tcolor = vec4(238./255.,232./255.,170./255., 1.0) * PhongShading(n);\n        }\n        else\n        {\n        \tcolor = vec4(34./255.,190./255.,34./255., 1.0) * PhongShading(n);\n        }\n    }\n    \n    if (CheckShadow(spot))\n    {\n        // Basic shadow\n        color *= 0.5;\n    }\n\n    if (type.x > 15.0f)\n    {\n        // Add fog\n        float a = (35.0-type.x)/20.0;\n        uv = coord.xy / iResolution.x;\n        color = mix(texture(iChannel0, fract(uv)), color, fade(a));\n    }\n    \n    return color;\n}\n\nvec4 GetColor(const vec3 ro, const vec3 rd, vec2 uv, vec2 coord)\n{\n\tvec2 dist = march(ro, rd);\n    if (dist.x > 0.0)\n    {\n        vec3 spot = ro + dist.x * rd;\n        float h = height(spot.xz).x;\n        vec4 color = GetTerrainColor(spot, dist, uv, coord);\n\n        // Add reflection\n        if (dist.y == 2.0)\n        {\n            vec3 n = normal(spot.xz);\n            vec3 r_rd = rd - 2.0 * dot(n, rd) * n;\n            vec3 r_ro = spot + 0.01 * r_rd;\n            vec2 reflect = march(r_ro, r_rd);\n\n            if (reflect.x > 0.0)\n            {\n                vec3 r_spot = r_ro + reflect.x * r_rd;\n           \t\tcolor += 0.15 * GetTerrainColor(r_spot, reflect, uv, coord);\n            }\n            else if(!CheckShadow(spot))\n            {\n                // Check for sun reflection\n                vec2 sun = vec2(0.77, 1.0f);\n                vec2 rsun = vec2(r_rd.x, r_rd.z);\n                float angle = dot(sun, rsun)/(length(sun)*length(rsun));\n                \n                if(angle > 0.995)\n                {\n                \tcolor += vec4(0.6,0.6,0.5,1.0) * abs(sunFade((angle-0.995)/0.005));\n                }\n            }\n        }\n        \n        return color;\n    }\n    else\n    {\n        uv = coord.xy / iResolution.x;\n        return texture(iChannel0, fract(uv));\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{  \n\n    vec2 uv = fragCoord.xy / iResolution.xy;\n\n    uv.y -= 0.9f;\n    vec3 cam_position = vec3(iTime/2.0, CAM_HEIGHT, iTime/2.0);\n    vec3 view_dir = normalize(vec3(uv, 1.0));\n    fragColor = GetColor(cam_position, view_dir, uv, fragCoord);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = vec4(135./255.,206./255.,235./255.,1.0);\n    vec2 uv = fragCoord.xy / iResolution.xy;\n    \n    // Big ol' star\n    vec2 loc = uv - vec2(0.8, 0.5);\n\tfloat d = length(loc)*(29.0+sin(iTime));\n\t\n\tvec3 col = vec3(1.0)/d;\n    fragColor += vec4(clamp(col, 0.0, 1.0), 0.0);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdXBWl",
+      "date": "1498739625",
+      "viewed": 369,
+      "name": "Daily 2017-06-29",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 16,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Inspired by https://www.shadertoy.com/view/MslcD4\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv -=.5;\n    uv.x*=iResolution.x/iResolution.y;\n    float c=1.;\n    for(int i=0;i<30;++i){\n        float y=.7-1.4*float(i)/30.+.1*sin(iTime+uv.x*10./(1.+exp(-.1*pow(abs(float(i)-15.),2.)))+float(i)*6.2832/4.)*exp(-5.*pow(length(uv),2.));\n        c=mix(c,1.-exp(-50.*(y-uv.y)),smoothstep(uv.y,uv.y+2./iResolution.y,y));\n    }\n\tfragColor = vec4(c);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

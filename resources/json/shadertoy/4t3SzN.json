@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4t3SzN",
+      "date": "1478331081",
+      "viewed": 1339,
+      "name": "Iterations - inversion 2",
+      "username": "iq",
+      "description": "A set of 48 spiral inversions at random positions performed to the input point.",
+      "likes": 28,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "2d",
+        "inversion",
+        "iteration"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Created by inigo quilez - iq/2016\n// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n// based on https://www.shadertoy.com/view/XdXGDS\n\n#define AA 2\n\nvec3 shape( in vec2 uv )\n{\n\tfloat time = iTime*0.05  + 47.0;\n    \n\tvec2 z = -1.0 + 2.0*uv;\n\tz *= 1.5;\n    \n    vec3 col = vec3(1.0);\n\tfor( int j=0; j<48; j++ )\n\t{\n        float s = float(j)/16.0;\n        float f = 0.2*(0.5 + 1.0*fract(sin(s*20.0)));\n\n\t\tvec2 c = 0.5*vec2( cos(f*time+17.0*s),sin(f*time+19.0*s) );\n\t\tz -= c;\n\t\tfloat zr = length( z );\n\t    float ar = atan( z.y, z.x ) + zr*0.6;\n\t    z  = vec2( cos(ar), sin(ar) )/zr;\n\t\tz += c;\n\n        // color\t\t\n        col -= 0.5*exp( -10.0*dot(z,z) )* (0.25+0.4*sin( 5.5 + 1.5*s + vec3(1.6,0.8,0.5) ));\n\t}\n        \n    return col;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float e = 1.0/iResolution.x;\n\n    vec3 tot = vec3(0.0);\n    for( int m=0; m<AA; m++ )\n    for( int n=0; n<AA; n++ )\n    {        \n        vec2 uv = (fragCoord+vec2(m,n)/float(AA))/iResolution.xy;\n\t    vec3 col = shape( uv );\n        float f = dot(col,vec3(0.333));\n        vec3 nor = normalize( vec3( dot(shape(uv+vec2(e,0.0)),vec3(0.333))-f, \n                                    dot(shape(uv+vec2(0.0,e)),vec3(0.333))-f, \n                                    e ) );\n        col += 0.2*vec3(1.0,0.9,0.5)*dot(nor,vec3(0.8,0.4,0.2));;\n\t    col += 0.3*nor.z;\n        tot += col;\n    }\n    tot /= float(AA*AA);\n\n    tot = pow( clamp(tot,0.0,1.0), vec3(0.8,1.1,1.3) );\n\t\n    vec2 uv = fragCoord/iResolution.xy;\n    tot *= 0.4 + 0.6*pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.1 );\n\n    fragColor = vec4( tot, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

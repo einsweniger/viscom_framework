@@ -1,0 +1,44 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sjfRG",
+      "date": "1501080364",
+      "viewed": 204,
+      "name": "ohhh some music!",
+      "username": "afl_ext",
+      "description": "some music with sound shader",
+      "likes": 1,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "sound",
+        "synth"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(texture(iChannel0, uv));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "#define FQ(a) (sin(6.2831*a*time))\n#define tremolo(a) (sin(a*time)*0.5 + 0.5)\n#define attack(a) (max(0.0, -tan(time * a + (3.1415*0.5))))\n#define note(part) (3.1415/part)\n\n#define tone(s) (440.0 * pow(2.0, (s*2.0)/12.0))\n\nfloat low_kick(float time){\n \treturn FQ(60.0) * attack(4.0);\n}\n\nfloat clap(float time){\n \treturn FQ(1600.0) * attack(4.0);\n}\n\n#define inrange(a,b,v) (step(a,v) * (1.0-step(b,v)))\nfloat melody(float time){\n \tfloat fq = 440.0;\n    float n = note(16.0);\n    float p = 0.0;\n    float len = 32.0;\n    float vol = 1.0;\n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(2.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(4.0); p += 1.0;\n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(4.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(2.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(-6.0); p += 1.0;\n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(2.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(4.0); p += 1.0;\n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(-1.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(-6.0); p += 1.0;\n    \n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(2.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(4.0); p += 1.0;\n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(5.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(4.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(2.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(-1.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(-6.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(-4.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(-1.0); p += 1.0;\n    \n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    fq += inrange(n * p, n * (p+1.0), mod(time, n * len)) * tone(0.0); p += 1.0;\n    return FQ(fq*0.5)*0.3 + FQ(fq)*0.5 + FQ(fq*2.0)*0.4;\n}\n\nvec2 mainSound( float time )\n{\n    float S = 0.0;\n    \n    S += low_kick(time)*0.1;\n    S += clap(time+3.1415*0.125*0.5)*0.1;\n    S += melody(time) *0.5;\n    \n    return vec2(S);\n}",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

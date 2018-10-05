@@ -1,0 +1,48 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtBGDR",
+      "date": "1427999761",
+      "viewed": 1590,
+      "name": "ngMir1",
+      "username": "netgrind",
+      "description": "feeling blue",
+      "likes": 8,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "blue",
+        "cam",
+        "mirror",
+        "netgrind"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 c = texture(iChannel0,uv);\n    c = sin(uv.x*10.+c*cos(c*6.28+iTime+uv.x)*sin(c+uv.y+iTime)*6.28)*.5+.5;\n    c.b+=length(c.rg);\n\tfragColor = c;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

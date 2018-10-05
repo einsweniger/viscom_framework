@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldSfDW",
+      "date": "1500400603",
+      "viewed": 395,
+      "name": "[SH17A] Rain drops",
+      "username": "eliemichel",
+      "description": "Shortened from https://www.shadertoy.com/view/ldSBWW",
+      "likes": 8,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rain"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define a(p) textureLod(iChannel0, p, 2.5)\n#define t texture(iChannel1,\n\nvoid mainImage( out vec4 c, vec2 g )\n{\n    c = a(g /= iResolution.xy);\n    vec2 x = vec2(20);\n    vec4 n = t round(g*x - .3) / x);\n    vec2 z = g*x * 6.3 + (t g * .1).rg - .5) * 2.;\n    x = sin(z) - fract(iTime * (n.b + .1) + n.g) * .5;\n    x.x+x.y-n.r*3. > .5 ? c = a(g + cos(z) * .2) : c;\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltjyWR",
+      "date": "1508265265",
+      "viewed": 198,
+      "name": "Triangular chess",
+      "username": "jakeactuallynext",
+      "description": "A triangular chess texture.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "2d",
+        "triangle"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float calcAlpha(float direction) {\n    float ondulated = sin(direction * 100.);\n    return smoothstep(-.1, .1, ondulated);\n}\n\nvoid mainImage( out vec4 O, in vec2 u )\n{\n    vec4 color1 = vec4(1);\n    vec4 color2 = vec4(0);\n    vec2 U = u / iResolution.xy * vec2(1., .7);\n    \n    float alpha120 = calcAlpha(U.x + U.y * .5);\n    float alpha0 = calcAlpha(U.y);\n    float alpha60 = calcAlpha(U.x - U.y * .5);\n    \n    float alpha = alpha120 - alpha0 + alpha60;\n    O = color1 * alpha + color2 * (1. - alpha);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

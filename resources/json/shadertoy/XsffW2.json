@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsffW2",
+      "date": "1500954236",
+      "viewed": 169,
+      "name": "Tiny Checkerboard",
+      "username": "DJDoomz",
+      "description": "(I feel like someone else probably already did this)",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//132\n/*\nvoid mainImage( out vec4 f,vec2 u )\n{\n\tu=u/iResolution.xy-.5;\n    u = vec2(u.x*35.,9)/(f.a=abs(u.y*9.)-1.)+iTime*4.;    \n    f = sign(sin(u.xyxx))+f.a-1.;\n}\n*/\n\n//cheap & ugly define version (124)\n#define mainImage(f,u)f.xy=u/iResolution.xy-.5;f.xy = vec2(f.x*35.,9)/(f.z=abs(f.y*9.)-1.)+iTime*4.;f=sign(sin(f.xyxx))+f.z-1.",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

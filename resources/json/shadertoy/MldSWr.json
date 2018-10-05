@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MldSWr",
+      "date": "1479144254",
+      "viewed": 100,
+      "name": "Weird Spiral",
+      "username": "aiekick",
+      "description": "Weird, Spiral",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "spiral",
+        "weird"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord.xy * 2. - iResolution.xy)/iResolution.y * 5.;\n\t\n\tfloat a = length(uv*0.5) * sin(iTime * 0.2);\n\t\n\tuv *= mat2(cos(a), -sin(a), sin(a), cos(a));\n\t\n\tuv = abs(uv)-5.*cos(iTime * 0.2);\n\t\n\tuv = vec2(atan(uv.x, uv.y)/3.14159*3., length(uv));\n\tuv = abs(fract(uv)-.5);\n    \n\tfloat b = sqrt(uv.x) + sqrt(uv.y);\n\tfloat c = sqrt(uv.x + uv.y);\n\t\n\tfloat s = b-c;\n\n\tfragColor = vec4(s);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

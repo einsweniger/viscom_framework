@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dtfWr",
+      "date": "1524727656",
+      "viewed": 25,
+      "name": "catadioptre 3d",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raymarching"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// vriant of https://shadertoy.com/view/lscfDr\n\n#define C      max(max(a.x,a.y),a.z)\n#define B(x,r) t = min(t, ( a = abs(q), a.x/=r, C ) ) // or just max.yz\n                                              // NB: /r is bad. but cause a cool glow :-)\nvoid mainImage(out vec4 O, vec2 U) {\n    \n    float t = iTime,v, g=0.;\n    mat2  R = mat2( sin(t+vec4(0,33,11,0)) );\n    vec3  q = iResolution,\n          D = vec3(.3*(U+U-q.xy)/q.y, -1),    // ray direction\n          p = 30./q, a;                       // marching point along ray \n    O-=O;\n    for ( O++; O.x > 0. && t > .01 ; O-=.015 )\n        q = p,\n        q.xz *= R, q.yz *= R,                 // rotation\n        a = abs(q), // v = C - 5.,            // bounding cube\n        a = abs(a-3.), t = C,                 // 8 small cubes\n        B(x,5.), B(y,5.), B(z,5.)-1.,         // 3 boxes\n      //t = max(v,t),\n        v = C-5., g += exp(-v*v),             // glow\n        p += t*D;                             // step forward = dist to obj\n\n  //O.r += .02*g;                             // glow\n  //v = C-5.; O.r += exp(-v*v);\n\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltB3zD",
+      "date": "1427241319",
+      "viewed": 5671,
+      "name": "Gold Noise random generator",
+      "username": "dcerisano",
+      "description": "- based on the Golden Ratio, PI and the Square Root of Two (irrationals)\n- fastest one-line noise generator function\n- improved random distribution\n- works with all chipsets (including low precision)\n",
+      "likes": 28,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "fractal",
+        "noise",
+        "random",
+        "static",
+        "generator",
+        "pseudo"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11903,
+            "src": "https://soundcloud.com/mozart/piano-sonata-no1-in-c-major-k-279-iii-allegro",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Gold Noise \u00a92017-2018 dcerisano@standard3d.com\n// - based on the Golden Ratio, PI and the Square Root of Two\n// - fastest noise generator function\n// - works with all chipsets (including low precision)\n\nprecision lowp    float;\n\nfloat PHI = 1.61803398874989484820459 * 00000.1; // Golden Ratio   \nfloat PI  = 3.14159265358979323846264 * 00000.1; // PI\nfloat SQ2 = 1.41421356237309504880169 * 10000.0; // Square Root of Two\n\nfloat gold_noise(in vec2 coordinate, in float seed){\n    return fract(sin(dot(coordinate*(seed+PHI), vec2(PHI, PI)))*SQ2);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord){    \n\tfragColor  = vec4(gold_noise(fragCoord, iTime));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

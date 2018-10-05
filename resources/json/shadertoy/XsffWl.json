@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsffWl",
+      "date": "1498685826",
+      "viewed": 163,
+      "name": "patterns subtracting voronoi",
+      "username": "public_int_i",
+      "description": "patterns and shapes made by subtracting voronoi",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "voronoi",
+        "patterns",
+        "shapes",
+        "subtracting"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, vec2 u )\n{\n    #define l(p) length(fract(u*.01+fract(p.x*vec2(1,8))+cos(u.yx*p.y+p.x*8.))-.5)\n    #define v(p) min(l(p.xy),l(p.yw))*1.66\n    #define m(p) v((fract(iDate.wwww*p*.001)*vec2(1,.01).xyxy))\n    \n    o += max(0.,m(vec4(1,2,3,4))-m(vec4(6,7,8,9)))*10.-o;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Ms3fz7",
+      "date": "1524500292",
+      "viewed": 107,
+      "name": "GLSL bug: uvec(-1 const vs not)",
+      "username": "FabriceNeyret2",
+      "description": "on machine I tested:\n                                                  left:                           right:\ntop: white / black           unsigned( const -1. )            == 0 ?\nbottom: black / white     unsigned( unconst -1. )        == 0 ?\n",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "glsl",
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// uint(-1) is ok for ints and const floats but wrong(=0) for unconst floats.\n// patch:  #define unsigned(v)  ( (v) >= 0. ? uint(v) : -1U-uint(-(v)) )\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    U /= iResolution.xy;\n#if 1                                        // 0: test ints  1: test floats\n    uint v = U.y > .5 \n             ?  uint ( -1. )                    // -1 as const float\n             :  uint ( -1.+min(0.,iTime) );     // -1 as not const float\n#else\n    uint v = U.y > .5 \n             ?  uint ( -1 )                     // -1 as const int\n             :  uint ( -1+min(0,int(iTime)) );  // -1 as not const int\n#endif\n    \n    O = U.x < .5 ? vec4(v)                   // show value\n                 : vec4 ( v == 0U );         // test if value == 0\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

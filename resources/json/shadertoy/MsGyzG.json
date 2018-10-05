@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsGyzG",
+      "date": "1522398534",
+      "viewed": 128,
+      "name": "circle with aspect ratio",
+      "username": "Fig1024",
+      "description": "circle with aspect ratio",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "circle"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float aspect = iResolution.x/iResolution.y;\n    \n    float pixel_radius = 43.0;\n    \n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n    uv-= 0.5;\n    uv.x *= aspect;\n    uv+= 0.5;\n\n   \tfloat circle_radius = pixel_radius / iResolution.y;\n    vec2 circle_center = vec2(0.5, 0.5);\n    \n  //  float  dist = smoothstep(circle_radius, 0.0, distance(uv, circle_center));\n    float  dist = step(circle_radius, distance(uv, circle_center));\n    \n    vec4 innerColor = vec4(1,0,0,1);\n    vec4 outerColor = vec4(1,1,1,1);\n\n    fragColor = mix(outerColor, innerColor, dist );\n    fragColor = sqrt(fragColor);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

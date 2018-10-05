@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsVcWW",
+      "date": "1522078771",
+      "viewed": 138,
+      "name": "A new type of fractal",
+      "username": "Jamie_Pendergast",
+      "description": "I think i have made something quite mysterious, look at the way the \"pillars\" sub divide, perhaps there is something hidden there",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractalmysteriousnumbers"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n\n    float a = uv.x;\n    float b = uv.y;\n    \n    float c = (a * b + a * b) / (a + b);\n    float d = (c + a - b * b) * c - a * b;\n    \n    \n    vec2 m = iMouse.xy / iResolution.xy;\n    for(int i = 0; i < 300; i++) {\n    \ta = a + c - b + m.x;\n        b = b + c + d - m.y;\n        \n        if(c < d) {\n            break;\n        }\n        \n        \n        c = (a * b + a * b) / (a + b);\n        d = (c + a - b * b) * c - a * b;\n        \n        \n        \n        fragColor = vec4(c,d,a,1.);\n    }\n    // Output to screen\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdVXRh",
+      "date": "1462866662",
+      "viewed": 503,
+      "name": "Messing with dithering",
+      "username": "ChronosDragon",
+      "description": "I recalled reading that the 8x8 noise texture here is actually a Bayer dithering matrix, so wanted to investigate. Might reuse this shader for more dithering experiments in the future.",
+      "likes": 6,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "video",
+        "dither",
+        "dithering"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11,
+            "src": "/media/a/c3a071ecf273428bc72fc72b2dd972671de8da420a2d4f917b75d20e1c24b34c.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 28,
+            "src": "/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 color = texture(iChannel0, uv);\n    \n    vec3 value = color.rgb;\n    vec3 oldcolor = value + (value * texture(iChannel1, (mod(fragCoord, 8.0) / 8.0)).rgb);\n    vec3 newcolor = floor(oldcolor);\n    if (fragCoord.x > iMouse.x) {\n\t\tfragColor = vec4(newcolor, 1.0);\n    }\n    else {\n        fragColor = vec4(value, 1.0);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

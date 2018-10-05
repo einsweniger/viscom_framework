@@ -1,0 +1,45 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sjfWW",
+      "date": "1500445505",
+      "viewed": 463,
+      "name": "Glowing Ring",
+      "username": "ray7551",
+      "description": "Fork from http://glslsandbox.com/e#39018.0\nYou can tweak the 'const' part and see how it will be.",
+      "likes": 13,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "ring",
+        "glow",
+        "in10line"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "const float lineNum = 16.0;\nconst float variation = 0.5;\nconst float speed = 0.01;\nconst vec3 baseColor = vec3(1.0, 0.5, 0.1);\nconst float glowing = 0.007;\nconst float glowSpeed = 1.5;\nconst float petalNum = 6.0;\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\tvec2 pos = (fragCoord.xy * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y) * 0.5;\n\t\n\tfloat radius = length(pos) * 3.0 - 1.0;\n\tfloat t = atan(pos.y + variation, pos.x);\n    \n\tfloat color = 0.0;\n\tfor (float i = 1.0; i <= lineNum; i++) {\n\t\tcolor += glowing * (cos(iTime * glowSpeed) / 3.0 + 1.0) / abs(\n            0.2 * sin(\n                petalNum * (t + i * iTime * speed)\n            ) - radius\n        );\n\t}\n\t\n\tfragColor = vec4(baseColor * color, 1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "const float vibratoSpeed = 1.5; // it should equal to glowSpeed\n\nvec2 mainSound( float time )\n{\n    return vec2(\n        sin(3.14 * 340.0 * time) // base sound\n        * ((abs(cos(time * vibratoSpeed / 2.0)) + 0.3) * 0.3) // vibrato\n    );\n}",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

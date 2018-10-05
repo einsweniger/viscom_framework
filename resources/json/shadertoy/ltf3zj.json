@@ -1,0 +1,46 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltf3zj",
+      "date": "1423264383",
+      "viewed": 805,
+      "name": "one tweet",
+      "username": "dzira",
+      "description": "one tweet shader",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "tweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 u=fragCoord.xy/iResolution.y-.6;\n    fragColor=texture(iChannel0,u+normalize(u)*vec2(sin(2.*length(u)-iTime)));\n}",
+        "name": "",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

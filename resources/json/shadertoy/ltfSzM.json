@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltfSzM",
+      "date": "1435199652",
+      "viewed": 58,
+      "name": "dVoid",
+      "username": "clickbecause",
+      "description": "distance field interference patterns...",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "shaderclub"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float wave(float p, float f, float a){\n    return sin(p * f + iTime)*a;\n}\n\nconst int num = 6;\nfloat xoff[num];\nfloat yoff[num];\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    \n    uv -= vec2(0.5);\n    uv.x *= iResolution.x/iResolution.y;\n    uv += vec2(0.5);\n    \n    float t = iTime;\n    float r = 0.5;\n    \n    float df = 0.0;\n    for (int i = 0; i < num; i++) {\n    \tfloat angle = 6.28/float(num)*float(i);\n    \txoff[i] = cos(angle) * r + (0.5);\n    \tyoff[i] = sin(angle) * r + (0.5);\n        \n        float x = abs(uv.x-xoff[i]);\n   \t\tfloat y = abs(uv.y-yoff[i]);\n        \n        float d = sqrt(x*x+y*y); //euclidean\n        //d = (x+y); //manhattan\n        //d = max(x,y); //chebyshev\n        \n        df += wave(d, 64.0, 1.0);\n  \t}\n    \n    float b = sin(df);\n    b = smoothstep(0.1, 0.9, b);\n    \n    fragColor = vec4(vec3(b), 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

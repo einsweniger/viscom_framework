@@ -1,0 +1,108 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltlfzX",
+      "date": "1512756915",
+      "viewed": 227,
+      "name": "dithering 2",
+      "username": "FabriceNeyret2",
+      "description": "Using either sin(x)sin(y) or Bayer matrix pattern, in B&W or color.\n\nchange #SCALE to use bigger pattern.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "video",
+        "effect"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 28,
+            "src": "/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define SCALE 4.\n\nvoid mainImage( out vec4 O, vec2 u )\n{\n    vec2 R = iResolution.xy,\n         A = sin(3.14*u/SCALE);\n    vec4 S =  texture(iChannel0, u/R ); \n    \n    int t = int(iTime/2.);    \n\n    float d = (t/2)%2 < 1 \n        ? .5+.5*A.x*A.y                                     // sin(x)*sin(y)\n        : texture(iChannel1, (.5+floor(u*2./SCALE))/8. ).r; // Bayer matrix\n    \n    if (t%2<1) S = S.rrrr;                                  // B&W or color\n\n    O = smoothstep(-.25, .25, S - d );                      // apply dither\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 28,
+            "src": "/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define SCALE 4.\n\nvoid mainImage( out vec4 O, vec2 u )\n{\n    vec2 R = iResolution.xy,\n         A = sin(3.14*u/SCALE);\n    vec4 S =  texture(iChannel0, u/R ); \n    \n    int t = int(iTime/2.);    \n\n    float d = (t/2)%2 < 1 \n        ? .5+.5*A.x*A.y                                     // sin(x)*sin(y)\n        : texture(iChannel1, (.5+floor(u*2./SCALE))/8. ).r; // Bayer matrix\n    \n    if (t%2<1) S = S.rrrr;                                  // B&W or color\n\n    O = smoothstep(-.25, .25, S - d );                      // apply dither\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsBBzm",
+      "date": "1499951778",
+      "viewed": 287,
+      "name": "[SH17A] Fractalicious",
+      "username": "P_Malin",
+      "description": "I have no idea what I'm doing.",
+      "likes": 7,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "fractal",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11030,
+            "src": "https://soundcloud.com/mrgrinderman/the-orb-a-huge-evergrowing-pulsating-brain-that-rules-from-the-centre-of-the-ultraworld",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// [SH17A] Fractalicious\n// @P_Malin\n// https://www.shadertoy.com/view/MsBBzm\n\nvoid mainImage( out vec4 c, vec2 f )\n{\n\tf = f / iResolution.xy - .5;\n\n\tfloat l = 7e3, d;\n\t\n\tfor(int i=0; i<50; i++)\n\t{\n\t\tf.x = abs(f.x);\n\t\tf = f * 1.2 + sin( iTime * vec2(.13,.05) ) - .5;\t\t\t\n        d = dot(f, f);\n        f = .5 -f / d;\t\t\n\t\tl = min(l, d);\n\t}\n\t\n    c = sin(vec4(1, 2, 3,0)*iTime+d) + 1.;\n\tc = 1. - exp(-c * l * l * d * d * 15.);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

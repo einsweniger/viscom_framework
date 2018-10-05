@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlsyWX",
+      "date": "1506672058",
+      "viewed": 278,
+      "name": "shortest rotation dot (91 chars)",
+      "username": "FabriceNeyret2",
+      "description": " sin( iTime  + vec2(33,0) ) ~= vec2(cos,sin)   \n33 is a twice better approximation of pi/2[2pi] than 1.6  while saving 1 char (but 1.57 occur to be very better... at the cost of +2 chars ;-) )",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "rotation",
+        "trigonometry",
+        "short",
+        "onetweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( O, U )      \\\n    vec2 R = iResolution.xy;   \\\n    O += .1 / length( (U+U-R)/R.y - sin( iTime  + vec2(33,0) ) )\n        \n        \n        \n// and concerning rotation matrix:  U *= mat2(cos( a + vec4(0,33,11,0)))  //33,55",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

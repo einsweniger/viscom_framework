@@ -1,0 +1,75 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldsBDN",
+      "date": "1496289837",
+      "viewed": 259,
+      "name": "texture as wavetable sound",
+      "username": "MacroMachines",
+      "description": "experiment with using the texture inputs as wavetables.  think of each row of pixels as a waveform where left channel is red and right is green.  this should be fun!\nneed to try and window the edges with a cosine.",
+      "likes": 2,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "sound",
+        "texture",
+        "wavetable"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = vec4(texture(iChannel0, uv).rgb,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "\nvec2 mainSound( float time )\n{\n    float Hz = 70.0;\n    float Scan = 0.050;\n    float timeMod = fract(time*Hz)*1.0;\n    float timeScan = floor(time*Hz)/Hz*Scan*1.;\n    \n    //float timeScan = floor(time*Hz/Scan)/Hz*Scan;\n    \n    return cos(timeMod*timeScan)*sin(vec2( texture(iChannel0,vec2(timeMod,timeScan)  ).rg*4.0-2.0 )*150.0);\n}",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

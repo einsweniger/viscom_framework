@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdjBWz",
+      "date": "1500133972",
+      "viewed": 352,
+      "name": "[SH17A] ParallaxPlanet",
+      "username": "kuvkar",
+      "description": "Planet with water core",
+      "likes": 10,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "competition",
+        "sh17a",
+        "shortcode"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 45,
+            "src": "/media/a/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 c, vec2 f )\n{\n    vec4 g,p;\n    \n    f=(f-(c.xy = iResolution.xy)*.5)/c.x*2.3;\n    c=vec4(.0,.08,.16, 1.);\n    \n    for(float i=.4;i<.6;i+=.0005)\n        p=vec4(f,sqrt(1.-dot(f/i,f/i)),1.),\n        g=texture(iChannel0, .02*iTime+p.xy*.2/p.z), \n        g.r > i ? c = g : c;\n    \n    c*=max(0.,p.y+p.z+p.x);\n    c.b+=.04*(1.-c.a)*(1.+p.y);\n}\n\n\n/*\nvoid mainImage( out vec4 c, vec2 f )\n{\n    vec3 p,q;\n    vec4 g;\n    f=(f-(c.xy = iResolution.xy)*.5)/c.x*4.;\n    c=vec4(.1, .2, .3, 0);\n    for(float i=1.;i>.8;i-=.002)\n        p=vec3(f,sqrt(1.-dot(f*i,f*i))),\n        i == 1. ? q = p : q,\n        g=texture(iChannel0, .04*iTime+p.xy*.1/p.z), \n        g.r*.55>(1.-i)+.2 ? c = g : c;\n    \n    c*=.4+.5*(q.y+q.z+q.x*.7);\n}\n*/\n/*\nvoid mainImage( out vec4 c, in vec2 f )\n{\n    vec2 r=iResolution.xy;\n    vec3 p,q;\n    vec4 g;\n    f=(f-r*.5)/r.x*4.;\n    c=vec4(.1, .2, .3, .0);\n    //for(float i=1.;i>.8;i-=.002)\n    for(float i=1.;i>.8;i-=.002)\n    {\n        p=vec3(f,sqrt(1.-dot(f*i,f*i)));\n        if(i==1.)q=p;\n        g=texture(iChannel0, .04*iTime+p.xy*.1/p.z); \n        \n        if(g.r*.55>(1.-i)+.2)\n        \tc=g;  \n    }\n    c*=.7*(q.y+q.z+q.x*.7);\n}\n\n\n\n\n*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

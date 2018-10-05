@@ -1,0 +1,81 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltlfRl",
+      "date": "1512986161",
+      "viewed": 267,
+      "name": "dart throwing / space filling",
+      "username": "FabriceNeyret2",
+      "description": "A very naive dart-throwing  algorithm to make space-filling disks\nreference: [url]http://paulbourke.net/fractals/randomtile/[/url]\n\nultimate MIPmap is used to detect intersections. \n( Note the bug on the right column on some browsers/resolutions. )",
+      "likes": 2,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "bug",
+        "short",
+        "filling",
+        "gpmipmap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 O, vec2 U )\n{\n    O = texelFetch(iChannel0, ivec2(U), 0);\n  //O = O.g > 0. ? vec4(1) : O.b == 0. ? vec4(0) : .6 + .6 * cos( 6.3*O.b + vec4(0,23,21,0));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// principle : O.a stores intersection = previous * tested disk.\n//             Ultimate MIPmap = 0 => no intersection => state += tested disk.\n\n#define p -0.2                                // radius time-decrease power law\n#define shape(P,U,r) max( 0., r-length(P-U) ) // put your favorite shape here\n\n#define rand(p)  fract( 43758.5453123 * sin( p* vec2(12.9898, 78.233)) )\n \nvoid mainImage( out vec4 O, vec2 U )\n{\n    int i = iFrame;\n    if (i == 0 ) { O-=O; return; } \n    vec2 R = iResolution.xy, P;\n    \n    O = texelFetch(iChannel0, ivec2(U), 0);   // previous state\n    float v = textureLod(iChannel0, vec2(.5), 100.).a, // result of .g collision test\n         r0 = .2*R.y,\n          r = r0 * pow(float(i), p);          // radius time-decrease law\n    if (v==0.) O.r += O.g,                    // no collision between .r and .g: accept .g\n               O.b += r/r0* min(O.g,1.);      // drawable version (we could antialias there).\n            // O.b += (16./r)*float(0.<O.g);  // variant (to use with rainbow in Image)\n    O.g = 0.;                                 // erase .g, reset test buffer .a\n    O.a = O.r;\n    P = rand(vec2(i))*R;                      // try new disk\n    O.g += shape(P,U,r);                      // temptative shape stored in .g\n    O.a *= float(O.g>0.);                     // intersection in .a. MIPmap cumulates on whole image\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

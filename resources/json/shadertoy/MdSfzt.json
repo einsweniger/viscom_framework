@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdSfzt",
+      "date": "1501660622",
+      "viewed": 373,
+      "name": "shortest hello world (156 chars)",
+      "username": "FabriceNeyret2",
+      "description": "inspired by [url]https://www.shadertoy.com/view/4sBfRd[/url]",
+      "likes": 8,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "text",
+        "2tweets",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/**/ // extreme iapafoto version with flipped char ids\n\n#define mainImage(O, V)                                              \\\n    vec2 U = 9.*V/iResolution.y;                                     \\\n    int i = 80+int[](8,11,4,4,1,49,25,1,30,4,12,-17)[int(U)];        \\\n    O += texture( iChannel0, fract(U)*.05 - vec2(i,i/16)/16. ).x \n\n/**/\n\n/**  more practical version:\n        \n#define mainImage(O, V)                                              \\\n    vec2 U = 9.*V/iResolution.y;                                     \\\n    int i = int[](72,69,76,76,79,32,87,79,82,76,68,33)[int(U)];      \\\n    O += texture( iChannel0, fract(U)*.05 + vec2(i,15-i/16)/16. ).x\n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

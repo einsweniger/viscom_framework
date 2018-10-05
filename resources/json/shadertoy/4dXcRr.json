@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dXcRr",
+      "date": "1486631290",
+      "viewed": 83,
+      "name": "epileptic circles",
+      "username": "Zabidon",
+      "description": "tweet shader",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "circle",
+        "tweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// License: Do What The F**k You Want To But It's Not My Fault Public License v1 (WTFNMFPL-1.0)\n// Created by Osipov Kirill --- zabidon\n\n\nvoid mainImage(out vec4 c, vec2 i)\n{\n    c = sin(length(1e2 * (i / iResolution.xy - .5)) + iMouse);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

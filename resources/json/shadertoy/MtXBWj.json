@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtXBWj",
+      "date": "1513274040",
+      "viewed": 312,
+      "name": "shortest sort(xyzw)  (73 char)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sort",
+        "short",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define rnd(p) fract( 3758.5453 * sin( (p) * mat2( 127.1,311.7, 269.5,183.3 )))\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n\tO = vec4( rnd(U+.5), rnd(U) );                         // random vec4\n\n#define S O = vec4( min( O.xz, O.yw ), max( O.xz, O.yw ) ) // sort(x,y) + sort(z,w) -> shuffle\n    S; S; if (O.y>O.z) O.yz = O.zy;\n        \n    // if ( O.x > O.y || O.y > O.z || O.z > O.w ) O++;     // verification\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

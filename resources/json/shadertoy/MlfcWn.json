@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlfcWn",
+      "date": "1504283280",
+      "viewed": 214,
+      "name": "hexa weaving 3",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "2tweets",
+        "short",
+        "weaving",
+        "oriental"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant from https://www.shadertoy.com/view/MlXcWn\n//              https://www.shadertoy.com/view/ltfcWn\n\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    float N = 3.,              // number of axis\n          S = 8.,              // scale\n          a = 3.14/N, \n          h = iResolution.y;\n    U /= h; U -= .5; U *= S;\n    O -= O;\n    \n    for (float i=0.; i<N; i++)\n        O = max( O,    smoothstep(S/h, 0., abs(fract(U.x+.1)-.6)-.2)            // strip\n                   * ( .7 + .3* sin(6.28* ( U.y*1.73/2. + .5*floor(U.x) ))) ),  // waves\n        U *= mat2(cos(a),-sin(a),sin(a),cos(a));\n  //O *= vec4(1.2, 1.1, 1,1);\n} ",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldVcRt",
+      "date": "1523000850",
+      "viewed": 103,
+      "name": "Clique Julia Fractal",
+      "username": "JuliaPoo",
+      "description": "Originally written for a phone background so there are extra variables",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nfloat battery = 1.;\nfloat bat2 = .4;\n\nint julia(vec2 uv, vec2 c){\nint i=0;\nwhile (i<int(100.*bat2*battery) && length(uv)<2.){\n\nuv = vec2(uv.x*uv.x - uv.y*uv.y, 2.*uv.x*uv.y)+c;\ni += 1;\n\n  }\n  return i;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n    \n  float time = iTime;\n  vec2 touch = iMouse.xy;\n\n  vec2 uv =-2.+4.*fragCoord.xy / iResolution.xy;\n  uv.y *= iResolution.y/iResolution.x;\n  float t = .1* time;\n  vec2 touc = -1. + 2.*touch.xy/iResolution.xy;\n  touc.y *= -iResolution.y/iResolution.x;\n  float r = clamp(length (touc),.5,1.5);\n  float a= atan(touc.y,touc.x);\n\n  //julia\n  float j = float(julia(uv, r*vec2(cos(t+a),sin(t+a))))/(100.*.3*battery);\n\n  fragColor = vec4(j);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

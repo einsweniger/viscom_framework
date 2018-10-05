@@ -1,0 +1,65 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XlsBzS",
+      "date": "1512311854",
+      "viewed": 264,
+      "name": "masking illusion",
+      "username": "FabriceNeyret2",
+      "description": "Without motion, the high frequencies of noise mask the image.\n",
+      "likes": 7,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "perception",
+        "iluusion"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define spow(x,n) sign(x)*pow(abs(x),n)\n\nvoid mainImage( out vec4 O, vec2 U )\n{\n    vec2 D = vec2(-100.*(2.*iTime+sin(2.*iTime)),0);\n    \n\tO =         texelFetch(iChannel0,ivec2(mod(U+D,256.)),0) // sliding mask\n        + .06 * texture(iChannel1,U/iResolution.xy);         // image\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

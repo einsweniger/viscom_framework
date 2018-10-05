@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdlfRM",
+      "date": "1495462144",
+      "viewed": 365,
+      "name": "shortest xor (51 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "short",
+        "halftweet",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(O,U) O = vec4( int(U) & int(U.y) ) / 256.\n\n// void mainImage( out vec4 O, vec2 U ) {  O = vec4( int(U) & int(U.y) ) / 256.;  }\n\n// void mainImage( out vec4 O, vec2 U ) {  O = vec4( int(U.x) ^ int(U.y) ) / 256.;  } // true xor\n\n// void mainImage( out vec4 O, vec2 U ) {  O = vec4( int(U.x) & int(U.y) ) / iResolution.y;  }\n\n// void mainImage( out vec4 O, vec2 U ) {  O = vec4( int(U.x) & int(U.y) ) / iMouse.x;  }\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

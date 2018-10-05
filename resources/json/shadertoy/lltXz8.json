@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lltXz8",
+      "date": "1478195988",
+      "viewed": 310,
+      "name": "Vasarely - 1 short (220 chars)",
+      "username": "FabriceNeyret2",
+      "description": "short version of  https://www.shadertoy.com/view/MldSR8",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "2tweets",
+        "short",
+        "golf",
+        "vasarely"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// short version of https://www.shadertoy.com/view/MldSR8\n\n\n/**/ // ---------------------------------------- coyote: 220 chars (rearanged by Fab)\nvoid mainImage( out vec4 O,  vec2 U )\n{\n    U += U - (O.xy=iResolution.xy);\n\tfloat L = length( U *= 10.5/O.y ), l;\n    O -= O;\n   \n    abs(U.x) < 10.5 ?\n\n        U /= L > 8.5 ? 1. : 3.-L*L/36.,  // bubble\n\n        l = length(fract(U+=.5)-.5),\n        L = length(abs(floor(U))+1.),\n\n        O +=  l<.35 ? 1.                 // inner\n            : l<.5  ? .03*L              // mid\n            :         .9-.1*L            // outer\n    : O;\n}\n/**/\n\n/** // ---------------------------------------- 235 chars\n\nvoid mainImage( out vec4 O,  vec2 U )\n{\n\tvec2 R = iResolution.xy;\n         U = (U+U-R)/R.y * 10.5;\n\tfloat L = length(U), l;\n    \n    O -= O;\n    if (abs(U.x) > 10.5) return;\n    \n    U /= L > 8.5 ? 1. : 3.-L*L/36.;      // bubble\n    \n    l = length(2.*fract(U +.5)-1.);\n    L = length(abs(ceil(U-.5))+1.);\n    \n    O +=   l<.7 ? 1.                     // inner\n         : l<1. ? .03*L                  // mid\n         :        .9-.1*L ;              // outer     \n}\n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

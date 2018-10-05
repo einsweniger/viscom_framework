@@ -1,0 +1,64 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lt2yDy",
+      "date": "1510072898",
+      "viewed": 211,
+      "name": "nmn_3d",
+      "username": "nonymononymo",
+      "description": "x",
+      "likes": 0,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "x"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float offset() {\n    return 0.5 * iMouse.x / iResolution.x;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    vec4 textureColor = texture(iChannel0, uv);\n    vec2 redSamplePos = vec2(uv.x - offset(),  uv.y);\n    vec2 blueSamplePos = vec2(uv.x + offset(),  uv.y);\n    float redAmount = texture(iChannel0,redSamplePos).r;\n    float blueAmount = texture(iChannel0,blueSamplePos).b;\n    fragColor = vec4(redAmount, textureColor.g, blueAmount, textureColor.w);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

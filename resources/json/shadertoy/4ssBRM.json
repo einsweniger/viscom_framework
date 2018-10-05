@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4ssBRM",
+      "date": "1495359176",
+      "viewed": 180,
+      "name": "Daily 2017-05-21",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 1,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8996,
+            "src": "https://soundcloud.com/iamneoncity/maroon-5-dont-wanna-know-ft-kendrick-lamar-neon-city-remix-tropical-house",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float rand(float x){return fract(sin(x)*1e4);} \nvec4 blend(vec4 c, vec4 o){return o*o.a + c*(1.-o.a);}\n\nvec3 hsv(vec3 c) {\n    vec4 k=vec4(1.,2./3.,1./3.,3.);\n    vec3 p=abs(fract(c.xxx+k.xyz)*6.-k.www);\n    return c.z*mix(k.xxx,clamp(p-k.xxx,0.,1.),c.y);\n}\n\nvec4 city(vec2 uv, float zoomx, float speed, float hCenter, float hAmpl, float hue, float wavespeed) {\n    uv.x+=iTime*speed;\n    uv.x*=zoomx;\n    uv.x+=rand(floor(uv.x))*.5;\n    uv.y+=sin(floor(uv.x)*.5+iTime*wavespeed)*.1;\n    float h=mix(hCenter-hAmpl, hCenter+hAmpl, uv.y);\n    float s=step(rand(floor(uv.x)),h);\n    float y=mix(.2, 1., uv.y);\n    vec3 c=hsv(vec3(hue, 1., 1.));\n    return mix(vec4(c,y),vec4(0.),s);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 c=vec4(hsv(vec3(.75,1.,mix(.6,.1,uv.y))),.0);\n    for (int i = 0; i < 4; ++i) {\n        float f=float(i);\n    \tc=blend(c,city(uv, 40.-f*8., .2+f*.02, .4+.05*f, .4+.2*f, .7-f*.05, 2.+f*.4));\n    }\n\tfragColor = c;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

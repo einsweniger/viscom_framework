@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lstyWs",
+      "date": "1520679393",
+      "viewed": 155,
+      "name": "Ray tracer Upgraded",
+      "username": "Jamie_Pendergast",
+      "description": "Made another one of these cool things!\nYou need a beefy pc to run these types of things so beware.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raytracer"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "struct Ray {\n\tvec3 origin;\n    vec3 direction;\n};\n\nstruct Intersection {\n\tvec3 normal;\n    vec3 point;\n   \tfloat dist;\n};\n    \nstruct Sphere {\n\tvec3 origin;\n    vec3 color;\n    float radius;\n};\n\n    \nfloat ZMAX = 999999.0;\nfloat EPSILON = 0.0001;\n\n\n#define sphere_c 3\nSphere spheres[3];\n\nIntersection NO_HIT = Intersection(vec3(0.),vec3(0.),-1.);\n\nIntersection iSphere(Ray ray, Sphere sphere) {\n\n\tIntersection i;\n\ti.dist = ZMAX;\n\tvec3 c = sphere.origin;\n\tfloat r = sphere.radius;\n\tvec3 e = c-ray.origin;\n\tfloat a = dot(e, ray.direction);\n\tfloat b = r*r - dot(e,e) + a*a;\n\tif( b>0.0 )\n\t{\n\t\tfloat f = sqrt(b);\n\t\tfloat t = a - f;\n\t\tif(t > EPSILON)\n\t\t{\n            i.point = ray.origin + ray.direction*t;\n\t\t\ti.normal = normalize(i.point-c);\n\t\t\ti.dist = t;\n\t\t}\n\t}\n\treturn i;\n}\n\nIntersection iPlane(Ray ray, vec3 n,const vec3 p0, vec3 l0, vec3 l, float t) {\n    // assuming vectors are all normalized\n    float denom = dot(n, l); \n    if (denom > 1e-6) { \n        vec3 p0l0 = p0 - l0; \n        t = dot(p0l0, n) / denom; \n        return Intersection(n,ray.origin + ray.direction * t,t);\n    } \n \n    return NO_HIT; \n} \n\n\n\n\nvec3 light = vec3(0.5,-0.3,-1.);\n\nvec3 sphere_material(Ray ray, Intersection i, Sphere s) {\n \tfloat d = dot(i.normal,light);\n \td = max(d,0.1);\n    d = min(d,0.8);\n\n    \n    vec3 c = s.color * d;\n    \n    return min(c,1.);\n}\n\n\nvec3 rayTrace(Ray ray) {\n    vec3 color = vec3(0.);\n    float Distance = ZMAX;\n    int old_sphere_i = -1;\n    vec3 sky = vec3(0.1,0.5,1.);\n    \n    for(int REF = 1; REF < 7; REF++) {\n        for(int sphere_i =0; sphere_i < sphere_c; sphere_i++) {\n            \n            if(sphere_i != old_sphere_i) {\n                Sphere sphere = spheres[sphere_i];\n                Intersection intersection = iSphere(ray,sphere);\n                if(intersection.dist <= Distance) {\n                    Distance = intersection.dist;\n\n                    if(intersection.dist !=  ZMAX) {\n\n                        vec3 materialc = sphere_material(ray,intersection,sphere);\n                        color += materialc;\n                        \n                        ray.origin = intersection.point + (intersection.normal * 0.01);\n                        \n                        vec3 rf = reflect(ray.direction,intersection.normal);\n                        ray.direction = rf;\n                        old_sphere_i = sphere_i;\n                        \n                    }\n                }\n                \n                \n            }\n    \t}\n    }\n    \n    return color;\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    light.x = abs(sin(iTime) - light.y);\n   \tlight.y = abs(cos(iTime) + light.x);\n    light = normalize(light);\n    \n    // Normalized pixel coordinates (from -0.5 to 0.5)\n    vec2 uv = fragCoord/iResolution.x;\n\n    Ray ray;\n    \n    \n    //ty fabrice neyret 2\n    vec3 direction = normalize( vec3( (iMouse.xy / iResolution.xy) + uv -1., 1.));\n\n    vec3 origin = vec3(((iMouse.x / iResolution.x) - 0.5)* 10.,0., -10.);\n    \n    \n    ray.origin = origin;\n    ray.direction = direction;  \n    \n    spheres[0] = Sphere(vec3(-3.,-3.,10.), vec3(1.,0.,0.),1.);\n    spheres[1] = Sphere(vec3(0.,-20.,10.), vec3(0.,1.,0.),10.);\n    spheres[2] = Sphere(vec3(3.,-3.,10.), vec3(0.,0.,1.),1.);\n    \n    // Output to screen\n    fragColor = vec4(rayTrace(ray),1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

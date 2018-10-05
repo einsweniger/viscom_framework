@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdjBDh",
+      "date": "1500291359",
+      "viewed": 267,
+      "name": "[SH17A] Spiral Circles",
+      "username": "NinjaKoala",
+      "description": "2 Tweet spiral thingy\u2026",
+      "likes": 9,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "spiral",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define L length\nvoid mainImage( out vec4 c, vec2 i ){\n    vec2 p,R=iResolution.xy;\n\tp = i.xy / R-.5;\n\tp.x *= R.x / R.y;\n\t\n\tfloat j = clamp(floor(L(p)*36.17+.5),1.,17.),r,t;\n\n\tr = j / 36.17;\n\n\tt = iTime * (18.-j) *.4189;\n\n\tc=vec4(smoothstep(0., 2./R.y, min(abs(L(p)-r),L(r * vec2(-sin(t),-cos(t))-p)-.006)));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

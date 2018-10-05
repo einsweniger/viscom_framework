@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtsyWX",
+      "date": "1506663642",
+      "viewed": 325,
+      "name": "Acid Drop - 269 chars",
+      "username": "GregRostami",
+      "description": "Here's a modification of gPlatl's beautiful Fractaloscopic shader:\n[url]https://www.shadertoy.com/view/4lXyWS[/url]\nI tried to animate just about everything ... enjoy in Fullscreen.",
+      "likes": 2,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "2d",
+        "twotweets",
+        "acid",
+        "short",
+        "koleidoscope"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 12218,
+            "src": "https://soundcloud.com/simone-peltier/the-beatles-lucy-in-the-sky-with-diamonds",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// 288 Chars - Makes it compatible with mobile browsers and WebGL 1.0\n/**/\nvoid mainImage(out vec4 O,vec2 U)\n{\n\tfloat t = iTime*.1, m = .4*sin(t*.2);\n    vec2 R = iResolution.xy;\n    O = vec4 ( dot( R = (2.+1.4*cos(t))*(U+U-R)/R.y,R ) *\n             sin( abs (mod (.2*t+atan (R.y,R.x), 2.094) - 1.05) + t + vec2(1.6,0) ), m,0);\n    for (int i=0; i< 45; i++)\n        O.xzyw = vec4(1.3,.999,.678,0) * abs( abs(O)/dot(O,O) - vec4(1,1.02,.4*m,0) );\n}\n/**/\n\n// 269 chars version\n/**\n#define mainImage(O,U)\t\t\t\t\t\t\t\t\t\t\\\n\tfloat t = iTime*.1, m = .4*sin(t*.2), i;\t\t\t\t\\\n    vec2 R = iResolution.xy;\t\t\t\t\t\t\t\t\\\n    O = vec4 ( dot( R = (2.+1.4*cos(t))*(U+U-R)/R.y,R ) *\t\\\n             sin( abs (mod (.2*t+atan (R.y,R.x), 2.094) - 1.05) + t + vec2(1.6,0) ), m,0);\t\\\n    while (i++< 45.)\t\t\t\t\t\t\t\t\t\t\\\n        O.xzyw = vec4(1.3,.999,.678,0) * abs( abs(O)/dot(O,O) - vec4(1,1.02,.4*m,0) )\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

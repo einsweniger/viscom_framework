@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sKyR3",
+      "date": "1522780908",
+      "viewed": 125,
+      "name": "Smooth circle",
+      "username": "DonKarlssonSan",
+      "description": "You must give a description to your shader",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "circle",
+        "smoothstep"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    // Normalize pixel coordinates (from 0 to 1)\n    // Translate to center of screen\n    vec2 uv = (fragCoord.xy -0.5 * iResolution.xy) / iResolution.x;\n \n    float r = 0.2;\n    float smoothness = 2.0 / iResolution.x;\n    float distFromCenter = length(uv);\n    float col = smoothstep(r, r + smoothness, distFromCenter);\n\n    // Output to screen\n    fragColor = vec4(col);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

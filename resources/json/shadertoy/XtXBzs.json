@@ -1,0 +1,48 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtXBzs",
+      "date": "1512841494",
+      "viewed": 203,
+      "name": "bug: 2 images buffer :-)",
+      "username": "FabriceNeyret2",
+      "description": ":-)",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "bug"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( O, U ) O.r++",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage( O, U ) if (U.x<iResolution.x/2.) discard; O.g++\n\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

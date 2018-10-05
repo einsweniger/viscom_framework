@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dsczr",
+      "date": "1486757642",
+      "viewed": 300,
+      "name": "Can u see anything?",
+      "username": "Pro_Coder",
+      "description": "It makes u see almost nothing xD",
+      "likes": 5,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 11,
+            "src": "/media/a/c3a071ecf273428bc72fc72b2dd972671de8da420a2d4f917b75d20e1c24b34c.ogv",
+            "ctype": "video",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//Credits to ProCoder\n\n\n\nfloat st2(vec2 p){\n\tfloat s;\n    float ss = 2.0;\n    float f = 90.0;\n\n   \tp += floor(p * (f));\n    \n    s = sin(p.x + iTime * ss) * sin(p.y + iTime * ss);\n    \n    return s*10.0;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n\t\n    \n   \tfragColor =  texture( iChannel0, uv + st2(fragCoord.xy*2.0 ) / iResolution.xy);\n\n    \n    //fragColor =  \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdGcDy",
+      "date": "1523137037",
+      "viewed": 115,
+      "name": "Sierpinski!",
+      "username": "Jamie_Pendergast",
+      "description": "Yes! a Sierpinski Triangle! Thanks to everyone that helped me!",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "int m = 0;\nint n = 31;\n\nint s(int z) {\n    int x = ~m & z;\n    m = x | n;\n    return x;\n}\nvoid mainImage( out vec4 c, in vec2 f )\n{\n    int z = 1;\n    int x = s(int(f.x) << (z | 2));\n    int y = s(int(f.y) << (z | 2));\n    c = vec4(float(y));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

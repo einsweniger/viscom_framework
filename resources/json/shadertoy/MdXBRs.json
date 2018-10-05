@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdXBRs",
+      "date": "1497487812",
+      "viewed": 217,
+      "name": "Tadpole",
+      "username": "aiekick",
+      "description": "Tadpole",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tadpole"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 3,
+            "src": "/media/a/95b90082f799f48677b4f206d856ad572f1d178c676269eac6347631d4447258.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float df(vec2 p)\n{\n    float r = dot(p,p) * 0.02 * cos(iTime * 20.);\n\t\n\tp *= mat2(cos(r), -sin(r), sin(r), cos(r));\n\t\n\treturn max(abs(p.x)+p.y, abs(p.y*p.x)) + length(p)*0.3;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uvt = gl_FragCoord.xy / iResolution.xy;\n    uvt.y += iTime * 1.;\n    \n\tvec2 uvc = (gl_FragCoord.xy *2. - iResolution.xy) / iResolution.y * 3.32;\n\t\n\tfloat d = df(uvc);\n\t\n\tfloat c = 1.-mix(0., 1., d);\n\t\n\tc = sqrt(c);\n\t\n\tfragColor = vec4(c);\n    \n    vec4 bg = texture(iChannel0, uvt);\n    \n    bg.b *= 2.0 + sin(iTime*20.0+ gl_FragCoord.y*0.1)*0.5; // thanks to Dain\n    \n    if (d > .9)\n        fragColor = bg;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

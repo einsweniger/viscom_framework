@@ -1,0 +1,37 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tXyzN",
+      "date": "1503594698",
+      "viewed": 208,
+      "name": "cylinder menger sponge",
+      "username": "abje",
+      "description": "a rounder shaped menger sponge, I was inspired by ollj and [url=https://www.shadertoy.com/view/XsfczB]cylinder sponge[/url] by russ. I can make it run faster by moving the normal calculation out of the loop in the loop, i think.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "fractal",
+        "cylinder",
+        "mengersponge"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "//by iq https://www.shadertoy.com/view/XljGDy\nvec2 circle(in vec2 rd, in vec3 sph )\n{\n    vec2 oc = sph.xy;\n    float b = dot( oc, rd );\n    float c = dot( oc, oc ) - sph.z*sph.z;\n    float h = b*b - c;\n    if( h<0.0 || dot(sph.xy,sph.xy) > sph.z*sph.z) return vec2(0.0);\n    h = sqrt( h );\n    return -b + vec2(-h,h);\n}\n\nvec2 circle2(in vec2 rd, in vec3 sph )\n{\n    vec2 oc = sph.xy;\n    float b = dot( oc, rd );\n    float c = dot( oc, oc ) - sph.z*sph.z;\n    float h = b*b - c;\n    if( h<0.0 ) return vec2(1000.0);\n    h = sqrt( h );\n    return -b + vec2(-h,h);\n}\n\nvec4 cylinder(vec3 ray, vec3 pos, float size, vec3 raylen) {\n    vec3 lens = vec3(\n        circle((ray.yz)*raylen.x,vec3(pos.yz,size)).y*raylen.x,\n    \tcircle((ray.xz)*raylen.y,vec3(pos.xz,size)).y*raylen.y,\n        circle((ray.xy)*raylen.z,vec3(pos.xy,size)).y*raylen.z);\n    \n    vec3 mask = vec3(greaterThan(lens,max(lens.yzx,lens.zxy)));\n    float len = dot(lens,mask);\n    \n    return vec4(len, (pos+ray*dot(lens,mask))*(1.0-mask)/size);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord.xy*2.0-iResolution.xy)/iResolution.y;\n    \n    vec3 normal;\n    vec3 ray = normalize(vec3(uv,1.0));\n    vec3 raylen = 1.0/vec3(\n        length(ray.yz),\n        length(ray.xz),\n        length(ray.xy));\n    vec3 pos = vec3(cos(iTime)*2.0, sin(iTime)*2.0, -5.0);\n    \n    const vec2 magicnum = vec2(1.0,-1.0);\n    \n    vec2 num = max(max(\n        circle2((ray.yz)*raylen.x,vec3(pos.yz,3.0))*raylen.x*magicnum,\n        circle2((ray.xz)*raylen.y,vec3(pos.xz,3.0))*raylen.y*magicnum),\n        circle2((ray.xy)*raylen.z,vec3(pos.xy,3.0))*raylen.z*magicnum)*magicnum;\n    \n    pos += ray * num.x;\n    float dist = num.x;\n    for (int i = 0; i < 10; i++) {\n        float len = 0.0;\n        for (float j = 1.0; j > 0.01; j /= 3.0) {\n        \tvec3 p = mod(pos+3.0*j,6.0*j)-3.0*j;\n            vec4 len2 = cylinder(ray, p, j, raylen);\n            \n            if (len2.x > len) {\n                normal = -len2.yzw;\n            \tlen = max(len2.x,len);\n            }\n        }\n        dist += len;\n        \n        if (len < 0.001 || dist > num.y) {\n            break;\n        }\n        pos += ray*len;\n    }\n    if (dist < num.y)\n    fragColor = vec4(0.5*normal+0.5,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

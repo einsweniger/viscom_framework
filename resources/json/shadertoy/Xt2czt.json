@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xt2czt",
+      "date": "1509794941",
+      "viewed": 242,
+      "name": "Flickering Dots",
+      "username": "chaosink",
+      "description": "Flickering Dots. Very simple.",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord - iResolution.xy / 2.;\n    float d = dot(uv, uv);\n    //float d = sqrt(dot(uv, uv));\n    fragColor = vec4(.5 + .5 * cos(d / 5. + iTime * 10.));\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

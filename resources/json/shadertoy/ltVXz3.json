@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltVXz3",
+      "date": "1485299158",
+      "viewed": 225,
+      "name": "Simple Eclipse",
+      "username": "arda",
+      "description": "Well, this is my kind of \"Hello World !\".",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "simple",
+        "eclipse"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec2 R = iResolution.xy;\n    uv = ( fragCoord -.5*R ) / R.xy;\n    uv.x *= iResolution.x/iResolution.y;\n    float d = length(uv);\n    float plt =0.5 + sin(iTime)/6.0;\n    float plt2=0.06 + sin(iTime+3.14)/40.0;\n    float r1 = 0.5;\n    float r2 = 0.3;\n    float c2= smoothstep(r2,r2-plt2,d);\n    float c1 = smoothstep(r1,r1-plt,d);\n    fragColor = vec4(vec3(c1-c2),1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

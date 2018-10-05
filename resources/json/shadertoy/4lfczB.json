@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lfczB",
+      "date": "1505383586",
+      "viewed": 206,
+      "name": "Sphere over lake",
+      "username": "Nowado",
+      "description": "Any description",
+      "likes": 6,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sphere"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n    \n#define r iResolution.xy\n#define t iTime\n{\n    vec2 uv = fragCoord/r;\n    vec2 d = vec2 (.3*sin(t),.1*cos(t));\n    uv-=.5;\n    uv.x*=r.x/r.y;\n    float l = length(uv+d)*4.5*(2.0*uv.y+1.0);\n    l=l;\n    fragColor = vec4(0.25/l,0.4/l,0.5/l,1.0); \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

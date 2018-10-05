@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ldGczw",
+      "date": "1521513702",
+      "viewed": 162,
+      "name": "Abstract Noise ",
+      "username": "ThePopil",
+      "description": "Inspired by https://shadertoy.com/view/Ms3cWX by jj99\n\nprotip: if you just say your shader is abstract then you don't have to understand what your math is doing ;)",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise",
+        "fbm",
+        "color",
+        "abstract"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 15,
+            "src": "/media/a/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Inspired by \"fluffy clouds\" by jj99. \n// https://shadertoy.com/view/Ms3cWX\n// (Specifically the layers function)\n\nfloat hash(vec2 p)\n{\n    p = vec2( dot(p,vec2(15.623,311.7)),dot(p,vec2(269.5,183.3)));\n\treturn fract(sin(p)*43758.5453).x;\n}\n\nfloat fade(float t)\n{\n\treturn t*t*t*(10.0+t*(-15.0 + 6.0*t));\n}\n\nfloat noise(vec2 pos)\n{\n    vec2 g = floor(pos);\n    vec2 f = fract(pos);\n    \n    float a = hash(g);\n    float b = hash(g+vec2(1,0));\n    float c = hash(g+vec2(0,1));\n    float d = hash(g+vec2(1,1));\n    \n    float s1 = mix(a,b,fade(f.x));\n\tfloat s2 = mix(c,d,fade(f.x));\n    return mix(s1,s2,fade(f.y));\n}\n\nfloat fbm(in vec2 p)\n{\n    float time = iTime+52.;\n    mat2 m2  = mat2(p.y*sin(time*0.1+0.5), -p.x*cos(time*0.1+1.0), \n                    -p.y*sin(time*0.1+1.5), p.x*cos(time*0.1+2.0));\n    float f = 1.9;\n    float a = 0.55;\n    float t = 0.0;\n    float b = 0.5;\n    for(int i=0; i < 8; i++)\n    {\n        float n = noise(p);\n        t += b*n;\n        b *= a;\n        \n        p = f*m2*p;\n    }\n    return t;\n}\n\nfloat layers(vec2 p)\n{\n    float time = (iTime+52.)*0.75;\n    \n    vec2 basePos = vec2(time*0.13, time*0.17);\n    vec2 baseScale = vec2(13.25);\n    float base = fbm(p * baseScale + basePos)*0.25;\n    \n    vec2 innerPos = vec2(sin(time * 0.035), sin(time * 0.05)) * 3.;\n    vec2 innerScale = vec2(3.25);\n    float inner = fbm(p * innerScale + innerPos);\n    \n    vec2 outerPos = vec2(-0.6, -0.5) + vec2(sin(-time * 0.01), sin(time * 0.1)) * 1.9;\n    vec2 outerScale = vec2(1.25);\n    float feedback = fbm((p + inner) * outerScale + outerPos);\n    \n    return base+feedback;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 p = fragCoord.xy  / iResolution.xy;\n\tp.x *= iResolution.x / iResolution.y;\n    \n    vec3 color = vec3(layers(p));\n\n    // Mix in shadertoy's default shader for some color\n    color *= 0.5 + 0.5*cos((iTime+52.)+p.xyx+vec3(0,2,4));\n    \n    fragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

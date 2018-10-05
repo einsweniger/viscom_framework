@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsXcRl",
+      "date": "1489277378",
+      "viewed": 201,
+      "name": "tiles to the power of 2",
+      "username": "battlebottle",
+      "description": "as described",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tiles"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    float x = log(fragCoord.x + (sin(iTime) + 1.0) * 1000.0)/log(2.);\n    float y = log(fragCoord.y + (sin(iTime) + 1.0) * 1000.0)/log(2.);\n    \n    float col = mod(mod(floor(x), 2.0) + mod(floor(y), 2.0), 2.0);\n    \n\tfragColor = vec4(col * 0.2 + 0.8);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

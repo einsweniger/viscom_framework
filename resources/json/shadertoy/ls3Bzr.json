@@ -1,0 +1,128 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ls3Bzr",
+      "date": "1523965243",
+      "viewed": 127,
+      "name": "Divine Spirograph",
+      "username": "nightfox",
+      "description": "Have fun playing with the #define values in the Common tab ;)",
+      "likes": 1,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy;\n    vec3 col = texture(iChannel0, uv).rgb;\n\tuv -= .5;\n    uv *= 2.;\n    uv.x *= iResolution.x/iResolution.y;\n   \n    vec2 point = vec2(cos(OUTER_SPIN_RATE*iTime)+RADIUS*cos(INNER_SPIN_RATE*iTime),sin(OUTER_SPIN_RATE*iTime)+RADIUS*sin(INNER_SPIN_RATE*iTime));\n    point /= 1.+RADIUS;\n    \n    if (abs(1. - length(uv)) < 0.001) col += 1.;\n    \n    float d = distance(uv,point);\n\n    col *= pow(.2,.9*d);\n    col += pow(.2,.9*d) + .05 * sin(10.*point.y+10.*point.x+10.*atan(uv.y-point.y, uv.x-point.x))+  pow(.000002,d) ;\n\n    \n    // Output to screen\n    fragColor = vec4(col,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n    if (texture(iChannel1, uv).x == iResolution.x)\n    \tfragColor = texture(iChannel0,uv);\n\tuv -= .5;\n    uv *= 2.;\n    uv.x *= iResolution.x/iResolution.y;\n\n    \n    vec3 col = vec3(0.);\n    \n\tfloat innerCircleRad = .952;\n    vec2 point = vec2(cos(OUTER_SPIN_RATE*iTime)+RADIUS*cos(INNER_SPIN_RATE*iTime),sin(OUTER_SPIN_RATE*iTime)+RADIUS*sin(INNER_SPIN_RATE*iTime));\n    point /= 1.+RADIUS;\n    \n    if (abs(1. - length(uv)) < 0.005) col += 1.;\n    \n    float d = distance(uv,point);\n    if (d < 0.01)\n    \tcol = vec3(sin(7.3*iTime), sin(4.1*iTime),sin(3.*iTime));\n    \n    // Output to screen\n    fragColor += vec4(col,1.0);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "#define RADIUS .95\n#define INNER_SPIN_RATE 8.\n#define OUTER_SPIN_RATE 3.",
+        "name": "Common",
+        "description": "",
+        "type": "common"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = vec4(iResolution.x);\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

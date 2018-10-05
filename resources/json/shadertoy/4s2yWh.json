@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4s2yWh",
+      "date": "1491909354",
+      "viewed": 214,
+      "name": "crash",
+      "username": "Zabidon",
+      "description": "It is my little experiment",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 15,
+            "src": "/media/a/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// License: Do What The F**k You Want To But It's Not My Fault Public License v1 (WTFNMFPL-1.0)\n// Created by Osipov Kirill --- zabidon\n\nvoid mainImage(out vec4 a, in vec2 b)\n{\n\tb = b / iResolution.y - .5;\n    a = texture(iChannel0, vec2(atan(b.x, b.y)));\n    a *= length(6. * b) * step(a.x / length(b), 9.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llSBDd",
+      "date": "1517564762",
+      "viewed": 253,
+      "name": "playing with new \"Common\" tab :)",
+      "username": "FabriceNeyret2",
+      "description": "see the code :-p\n\nEDIT: no longer working in new version on Common feature (final newline added) :-/\nNo idea how to get the behavior back.",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "test"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "#define mainImage(O,U) O = texelFetch(iChannel0,ivec2(U)+1,0); ",
+        "name": "Common",
+        "description": "",
+        "type": "common"
+      },
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "O = fract( O-O*vec4(7,8,9,0)*.01 + .1*texelFetch(iChannel1,ivec2(U), 0).r )",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dBBW1",
+      "date": "1500178103",
+      "viewed": 289,
+      "name": "[SH17A] Gas Giant",
+      "username": "Klems",
+      "description": "Everyone is making a planet, so I'm making one.",
+      "likes": 12,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "sh17a"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\n// 271 chars thanks to GregRostami\n#define r(a) mat2(cos(a + .78*vec4(0,6,2,0)))\nvoid mainImage( out vec4 c, vec2 u ) {\n    \n    c.xyz = iResolution;\n    u = (u+u-c.xy)/c.y*1.1;\n    \n    vec4 n = vec4(u, sqrt(max(0., 1.-dot(u,u))), 1);\n    \n    n.xy *= r(.8);\n    n.xz *= r(-.6);\n    n.xy *= r(n.z*4.+iTime*.3);\n    c = (n*.6+.9) * max(.2, n.z) * texture(iChannel0, n.xy*.1).r;\n    c.r *= .6;\n\t\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

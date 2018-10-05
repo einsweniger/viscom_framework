@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4slyWM",
+      "date": "1488453490",
+      "viewed": 260,
+      "name": "MyMetaballs",
+      "username": "FurryLiso",
+      "description": "bla bla bla",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "metasurface"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec3 ColorHSV(float h, float s, float v)\n{\n  float Vmin, a, Vinc, Vdec;\n  int Hi;\n    \n  if(h > 360.0)\n    h = 360.0;\n  if(s > 100.0)\n    s = 100.0;\n  if(v > 100.0)\n    v = 100.0;\n  \n  Hi = int(h / 60.0) % 6;\n  Vmin = ((100.0 - s) * v) / 100.0;\n  a = (v - Vmin) * float((int(h) % 60)) / 60.0;\n  Vinc = Vmin + a;\n  Vdec = v - a;\n  \n  v *= 2.55;\n  Vmin *= 2.55;\n  Vinc *= 2.55;\n  Vdec *= 2.55;\n  \n  if (Hi == 0)\n    return vec3(v, Vinc, Vmin);\n  if (Hi == 1)\n    return vec3(Vdec, v, Vmin);\n  if (Hi == 2)\n    return vec3(Vmin, v, Vinc);\n  if (Hi == 3)\n    return vec3(Vmin, Vdec, v);\n  if (Hi == 4)\n    return vec3(Vinc, Vmin, v);\n  if (Hi == 5)\n    return vec3(v, Vmin, Vdec);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\t\n\tfloat c = cos(iTime);\n    float s = sin(iTime);\t\n\tvec2 metaballs[4];\n    \n\tmetaballs[0] = vec2(c * 200.0 + 300.0, s * 150.0 + 200.0);\n\tmetaballs[1] = vec2(c * 250.0 + 350.0, sin(iTime * 0.25) * 100.0 + 200.0);\n\tmetaballs[2] = vec2(cos(iTime * 0.33) * 300.0 + 350.0, sin(iTime * 1.5) * 150.0 + 200.0);\n\tmetaballs[3] = vec2(iMouse.xy);\n    \n\tfragColor = vec4(ColorHSV(4000.0/distance(fragCoord.xy,metaballs[0])\n\t         \t   + 4000.0/distance(fragCoord.xy,metaballs[1])\n\t         \t   + 4000.0/distance(fragCoord.xy,metaballs[2])\n\t         \t   + 6000.0/distance(fragCoord.xy,metaballs[3]), 100.0, 100.0), 1.0);\t\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlsfzX",
+      "date": "1512768936",
+      "viewed": 186,
+      "name": "Simple timer",
+      "username": "qwertsol",
+      "description": "Shader displaying current iTime.",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "text",
+        "timer"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 49,
+            "src": "/media/a/08b42b43ae9d3c0605da11d0eac86618ea888e62cdd9518ee8b9097488b31560.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec4 char( float i, vec2 uv )\n{\n    float x = (i + uv.x) * 0.0625;\n    float y = (floor(x) + uv.y) * 0.0625;\n    x = mod(x, 1.0);\n        \n    return texture(iChannel0, vec2(x, y));\n}\n\nconst float zero = 192.0;\nconst float comma = zero  + 30.0;\n\nint length = 0;\nfloat string[10];\n\nvoid floatToString( float i )\n{\n    string[0] = zero + floor(mod(i, 0.1) * 100.0);\n    string[1] = zero + floor(mod(i, 1.0) * 10.0);\n    string[2] = comma;\n    length = 3;\n    \n    for (int j=0; j<6; j++)\n    {\n        string[length] = zero + floor(mod(i, 10.0));\n        length++;\n        if (i < 10.0)\n            break;\n        i /= 10.0;\n    }\n}\n\nfloat insideBox( vec2 v, vec2 bottomLeft, vec2 topRight )\n{\n    vec2 s = step(bottomLeft, v) - step(topRight, v);\n    \n    return s.x * s.y;   \n}\n\nvec4 color = vec4(0.0, 0.0, 0.0, 1.0);\nvoid paintText( vec2 uv, vec2 pos, float size, vec4 col )\n{\n    const float margin = 0.28;\n    float chWidth = (1.0 - 2.0 * margin) * size;\n    \n    float hf = (float(length) * chWidth) / 2.0;\n    vec2 ext = vec2(hf, size / 2.0);\n    vec2 min = pos - ext;\n    vec2 max = pos + ext;\n    \n    if (insideBox(uv, min, max) > 0.0)\n    {\n        uv -= min;\n        int i = int(uv.x / chWidth);\n        uv.x = mod(uv.x, chWidth);\n        uv.x += margin * size;\n        \n        vec2 coords = uv / size;\n        float alpha = char(string[length - i - 1], coords).r;\n    \tcolor = mix(color, col, col.a * alpha);\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    uv.x *= iResolution.x / iResolution.y;\n    \n    vec2 mid = vec2(0.5);\n    mid.x *= iResolution.x / iResolution.y;\n    \n    floatToString(iTime);\n    paintText(uv, mid, 0.2, vec4(1.0));\n    \n\tfragColor = color;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtyGzy",
+      "date": "1475172672",
+      "viewed": 460,
+      "name": "Dizzy - 96 chars",
+      "username": "GregRostami",
+      "description": "This is a modification of aiekick's shader: [url]https://www.shadertoy.com/view/4ly3Ry[/url]\nA big thanks to coyote for reducing this shader.",
+      "likes": 6,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "2d",
+        "2tc",
+        "onetweet"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 4872,
+            "src": "https://soundcloud.com/farooq-saeed-khan/inception-theme-hans-zimmer",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define mainImage(o,U)\t\t\t\t\t\t\t\\\nvec2 u=U/iResolution.x-.5;\t\t\t\t\t\t\\\nu/=dot(u,u);\t\t\t\t\t\t\t\t\t\\\n       o=max(u=fract(u+u+iTime),u.x-u).yyyy\n\n// 105 chars - As the old Amiga programmer (coyote) battles the French wizard from\n// Middle Earth (Fabrice), another 1 char is SLAIN!!\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    u /= dot(u=u/iResolution.x-.5, u);\n    o = max( u= fract(u+u+iTime), u.x - u ).yyyy;\n}\n/**/\n\n// 90 chars - To honor the origins of this algorithm ... aiekick\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    o = max( u= fract(u/dot(u=u/4e2-.6, u)+iDate.w), u.x - u ).yyyy;\n}\n/**/\n\n// 106 chars - iq is now using the DARK SIDE to reduce this shader!\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    u /= dot(u=u/iResolution.y-.6, u);\n    o = max( u= fract(u+=u+iDate.w), u.x - u ).yyyy;\n}\n/**/\n\n// 118 chars - Jedi Master iq slashed another 8 chars off!!\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    u /= dot(u=u/iResolution.y-.6, u) * .4;\n    o = max( u= fract(u+= ceil( u+=iDate.ww )), u.yx - u ).yyyy;\n}\n/**/\n\n// 126 chars - coyote used voodoo to poke lots of chars out of the shader\n/**\nvoid mainImage(out vec4 o,vec2 u)\n{\n    u /= dot(u=u/iResolution.y-.6, u) * .4;\n    o = max( u= fract(u+= mod( ceil( u+=iDate.ww ), 4.)), u.yx - u ).yyyy;\n}\n/**/\n\n// 134 chars - Original Shader\n/**\nvoid mainImage(out vec4 f,vec2 g)\n{\n    g /= dot(g = g/iResolution.y-.5,g)*.4;\n    g.y += mod( ceil(g.x+= iDate.w), 4.);\n    g = fract(g);\n    f -= f - max(g.x-g.y,g.y);\n}\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

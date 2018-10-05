@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sBcD3",
+      "date": "1493993462",
+      "viewed": 220,
+      "name": "Fungi Path",
+      "username": "lherm",
+      "description": "Yah.",
+      "likes": 1,
+      "published": 3,
+      "flags": 4,
+      "tags": [
+        "raymarch"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 32,
+            "src": "/presets/mic.png",
+            "ctype": "mic",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PSD pow(textureLod(iChannel0, vec2(.5), 0.).r, 1.)\nvoid mainImage( out vec4 f, in vec2 g )\n{\n    f-=f;\n    float x = 1., i=x, T=iTime, l;\n\tvec2 R = iResolution.xy;\n    vec4 p = vec4((g+g-R)/R.y, .5, 0), d=p;\n    p.y -= 5.; p.z -= T+T;\n    p *= .5;\n    for (; i > 0. && x > 1e-3; i-= .02)\n        x = length(cos(p.wxw)-cos(p.yzw))-PSD*.5,\n        f = i*i*vec4(l=distance(p, p-p), 1./l*l, abs(p.y), 1.),\n        p -= d*x*.5;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

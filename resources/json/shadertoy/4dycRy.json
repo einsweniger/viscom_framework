@@ -1,0 +1,63 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dycRy",
+      "date": "1522359427",
+      "viewed": 148,
+      "name": "Buffer mipmapping bug?",
+      "username": "Klems",
+      "description": "The red pixel in the bottom left corner has a huge value. Last mip level should be red, but it is black on my system. Use mouse to set LOD level, click right for maximum LOD.",
+      "likes": 0,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "mipmap"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    float lod = (iMouse.x/iResolution.x)*(log2(iResolution.x)+1.0);\n    fragColor = textureLod(iChannel0, fragCoord/iResolution.xy, lod);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    fragColor = vec4(0);\n    if (length(fragCoord)<2.0) {\n        fragColor = vec4(1,0,0,0)*9e9;\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

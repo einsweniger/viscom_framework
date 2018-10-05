@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdfBzl",
+      "date": "1497405849",
+      "viewed": 232,
+      "name": "311 char starfield (w/ texture)",
+      "username": "Ebanflo",
+      "description": "Not very exciting, but its my first shot at this sort of thing.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 30,
+            "src": "/media/a/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float h(vec3 p)//Dave_Hoskins https://www.shadertoy.com/view/4djSRW\n{\n\tp=fract(p*.103);\n    p+=dot(p,p.yzx+19.2);\n    return fract((p.x+p.y)*p.z);\n}\nvec4 f(vec2 x){\n    vec4 a=vec4(0.);\n    float s=1.;\n    for(int n=0;n<5;n++){\n        a+=texture(iChannel0,s*x)/s;\n        s*=2.;\n    }\n    return a*.65;\n}\nvoid mainImage(out vec4 o,vec2 i){\n    i/=iResolution.xy;\n    o=smoothstep(.9,1.,f(i));\n    //(length(o)>.7)?o+=h(vec3(i,iTime)):o=vec4(0.); //twinkle\n    //(length(o)>.7)?o+=texture(iChannel0, i+iTime):o=vec4(0.0); //not working\n    o+=(dot(o,o)>.5)?h(vec3(i,iTime)):0.; //Fabrice's twinkle\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ld2BWz",
+      "date": "1500134184",
+      "viewed": 199,
+      "name": "2D Sphere with texture (109c)",
+      "username": "aiekick",
+      "description": "based on [url=https://www.shadertoy.com/view/ldfyW2]2D Sphere (113c)[/url]\nthis code golded shader, was done, with FabriceNeyret2 and pthextract :)\ni cant add this shader in SH17A, because he not belong only to me :)",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "sphere",
+        "115c"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 9,
+            "src": "/media/a/bd6464771e47eed832c5eb2cd85cdc0bfc697786b903bfd30f890f9d4fc36657.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/* based on https://www.shadertoy.com/view/ldfyW2 */\n\n#define mainImage(o,u)                        \\\n    vec2 R = iResolution.xy/2., g = u-R;      \\\n    o = texture(iChannel0, g*= g += pow(.8 - dot(g/=R.y,g), .2) ) * g.x\n        \n/*void mainImage( out vec4 f, vec2 g )\n{\n    g -= f.xy = iResolution.xy/2.;\n    \n   \tg *= g += pow(.8 - dot(g /= f.y,g), .2);\n    \n    f = texture(iChannel0, g) * g.x;\n}*/\n\n/* original without texture : \nvoid mainImage( out vec4 f, vec2 g )\n{\n    g -= f.xy=iResolution.xy/2.;\n    \n   \tf = vec4(g *= g += f.a = pow(.3 - dot(g/=f.y,g), .2), f.aa) * f.a;\n}*/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lllyzj",
+      "date": "1505579384",
+      "viewed": 236,
+      "name": "Glow Ring",
+      "username": "BeardThings",
+      "description": "Started off ass a brick project but instead turned into a ring draw by a pinpoint laser. I like how it turned out.",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "lighting",
+        "ring",
+        "glow"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 1,
+            "src": "/media/a/10eb4fe0ac8a7dc348a2cc282ca5df1759ab8bf680117e4047728100969e7b43.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float Rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nvec3 CalcHeighttNormals(vec2 uv, float off, sampler2D tex) {\n    const vec2 c = vec2(0.2, 0.0);\n    float s0 = texture(tex, uv + vec2(-off, 0.0)).r;\n    float s1 = texture(tex, uv + vec2(off, 0.0)).r;\n    float s2 = texture(tex, uv + vec2(0.0, -off)).r;\n    float s3 = texture(tex, uv + vec2(0.0, off)).r;\n    vec3 va = normalize(vec3(c.xy, s1-s0));\n\tvec3 vb = normalize(vec3(c.yx, s3-s2));\n    return cross(va,vb);\n}\n\nvec3 SampleLight(vec3 baseColor, vec3 norm, vec3 lightDir, vec3 viewDir, vec3 specCol, float specPow, float specAmount) {\n\n    float lightAmount = max(dot(norm, -lightDir),0.0);\n    const vec3 c_Ambient = vec3(0.2,0.2,0.1);\n    float spec = pow(dot(reflect(-lightDir, norm), viewDir) * 0.5 + 0.5, specPow);\n    \n    return baseColor * lightAmount + c_Ambient + specCol * spec * specAmount;\n}\n\nfloat Sin01(float angle) {\n    return (sin(angle) + 1.0) * 0.5;\n}\n\nfloat Cos01(float angle) {\n    return (cos(angle) + 1.0) * 0.5;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {   \n    vec2 realUV = fragCoord / iResolution.xy;\n\tvec2 uv = fragCoord / iResolution.xy;\n\n    \n    // Build brick color\n    const vec4 c_BrickBase = vec4(0.7, 0.7, 0.7, 1.0);\n    const vec4 c_BrickSpot = vec4(0.7, 0.6, 0.4, 1.0) * 0.3;\n    \n    vec4 brickColor = mix(c_BrickBase * 1.4, c_BrickSpot * (Sin01(iTime) * 0.4 + 1.0), 1.0 -texture(iChannel0, uv * 2.0).r);\n    \n    // Lighting\n    vec2 lightBrickUV = uv;\n    vec3 normal = CalcHeighttNormals(lightBrickUV * 2.0, 0.005, iChannel0);\n    \n    \n    const float c_MaxAngle = 3.14159 * 0.1;\n    float lightAngle = sin(iTime) * c_MaxAngle;\n    vec3 lightDir = vec3(sin(lightAngle),0,-cos(lightAngle));\n    const vec3 c_ViewDir = vec3(0, 0, -1.0);\n    \n    \n    vec2 beamUV = realUV;\n    \n    const vec4 c_GoldColor = vec4(0.7, 0.7, 0.3, 1.0);\n    const float c_LaserThickness = 75.0;\n    \n    vec2 laserPoint = vec2(Cos01(iTime), Sin01(iTime));\n    \n    vec2 distanceToGlowPoint = vec2(distance(beamUV.x, laserPoint.x), distance(beamUV.y, laserPoint.y));\n    \n    float glowGoldAmount = max(pow(1.0 - distanceToGlowPoint.x, c_LaserThickness), 0.0);\n    glowGoldAmount += max(pow(1.0 - distanceToGlowPoint.y, c_LaserThickness), 0.0);\n    \n    float distanceToCenter = distance(beamUV, vec2(0.5));\n    float glowRing = 1.0 - abs(0.5 - distanceToCenter);\n    \n    \n    vec2 laserPointFromCenter = laserPoint - vec2(0.5);\n    vec2 uvPointFromCenter = realUV - vec2(0.5);\n    \n    float uvAngle = atan(uvPointFromCenter.y, uvPointFromCenter.x);\n    \n    //Branching agh! Goodluck GPU, may the force be with you\n\tuvAngle = uvAngle >= 0.0 ? uvAngle : 2.0*3.14159 + uvAngle;\n    \n    float trailAmount = 0.0;\n    \n    // Not the best way of doing this but I couldn't think of a better way\n    {\n    \tfloat timeAngle = mod(iTime, 2.0 * 3.14159);\n\t\t\n    \tfloat distanceToAngle = abs(min(uvAngle - timeAngle, 0.0));\n        float isBehind = max(-sign(uvAngle - timeAngle), 0.0);\n        \n        trailAmount += max((3.14159 - distanceToAngle) / 3.14159, 0.0) * isBehind;\n    }\n    \n    {\n    \tfloat timeAngle = mod(iTime, 2.0 * 3.14159) + 2.0 * 3.14159;\n\t\t\n    \tfloat distanceToAngle = abs(min(uvAngle - timeAngle, 0.0));\n        float isBehind = max(-sign(uvAngle - timeAngle), 0.0);\n        \n        trailAmount += max((3.14159 - distanceToAngle) / 3.14159, 0.0) * isBehind;\n    }\n    \n    glowGoldAmount += pow(glowRing, 100.0) * min(trailAmount, 1.0);\n    \n    vec4 baseBurnColor = vec4(0.6,0.6,0.6,1.0) * min(iTime * 0.01, 1.0);\n    const vec4 c_LaserRingColor = vec4(0.7, 0.7, 0.3, 1.0);\n    \n    vec4 ringColor = c_LaserRingColor * pow(glowRing, 100.0) * min(trailAmount, 1.0);\n    \n    vec4 burnColor = baseBurnColor * pow(glowRing, 50.0);\n    \n    brickColor -= burnColor;\n    brickColor.xyz = SampleLight(brickColor.xyz, normal, lightDir, c_ViewDir, vec3(1.0), 100.0, 0.2);\n    \n    fragColor = brickColor + c_GoldColor * glowGoldAmount + ringColor;\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4s2fRd",
+      "date": "1501743968",
+      "viewed": 173,
+      "name": "StraightMapping",
+      "username": "AngusLang",
+      "description": "simple demo straight texture mapping",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "texturemapping"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 co = fragCoord;\n    vec2 pixel_ratio = vec2(2.0, 2.0);\n    \n    vec4 light_color = vec4(1.0, 1.0, 1.0, 1.0);\n    \n    //co.x = co.x / iResolution.x;\n    //co.y = co.y / iResolution.y;\n    \n    co.x = co.x * pixel_ratio.x / iResolution.x;\n    co.y = co.y * pixel_ratio.y / iResolution.y;\n   \tco.x += (floor(co.y / 1.0f)) * 0.3333f;\n    vec4 pixel_color = texture(iChannel0, co);\n    \n    \n    fragColor = pixel_color;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dGXDW",
+      "date": "1464269295",
+      "viewed": 141,
+      "name": "shift1d",
+      "username": "lennyjpg",
+      "description": "stretch pixls",
+      "likes": 2,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    fragColor = texture(iChannel0, vec2(fract(iTime*0.01),(fragCoord.y / iResolution.y)));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "vec2 mainSound( float time )\n{\n    return vec2(fract(sin(time * 1.37)*1.));\n}",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

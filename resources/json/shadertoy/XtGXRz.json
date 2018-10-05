@@ -1,0 +1,40 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XtGXRz",
+      "date": "1482358876",
+      "viewed": 142,
+      "name": "optimize AABB intersection",
+      "username": "KylBlz",
+      "description": "Help optimize aabb intersection code",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "optimize",
+        "intersection",
+        "raytrace",
+        "box",
+        "help",
+        "aabb"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define minT(a,b) (a<b)? zfar: (b<0.)? (a>0.)? a: zfar: b\n#define vec3max(a) max(a.x, max(a.y, a.z))\n#define vec3min(a) min(a.x, min(a.y, a.z))\n\nstruct ray { vec3 o, d; };\nstruct hit { vec3 l, n; float d; };\nstruct box { vec3 c, s; }; //center and size (instead of 2 corners), happens to be intuitive for me and produce shorter code\n\nhit lt(in hit a, in hit b) { if (a.d < b.d) return a; else return b; }\n    \nbox b1 = box(vec3(-3.,0.,5.), vec3(1.,1.,10.)),\n\tb2 = box(vec3(0.,0.,5.), vec3(1.,1.,10.)),\n\tb3 = box(vec3(3.,0.,5.), vec3(1.,1.,10.)),\n\tb4 = box(vec3(-2.,3.,5.), vec3(1.,1.,10.)),\n\tb5 = box(vec3(2.,3.,5.), vec3(1.,1.,10.));\n\nfloat zfar = 1000.;\n\nhit traceBox(in ray r, in box b) {\n    vec3 t1 = (b.c-b.s - r.o)/r.d, //https://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm\n\t \t t2 = (b.c+b.s - r.o)/r.d,\n\t\t tn = min(t1, t2), tx = max(t1, t2);\n    float d = minT(vec3min(tx),vec3max(tn)); //minT calculates the minimum positive, if n/a then returns zfar\n    vec3 l = r.o + r.d * d,\n         a = l - b.c; //location relative to box center\n    return hit(l, step(b.s*.995, abs(a)) * sign(a), d); //for the normal, use step(size, loc)\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n   \tvec2 uv = fragCoord.xy / iResolution.xy * 2. - 1.;\n    uv.x *= iResolution.x/iResolution.y;\n    fragColor = vec4(0.);\n    ray r = ray(vec3(sin(iTime)*2., 1.2, -10.), normalize(vec3(uv,1.)));\n    hit h = traceBox(r, b1);\n    h = lt(h, traceBox(r, b2));\n    h = lt(h, traceBox(r, b3));\n    h = lt(h, traceBox(r, b4));\n    h = lt(h, traceBox(r, b5));\n    if (h.d < zfar) fragColor.rgb = abs(h.n); //shade absolute normal\n    else fragColor.bg = abs(uv); //background\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

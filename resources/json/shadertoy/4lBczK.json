@@ -1,0 +1,95 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lBczK",
+      "date": "1509132112",
+      "viewed": 238,
+      "name": " transparent voxels",
+      "username": "abje",
+      "description": "rendering a 4d cylinder fractal with transparent voxels.\nkeys q,w,e,r,a,s,d,f moves camera\nkeys t,y,u,i,o,p,g,h,j,k,l,\u00f8 rotates camera",
+      "likes": 3,
+      "published": 3,
+      "flags": 48,
+      "tags": [
+        "3d",
+        "voxels",
+        "4d",
+        "cylinders"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define resolution3d 100.0\n//#define rotation\n#define pi acos(-1.0)\nfloat time;\n\n#define rot(spin) mat2(sin(spin),cos(spin),cos(spin),-sin(spin))\n\n//by iq https://www.shadertoy.com/view/XljGDy\nvec2 sphIntersect(in vec3 rd, in vec4 sph )\n{\n\tvec3 oc =  sph.xyz;\n\tfloat b = dot( oc, rd );\n\tfloat c = dot( oc, oc ) - sph.w*sph.w;\n\tfloat h = b*b - c;\n\tif( h<0.0  || dot(sph.xyz,sph.xyz) > sph.w*sph.w) return vec2(-1.0);\n    h = sqrt( h );\n\treturn -b + vec2(-h,h);\n}\n\n//by iq https://www.shadertoy.com/view/XljGDy\nfloat sphDensity( vec4  ro, vec4  rd,   // ray origin, ray direction\n                  vec4  sc, float sr,   // sphere center, sphere radius\n                  float dbuffer )       // depth buffer\n{\n    // normalize the problem to the canonical sphere\n    float ndbuffer = dbuffer / sr;\n    vec4  rc = (ro - sc)/sr;\n\t\n    // find intersection with sphere\n    float b = dot(rd,rc);\n    float c = dot(rc,rc) - 1.0;\n    float h = b*b - c;\n\n    // not intersecting\n    if( h<0.0 ) return 0.0;\n\t\n    h = sqrt( h );\n    \n    //return h*h*h;\n\n    float t1 = -b - h;\n    float t2 = -b + h;\n\n    // not visible (behind camera or behind ndbuffer)\n    if( t2<0.0 || t1>ndbuffer ) return 0.0;\n\n    // clip integration segment from camera to ndbuffer\n    t1 = max( t1, 0.0 );\n    t2 = min( t2, ndbuffer );\n\n    // analytical integration of an inverse squared density\n    float i1 = -(c*t1 + b*t1*t1 + t1*t1*t1/3.0);\n    float i2 = -(c*t2 + b*t2*t2 + t2*t2*t2/3.0);\n    return (i2-i1)*(3.0/4.0);\n}\n\n/*vec2 circle(in vec2 rd, in vec3 sph )\n{\n    vec2 oc = sph.xy;\n    float b = dot( oc, rd );\n    float c = dot( oc, oc ) - sph.z*sph.z;\n    float h = b*b - c;\n    if( h<0.0 || dot(sph.xy,sph.xy) > sph.z*sph.z) return vec2(0.0);\n    h = sqrt( h );\n    return -b + vec2(-h,h);\n}*/\n\n\n\nfloat cylinder(vec4 ray, vec4 pos, float size,\n        float lenrayyzw,\n        float lenrayzwx,\n        float lenraywxy,\n        float lenrayxyz) {\n    return max(max(max(\n        sphIntersect(ray.yzw*lenrayyzw,vec4(pos.yzw,size)).y*lenrayyzw,\n        sphIntersect(ray.zwx*lenrayzwx,vec4(pos.zwx,size)).y*lenrayzwx),\n        sphIntersect(ray.wxy*lenraywxy,vec4(pos.wxy,size)).y*lenraywxy),\n        sphIntersect(ray.xyz*lenrayxyz,vec4(pos.xyz,size)).y*lenrayxyz);\n    \n}\nvec4 cylindernormal(vec4 ray, vec4 pos, float size,\n        float lenrayyzw,\n        float lenrayzwx,\n        float lenraywxy,\n        float lenrayxyz) {\n    vec4 lens = vec4(\n        sphIntersect(ray.yzw*lenrayyzw,vec4(pos.yzw,size)).y*lenrayyzw,\n        sphIntersect(ray.zwx*lenrayzwx,vec4(pos.zwx,size)).y*lenrayzwx,\n        sphIntersect(ray.wxy*lenraywxy,vec4(pos.wxy,size)).y*lenraywxy,\n        sphIntersect(ray.xyz*lenrayxyz,vec4(pos.xyz,size)).y*lenrayxyz);\n    float len = max(max(max(lens.x,lens.y),lens.z),lens.w);\n    vec4 mask = step(len,lens);\n    pos += ray*len;\n    return -pos/size*(1.0-mask);\n}\n\nvec4 hypercylinder(vec4 ro, vec4 rd) {\n    vec4 ray = rd;\n    //ray.xw *= rot(iMouse.x*0.025);\n\t//ray.zw *= rot(iMouse.y*0.025);\n\t//ray.zw *= rot(iTime*0.25);\n\t//ray.wx *= rot(iTime*0.25);\n    float lenrayyzw = 1.0/length(ray.yzw);\n    float lenrayzwx = 1.0/length(ray.zwx);\n    float lenraywxy = 1.0/length(ray.wxy);\n    float lenrayxyz = 1.0/length(ray.xyz);\n    float time = iTime*0.1;\n    vec4 cam = ro;\n\n    vec4 pos = cam;\n    vec4 lightpos = ro+vec4(0,0,0.1,0);\n\n\n    //vec4 pos = vec4(0.0,0.0,0.0,iTime);\n    float dist = 0.0;\n    vec4 normal;\n    int i;\n    for (i = 0; i < 20; i++) {\n        float len = 0.0;\n        for (float j = 1.0/6.0; j > 0.005; j /= 3.0) {\n            vec4 p = mod(pos+3.0*j,6.0*j)-3.0*j;\n            float len2 = cylinder(ray, p, j,\n                                  lenrayyzw,\n                                  lenrayzwx,\n                                  lenraywxy,\n                                  lenrayxyz);\n\n            if (len2 > len) {\n                normal = cylindernormal(ray, p, j,\n                                        lenrayyzw,\n                                        lenrayzwx,\n                                        lenraywxy,\n                                        lenrayxyz);\n                len = len2;\n            }\n        }\n\n        if (len < 0.001) {\n            break;\n        }\n        dist += len;\n        pos += ray*len;\n    }\n\n    vec4 lightdir = normalize(lightpos-pos);\n\n    vec4 fragColor = vec4(0.5*normal+0.5);\n    fragColor *= vec4(max(dot(lightdir,normal),0.2));\n    fragColor += max(sphDensity(cam,ray,lightpos,0.01,dist),0.0);\n    return fragColor;\n        //fragColor *= vec4(-dot(cos(pos*5.0),vec4(1.0/3.0))*0.5+0.5);\n}\n\nvec2 iBox( in vec3 ro, in vec3 rd, in float rad ) \n{\n\t// ray-box intersection in box space\n    vec3 m = 1.0/rd;\n    vec3 n = m*ro;\n    vec3 k = abs(m)*rad;\n\t\n    vec3 t1 = -n - k;\n    vec3 t2 = -n + k;\n    \n\tfloat tN = max( max( t1.x, t1.y ), t1.z );\n\tfloat tF = min( min( t2.x, t2.y ), t2.z );\n\n\t//vec3 nor = -sign(rdd)*step(t1.yzx,t1.xyz)*step(t1.zxy,t1.xyz);\n\n\treturn vec2(max(tN,0.0), tF);\n}\n\nvec4 memory(int i) {\n    return texelFetch(iChannel0,ivec2(i,0),0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    time = iTime;\n\tvec2 uv = (fragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;\n    \n    vec4 cam4d = memory(4);\n    \n    mat4 rotation4d = mat4(\n        memory(0),\n        memory(1),\n        memory(2),\n        memory(3));\n    \n    vec3 pos = vec3(0.0,0.0,-2.0*resolution3d);\n    vec3 dir = normalize(vec3(uv,1.0));\n    dir.yz *= rot(-iMouse.y/iResolution.y*3.14);\n    pos.yz *= rot(-iMouse.y/iResolution.y*3.14);\n    dir.xz *= rot(-iMouse.x/iResolution.x*6.28);\n    pos.xz *= rot(-iMouse.x/iResolution.x*6.28);\n    vec2 box = iBox(pos,dir,resolution3d);\n    pos += dir*box.x;\n    vec3 floorpos = floor(pos);\n    vec3 signdir = sign(dir);\n    vec3 invdir = 1.0/(abs(dir)+0.0001);\n    vec3 mask;\n    vec3 dists = abs(-signdir*0.5-0.5+pos-floorpos)*invdir;\n    float colorsize = 0.0;\n    fragColor = vec4(0.0);\n    float dist = box.x;\n    \n    float visibility = 1.0;\n    \n    float maxdist = length(vec3(resolution3d*2.0));\n\n    \n    while(dist < box.y) {\n        mask = vec3(lessThanEqual(dists,min(dists.yzx,dists.zxy)));\n        float len = dot(mask,dists);\n        \n        vec3 uv3d = floorpos/resolution3d;\n        vec4 rd4d = normalize(vec4(uv3d,1));\n        \n        rd4d = rotation4d[0]*rd4d.x\n              +rotation4d[1]*rd4d.y\n              +rotation4d[2]*rd4d.z\n              +rotation4d[3]*rd4d.w;\n        \n        float coloring = (10.0-pow((dist/maxdist),10.0)*10.0)/maxdist*0.25;\n        \n        fragColor += hypercylinder(cam4d,rd4d)*len;\n        colorsize += len;\n        //if (colorsize >= 1.0) break;\n        //visibility *= 0.95;\n        dist += len;\n        \n        pos += len*dir;\n        floorpos += mask*signdir;\n        dists -= len;\n        dists += mask*invdir;\n    }\n    //fragColor += (0.1+0.1*hypercylinder(cam4d,normalize(vec4(uv,0,1)*transpose(rotation4d))))\n    //    *max(1.0-colorsize,0.0);\n    fragColor /= colorsize;\n    //fragColor = vec4(colorsize);\n    //fragColor = vec4(normal*0.5+0.5,1.0);\n\t//fragColor = step(0.0,49.0-i)*texture(iChannel0,fract(normal.x*pos.zy-normal.y*pos.xz+normal.z*pos.xy));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 33,
+            "src": "/presets/tex00.jpg",
+            "ctype": "keyboard",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define MOVE_SPEED 0.5\n#define ROT_SPEED 1.0\n\n#define KEY_Q 81\n#define KEY_W 87\n#define KEY_E 69\n#define KEY_R 82\n#define KEY_T 84\n#define KEY_Y 89\n#define KEY_U 85\n#define KEY_I 73\n#define KEY_O 79\n#define KEY_P 80\n#define KEY_A 65\n#define KEY_S 83\n#define KEY_D 68\n#define KEY_F 70\n#define KEY_G 71\n#define KEY_H 72\n#define KEY_J 74\n#define KEY_K 75\n#define KEY_L 76\n#define KEY_OO 192\n\n#define PLUS_X keys(KEY_D)\n#define PLUS_Y keys(KEY_S)\n#define PLUS_Z keys(KEY_A)\n#define PLUS_W keys(KEY_R)\n\n#define MINUS_X keys(KEY_E)\n#define MINUS_Y keys(KEY_W)\n#define MINUS_Z keys(KEY_Q)\n#define MINUS_W keys(KEY_F)\n\n#define ROT_PLUS_0 keys(KEY_U)\n#define ROT_PLUS_1 keys(KEY_O)\n#define ROT_PLUS_2 keys(KEY_Y)\n#define ROT_PLUS_3 keys(KEY_I)\n#define ROT_PLUS_4 keys(KEY_T)\n#define ROT_PLUS_5 keys(KEY_P)\n\n#define ROT_MINUS_0 keys(KEY_J)\n#define ROT_MINUS_1 keys(KEY_L)\n#define ROT_MINUS_2 keys(KEY_H)\n#define ROT_MINUS_3 keys(KEY_K)\n#define ROT_MINUS_4 keys(KEY_G)\n#define ROT_MINUS_5 keys(KEY_OO)\n\nfloat keys(int i) {\n    return texelFetch(iChannel1,ivec2(i,0),0).x;\n}\n\nvec4 memory(int i) {\n    return texelFetch(iChannel0,ivec2(i,0),0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = texelFetch(iChannel0,ivec2(fragCoord),0);\n    if (int(fragCoord.y) == 0) {\n        int index = int(fragCoord.x);\n        if (index < 4) {\n            if (iFrame == 0) {\n                fragColor = vec4(index==0,index==1,index==2,index==3);\n                return;\n            }\n            \n            float[6] rot;\n            rot[0] = (ROT_PLUS_0-ROT_MINUS_0)*iTimeDelta*ROT_SPEED;\n            rot[1] = (ROT_PLUS_1-ROT_MINUS_1)*iTimeDelta*ROT_SPEED;\n            rot[2] = (ROT_PLUS_2-ROT_MINUS_2)*iTimeDelta*ROT_SPEED;\n            rot[3] = (ROT_PLUS_3-ROT_MINUS_3)*iTimeDelta*ROT_SPEED;\n            rot[4] = (ROT_PLUS_4-ROT_MINUS_4)*iTimeDelta*ROT_SPEED;\n            rot[5] = (ROT_PLUS_5-ROT_MINUS_5)*iTimeDelta*ROT_SPEED;\n            \n            mat4 rotation = mat4(\n                memory(0),\n                memory(1),\n                memory(2),\n                memory(3));\n            \n            mat4 newrotation = rotation;\n            \n            newrotation[0] = (rotation[0]*cos(rot[0])+rotation[1]*sin(rot[0]));\n            newrotation[1] = (rotation[1]*cos(rot[0])-rotation[0]*sin(rot[0]));\n            \n            rotation = newrotation;\n            \n            newrotation[0] = (rotation[0]*cos(rot[1])+rotation[2]*sin(rot[1]));\n            newrotation[2] = (rotation[2]*cos(rot[1])-rotation[0]*sin(rot[1]));\n            \n            rotation = newrotation;\n            \n            newrotation[0] = (rotation[0]*cos(rot[2])+rotation[3]*sin(rot[2]));\n            newrotation[3] = (rotation[3]*cos(rot[2])-rotation[0]*sin(rot[2]));\n            \n            rotation = newrotation;\n            \n            newrotation[1] = (rotation[1]*cos(rot[3])+rotation[2]*sin(rot[3]));\n            newrotation[2] = (rotation[2]*cos(rot[3])-rotation[1]*sin(rot[3]));\n            \n            rotation = newrotation;\n            \n            newrotation[1] = (rotation[1]*cos(rot[4])+rotation[3]*sin(rot[4]));\n            newrotation[3] = (rotation[3]*cos(rot[4])-rotation[1]*sin(rot[4]));\n            \n            rotation = newrotation;\n            \n            newrotation[2] = (rotation[2]*cos(rot[5])+rotation[3]*sin(rot[5]));\n            newrotation[3] = (rotation[3]*cos(rot[5])-rotation[2]*sin(rot[5]));\n            \n            rotation = newrotation;\n            \n            fragColor = rotation[index];\n            \n            return;\n        }\n        if (index == 4) {\n            if (iFrame == 0) {\n                fragColor = vec4(0,0,0,1);\n            }\n            \n            mat4 rotation = mat4(\n                memory(0),\n                memory(1),\n                memory(2),\n                memory(3));\n            \n            vec4 move = vec4(\n                PLUS_X-MINUS_X,\n                PLUS_Y-MINUS_Y,\n                PLUS_Z-MINUS_Z,\n                PLUS_W-MINUS_W)*iTimeDelta*MOVE_SPEED;\n            \n            fragColor += rotation*move;\n            \n            return;\n        }\n        if (iFrame == 0) {\n            fragColor = vec4(0,1,0,1);\n            return;\n        }\n    }\n    if (iFrame == 0) {\n        fragColor = vec4(1,0,0,1);\n        return;\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

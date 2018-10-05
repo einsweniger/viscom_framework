@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltXSzf",
+      "date": "1438468056",
+      "viewed": 178,
+      "name": "Interfering circles - patu",
+      "username": "patu",
+      "description": "Interfering circles",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "interferingcircles"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage (out vec4 c, in vec2 f) {    \n    float t = iTime; c -= c;\n    for (float k = 1.; k < 3.; k++) c.b += mod(length(vec2(sin(t * k - sin(t)), \n        cos(sin(t + k) - k)) * .2 + .25 - f.xy / iResolution.x),\n        .05) < .025 ? .5 : 0.; \n    c.r = c.b == .5 ? 0. : 1.;    \n} //minified with advices of 834144373 and coyote ",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

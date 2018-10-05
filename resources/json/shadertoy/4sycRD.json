@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sycRD",
+      "date": "1521140257",
+      "viewed": 124,
+      "name": "johndp blinker",
+      "username": "johndp",
+      "description": "blinker",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "utility"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float m_fps = 2.0;\n    float d0 = round(fract(float(iFrame)/2.0/m_fps)+0.001);\n\n    // Output to screen\n    fragColor = vec4(d0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

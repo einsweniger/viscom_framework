@@ -1,0 +1,78 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XsSfWR",
+      "date": "1499988776",
+      "viewed": 620,
+      "name": "[SH17A] microfeedback 3",
+      "username": "victor_shepardson",
+      "description": "iterative domain distortion and channel shift",
+      "likes": 32,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "feedback"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage(out vec4 c, vec2 u)\n{\n    c = .5+.5*texelFetch(iChannel0, ivec2(u),0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// LICENSE:\n// Creative Commons Attribution 4.0 International License.\n// https://creativecommons.org/licenses/by/4.0/\n\n#define T(x) texture(iChannel0, fract((x)/iResolution.xy))\n\nvoid mainImage(out vec4 c, vec2 u)\n{   \n    //c=1./u.yyyx;\n    c=u.yyyx/1e4;///iTime;\n    //for(float t=1.4; t<1e2; t+=t)\n    //    c += (c.gbar-c)/3.+T(u-c.wz*t);\n    for(float t=.6; t<4e2; t+=t)\n    \tc += c.gbar/4.-c*.3+T(u-c.wz*t);\n    \n\tc = mix(T(u+c.xy), cos(c), .07);\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

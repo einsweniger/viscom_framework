@@ -1,0 +1,88 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xs33DS",
+      "date": "1451929376",
+      "viewed": 477,
+      "name": "Filter: Motion Blur, multipass",
+      "username": "4rknova",
+      "description": "A simple multipass blur filter",
+      "likes": 6,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "blur",
+        "multipass"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [],
+        "code": "// by Nikos Papadopoulos, 4rknova / 2016\n// WTFPL\n\nvoid mainImage(out vec4 c, vec2 p)\n{\n\tc = texture(iChannel0, p.xy / iResolution.xy);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 36,
+            "src": "/media/a/35c87bcb8d7af24c54d41122dadb619dd920646a0bd0e477e7bdc6d12876df17.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "// by Nikos Papadopoulos, 4rknova / 2016\n// WTFPL\n\n#define BLUR .9\n\nvoid mainImage(out vec4 c, vec2 p)\n{\n    vec2 u = p.xy / iResolution.xy;\n    c = mix(texture(iChannel1, u), texture(iChannel0, u), clamp(BLUR,0.,1.-1e-2));\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

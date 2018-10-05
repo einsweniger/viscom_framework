@@ -1,0 +1,93 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sfcRH",
+      "date": "1486916449",
+      "viewed": 274,
+      "name": "kaleidoscop",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 5,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "ifs",
+        "kaleidoscop"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 O, in vec2 U )\n{\n    O = texture(iChannel0, U / iResolution.xy );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 12,
+            "src": "/media/a/e81e818ac76a8983d746784b423178ee9f6cdcdf7f8e8d719341a6fe2d2ab303.webm",
+            "ctype": "video",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 O, vec2 U )\n{\n    vec2 R = iResolution.xy;\n    U /= R;\n    \n    float a = iTime, c=cos(a),s=sin(a); \n    // if (U.x>.5 == U.y>.5) s = -s;\n    O =  .2  * texture(iChannel1, U ) \n        +.93 * texture(iChannel0, R.y/R*fract( (1.5+.5*s) * (.5+(U*R/R.y-.5)*mat2(c,-s,s,c)))  )\n       - .05;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

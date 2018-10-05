@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mslyzf",
+      "date": "1489249016",
+      "viewed": 316,
+      "name": "hypnotic tunnel",
+      "username": "battlebottle",
+      "description": "a simple tunnel",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tunnel"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n\tvec2 centre = iResolution.xy / 2.0;\n    \n    vec4 col = vec4(0.0,0.0,0.0,1.0);\n    \n    float steps = 16.0;\n    \n    for(float x = -(steps/2.0); x < (steps/2.0); x++){\n    \tfor(float y = -(steps/2.0); y < (steps/2.0); y++){\n    \t\tfloat dist = sqrt(sqrt((distance(fragCoord + vec2(x, y) / steps, centre))) * 100.0);\n    \t\tcol += floor(mod(dist - iTime * 3.0, 2.0));\n    \t}\n    }\n    \n    col /= steps * steps;\n        \n\tfragColor = col * (1.0 - (distance(fragCoord, centre) / iResolution.x));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

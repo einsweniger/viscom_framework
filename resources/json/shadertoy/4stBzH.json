@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4stBzH",
+      "date": "1524080493",
+      "viewed": 86,
+      "name": "Backing up",
+      "username": "Plento",
+      "description": "My attempt at a repeating tunnel thing, but with a warping effect. Im learning most of this by trial and error but I'd like to learn the right way. Anyone have any go to resources for learning GLSL? any good books? tutorials? Thank you. ",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tunnel",
+        "warp"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \n    vec2 uv = fragCoord/iResolution.xy;\n\n    uv -= .5;\n    \n  \n    //uv.x *= iMouse.x * .005;\n    uv.x *= cos(iTime + uv.y  ) * 2.;\n \tuv.y *= sin(iTime + uv.x ) * 2.;\n    //uv.y *= iMouse.y * .005;\n    \n   \n\n    float d = length(uv);\n    float g = length(atan( d * iTime) * .4);\n \tfloat o = 25.f;\n    \n   \n  \n    vec3 col = vec3(smoothstep(g, g - .1, abs(sin(g * iTime * o )) ), \n                    smoothstep(g, g - .1, sin(g * iTime * o)), \n                    smoothstep(g, g - .1, sin(g * iTime * o) ));\n\n    d = smoothstep(0.04, 0.42, d);\n    \n    fragColor = vec4(col * d,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

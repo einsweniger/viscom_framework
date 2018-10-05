@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdVyDR",
+      "date": "1521649497",
+      "viewed": 138,
+      "name": "hierarchy - kaleido (204 chars)",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "kifs",
+        "2tweets",
+        "short",
+        "golf"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://shadertoy.com/view/MsKyDR\n\n#define mainImage(O,u)                                               \\\n    for ( vec2 R = iResolution.xy, U = ( u+u - R ) / R.y, V,         \\\n               A = 4./(1.+sin(iTime)) +R-R;                          \\\n          V = pow(U=abs(U),A), O.w++<9. && pow(V+V.y,1./A).x<1.;     \\\n          O += vec4(.11,.14,.2,0)                                    \\\n        ) U = (U/.4-1.) * mat2(cos( iTime + vec4(0,55,33,0))) \n\n        \n        \n        \n        \n/** // 210 chars\n\n#define mainImage(O,u)                                       \\\n    float a = 4./(1.+sin(iTime));                            \\\n    for ( vec2 R = iResolution.xy, U = abs( (u+u-R) / R.y ); \\\n          O.w++<9. && pow(pow(U.x,a)+pow(U.y,a),1./a)<1. ;   \\\n          O += vec4(.11,.14,.2,0)                            \\\n        ) U = abs( (U/.4-1.) * mat2(cos( iTime + vec4(0,33,55,0))) ) \n\n/**/",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

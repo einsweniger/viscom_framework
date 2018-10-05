@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdXBz8",
+      "date": "1494765277",
+      "viewed": 216,
+      "name": "fuckthepolice",
+      "username": "lennyjpg",
+      "description": " ",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float whoop(in vec2 u,float s, in float t){\n    float a = atan(u.y,u.x);\n    float d = fract((sin(s*t + a)+1.)*.5);\n    return length(vec2(sin(a), cos(a)) * d) * .7;\n}\nvoid mainImage( out vec4 O, in vec2 v ){\n    vec2 r = iResolution.xy;\n    v = (v - .5 * r.xy) /  min(r.x, r.y) - vec2(.4,sin(iTime*.5));\n    float t = iTime * 7.7,\n    a = whoop(v, 1.3, t*.7),\n    b = whoop(v - vec2(-.6,0), 1.7, t*.5);\n\tO.xyz = mix(vec3(0,0,.9), vec3(.9,0,0), .5+(a-b)*.9);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

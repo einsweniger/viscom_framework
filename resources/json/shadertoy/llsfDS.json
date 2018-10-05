@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llsfDS",
+      "date": "1513205550",
+      "viewed": 259,
+      "name": "shortest planet (193 chars)",
+      "username": "FabriceNeyret2",
+      "description": "mixing [url] https://shadertoy.com/view/XstXzs [/url]   and [url] https://www.shadertoy.com/view/XdcGWr [/url].\n",
+      "likes": 6,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sphere",
+        "2tweets",
+        "short"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 3,
+            "src": "/media/a/95b90082f799f48677b4f206d856ad572f1d178c676269eac6347631d4447258.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "false",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://shadertoy.com/view/XstXzs   + map: https://www.shadertoy.com/view/XdcGWr\n// variant of https://www.shadertoy.com/view/XsdXRl\n\nvoid mainImage( out vec4 O, vec2 U )\n{ \tU = 2.2 * U/iResolution.y - 1.1;\n    U.x = acos( U.x / cos( U.y = asin(U.y) )) - iTime;\n\n    O = texture(iChannel0,U/4.).grba;\n    O += vec4( 2.*O.r - O.b, O.rba );\n\tO = smoothstep(0., .7, .5*O*O*O) + 1./U.x;\n}\n\n\n\n\n\n\n\n\n\n\n\n\n/* About the maths:\n\n   Xe = cos(theta)cos(phi)\n   Ye = sin(phi)               -> phi = asin(Ye) -> theta = acos(Xe/cos(phi))\n   uv = vec2(theta-time,phi) \n\n   Black background:\n\n   acos = NaN out of the disk\n   as a color, Nan is black\n   so + 1./Ux forces black out of the disk\n*/ ",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

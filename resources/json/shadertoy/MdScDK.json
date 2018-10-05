@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdScDK",
+      "date": "1493817065",
+      "viewed": 171,
+      "name": "Daily 2017-05-03",
+      "username": "Koltes",
+      "description": "Daily",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "daily"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Based on LJ magics\n\nvec3 ro,rd,mp;\nfloat md;\n\nmat2 r2d(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}\nfloat soc(vec3 p){vec3 n=normalize(sign(p));return min(min(dot(p.xy,n.xy),dot(p.yz,n.yz)),dot(p.xz,n.xz));}\n\nfloat map(vec3 p){\n    p.xy*=r2d(iTime*.7);\n    p.yz*=r2d(iTime*.5);\n\tp.xz*=r2d(iTime*.3);\n    return soc(max(abs(p)-.2,1e-6))-.1*sqrt(2.);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = (fragCoord.xy-.5*iResolution.xy)/iResolution.y;\n    ro=vec3(uv,3.);\n    rd=vec3(uv,-1.);\n    mp=ro;\n    for(int i=0;i<50;++i){\n        md=map(mp);\n        if(md<.001)break;\n        mp+=rd*md;\n    }\n\tfragColor = vec4(length(mp-ro)*.1);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

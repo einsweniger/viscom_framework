@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4lfBDs",
+      "date": "1513833806",
+      "viewed": 182,
+      "name": "Basic_MovingSin",
+      "username": "PaperColor",
+      "description": "sin wave",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "sinwave"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 28,
+            "src": "/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float count = 10.0;\nfloat pi = 3.141592654;\nfloat tao = 2.0*pi;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\t\n\t//fragColor = vec4( col, 1.0 );\n\t//float value = sin(uv.x*10.0*);\n\t\n    //fragColor = vec4(value,value,value,1);\n\t//fragColor = texture(iChannel0,uv*10.0);\n\tvec2 scaleduv = uv*count;\n    float verticalValue = sin(uv.x*count*tao+iTime);\n    //float horiaontalValue = sin(scaleduv.y);\n    \n    fragColor = vec4(verticalValue,verticalValue,verticalValue,1.0);\n    //fragColor = vec4(uv.x,uv.x,uv.x,1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MlfcDn",
+      "date": "1504294475",
+      "viewed": 189,
+      "name": "satin weaving",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 1,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "pattern",
+        "2tweets",
+        "short",
+        "weaving"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define S(x,y,a,b) abs(fract(x)-.5) < .4  ? a + b* sin(3.14/2.5* ( y -.25 + 3.*ceil(x) )) : 0.\n\n#define mainImage( O, u )                       \\\n    vec2 U = u / 50.;                           \\\n    O += max ( S(U.x,U.y,.5,.5), S(U.y,-U.x,.8,-.2) )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

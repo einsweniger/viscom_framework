@@ -1,0 +1,94 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lljfzd",
+      "date": "1516917918",
+      "viewed": 168,
+      "name": "mrshmllwppsRbbdFrPlsre",
+      "username": "jrsa",
+      "description": " ",
+      "likes": 6,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "feedback",
+        "colorshifting",
+        "shaderclub"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tfragColor = texture(iChannel0, uv);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    \n    if (iMouse.z > 1.0 || iFrame < 10) {\n        // draw an image to start the process\n    \tfragColor = texture(iChannel1, uv);\n    } else {\n        // use input red and blue as midpoints of scaling operation\n        vec2 center = texture(iChannel0, uv).rb; \n        uv -= center;\n        uv *= mat2(0.999, 0.0, 0.0, 1.001);\n        uv += center;\n                \n        // get another input texel, displaced by scaling above\n    \tfragColor = texture(iChannel0, uv);\n        \n        // set green channel to magnitude of red and blue (of displaced input)\n        fragColor.g = mod(3.4 * length(fragColor.rb), 0.5) + 0.5;\n        \n        // shift blue by magnitude of vector used to offset scaling matrix\n        // (actual red and blue input, before displacement)\n        fragColor.b = mod(fragColor.b + (length(center) / 1000.0), 1.0);\n        \n        // shift red by rgb magnitude of displaced input\n        fragColor.r = mod(fragColor.r + (length(fragColor.rgb) / 1000.0), 1.0);\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

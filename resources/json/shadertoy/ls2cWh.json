@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ls2cWh",
+      "date": "1491944252",
+      "viewed": 216,
+      "name": "peace",
+      "username": "Zabidon",
+      "description": "It is a minor change of Fabrice shader and taken from here https://www.shadertoy.com/view/XdXyDr\n\nO == NaN has been fixed.",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "tweet",
+        "peace"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// Original shader is taken from here https://www.shadertoy.com/view/XdXyDr\n#define mainImage(O, U) O.xy = U / iResolution.y - .5; O = vec4(1) - .03/abs(length(O.xy) -.5) - .03/abs(O.x) - (length(O.xy) < .5 ? .03/abs(abs(O.x)+O.y): 0.)",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

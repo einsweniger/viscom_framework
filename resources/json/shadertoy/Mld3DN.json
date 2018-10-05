@@ -1,0 +1,65 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Mld3DN",
+      "date": "1469450421",
+      "viewed": 765,
+      "name": "Noise Transition By Lawliet",
+      "username": "Lawliet",
+      "description": "Noise Transition",
+      "likes": 4,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "noise",
+        "transition"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 15,
+            "src": "/media/a/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+            "ctype": "texture",
+            "channel": 2,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define COLOR vec4(1.0,0.0,0.0,0.5)\n#define SPEED 0.25\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    \n    vec4 fore = texture(iChannel0,uv); \n    \n    vec4 back = texture(iChannel1,uv); \n    \n    vec4 noise = texture(iChannel2,uv * 5.0); \n    \n    vec4 light = COLOR;\n    \n    float offset;\n    \n    offset = sin(mod(iTime * SPEED,3.14 * 0.5));\n    \n    float a = offset * 3.0 - uv.x;\n    \n    a = a - noise.r;\n    \n    a = clamp (a,0.0,1.0);\n    \n\tfragColor = back * (1.0 - a) + fore * a;\n    \n    //fragColor = noise;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

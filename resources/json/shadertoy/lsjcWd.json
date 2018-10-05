@@ -1,0 +1,35 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "lsjcWd",
+      "date": "1494449525",
+      "viewed": 111,
+      "name": "1/100",
+      "username": "yahe",
+      "description": "1/100",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "line"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 st = fragCoord.xy/iResolution.xy;\n    vec3 color = vec3(0.0);\n    \n    float left = - smoothstep( cos(iTime) / 2.0, cos(iTime) / 2.0 + 0.7, st.x) + 1.0;\n    float top = cos(st.x);\n    float bottom = cos(st.y * 1000.0 * cos(iTime/2.0));\n    \n    color = top * bottom * left * vec3( cos(iTime)+st.x , cos(iTime)+ st.y, 1.0 ); \n    fragColor = vec4(color,1.0);\n    \n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

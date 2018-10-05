@@ -1,0 +1,63 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4dffDH",
+      "date": "1495843548",
+      "viewed": 222,
+      "name": "17/100",
+      "username": "yahe",
+      "description": "17/100",
+      "likes": 5,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "distance"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "vec2 rotate(vec2 v, float alpha)\n{\n\tfloat vx = v.x*cos(alpha)-v.y*sin(alpha);\n\tfloat vy = v.x*sin(alpha)+v.y*cos(alpha);\n\tv.x = vx;\n\tv.y = vy;\n\treturn v;\n}\n\nfloat F(vec2 p, float s)\n{\n\tfloat x = abs(p.x);\n    float y = abs(p.y);\n    \n    x *= s;\n    y *= s;\n    \n    float ScaleX = (1.0 - sqrt(abs(1.0 - x)))/(x);\n    float ScaleY = (1.0 - sqrt(abs(1.0 - y)))/(y);\n    \n    float brightness = 1.1;\n    \n    return ScaleX * ScaleY * brightness;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    vec4 pix = texture(iChannel0,uv);\n    \n    float aspect = iResolution.x / iResolution.y;\n    uv.x = uv.x * aspect;\n    vec2 p = uv - vec2(0.5 * aspect, 0.5);\n    \n    \n    vec3 col = vec3(0.0, 0.0, 0.0);\n    \n    float scale = 0.;\n    \n    for (float i=0.; i<20.; i++) {\n    \tscale += F(rotate(p,(i*2.+1.)*iTime/100.), (i*(sin(iTime/50.)/5.+.5)+1.));\n    }\n    \n    vec3 Color = vec3(0.5);\n    \n    vec4 color = pix * scale / 1.5;\n    \n    \n\tfragColor = color;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "#define N 5\nvec2[N] c;\n\nfloat avgDistance(vec2 uv)\n{\n \tfloat d = 0.0;\n    float k = 50.;\n    \n    for(int i=0; i<N; i++)    \n     \td+= cos(k*distance(uv,c[i])); \n    \n    return d/float(N);  \n}\n\nvec4 distToColor(float d)\n{\n    return vec4(sin(d),sin(d),sin(d),1.0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord.xy - iResolution.xy * .5) / iResolution.y;\n    \n    for(int i=0; i<N; i++)\n    {\n     float fi = 2.0*3.14*float(i)/float(N);\n     c[i]= vec2(sin(fi+iTime/10.), cos(fi+iTime/10.))*cos(iTime/10.);\n    }\n    \n\tfragColor = distToColor(avgDistance(uv))*1.;\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

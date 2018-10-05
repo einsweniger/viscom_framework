@@ -1,0 +1,269 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdKyWW",
+      "date": "1522077713",
+      "viewed": 178,
+      "name": "Reaction Diffusion 6",
+      "username": "aiekick",
+      "description": "Reaction Diffusion 6",
+      "likes": 4,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "reaction",
+        "diffusion6"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 2,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 260,
+            "src": "/media/previz/buffer03.png",
+            "ctype": "buffer",
+            "channel": 3,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord/iResolution.xy / ZOOM;\n\n    float r = texture(iChannel0, uv).r;\n    //float v = texture(iChannel1, uv).r;\n    //float b = texture(iChannel2, uv).r;\n    //float a = texture(iChannel3, uv).r;\n    \n    fragColor = vec4(smoothstep(0.2,.8,vec4(r)));\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "#define FEED_RATE r * 0.05\n#define KILL_RATE r * 0.15\n#define DIFF vec2(0.8,0.2)\n#define ZOOM 1.0\n\nfloat pn(vec3 p) \n{\n   vec3 i = floor(p);\n   vec4 a = dot(i, vec3(1., 57., 21.)) + vec4(0., 57., 21., 78.);\n   vec3 f = cos((p-i)*3.14159)*(-.5) + .5;\n   a = mix(sin(cos(a)*a), sin(cos(1.+a)*(1.+a)), f.x);\n   a.xy = mix(a.xz, a.yw, f.y);\n   return mix(a.x, a.y, f.z);\n}\n\nvec2 cell(vec2 fragCoord, vec2 pixel, vec2 dir, float scale, sampler2D sam, vec2 size)\n{\n    pixel *= dir;\n    \n    // remove screen border of domain\n    if (fragCoord.x + pixel.x > size.x) fragCoord.x = 0.;\n    if (fragCoord.y + pixel.y > size.y) fragCoord.y = 0.;\n    if (fragCoord.x + pixel.x < 0.0) fragCoord.x = size.x;\n    if (fragCoord.y + pixel.y < 0.0) fragCoord.y = size.y;\n    \n\tvec2 uv = (fragCoord + pixel) / size.xy;\n    return texture(sam, uv).rg * scale;\n}\n\nvec2 laplacian2D(vec2 fragCoord, vec2 dir, float a, float b, sampler2D sam, vec2 size) \n{\n    float st = 1.;\n    a /= 4.;\n    b /= 4.;\n    return \n        cell(fragCoord, vec2(0., -st), dir, a, sam, size) +\n        cell(fragCoord, vec2(0., st), dir, a, sam, size) +\n        cell(fragCoord, vec2(st, 0.), dir, a, sam, size) +\n        cell(fragCoord, vec2(-st, 0.), dir, a, sam, size) +\n        cell(fragCoord, vec2(-st, -st), dir, b, sam, size) +\n        cell(fragCoord, vec2(-st, st), dir, b, sam, size) +\n        cell(fragCoord, vec2(st, -st), dir, b, sam, size) +\n        cell(fragCoord, vec2(st, st), dir, b, sam, size) -\n        cell(fragCoord, vec2(0., 0.), dir, 1., sam, size);\n}\n\n",
+        "name": "Common",
+        "description": "",
+        "type": "common"
+      },
+      {
+        "inputs": [
+          {
+            "id": 10,
+            "src": "/media/a/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 260,
+            "src": "/media/previz/buffer03.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    \n    fragColor = vec4(0,0,0,0);\n\t\n   \tif (iFrame < 30)\n    {\n        uv = (fragCoord*2. - iResolution.xy / ZOOM)/iResolution.y / ZOOM;\n    \tif (length(uv*pn(uv.xyy*20.)) < 0.05)\n\t\t\tfragColor = mix(vec4(0,1,0,1), vec4(1,0,0,1), length(uv)); \n    }\n    else if (iMouse.z > 0.0)\n\t{\n\t\tvec2 mo = iMouse.xy / iResolution.xy / ZOOM;\n    \tfragColor = texture(iChannel0, uv);\n        if (length(uv-mo) < 0.003)\n\t\t\tfragColor = mix(vec4(0,1,0,1), vec4(1,0,0,1), length(uv-mo)); \n\t}\n    else\n    {\n        float a = float(iFrame) * 0.1;\n        \n\t\tvec2 dir = normalize(vec2(a+cos(a),a-sin(a)));\n        \n        dir = vec2(1);\n        \n        float r = texture(iChannel1, uv).r;\n        \n        vec2 diffusionCoef = DIFF;\n        float feedCoef = FEED_RATE;\n        float killCoef = KILL_RATE;\n            \n        vec2 ab = cell(fragCoord, vec2(0,0), vec2(0,0), 1., iChannel0, iResolution.xy);\n        vec2 lp = laplacian2D(fragCoord, dir, .5, .5, iChannel0, iResolution.xy);\n        \n        float reaction = ab.x * ab.y * ab.y;\n        vec2 diffusion = diffusionCoef * lp;\n        float feed = feedCoef * (1. - ab.x);\n        float kill = (feedCoef + killCoef) * ab.y;\n        \n        ab += diffusion + vec2(feed - reaction, reaction - kill);\n        \n    \tfragColor = vec4(clamp(ab,0.,1e4),ab*r);\n    }\n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 46,
+            "src": "/media/a/79520a3d3a0f4d3caa440802ef4362e99d54e12b1392973e4ea321840970a88a.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    \n    fragColor = vec4(0,0,0,0);\n\t\n    float a = float(iFrame) * 0.1;\n        \n\tvec2 dir = normalize(vec2(a+cos(a),a-sin(a)));\n        \n    dir = vec2(1);\n        \n    float r = texture(iChannel1, uv).r;\n        \n    vec2 diffusionCoef = DIFF;\n    float feedCoef = FEED_RATE;\n    float killCoef = KILL_RATE;\n            \n    vec2 ab = cell(fragCoord, vec2(0,0), vec2(0,0), 1., iChannel0, iResolution.xy);\n    vec2 lp = laplacian2D(fragCoord, dir, .5, .5, iChannel0, iResolution.xy);\n        \n    float reaction = ab.x * ab.y * ab.y;\n    vec2 diffusion = diffusionCoef * lp;\n    float feed = feedCoef * (1. - ab.x);\n    float kill = (feedCoef + killCoef) * ab.y;\n        \n    ab += diffusion + vec2(feed - reaction, reaction - kill);\n        \n    fragColor = vec4(clamp(ab,0.,1e4),ab*r);\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 45,
+            "src": "/media/a/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    \n    fragColor = vec4(0,0,0,0);\n\t\n    float a = float(iFrame) * 0.1;\n        \n\tvec2 dir = normalize(vec2(a+cos(a),a-sin(a)));\n        \n    dir = vec2(1);\n        \n    float r = texture(iChannel1, uv).r;\n        \n    vec2 diffusionCoef = DIFF;\n    float feedCoef = FEED_RATE;\n    float killCoef = KILL_RATE;\n            \n    vec2 ab = cell(fragCoord, vec2(0,0), vec2(0,0), 1., iChannel0, iResolution.xy);\n    vec2 lp = laplacian2D(fragCoord, dir, .5, .5, iChannel0, iResolution.xy);\n        \n    float reaction = ab.x * ab.y * ab.y;\n    vec2 diffusion = diffusionCoef * lp;\n    float feed = feedCoef * (1. - ab.x);\n    float kill = (feedCoef + killCoef) * ab.y;\n        \n    ab += diffusion + vec2(feed - reaction, reaction - kill);\n        \n    fragColor = vec4(clamp(ab,0.,1e4),ab*r);\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 16,
+            "src": "/media/a/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+            "ctype": "texture",
+            "channel": 1,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 260,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    \n    fragColor = vec4(0,0,0,0);\n\t\n    float a = float(iFrame) * 0.1;\n        \n\tvec2 dir = normalize(vec2(a+cos(a),a-sin(a)));\n        \n    dir = vec2(1);\n        \n    float r = texture(iChannel1, uv).r;\n        \n    vec2 diffusionCoef = DIFF;\n    float feedCoef = FEED_RATE;\n    float killCoef = KILL_RATE;\n            \n    vec2 ab = cell(fragCoord, vec2(0,0), vec2(0,0), 1., iChannel0, iResolution.xy);\n    vec2 lp = laplacian2D(fragCoord, dir, .5, .5, iChannel0, iResolution.xy);\n        \n    float reaction = ab.x * ab.y * ab.y;\n    vec2 diffusion = diffusionCoef * lp;\n    float feed = feedCoef * (1. - ab.x);\n    float kill = (feedCoef + killCoef) * ab.y;\n        \n    ab += diffusion + vec2(feed - reaction, reaction - kill);\n        \n    fragColor = vec4(clamp(ab,0.,1e4),ab*r);\n}",
+        "name": "Buf D",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

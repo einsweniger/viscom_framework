@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MsKyWz",
+      "date": "1521808367",
+      "viewed": 147,
+      "name": "Mouse Pos Grey Scale",
+      "username": "CommisarCain",
+      "description": "based on clicked mouse x position black and white gradient color modifier is applied.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "greyscalemouseposition"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 8,
+            "src": "/media/a/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec4 color_bl = vec4(0.0,0.0,0.0,0.0);\n    vec4 color_wt = color_bl + 1.0;\n    \n    vec2 xy = fragCoord.xy / iResolution.xy; // Condensing this into one line\n    vec2 mxy = iMouse.xy / iResolution.xy;\n    vec4 texColor = texture(iChannel0,xy); // Get the pixel at xy from iChannel0\n \tfragColor = vec4( smoothstep(0.1, 0.8, texColor.r+texColor.b+texColor.g - mxy.x) );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

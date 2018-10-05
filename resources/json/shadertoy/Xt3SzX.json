@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xt3SzX",
+      "date": "1480726955",
+      "viewed": 585,
+      "name": "Capsule - intersection",
+      "username": "iq",
+      "description": "Intersection of a ray and a generic (oriented in any direction) capsule",
+      "likes": 17,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d",
+        "raycasting"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// The MIT License\n// Copyright \u00a9 2016 Inigo Quilez\n// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n\n// intersection of a ray and a capped cylinder oriented in an arbitrary direction. There's\n// only one sphere involved, not two.\n\n\nvec4 iCapsule( in vec3 ro, in vec3 rd, \n               in vec3 cc, in vec3 ca, float cr, float ch ) // cc center, ca orientation axis, cr radius, ch height\n{\n    vec3  oc = ro - cc;\n    ch *= 0.5;\n\n    float card = dot(ca,rd);\n    float caoc = dot(ca,oc);\n    \n    float a = 1.0 - card*card;\n    float b = dot( oc, rd) - caoc*card;\n    float c = dot( oc, oc) - caoc*caoc - cr*cr;\n    float h = b*b - a*c;\n    if( h<0.0 ) return vec4(-1.0);\n    float t = (-b-sqrt(h))/a;\n\n    float y = caoc + t*card;\n\n    // body\n    if( abs(y)<ch ) return vec4( t, normalize( oc+t*rd - ca*y ) );\n    \n    // caps\n    float sy = sign(y);\n    oc = ro - (cc + sy*ca*ch);\n    b = dot(rd,oc);\n    c = dot(oc,oc) - cr*cr;\n    h = b*b - c;\n    if( h>0.0 )\n    {\n        t = -b - sqrt(h);\n        return vec4( t, normalize(oc+rd*t ) );\n    }\n\n    return vec4(-1.0);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 p = (-iResolution.xy + 2.0*fragCoord) / iResolution.y;\n\n     // camera movement\t\n\tfloat an = 0.5*iTime;\n\tvec3 ro = vec3( 1.0*cos(an), 0.4, 1.0*sin(an) );\n    vec3 ta = vec3( 0.0, 0.0, 0.0 );\n    // camera matrix\n    vec3 ww = normalize( ta - ro );\n    vec3 uu = normalize( cross(ww,vec3(0.0,1.0,0.0) ) );\n    vec3 vv = normalize( cross(uu,ww));\n\t// create view ray\n\tvec3 rd = normalize( p.x*uu + p.y*vv + 1.5*ww );\n\n    // raytrace\n\tvec4 tnor = iCapsule( ro, rd, vec3(0.0), normalize(vec3(0.3,0.1,0.4)), 0.2, 0.9 );\n\tfloat t = tnor.x;\n    \n    // shading/lighting\t\n\tvec3 col = vec3(0.0);\n\tif( t>0.0 )\n\t{\n\t    vec3 pos = ro + t*rd;\n\t\tvec3 nor = tnor.yzw;\n\t\tfloat dif = clamp( dot(nor,vec3(0.57703)), 0.0, 1.0 );\n\t\tfloat amb = 0.5 + 0.5*dot(nor,vec3(0.0,1.0,0.0));\n\t\tcol = vec3(0.2,0.3,0.4)*amb + vec3(0.8,0.7,0.5)*dif;\n\t}\n\t\n\tcol = sqrt( col );\n\t\n\tfragColor = vec4( col, 1.0 );\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

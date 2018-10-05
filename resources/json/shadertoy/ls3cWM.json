@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ls3cWM",
+      "date": "1519406136",
+      "viewed": 199,
+      "name": "The Voiceless",
+      "username": "python273",
+      "description": "*",
+      "likes": 1,
+      "published": 3,
+      "flags": 64,
+      "tags": [
+        "soundcloud"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 13737,
+            "src": "https://soundcloud.com/primalfever/and-so-i-watch-you-from-afar",
+            "ctype": "musicstream",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define PI 3.1415926535897932384626433832795\n#define half_PI 1.570796326794896619231321692\n\nfloat max_dist = distance(vec2(0.5, 0.5), vec2(1.0, 1.0));\nvec2 center = vec2(0.5, 0.5);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n    float dist = distance(uv, center) / max_dist;\n\n    float a = 1.0 - abs(\n        floor(uv.x + 0.5) -\n        mod((atan(uv.y - 0.5, uv.x - 0.5) + half_PI) / PI, 1.0)\n    );\n\n\tfloat c0 = texture(iChannel0, vec2(a, 0.25)).x;\n\n    fragColor = vec4(1.0, 1.0 - dist, c0, 1.0) * (c0 / dist);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

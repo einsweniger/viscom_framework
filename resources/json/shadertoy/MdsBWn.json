@@ -1,0 +1,36 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MdsBWn",
+      "date": "1495750996",
+      "viewed": 138,
+      "name": "RippleNipple",
+      "username": "wishedeom",
+      "description": "A simple radial wave",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "waves"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 centre = iResolution.xy / 2.0f;\n    vec2 radialVector = fragCoord.xy - centre;\n    float r = length(radialVector);\n    //float a = 0.5f + 0.5f * sin(r / 10.0f - iTime * 5.0f);\n    float a = sin(radialVector.x / 10.0) + sin(radialVector.y / 10.0) + sin(iTime * 10.0);\n    //a = a < 0.9f ? 1.0f : 0.0f;\n\tfragColor = vec4(a, 0.0, 0.0, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

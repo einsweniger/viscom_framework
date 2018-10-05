@@ -1,0 +1,51 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4tBBzG",
+      "date": "1516155604",
+      "viewed": 15,
+      "name": "Verbose Raytrace Plane",
+      "username": "zalo",
+      "description": "Simply raytraces a plane in the most verbose way possible\n\nUseful for calculating perspective transformations",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "raytrace",
+        "plane"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float plane( in vec3 norm, in vec3 po, in vec3 ro, in vec3 rd )\n{\n    float de = dot(norm, rd);\n    de = sign(de)*max( abs(de), 0.001);\n    return dot(norm, po-ro)/de;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    //Blah dirty fragCoord to screenRay\n    vec2 screenUV = fragCoord/iResolution.xy;\n    vec2 p = (2.0 * screenUV) - 1.0;\n    float aspect = iResolution.x/iResolution.y;\n    p.x *= aspect;\n    \n    //Normalized Ray Dir\n    vec3 dir = vec3(p.x, p.y, 1.0);\n    dir /= length(dir);\n    \n    //Rotations ------------------\n\tfloat x = 0.4*cos(0.3*iTime);\n\tfloat y = 0.4*sin(0.6*iTime);\n\tfloat z = 0.0;\n\t\n    float a = sin(x); float b = cos(x); \n    float c = sin(y); float d = cos(y); \n    float e = sin(z); float f = cos(z); \n    float ac = a*c;   float bc = b*c;\n\t\n\tmat3 RotationMatrix  = \n\t\t\tmat3(\t  d*f,      d*e,  -c,\n                 ac*f-b*e, ac*e+b*f, a*d,\n                 bc*f+a*e, bc*e-a*f, b*d );\n    //--------------------------------------\n    \n    //Define the plane\n    vec3 planePosition = vec3(0.0, 0.0, 0.5);\n    \n    vec3 right = RotationMatrix * vec3(aspect, 0.0, 0.0);\n    vec3 up = RotationMatrix * vec3(0, 1.0, 0);\n    vec3 normal = cross(right, up);\n    normal /= length(normal);\n    \n    //Find the plane hit point in space\n    vec3 pos = dir * plane(normal, planePosition, vec3(0), dir);\n    \n    //Sets rotation pivot to be in the center of the plane\n    pos -= planePosition;\n    \n    //Find the texture UV by projecting the hit point along the plane dirs\n    vec2 uv = vec2(dot(pos, right) / dot(right, right),\n                   dot(pos, up)    / dot(up,    up)) + 0.5;\n\t\n    //If we hit the rectangle, sample the texture\n    if(abs(uv.x - 0.5) < 0.5 && abs(uv.y - 0.5) < 0.5) {\n\t  fragColor = vec4(texture(iChannel0, uv).xyz, 1.0);\n    }\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

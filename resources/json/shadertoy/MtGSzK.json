@@ -1,0 +1,52 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MtGSzK",
+      "date": "1484936017",
+      "viewed": 252,
+      "name": "Smooth pixelation",
+      "username": "anastadunbar",
+      "description": "Pixelation with smoothness.",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "boxblur",
+        "smooth"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 5,
+            "src": "/media/a/8de3a3924cb95bd0e95a443fff0326c869f9d4979cd1d5b6e94e2a01f5be53e9.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "nearest",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float grayscale(vec3 c){return(c.r+c.g+c.b)/3.;}\nvec3 draw(vec2 uv){\n\t//return texture(iChannel0,uv).rgb;\n\t//return vec3(floor(uv.x*iResolution.x)==floor(mod(float(iFrame),iResolution.x))?1.:0.);\n\t//return vec3(grayscale(texture(iChannel0,uv).rgb)>0.5);\n\treturn vec3(fract((length(uv-.5)*12.)+iTime)>0.5?1.:0.);\n}\nconst int size=8;\nfloat fsize=float(size);\nvec3 sum(vec2 uv){\n\tvec3 total=vec3(0.);\n\tfor(int i=0;i<size*size;i++){\n\t\ttotal+=draw(uv+(vec2(mod(float(i),fsize),floor(float(i)/fsize))/iResolution.xy));\n\t}\n\treturn total;\n}\nvoid mainImage(out vec4 fragColor,in vec2 fragCoord){\n\tvec2 uv=fragCoord.xy/iResolution.xy;\n\tvec2 res=iResolution.xy/fsize;\n\tfragColor=vec4(sum(floor(uv*res)/res)/pow(fsize,2.),1.);\n\t//Compared with:\n\t//fragColor=vec4(draw(floor(uv*res)/res),1.);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

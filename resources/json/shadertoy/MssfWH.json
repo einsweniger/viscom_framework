@@ -1,0 +1,121 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "MssfWH",
+      "date": "1496099728",
+      "viewed": 235,
+      "name": "cheap edge detection",
+      "username": "nshelton",
+      "description": "more edge detection experiments",
+      "likes": 3,
+      "published": 3,
+      "flags": 32,
+      "tags": [
+        "tunnel",
+        "raymarch",
+        "edgedetect"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 259,
+            "src": "/media/previz/buffer02.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy/iResolution.xy;\n\n    \n    fragColor = texture(iChannel0, uv);\n\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 257,
+            "channel": 0
+          }
+        ],
+        "code": "\nfloat time = 0.1;\nfloat sdBox( vec3 p, vec3 b )\n{\n  vec3 d = abs(p) - b;\n  return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));\n}\n\nfloat opS( float d1, float d2 )\n{\n    return max(-d1,d2);\n}\n\nfloat sdTriPrism( vec3 p, vec2 h )\n{\n    vec3 q = abs(p);\n    return max(q.z-h.y,max(q.x*0.866025+p.y*0.5,-p.y)-h.x*0.5);\n}\n\n mat3 rotationMatrix(vec3 axis, float angle)\n{\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat3(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);\n}\n\nfloat length8(vec3 x)\n{\n \treturn pow(dot(vec3(1.0, 2.0, 1.0), pow(x, vec3(8.0))), 1.0/8.0)  ;\n}\n\nfloat length8(vec2 x)\n{\n \treturn pow(dot(vec2(1.0, 1.0), pow(x, vec2(8.0))), 1.0/8.0)  ;\n}\n\nfloat sdTorus88( vec3 p, vec2 t )\n{\n    \n  vec2 q = vec2(length8(p.xy)-t.x,p.z);\n  return length8(q)-t.y;\n}\n\nfloat nsin(float x)\n{\n    return sin(x) * 0.5 + 0.5;\n    \n}\n\nfloat triangle(vec3 p, float thickness, float depth, float size)\n{\n    float outer = sdTriPrism(p, vec2(size, depth)); \n    float inner = sdTriPrism(p, vec2(size-thickness, 0.1)); \n    \n    return opS(inner,outer);   \n}\n\nfloat map(vec3 p)\n{\n\n    vec3 q = p;\n\n    float rep = 0.2;\n        \n    vec3 c = vec3(rep);\n    p.z = mod(p.z,c.z)-0.5*c.z;\n\tfloat blockID = rep * floor(q.z / rep);\n\n    p = p * rotationMatrix(vec3(0.0, 0.0, 1.0), iTime* 0.1 + q.z);\n\n\n    float solid = triangle(p, 0.1, 0.1 , 0.02);    \n\n    vec3 p_s = q;\n\n    p_s.z += sin(blockID) * 0.1;\n    p_s.z = mod(p_s.z,c.z)-0.5*c.z;\n    p_s = p_s * rotationMatrix(vec3(-0.1, 0.1, 1.0), - 0.9* sin( 10.0 * blockID + iTime) + 1.0 * sin(blockID* 0.1 * sin(q.z)));\n\n    float cutout = 1e10;\n    \n    for ( int i = 0; i < 6; i ++)\n    {\n        p_s = p_s * rotationMatrix(vec3(0.0, 0.0, 1.0), 0.33 * 3.14);\n\n        float circle = sdBox(p_s + vec3(\n            0.06 * nsin(iTime * 0.1) + 0.01 * nsin(blockID* 1.0), \n            0.3 + 0.01 * nsin(iTime * 1.0), \n            0.0) , \n            \n             vec3(\n                 0.1, \n                 0.1, \n                 0.1));\n     \tcutout = min(cutout, circle);   \n    }\n    \n    float depth, material;\n    \n    solid = opS(solid, cutout);\n\n    return solid;\n}\n\n\nvoid getCamPos(inout vec3 ro, inout vec3 rd)\n{\n    ro.z = iTime * 0.1;\n    ro.x += 0.01 * sin(iTime);\n}\n\n vec3 gradient(vec3 p, float t) {\n\t\t\tvec2 e = vec2(0., t);\n\n\t\t\treturn normalize( \n\t\t\t\tvec3(\n\t\t\t\t\tmap(p+e.yxx) - map(p-e.yxx),\n\t\t\t\t\tmap(p+e.xyx) - map(p-e.xyx),\n\t\t\t\t\tmap(p+e.xxy) - map(p-e.xxy)\n\t\t\t\t)\n\t\t\t);\n\t\t}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\ttime = iTime * 3.0;\n    vec2 _p = (-iResolution.xy + 2.0*fragCoord.xy) / iResolution.y;\n    vec3 ray = normalize(vec3(_p, 1.0));\n    vec3 cam = vec3(0.0, 0.0, 0.0);\n    bool hit = false;\n    getCamPos(cam, ray);\n    \n    float depth = 0.0, iter = 0.0;\n   float d;\n    vec3 p;\n    \n    for( int i = 0; i < 60; i ++)\n    {\n    \tp = depth * ray + cam;\n        d = map(p);\n                  \n        if (d < 0.001) {\n\t\t\thit = true;\n            break;\n        }\n        if ( depth > 20.0)\n            break;\n                   \n        \n\t\tdepth += d * 0.3;\n\t\titer++;\n                   \n    }\n    vec3 col = vec3(0.0);\n    \n    if(hit)\n    \tcol = vec3(1.0 - iter / 60.0);\n\n    \n    if(hit)\n    {\n        vec3 normal = -gradient(p, 0.001);\n        col *= dot(ray, normal);\n        vec3 light = vec3(cos(iTime), sin(iTime), 0.0);\n   \n        col += vec3(0.5, 0.9, 0.9) * dot(light, normal) * 0.1;\n        \n        vec3 ref = reflect(ray,normal);\n        \n        ref = ref * rotationMatrix(vec3(1.0, 1.0, 1.1), iTime/10.0);\n\n\n        col *= abs(ref * 2.0);\n        col = pow(col, vec3(\n        \t0.6, \n            0.4, \n            0.1)) ;\n    }\n\n        \n    fragColor = vec4((col), 1.0);\n    \n}",
+        "name": "Buf A",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 257,
+            "src": "/media/previz/buffer00.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 258,
+            "channel": 0
+          }
+        ],
+        "code": "\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy/iResolution.xy;\n\n    vec3 total = vec3(0.0);\n\tvec3 delta = vec3(1.0, 1.0, 0.0) / iResolution.xyy;\n\n\tvec4 edges = vec4(0.0);\n    edges +=  abs(texture(iChannel0, uv + delta.xz) - texture(iChannel0, uv- delta.xz)) ;\n    edges +=  abs(texture(iChannel0, uv + delta.zy) - texture(iChannel0, uv- delta.zy)) ;\n    \n    fragColor = vec4((edges));\n\n}",
+        "name": "Buf B",
+        "description": "",
+        "type": "buffer"
+      },
+      {
+        "inputs": [
+          {
+            "id": 258,
+            "src": "/media/previz/buffer01.png",
+            "ctype": "buffer",
+            "channel": 0,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 259,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n        vec2 uv = fragCoord.xy/iResolution.xy;\n    \tvec3 delta = vec3(1.0, 1.0, 0.0) / iResolution.xyy;\n\n    \tvec4 color = vec4(0.0);\n    \tcolor += texture(iChannel0, uv + delta.zy );\n    \tcolor += texture(iChannel0, uv + delta.xz );\n    \tcolor += texture(iChannel0, uv - delta.xz );\n    \tcolor += texture(iChannel0, uv - delta.zy );\n    \tcolor += texture(iChannel0, uv  );\n    \n\t    fragColor = color/5.0;\n}",
+        "name": "Buf C",
+        "description": "",
+        "type": "buffer"
+      }
+    ]
+  }
+}

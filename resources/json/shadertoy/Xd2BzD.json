@@ -1,0 +1,38 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xd2BzD",
+      "date": "1499804652",
+      "viewed": 254,
+      "name": "Procedural Convex Polytope",
+      "username": "Ebanflo",
+      "description": "Mouse rotates camera",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "procedural",
+        "3d",
+        "raymarching",
+        "convex"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define numFaces 18\n#define epsilon .001\n#define time .5 * iTime\n#define numSteps 100\n#define far 20.0\n\nfloat hash12(vec2 p)//Dave_Hoskins https://www.shadertoy.com/view/4djSRW\n{\n\tvec3 p3  = fract(vec3(p.xyx) * .1031);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nvec3 hash32(vec2 p)\n{\n\tvec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));\n    p3 += dot(p3, p3.yxz+19.19);\n    return fract((p3.xxy+p3.yzz)*p3.zyx);\n}\n\nvec3 generateNorm(float x){\n    vec3 n1 = hash32(vec2(x, floor(time)));\n    vec3 n2 = hash32(vec2(x, ceil(time)));\n    return normalize(2.0 * mix(n1, n2, fract(time)) - 1.0);\n}\n\nvec3 generatePos(float x, vec3 n){\n    float p1 = 1.0 + hash12(vec2(x, floor(time)));\n    float p2 = 1.0 + hash12(vec2(x, ceil(time)));\n    return n * mix(p1, p2, fract(time));\n}\n\nfloat sdPlane(vec3 p, vec3 o, vec3 n){return dot(n, p - o);}\n\nfloat sdf(vec3 p){\n    vec3 norm1 = generateNorm(0.0);\n    vec3 norm2 = generateNorm(1.0);\n    vec3 pos1 = generatePos(0.0, norm1);\n    vec3 pos2 = generatePos(1.0, norm2);\n\tfloat d1 = sdPlane(p, pos1, norm1);\n    float d2 = sdPlane(p, pos2, norm2);\n    float d = max(d1, d2);\n    for(int i = 2; i < numFaces; i++){\n        float fi = float(i);\n        vec3 n = generateNorm(fi);\n        vec3 o = generatePos(fi, n);\n        float d0 = sdPlane(p, o, n);\n        d = max(d, d0);\n    }\n    return d;\n}\n\nvec3 getNormal(vec3 p){\n    vec2 e = vec2(1.0, 0.0);\n    return normalize(vec3(\n        sdf(p + epsilon * e.xyy),\n        sdf(p + epsilon * e.yxy),\n        sdf(p + epsilon * e.yyx))\n        - sdf(p));\n}\n\nvec4 render(vec3 rd, vec3 ro){\n    float d = 0.0;\n    for(int n = 0; n < numSteps; n++){\n        vec3 p = d * rd + ro;\n        float sd = sdf(p);\n        if(sd < epsilon){\n            vec3 normal = getNormal(p);\n            return vec4(.5 + .5 * normal, 1.0);\n        }\n        d += sd;\n        if(d > far) break;\n    }\n    return vec4(vec3(0), 1);\n}\n\nvec3 r(vec3 v, vec2 r){//rodolphito's rotation\n    vec4 t = sin(vec4(r, r + 1.5707963268));\n    float g = dot(v.yz, t.yw);\n    return vec3(v.x * t.z - g * t.x,\n                v.y * t.w - v.z * t.y,\n                v.x * t.x + g * t.z);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 xy = (2.0 * fragCoord - iResolution.xy) / iResolution.y;\n    vec3 rd = normalize(vec3(xy, 2.0));\n    vec3 ro = vec3(0, 0, -10);\n    vec2 m = (2.0 * iMouse.xy - iResolution.xy) / iResolution.y;\n    rd = r(rd, m);\n    ro = r(ro, m);\n    fragColor = render(rd, ro);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

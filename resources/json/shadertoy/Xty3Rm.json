@@ -1,0 +1,50 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "Xty3Rm",
+      "date": "1473732952",
+      "viewed": 221,
+      "name": "My first cool shader",
+      "username": "chuckbot",
+      "description": "Practis with shadertoy",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "3d"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 47,
+            "src": "/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 xy = fragCoord.xy / iResolution.xy; // Condensing this into one line\n       xy.y = 1.0-xy.y; // Flipping the y\n    vec4 texColor = texture(iChannel0,xy); // Get the pixel at xy from iChannel0\n       texColor.r *= abs(sin(iTime));\n    texColor.g *= abs(cos(iTime));\n    texColor.b *= abs(sin(iTime) * cos(iTime));\n    fragColor = texColor; // Set the screen pixel to that color\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

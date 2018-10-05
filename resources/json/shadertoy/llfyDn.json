@@ -1,0 +1,41 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "llfyDn",
+      "date": "1504285742",
+      "viewed": 237,
+      "name": "weaving 4",
+      "username": "FabriceNeyret2",
+      "description": ".",
+      "likes": 3,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "illusion",
+        "pattern",
+        "perception",
+        "short",
+        "onetweet",
+        "weaving"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "#define S(x,y)   abs(fract(x)-.5) < .4  ? .7 + .3* sin(3.14* (y + ceil(x) )) : 0.\n\n#define mainImage( O, u )                     \\\n    vec2 U = u / 50.;                         \\\n    O += max ( S( U.x,U.y) , S(-U.y,U.x) )",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

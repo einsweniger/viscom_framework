@@ -1,0 +1,54 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4stczs",
+      "date": "1519855359",
+      "viewed": 173,
+      "name": " Tiny Clouds - clumpsy",
+      "username": "FabriceNeyret2",
+      "description": "variant of [url]https://shadertoy.com/view/XdtyRs[/url]  with clumpsy turbulence pseudo-Perlin abs(baseNoise)\n",
+      "likes": 2,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "clouds",
+        "2tweets",
+        "short",
+        "volumerendering",
+        "golfing"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 40,
+            "src": "/media/a/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+            "ctype": "volume",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "// variant of https://shadertoy.com/view/XdtyRs\n\n\n#define T abs( 1.-2.* texture( iChannel0, f*p.xzw/3. ).y ) / ( f += f )\n\n#define mainImage(O,U)                                    \\\n    vec4 p, d = vec4(.8,0,U/iResolution.y-.8);            \\\n    for( float f, t = 2e2 ; --t > 0. ; p = .05*t*d )      \\\n        p.xz += iTime,                                             \\\n        f = .5, f = T+T+T+T -p.w-.5 ,                              \\\n    \tf > 0. ? O += ( (1.-O)*vec4(1,.8,.6,0) - f ) *f *.4: O",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

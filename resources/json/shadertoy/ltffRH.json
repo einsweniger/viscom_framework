@@ -1,0 +1,53 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "ltffRH",
+      "date": "1511117321",
+      "viewed": 283,
+      "name": "Parallax Mapping Playground",
+      "username": "BeardThings",
+      "description": "Test out some relief mapping techniques",
+      "likes": 0,
+      "published": 3,
+      "flags": 0,
+      "tags": [
+        "2d",
+        "raymarching",
+        "parallax",
+        "mapping"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 17,
+            "src": "/media/a/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "float SDF(vec3 p)\n{\n    return dot(p, vec3(0.0,1.0,0.0)) + 0.7;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\n    float aspect = iResolution.x / iResolution.y;\n\tvec2 screenSpace = uv * 2.0 - 1.0;\n\n\tvec3 o = vec3(0.0, 0.5, iTime / 10.0);\n    vec3 f = vec3(0, 0.0, 1.0);\n    vec3 u = vec3(0,1.0,0);\n    vec3 r = normalize(cross(f, u));\n    \n    vec3 d = normalize(f + r * screenSpace.x * aspect + u * screenSpace.y);\n    \n    vec4 fc = vec4(0.4, 0.5, 0.8, 1.0) * (1.0 + uv.x * uv.y);\n    \n    float s = 0.0;\n    for(float i = 0.0; i < 32.0; i+=1.0)\n    {\n        vec3 p = o + d * s;\n        \n        float sdf = SDF(p);\n        \n        if(sdf < 0.001)\n        {\n            const float HeightStrength = 0.07;\n            const float StepLength = 20.0;\n            const float StepSize = 1.0 / StepLength;\n            const float UVScale = 1.0 / 5.0;\n            \n            vec2 ruv = p.xz * UVScale;\n            \n            vec4 c = texture(iChannel0,ruv);\n            \n            vec3 stepSize = d / d.y;\n            \n\t\t\tfloat pf = 0.0;\n            \n            for(float j = 0.0; j <= StepLength; j+=1.0)\n            {\n                vec3 newStep = stepSize * pf;\n                vec3 rp = p + newStep;\n                float cph = 1.0 - newStep.y;\n                \n                vec2 nuv = rp.xz * UVScale;\n                \n                vec4 nc = texture(iChannel0, nuv);\n                float nh = nc.r;\n                if(cph < 1.0 - nh * HeightStrength)\n                {\n                    c = max(nc.r, 0.3) * vec4(0.0, 1.0, 0.0, 1.0);\n                    break;\n                }\n                \n                pf += StepSize * HeightStrength;\n            }\n            \n            fc = c;\n            break;\n        }\n        s += sdf;\n    }\n\n\tfragColor = fc;\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}

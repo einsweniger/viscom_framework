@@ -1,0 +1,45 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "XdjyRV",
+      "date": "1492864368",
+      "viewed": 313,
+      "name": "Simple waveform thingy",
+      "username": "N00bySumairu",
+      "description": "A simple shader displaying the function, which generates the sound for the shader (a simple repeating C4 with harmonies;\nsound resembles string-instrument).",
+      "likes": 3,
+      "published": 3,
+      "flags": 8,
+      "tags": [
+        "2d",
+        "audio",
+        "waveform"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "/*\n * Very simple shader that generates sound and displays the waveform of the function used to do so\n *\n * To try out other sounds simple change lines 98 and 99 in this tab and line 40 in the sound tab.\n *\n * For some reason the points at which the data is sample are displayed thicker\n * (although only barely so) than the lines connecting\n * them, although only one radius is used.\n * If you know a fix for this, or have an idea for improving the performance, please do let me know.\n *\n * I wrote this shader just out of interest and in hope of learning something.\n *\n */\nconst float TAU \t= radians(360.)*2.;\t// 2\u03c0\nconst int \tSTEPS \t= 200;\t\t\t\t// How many data points should be sampled\nconst float R \t\t= 1.;\t\t\t\t// radius of line in pixels\nconst float FREQ \t= 261.63;\t\t\t// Frequency in 1/s (C4)\nconst float DISPLAYED_TIME = 10./FREQ;  // Time after current in s for which the function is sampled\n\t\t\t\t\t\t\t\t\t\t// (The image is more stable + the sampled points portait the function better,\n\t\t\t\t\t\t\t\t\t\t//  if the DISPLAYED_TIME is a multiple of the period of the sound-> x/FREQ)\n\n// Generates a sound that resembles a string instrument (without harmonics)\nfloat string(float freq, float time)\n{\n\treturn (abs(mod(time - 1. / (4.*freq), 1. / freq) * freq - 0.5) * 4. - 1.)*exp(-3.*time);\n}\n\n// Generates a sound that resembles a string instrument (with harmonics)\nfloat harmonic_string(float freq, float time)\n{\n\treturn string(freq, time) + string(freq*2., time)*0.2 + string(freq*3., time)*0.05 + string(freq*4., time)*0.005;\n}\n\n// generates ping in passed frequency (uses the default function given when creating a shader)\nfloat ping(float freq, float time)\n{\n\treturn sin(TAU*freq*time)*exp(-3.*time);\n}\n\n// generates ping in passed frequency with 2nd, 3rd and 4th harmonics\nfloat harmonic_ping(float freq, float time)\n{\n\treturn ping(freq, time) + ping(freq*2., time)*0.2 + ping(freq*3., time)*0.05 + ping(freq*4., time)*0.005;\n}\n\n// Loops time after specified amount, with specified delay before repeating\nfloat loop(float time, float len, float delay)\n{\n    float mt = mod(time, len+delay);\n    if (mt >= len) return len;\n    else return mt;\n}\n\n// Smallest distance from point x to line segment ab\nfloat line_dist(vec2 a, vec2 b, vec2 x)\n{\n    // Use a as the origin\n    vec2 _b = b-a;\n    vec2 _x = x-a;\n    // Unit vector in direction of _b\n    vec2 u_b = _b / length(_b);\n    // Scalar projection\n   \tfloat sp = dot(_x, u_b);\n    // If projection is on the line\n    // -> calculate smallest distance to line\n    // else -> calculate distance to appropriate end-point of the line\n    if (sp > length(_b))\n    {\n    \treturn distance(_b, _x);\n    }\n    else if (sp < 0.)\n    {\n    \treturn length(_x);\n    }\n    else\n    {\n    \treturn distance(u_b * sp, _x);\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Transform coords for easier use\n    vec2 pos = fragCoord.xy / iResolution.xy;\n    pos.x -= 0.25;\n    pos.x *= iResolution.x / iResolution.y;\n    // Calculate radius and smoothing-border-width\n    float r = R / iResolution.y;\n    float b = 1.5 / iResolution.y;\n    // Base color\n    vec3 color = vec3(0.125);\n    for (int i = 0; i < STEPS; i++)\n    {\n        // Calculate time for which the sample should be taken\n        // + adjust for the time it takes to render a frame\n        float time = iTime + iTimeDelta + float(i) * DISPLAYED_TIME / float(STEPS);\n        // Get current and next amplitude\n        float val = harmonic_string(FREQ, loop(time, 1.5, 0.));\n        float nextVal = harmonic_string(FREQ, loop(time + DISPLAYED_TIME / float(STEPS), 1.5, 0.));\n        // Calculate distance from line between current amplitude and next amplitude\n        // (uses vector projection and then the distance between the result of the vector projection\n        //  and the current position on screen)\n        vec2 A = vec2(float(i)/float(STEPS), (val+1.)/2.);\n        vec2 B = vec2(float(i+1)/float(STEPS), (nextVal+1.)/2.);\n        float d = line_dist(A, B, pos);\n        // Adjust color accordingly if distance is near to or lower than the radius\n        float f = smoothstep(r+b/2., r-b/2., d);\n        color = mix(color, vec3(0.1,0.75,0.75),f);\n    }\n\tfragColor = vec4(color, 1.);\n}\n",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      },
+      {
+        "inputs": [],
+        "outputs": [],
+        "code": "const float TAU \t= radians(360.)*2.;\t// 2\u03c0\nconst float FREQ \t= 261.63;\t\t\t// Frequency in 1/s\n\n// Generates a sound that resembles a string instrument (without harmonics)\nfloat string(float freq, float time)\n{\n\treturn (abs(mod(time - 1. / (4.*freq), 1. / freq) * freq - 0.5) * 4. - 1.)*exp(-3.*time);\n}\n\n// Generates a sound that resembles a string instrument (with harmonics)\nfloat harmonic_string(float freq, float time)\n{\n\treturn string(freq, time) + string(freq*2., time)*0.2 + string(freq*3., time)*0.05 + string(freq*4., time)*0.005;\n}\n\n// generates ping in passed frequency (uses the default function given when creating a shader)\nfloat ping(float freq, float time)\n{\n\treturn sin(TAU*freq*time)*exp(-3.*time);\n}\n\n// generates ping in passed frequency with 2nd, 3rd and 4th harmonics\nfloat harmonic_ping(float freq, float time)\n{\n\treturn ping(freq, time) + ping(freq*2., time)*0.2 + ping(freq*3., time) * 0.05 + ping(freq*4., time) * 0.005;\n}\n\n// Loops time after specified amount with specified delay\nfloat loop(float time, float len, float delay)\n{\n    float mt = mod(time, len+delay);\n    if (mt >= len) return len;\n    else return mt;\n}\n\nvec2 mainSound( float time )\n{\n    // Play harmonic *ping* sound, loop after 1.5s with no delay\n    // + reduce amplitude by 1/2 (a bit loud otherwise)\n    return vec2(harmonic_string(FREQ, loop(time, 1.5, 0.))) * 0.5;\n}\n",
+        "name": "Sound",
+        "description": "",
+        "type": "sound"
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "Shader": {
+    "ver": "0.1",
+    "info": {
+      "id": "4sffzf",
+      "date": "1497149664",
+      "viewed": 401,
+      "name": "RAIN Glass",
+      "username": "Txoka",
+      "description": "rain",
+      "likes": 6,
+      "published": 3,
+      "flags": 2,
+      "tags": [
+        "water",
+        "rain",
+        "cristal"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [
+          {
+            "id": 3,
+            "src": "/media/a/95b90082f799f48677b4f206d856ad572f1d178c676269eac6347631d4447258.jpg",
+            "ctype": "texture",
+            "channel": 0,
+            "sampler": {
+              "filter": "mipmap",
+              "wrap": "repeat",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          },
+          {
+            "id": 31,
+            "src": "/presets/webcam.png",
+            "ctype": "webcam",
+            "channel": 1,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "clamp",
+              "vflip": "true",
+              "srgb": "false",
+              "internal": "byte"
+            },
+            "published": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": 37,
+            "channel": 0
+          }
+        ],
+        "code": "void mainImage( out vec4 o, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy / iResolution.xy;\n\tvec2 uv1= vec2(uv.y*0.1+iTime*0.095,uv.x*2.);\n\tvec3 rain=texture(iChannel0,uv1).rgb/8.;\n    vec2 uv2 = uv.xy-rain.xy;\n    o=texture(iChannel1,uv2+0.04);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }
+}
