@@ -22,12 +22,20 @@
                 "value": true
             },
             {
-                "key": "OGLerrors",
+                "key": "NewScene",
                 "value": false
+            },
+            {
+                "key": "OGLerrors",
+                "value": true
             },
             {
                 "key": "Overlay",
                 "value": false
+            },
+            {
+                "key": "Shader",
+                "value": true
             },
             {
                 "key": "ShaderImport",
@@ -35,7 +43,7 @@
             },
             {
                 "key": "ShaderToyImport",
-                "value": true
+                "value": false
             },
             {
                 "key": "Shaders",
@@ -51,7 +59,7 @@
             },
             {
                 "key": "TimeSlider",
-                "value": false
+                "value": true
             },
             {
                 "key": "Tracker",

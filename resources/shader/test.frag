@@ -23,9 +23,9 @@ uniform vec2 u_mouse;  // mouse pixel coords
 uniform mat4 u_MVP;
 uniform vec3 iResolution;
 uniform vec4 iMouse;
-uniform sampler2D tex_text;
-uniform sampler2D tex_noise;
-uniform sampler2D tex_wood;
+//uniform sampler2D tex_text;
+//uniform sampler2D tex_noise;
+//uniform sampler2D tex_wood;
 
 vec3 ray_direction;
 
@@ -48,15 +48,15 @@ subroutine uniform SceneMap map;  // uniform instance, can be called like a func
 
 uniform vec3 plane_position = vec3(0,-2,0);
 uniform float text_rotation = 0;
-#include "maps/sphereZone.glsl"
-#include "maps/positionOffsetting.glsl"
+//#include "maps/sphereZone.glsl"
+//#include "maps/positionOffsetting.glsl"
 #include "maps/sdfDemo.glsl"
-#include "maps/sdfText.glsl"
-#include "maps/rotatingSphere.glsl"
-#include "maps/blockyGround.glsl"
-#include "maps/text.glsl"
-#include "maps/hexagons.glsl"
-#include "maps/cubes.glsl"
+//#include "maps/sdfText.glsl"
+//#include "maps/rotatingSphere.glsl"
+//#include "maps/blockyGround.glsl"
+//#include "maps/text.glsl"
+//#include "maps/hexagons.glsl"
+//#include "maps/cubes.glsl"
 
 out vec4 test_color;
 out vec4 test_worldPos;
@@ -99,15 +99,15 @@ void draw_debug_plane(inout vec4 color_output) {
 
 void main()
 {
-    freqs[0] = saturate(texelFetch( texFFTSmoothed, 28,0 ).x*25);
-    freqs[1] = saturate(texelFetch( texFFTSmoothed, 56,0 ).x*12);
-    freqs[2] = saturate(texelFetch( texFFTSmoothed, 63,0 ).x*12);
-    freqs[3] = saturate(texelFetch( texFFTSmoothed, 150,0 ).x*12);
+    //freqs[0] = saturate(texelFetch( texFFTSmoothed, 28,0 ).x*25);
+    //freqs[1] = saturate(texelFetch( texFFTSmoothed, 56,0 ).x*12);
+    //freqs[2] = saturate(texelFetch( texFFTSmoothed, 63,0 ).x*12);
+    //freqs[3] = saturate(texelFetch( texFFTSmoothed, 150,0 ).x*12);
 
-    freqs[0] = saturate(get_average(texFFTSmoothed, 28, 3));
-    freqs[1] = saturate(get_average(texFFTSmoothed, 56, 3));
-    freqs[2] = saturate(get_average(texFFTSmoothed, 63, 3));
-    freqs[3] = saturate(get_average(texFFTSmoothed, 150, 3));
+    //freqs[0] = saturate(get_average(texFFTSmoothed, 28, 3));
+    //freqs[1] = saturate(get_average(texFFTSmoothed, 56, 3));
+    //freqs[2] = saturate(get_average(texFFTSmoothed, 63, 3));
+    //freqs[3] = saturate(get_average(texFFTSmoothed, 150, 3));
     vec2 fragCoord;
     fragCoord.x= texCoord.x*iResolution.x;
     fragCoord.y= texCoord.y*iResolution.y;

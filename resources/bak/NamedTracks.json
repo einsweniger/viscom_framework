@@ -1,0 +1,236 @@
+{
+    "value0": [
+        {
+            "key": "map",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "row": 0,
+                        "value": "text"
+                    },
+                    {
+                        "row": 511,
+                        "value": "sphereZone"
+                    },
+                    {
+                        "row": 576,
+                        "value": "positionOffsetting"
+                    },
+                    {
+                        "row": 640,
+                        "value": "blockyGround"
+                    },
+                    {
+                        "row": 704,
+                        "value": "hexagons"
+                    },
+                    {
+                        "row": 768,
+                        "value": "cubes"
+                    },
+                    {
+                        "row": 832,
+                        "value": "text"
+                    },
+                    {
+                        "row": 896,
+                        "value": "sdfDemo"
+                    },
+                    {
+                        "row": 1024,
+                        "value": "positionOffsetting"
+                    },
+                    {
+                        "row": 1109,
+                        "value": "positionOffsetting"
+                    },
+                    {
+                        "row": 1115,
+                        "value": "positionOffsetting"
+                    },
+                    {
+                        "row": 1537,
+                        "value": "cubes"
+                    },
+                    {
+                        "row": 2560,
+                        "value": "sphereZone"
+                    },
+                    {
+                        "row": 3584,
+                        "value": "hexagons"
+                    },
+                    {
+                        "row": 4097,
+                        "value": "hexagons"
+                    }
+                ]
+            }
+        },
+        {
+            "key": "postprocess",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "row": 0,
+                        "value": "none"
+                    },
+                    {
+                        "row": 255,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 511,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 704,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 976,
+                        "value": "glitch"
+                    },
+                    {
+                        "row": 1024,
+                        "value": "none"
+                    },
+                    {
+                        "row": 1641,
+                        "value": "chromaticAberrationV1"
+                    },
+                    {
+                        "row": 1665,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 1768,
+                        "value": "chromaticAberrationV2"
+                    },
+                    {
+                        "row": 1793,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 1896,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 1921,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 2152,
+                        "value": "glitch"
+                    },
+                    {
+                        "row": 2177,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 2281,
+                        "value": "sobel"
+                    },
+                    {
+                        "row": 2285,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 2292,
+                        "value": "sobel"
+                    },
+                    {
+                        "row": 2296,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 2560,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 3972,
+                        "value": "sobel"
+                    },
+                    {
+                        "row": 4201,
+                        "value": "sobel"
+                    },
+                    {
+                        "row": 4224,
+                        "value": "filmic"
+                    },
+                    {
+                        "row": 4351,
+                        "value": "ferris"
+                    },
+                    {
+                        "row": 4352,
+                        "value": "ferris"
+                    }
+                ]
+            }
+        },
+        {
+            "key": "shade_scene",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "row": 0,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 255,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 576,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 704,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 768,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 832,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 1024,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 1115,
+                        "value": "pbr"
+                    },
+                    {
+                        "row": 1537,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 2560,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 4097,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 4351,
+                        "value": "iq"
+                    },
+                    {
+                        "row": 4352,
+                        "value": "iq"
+                    }
+                ]
+            }
+        }
+    ]
+}

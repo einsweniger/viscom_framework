@@ -9,7 +9,8 @@ const vec3 distance_fog =vec3(0.80,0.90,1.00);
 vec4 fontSampler(vec2 uv) {
     // Sample the font texture. Make sure to not use mipmaps.
     // Add a small amount to the distance field to prevent a strange bug on some gpus. Slightly mysterious. :(
-    return texture(tex_text, (uv+0.5)*(1.0/16.0), -100.0) + vec4(0.0, 0.0, 0.0, 0.000000001);
+    //return texture(tex_text, (uv+0.5)*(1.0/16.0), -100.0) + vec4(0.0, 0.0, 0.0, 0.000000001);
+    return vec4(0);
 }
 vec3 texturize( sampler2D sa, vec3 p, vec3 n )
 {
@@ -58,7 +59,7 @@ vec3 iq(vec3 ray_origin, vec3 ray_direction, out float distance ){
             // Put a small number in Z so it can't go to zero.
             //surface_normal = -vec3(-tx.g, tx.b, 0.0001)*2.0*smallVec.x;
             //surface_normal = normalize(surface_normal+0.000000001);
-            color = texturize(tex_wood, hit, surface_normal);
+            //color = texturize(tex_wood, hit, surface_normal);
         }
         vec3 reflected = reflect( ray_direction, surface_normal );
 

@@ -1,0 +1,733 @@
+{
+    "value0": [
+        {
+            "key": "ca_num_iter",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 24.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 976,
+                        "value": 4.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1023,
+                        "value": 24.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1024,
+                        "value": 4.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1641,
+                        "value": 4.0
+                    },
+                    {
+                        "interp": {
+                            "type": 3
+                        },
+                        "row": 1768,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1773,
+                        "value": 24.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1774,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 3
+                        },
+                        "row": 1780,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1792,
+                        "value": 48.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1793,
+                        "value": 1.0
+                    }
+                ]
+            }
+        },
+        {
+            "key": "distort_add",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 0.3100000023841858
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1115,
+                        "value": 0.3100000023841858
+                    }
+                ]
+            }
+        },
+        {
+            "key": "distort_grid_size",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 0.20000000298023225
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 255,
+                        "value": 0.20000000298023225
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 511,
+                        "value": 0.20000000298023225
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1115,
+                        "value": 0.3100000023841858
+                    }
+                ]
+            }
+        },
+        {
+            "key": "distort_mul",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 0.10000000149011612
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1115,
+                        "value": 0.10000000149011612
+                    }
+                ]
+            }
+        },
+        {
+            "key": "fade_black",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 128,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 255,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 383,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 449,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 510,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 511,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 533,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 544,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 564,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 576,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 596,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 608,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 628,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 640,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 660,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 672,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 692,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 704,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 724,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 736,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 756,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 768,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 788,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 800,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 820,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 832,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 852,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 864,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 884,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 896,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 948,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 986,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 1023,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 1024,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 3072,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 3275,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 3327,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 3328,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 3585,
+                        "value": 0.0
+                    }
+                ]
+            }
+        },
+        {
+            "key": "test_debug_plane_mix",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 3584,
+                        "value": 0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4097,
+                        "value": 1.0
+                    }
+                ]
+            }
+        },
+        {
+            "key": "text_rotation",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": -6.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 320,
+                        "value": -5.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 328,
+                        "value": -4.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 335,
+                        "value": -3.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 342,
+                        "value": -2.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 349,
+                        "value": -1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 356,
+                        "value": -0.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 357,
+                        "value": 0.004013615660369396
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 384,
+                        "value": 0.004013615660369396
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 449,
+                        "value": 1.0
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 1115,
+                        "value": 1.040000081062317
+                    },
+                    {
+                        "interp": {
+                            "type": 3
+                        },
+                        "row": 1465,
+                        "value": 1.040000081062317
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1537,
+                        "value": -1.8000000715255738
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4351,
+                        "value": -1.8000000715255738
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4352,
+                        "value": 1.0099999904632569
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4360,
+                        "value": 1.5
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4368,
+                        "value": 2.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4376,
+                        "value": 2.5
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4384,
+                        "value": 3.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4392,
+                        "value": 3.5
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4400,
+                        "value": 4.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4408,
+                        "value": 4.5
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4416,
+                        "value": 5.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4424,
+                        "value": 5.5
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4432,
+                        "value": 6.0
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4440,
+                        "value": 6.5
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 4448,
+                        "value": 7.0
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 4456,
+                        "value": 7.5
+                    },
+                    {
+                        "interp": {
+                            "type": 1
+                        },
+                        "row": 4609,
+                        "value": 1.0099999904632569
+                    }
+                ]
+            }
+        },
+        {
+            "key": "trace_pixelRadius",
+            "value": {
+                "name": "",
+                "keys": [
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 0,
+                        "value": 0.00009999999747378752
+                    },
+                    {
+                        "interp": {
+                            "type": 2
+                        },
+                        "row": 976,
+                        "value": 0.00009999999747378752
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1023,
+                        "value": 0.30000001192092898
+                    },
+                    {
+                        "interp": {
+                            "type": 0
+                        },
+                        "row": 1024,
+                        "value": 0.00009999999747378752
+                    }
+                ]
+            }
+        }
+    ]
+}

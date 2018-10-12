@@ -1,6 +1,6 @@
 {
     "value0": [
-        "/test.frag",
-        "/renderTexture.frag"
+        "test.frag",
+        "renderTexture.frag"
     ]
 }

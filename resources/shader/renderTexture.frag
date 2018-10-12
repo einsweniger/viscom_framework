@@ -5,7 +5,7 @@ in vec2 texCoord;
 out vec4 color;
 
 uniform sampler2D tex_postproc;
-uniform sampler2D tex_text;
+//uniform sampler2D tex_text;
 uniform float iTime;
 uniform vec3 iResolution;
 uniform float fade_black = 0.0;
