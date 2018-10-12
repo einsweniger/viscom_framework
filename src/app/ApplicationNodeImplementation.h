@@ -15,11 +15,6 @@
 #include <experimental/filesystem>
 #include <fstream>
 
-namespace sgct {
-class SharedFloat;
-class SharedInt64;
-class SharedUInt64;
-}  // namespace sgct
 namespace minuseins {
 class IntrospectableFsq;
 class ShaderToyFsq;
@@ -105,8 +100,6 @@ class ApplicationNodeImplementation : public enh::ApplicationNodeBase {
   int iFrame = 0;
   bool stopTime_;
   bool drawToy = false;
-
-  sgct::SharedUInt64 syncRow;
 
   std::map<std::string, minuseins::tracker::Track> tracks;
   std::map<std::string, minuseins::tracker::strTrack> namedTracks;

@@ -14,7 +14,6 @@
 
 #include "core/glfw.h"
 
-#include <sgct/SharedData.h>
 #include "app/camera/MyFreeCamera.h"
 #include "app/camera/ScriptedCamera.h"
 #include "app/gfx/IntrospectableFsq.h"
@@ -33,7 +32,6 @@ ApplicationNodeImplementation::ApplicationNodeImplementation(
       grabMouse_{false} {
   restore(findConfig("StartupPrograms.json"), &startupPrograms);
   restoreTracks();
-  syncRow = sgct::SharedUInt64(0);
 }
 
 void ApplicationNodeImplementation::restoreTracks() {
@@ -87,7 +85,7 @@ void ApplicationNodeImplementation::UpdateFrame(double currentTime,
 
   globalTime_ = static_cast<float>(currentTime);
   elapsedTime_ = static_cast<float>(elapsedTime);
-  // currentRow = static_cast<unsigned int>(bass->get_row());
+  currentRow = static_cast<unsigned int>(bass->get_row());
   // currentRow = syncRow.getVal();
   // bass->set_row(syncRow.getVal());
   currentTime_ = static_cast<float>(bass->get_time());
@@ -195,11 +193,9 @@ void ApplicationNodeImplementation::toggleMouseGrab() {
 
 void ApplicationNodeImplementation::EncodeData() {
   ApplicationNodeBase::EncodeData();
-  sgct::SharedData::instance()->writeUInt64(&syncRow);
 }
 void ApplicationNodeImplementation::DecodeData() {
   ApplicationNodeBase::DecodeData();
-  sgct::SharedData::instance()->readUInt64(&syncRow);
 }
 bool ApplicationNodeImplementation::AddTuioCursor(TUIO::TuioCursor* tcur) {
   return ApplicationNodeBase::AddTuioCursor(tcur);

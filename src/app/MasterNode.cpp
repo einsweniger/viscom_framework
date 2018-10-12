@@ -12,7 +12,6 @@
 #include <glbinding-aux/Meta.h>
 #include <glbinding/glbinding.h>
 #include <imgui.h>
-#include <sgct/SharedData.h>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/vector.hpp>
@@ -140,7 +139,6 @@ void MasterNode::InitOpenGL() {
 void MasterNode::PreSync() {
   ApplicationNodeImplementation::PreSync();
   currentRow = static_cast<unsigned int>(bass->get_row());
-  syncRow.setVal(currentRow);
 }
 
 void MasterNode::saveTracks() {
